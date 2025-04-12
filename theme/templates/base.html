@@ -1,0 +1,38 @@
+{% load static tailwind_tags %}
+
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta http-equiv="X-UA-Compatible" content="ie=edge">
+		<title>{% block title %}Sentinels{% endblock %}</title>
+		<link rel="icon" href="{% static 'assets/img/Sentinels Logo.png' %}">
+		<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+		<link rel="stylesheet" href="{% static 'css/dist/styles.css' %}">
+
+		<script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+
+		<style>
+			* {
+				font-family: 'Poppins', sans-serif;
+			}
+		</style>
+
+		{% tailwind_css %}
+	</head>
+
+	<body class="bg-gray-50 font-serif leading-normal tracking-normal">
+		<div class="container mx-auto">
+			<section class="flex items-center justify-center h-screen">
+				<h1 class="text-5xl">Django + Tailwind = ❤️</h1>
+			</section>
+		</div>
+
+		<footer class="bg-gray-800 text-white py-4">
+			<div class="container mx-auto text-center">
+				<p>&copy; 2023 Django Tailwind</p>
+			</div>
+		</footer>
+	</body>
+</html>
