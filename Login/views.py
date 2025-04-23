@@ -1,7 +1,7 @@
 from django.shortcuts import render
 
 # Create your views here.
-def login_view(request):
+def Faculty_login_view(request):
     if request.method == 'POST':
         faculty_id = request.POST.get('faculty_id')
         password = request.POST.get('faculty_password')
@@ -22,7 +22,7 @@ def login_view(request):
         else:
             messages.error(request, "Faculty ID not found.")
 
-    return render(request, 'Login/login.html')
+    return render(request, 'Login/faculty-login.html')
 
-def superadmin_login_view(request):
-    return render(request, 'Login/superadmin_login.html')
+def Superadmin_login_view(request):
+    return render(request, 'Login/superadmin-login.html')

@@ -1,8 +1,11 @@
 from pathlib import Path
 import os
+import firebase_admin
+from firebase_admin import credentials, firestore
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 # Quick-start development settings - unsuitable for production
@@ -15,6 +18,12 @@ SECRET_KEY = 'django-insecure-ktfkhd0zkk(f8q_vzlivj(_xjx(gvu91t-%vl=6$ud+t2q$+o+
 DEBUG = True
 
 ALLOWED_HOSTS = []
+
+#firestore-database
+cred = credentials.Certificate("C:/sentinels-faculty/sentinels-a61ff-firebase-adminsdk-fbsvc-35c84e60a7.json")
+firebase_admin.initialize_app(cred)
+db = firestore.client()
+# Application definition
 
 
 # Application definition
@@ -75,7 +84,7 @@ WSGI_APPLICATION = 'SentinelsProject.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
 }
 
