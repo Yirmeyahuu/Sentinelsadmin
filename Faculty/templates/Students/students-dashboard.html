@@ -1,0 +1,154 @@
+{% extends 'Faculty/faculty-base.html' %}
+
+{% block content %}
+
+<div class="flex flex-col items-center space-y-4 p-6 w-full max-w-6xl">
+    <!-- Row 1 -->
+    <div class="flex space-x-4 ml-24">
+        <div class="relative bg-blue-400 shadow-lg rounded-2xl p-6 w-80 flex flex-col items-center overflow-hidden">
+            <!-- Abstract Design (SVG Lines) -->
+            <div class="absolute inset-0 opacity-30">
+                <svg class="w-full h-full" viewBox="0 0 200 200">
+                    <path fill="none" stroke="#3B82F6" stroke-width="8" d="M10 50 Q100 0, 190 50 T 390 50" />
+                    <path fill="none" stroke="#FACC15" stroke-width="8" d="M10 150 Q100 200, 190 150 T 390 150" />
+                </svg>
+            </div>
+        
+            <!-- Gradient Blobs -->
+            <div class="absolute -top-4 -left-6 w-20 h-20 bg-blue-900 blur-2xl opacity-90 rounded-full"></div>
+            <div class="absolute bottom-0 right-2 w-24 h-24 bg-blue-700 blur-2xl opacity-90 rounded-full"></div>
+        
+            <h2 class="text-lg font-semibold text-white mb-4 z-10">Computer Science</h2>
+        
+            <!-- Progress Circle -->
+            <div class="relative w-24 h-24">
+                <svg class="w-full h-full" viewBox="0 0 100 100">
+                    <circle cx="50" cy="50" r="40" stroke="#ffffff" stroke-width="10" fill="transparent"/>
+                    <circle id="progressCS" cx="50" cy="50" r="40" stroke="#3B82F6" stroke-width="10" fill="transparent"
+                            stroke-dasharray="251.2" stroke-dashoffset="251.2"
+                            stroke-linecap="round" />
+                </svg>
+                <div class="absolute inset-0 flex justify-center items-center text-lg font-bold text-white">
+                    <span id="progressTextCS">0%</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="relative bg-green-400 shadow-lg rounded-2xl p-6 w-80 flex flex-col items-center overflow-hidden">
+            <!-- Abstract Design (SVG Lines) -->
+            <div class="absolute inset-0 opacity-30">
+                <svg class="w-full h-full" viewBox="0 0 200 200">
+                    <path fill="none" stroke="#3B82F6" stroke-width="8" d="M10 50 Q100 0, 190 50 T 390 50" />
+                    <path fill="none" stroke="#FACC15" stroke-width="8" d="M10 150 Q100 200, 190 150 T 390 150" />
+                </svg>
+            </div>
+        
+            <!-- Gradient Blobs -->
+            <div class="absolute -top-4 -left-6 w-20 h-20 bg-green-200 blur-2xl opacity-90 rounded-full"></div>
+            <div class="absolute bottom-0 right-2 w-24 h-24 bg-green-100 blur-2xl opacity-90 rounded-full"></div>
+        
+            <h2 class="text-lg font-semibold text-white mb-4 z-10">Information Technology</h2>
+        
+            <!-- Progress Circle -->
+            <div class="relative w-24 h-24">
+                <svg class="w-full h-full" viewBox="0 0 100 100">
+                    <circle cx="50" cy="50" r="40" stroke="#ffffff" stroke-width="10" fill="transparent"/>
+                    <circle id="progressCS" cx="50" cy="50" r="40" stroke="#3B82F6" stroke-width="10" fill="transparent"
+                            stroke-dasharray="251.2" stroke-dashoffset="251.2"
+                            stroke-linecap="round" />
+                </svg>
+                <div class="absolute inset-0 flex justify-center items-center text-lg font-bold text-white">
+                    <span id="progressTextCS">0%</span>
+                </div>
+            </div>
+        </div>     
+</div>
+
+
+<div class="p-6 bg-blue-600 shadow-lg rounded-2xl w-full max-w-4xl mx-auto mt-10 ml-64">
+    <h2 class="text-xl font-bold mb-4 text-center text-white">Student Progress Monitoring</h2>
+
+    <div class="w-full h-80">
+        <canvas id="progressChart"></canvas>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- Chart for JavaScript-->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const ctx = document.getElementById("progressChart").getContext("2d");
+    
+        new Chart(ctx, {
+            type: "line",
+            data: {
+                labels: ["Novice", "Junior", "Senior"],
+                datasets: [
+                    {
+                        label: "BSCS Progress",
+                        data: [0, 0, 0], // Placeholder for BSCS data
+                        backgroundColor: "rgba(54, 162, 235, 1)", // Blue
+                        borderColor: "rgba(54, 162, 235, 1)",
+                        fill: false
+                    },
+                    {
+                        label: "BSIT Progress",
+                        data: [0, 0, 0], // Placeholder for BSIT data
+                        backgroundColor: "rgba(255, 206, 86, 1)", // Yellow
+                        borderColor: "rgba(255, 206, 86, 1)",
+                        fill: false
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            color: "#ffffff" // White Y-axis labels
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            color: "#ffffff" // White X-axis labels
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: "#ffffff" // White text for the legend
+                        }
+                    },
+                    tooltip: {
+                        titleColor: "#ffffff", // White text in tooltips
+                        bodyColor: "#ffffff"
+                    }
+                }
+            }
+        });
+    });
+    
+</script>
+
+<!--cardbox progress-->
+<script>
+    function updateProgress(percent) {
+        const circle = document.getElementById("progressCircle");
+        const text = document.getElementById("progressText");
+        
+        // Max dasharray value (full circle)
+        const circumference = 2 * Math.PI * 40;  
+        const offset = circumference - (percent / 100) * circumference;
+        
+        circle.style.strokeDashoffset = offset; 
+        text.textContent = percent + "%";
+    }
+
+    // Set initial progress to 0% (This will later be dynamic)
+    updateProgress(0);
+</script>
+{% endblock %}

@@ -3,87 +3,82 @@
 
 {% block content %}
 <div class="p-6 flex justify-center">
-    <div class="bg-blue-900 shadow-lg rounded-3xl p-6 max-w-4xl w-full">
+    <div class="w-full max-w-6xl">
+  
+        <div class="flex flex-col items-center space-y-6 p-6 w-full max-w-7xl">
+            <!-- Dashboard Cards Row -->
+            <div class="flex space-x-10 ml-24">
+                
+              <!-- Total Users -->
+              <div class="relative bg-blue-600 shadow-xl rounded-2xl p-6 w-[22rem] flex flex-col items-center overflow-hidden">
+                <div class="absolute inset-0 opacity-30">
+                  <svg class="w-full h-full" viewBox="0 0 200 200">
+                    <path fill="none" stroke="#3B82F6" stroke-width="8" d="M10 50 Q100 0, 190 50 T 390 50" />
+                    <path fill="none" stroke="#FACC15" stroke-width="8" d="M10 150 Q100 200, 190 150 T 390 150" />
+                  </svg>
+                </div>
+                <div class="absolute -top-4 -left-6 w-20 h-20 bg-blue-900 blur-2xl opacity-90 rounded-full"></div>
+                <div class="absolute bottom-0 right-2 w-24 h-24 bg-blue-700 blur-2xl opacity-90 rounded-full"></div>
+          
+                <h2 class="text-lg font-semibold text-white mb-4 z-10">Total Users</h2>
+                <p class="text-4xl font-bold text-white z-10">1</p>
+              </div>
+          
+              <!-- Active Users -->
+              <div class="relative bg-green-500 shadow-xl rounded-2xl p-6 w-[22rem] flex flex-col items-center overflow-hidden">
+                <div class="absolute inset-0 opacity-30">
+                  <svg class="w-full h-full" viewBox="0 0 200 200">
+                    <path fill="none" stroke="#34D399" stroke-width="8" d="M10 50 Q100 0, 190 50 T 390 50" />
+                    <path fill="none" stroke="#FACC15" stroke-width="8" d="M10 150 Q100 200, 190 150 T 390 150" />
+                  </svg>
+                </div>
+                <div class="absolute -top-4 -left-6 w-20 h-20 bg-green-800 blur-2xl opacity-90 rounded-full"></div>
+                <div class="absolute bottom-0 right-2 w-24 h-24 bg-green-600 blur-2xl opacity-90 rounded-full"></div>
+          
+                <h2 class="text-lg font-semibold text-white mb-4 z-10">Active Users</h2>
 
-        <!-- Image Slider -->
-        <div x-data="slider" x-init="init()" class="relative rounded-lg overflow-hidden z-10">
-            <div class="w-full h-96 relative">
-                <template x-for="(image, index) in images" :key="index">
-                    <img x-show="activeSlide === index"
-                        :src="image"
-                        class="w-full h-full object-cover transition-opacity duration-700 opacity-0"
-                        :class="activeSlide === index ? 'opacity-100' : ''">
-                </template>
+                <div class="relative w-24 h-24">
+                    <svg class="w-full h-full" viewBox="0 0 100 100">
+                        <circle cx="50" cy="50" r="40" stroke="#ffffff" stroke-width="10" fill="transparent"/>
+                        <circle id="progressCS" cx="50" cy="50" r="40" stroke="#3B82F6" stroke-width="10" fill="transparent"
+                                stroke-dasharray="251.2" stroke-dashoffset="251.2"
+                                stroke-linecap="round" />
+                    </svg>
+                    <div class="absolute inset-0 flex justify-center items-center text-lg font-bold text-white">
+                        <span id="progressTextCS">0%</span>
+                    </div>
+                </div>
+              </div>
+          
+              <!-- Inactive Users -->
+              <div class="relative bg-red-400 shadow-xl rounded-2xl p-6 w-[22rem] flex flex-col items-center overflow-hidden">
+                <div class="absolute inset-0 opacity-30">
+                  <svg class="w-full h-full" viewBox="0 0 200 200">
+                    <path fill="none" stroke="#EF4444" stroke-width="8" d="M10 50 Q100 0, 190 50 T 390 50" />
+                    <path fill="none" stroke="#FACC15" stroke-width="8" d="M10 150 Q100 200, 190 150 T 390 150" />
+                  </svg>
+                </div>
+                <div class="absolute -top-4 -left-6 w-20 h-20 bg-red-700 blur-2xl opacity-90 rounded-full"></div>
+                <div class="absolute bottom-0 right-2 w-24 h-24 bg-red-600 blur-2xl opacity-90 rounded-full"></div>
+          
+                <h2 class="text-lg font-semibold text-white mb-4 z-10">Inactive Users</h2>
+                <div class="relative w-24 h-24">
+                    <svg class="w-full h-full" viewBox="0 0 100 100">
+                        <circle cx="50" cy="50" r="40" stroke="#ffffff" stroke-width="10" fill="transparent"/>
+                        <circle id="progressCS" cx="50" cy="50" r="40" stroke="#3B82F6" stroke-width="10" fill="transparent"
+                                stroke-dasharray="251.2" stroke-dashoffset="251.2"
+                                stroke-linecap="round" />
+                    </svg>
+                    <div class="absolute inset-0 flex justify-center items-center text-lg font-bold text-white">
+                        <span id="progressTextCS">0%</span>
+                    </div>
+                </div>
+              </div>
             </div>
-        </div>
+          </div>
 
-
-        <!-- Text Below Slider -->
-        <div class="mt-6 text-white text-lg leading-relaxed text-justify  max-w-4xl">
-            <p>SENTINELS. A 2D role-playing game designed for students at STI West Negros University - College of Information and Communications Technology. This educational game helps learners understand cybersecurity fundamentals by immersing them in real-world scenarios based on course handouts. Players will explore topics such as cybersecurity roles and responsibilities, threats and vulnerabilities, and types of hackers while engaging in interactive challenges. The game offers three difficulty levels—Novice, Junior, and Senior—each featuring three tasks/activities and an intense boss battle to test their knowledge. Fun, engaging, and educational, this game makes learning cybersecurity an exciting adventure—play now and become a cybersecurity expert!</p>
-        </div>
     </div>
-</div>
-
-<!-- About System Section -->
-<div class="p-24 mt-10 mb-10 flex justify-center">
-    <div class="max-w-6xl w-full">
-        <div class="mt-16 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-
-            <!-- Card 1 -->
-            <div class="max-w-sm bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700">
-                <a href="#">
-                    <img class="rounded-t-lg" src="{% static 'assets/img/feature1.jpg' %}" alt="Feature 1" class="h-24 mx-auto rounded-lg">
-                </a>
-                <div class="p-5">
-                    <a href="#">
-                        <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Interactive Activities</h5>
-                    </a>
-                    <p class="mb-3 font-normal text-gray-700 dark:text-gray-400">Students can test their knowledge and skills through interactive tasks and quests.</p>
-                </div>
-            </div>
-
-            <!-- Card 2 -->
-            <div class="max-w-sm bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700">
-                <a href="#">
-                    <img class="rounded-t-lg" src="{% static 'assets/img/feature2.jpg' %}" alt="Feature 2" class="h-24 mx-auto rounded-lg">
-                </a>
-                <div class="p-5">
-                    <a href="#">
-                        <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Game Tutorial</h5>
-                    </a>
-                    <p class="mb-3 font-normal text-gray-700 dark:text-gray-400">There will be Game tutorials on how to play the game.</p>
-                </div>
-            </div>
-
-            <!-- Card 3 -->
-            <div class="max-w-sm bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700">
-                <a href="#">
-                    <img class="rounded-t-lg" src="{% static 'assets/img/feature3.jpg' %}" alt="Feature 3" class="h-24 mx-auto rounded-lg">
-                </a>
-                <div class="p-5">
-                    <a href="#">
-                        <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Student Progress Monitoring</h5>
-                    </a>
-                    <p class="mb-3 font-normal text-gray-700 dark:text-gray-400">Students are being monitored of their performance.</p>
-                </div>
-            </div>
-
-            <!-- Card 4 -->
-            <div class="max-w-sm bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700">
-                <a href="#">
-                    <img class="rounded-t-lg" src="{% static 'assets/img/feature1.jpg' %}" alt="Feature 4" class="h-24 mx-auto rounded-lg">
-                </a>
-                <div class="p-5">
-                    <a href="#">
-                        <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Student Progress Monitoring</h5>
-                    </a>
-                    <p class="mb-3 font-normal text-gray-700 dark:text-gray-400">Students are being monitored of their performance.</p>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+  </div>
 
 <!-- Auto-Slide Script -->
 <script>

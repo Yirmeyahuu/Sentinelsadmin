@@ -4,6 +4,7 @@ import firebase_admin
 from firebase_admin import credentials, firestore
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.templatetags.static import static
 
 
 # Initialize Firebase if not already initialized
@@ -119,3 +120,115 @@ def restore_student(request, student_id):
         messages.error(request, "student member not found in archive.")
 
     return redirect("archive-page")
+
+
+
+#This is the activity page for the faculty
+def activity_page(request):
+    activities_novice = [
+        {
+            "title": "",
+            "subject": "",
+            "date": "",
+            "progress": 0,  # percentage
+            "modules": 0,
+            "image": static("assets/img/Photo1.png"),  # Update with your actual image path
+        },
+        {
+            "title": "",
+            "subject": "",
+            "date": "",
+            "progress": 0,
+            "modules": 0,
+            "image": static("assets/img/Photo2.png"),
+        },
+        {
+            "title": "",
+            "subject": "",
+            "date": "",
+            "progress": 0,
+            "modules": 0,
+            "image": static("assets/img/Photo3.png"),
+        },
+        {
+            "title": "",
+            "subject": "",
+            "date": "",
+            "progress": 0,
+            "modules": 0,
+            "image": static("assets/img/Photo4.png"),
+        },
+    ]
+
+    activities_junior = [
+        {
+            "title": "",
+            "subject": "",
+            "date": "",
+            "progress": 0,  # percentage
+            "modules": 0,
+            "image": static("assets/img/Photo2.png"),  # Update with your actual image path
+        },
+        {
+            "title": "",
+            "subject": "",
+            "date": "",
+            "progress": 0,
+            "modules": 0,
+            "image": static("assets/img/Photo3.png"),
+        },
+        {
+            "title": "",
+            "subject": "",
+            "date": "",
+            "progress": 0,
+            "modules": 0,
+            "image": static("assets/img/Photo4.png"),
+        },
+        {
+            "title": "",
+            "subject": "",
+            "date": "",
+            "progress": 0,
+            "modules": 0,
+            "image": static("assets/img/Photo1.png"),
+        },
+    ]
+
+    activities_senior = [
+        {
+            "title": "",
+            "subject": "",
+            "date": "",
+            "progress": 0,  # percentage
+            "modules": 0,
+            "image": static("assets/img/Photo3.png"),  # Update with your actual image path
+        },
+        {
+            "title": "",
+            "subject": "",
+            "date": "",
+            "progress": 0,
+            "modules": 0,
+            "image": static("assets/img/Photo4.png"),
+        },
+        {
+            "title": "",
+            "subject": "",
+            "date": "",
+            "progress": 0,
+            "modules": 0,
+            "image": static("assets/img/Photo1.png"),
+        },
+        {
+            "title": "",
+            "subject": "",
+            "date": "",
+            "progress": 0,
+            "modules": 0,
+            "image": static("assets/img/Photo2.png"),
+        },
+    ]
+
+    return render(request, "Activities/activities.html",
+                  {"activities_novice": activities_novice, "activities_junior": activities_junior, "activities_senior": activities_senior})

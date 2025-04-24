@@ -76,5 +76,5 @@ config/settings.py
 # Static and media files
 #static/
 #media/
-.json
+*.json
 >>>>>>> f0c85c2 (Initial commit)
