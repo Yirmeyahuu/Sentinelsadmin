@@ -19,7 +19,7 @@ def Faculty_home(request):
 
 def student_list(request):
     """Fetch all active student members"""
-    student_ref = db.collection("Students")
+    student_ref = db.collection("Registered_Students")
     docs = student_ref.stream()
 
     students = [{**doc.to_dict(), "student_id": doc.id} for doc in docs]  # Ensure student_id is included
@@ -44,17 +44,17 @@ def add_student(request):
             "semester": request.POST.get("semester")
         }
 
-        db.collection("Students").document(student_data["student_id"]).set(student_data)
+        db.collection("Registered_Students").document(student_data["student_id"]).set(student_data)
 
         messages.success(request, "Student member added successfully!")
         return redirect("student-list")  # Redirect to the list
 
-    return render(request, "Students/student-list.html")
+    return render(request, "Students/student-list.html")  # Render the form for adding a student
 
 
 def edit_student(request, student_id):
     """Update student details in Firestore"""
-    student_ref = db.collection("Students").document(student_id)  # Corrected collection name
+    student_ref = db.collection("Registered_Students").document(student_id)  # Corrected collection name
     student = student_ref.get()
 
     if not student.exists:
@@ -82,7 +82,7 @@ def edit_student(request, student_id):
 
 def archive_student(request, student_id):
     """Move student member to 'archive' collection"""
-    student_ref = db.collection("Students").document(student_id)
+    student_ref = db.collection("Registered_Students").document(student_id)
     student = student_ref.get()
 
     if student.exists:
@@ -112,7 +112,7 @@ def restore_student(request, student_id):
     student = archive_ref.get()
 
     if student.exists:
-        db.collection("Students").document(student_id).set(student.to_dict())
+        db.collection("Registered_Students").document(student_id).set(student.to_dict())
         archive_ref.delete()
 
         messages.success(request, "student member has been restored successfully!")

@@ -1,0 +1,339 @@
+{% extends 'Superadmin/superadmin-base.html' %}
+{% load static %}
+
+{% block content %}
+
+<!-- Archive Confirmation Modal -->
+<div id="archiveModal" class="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 hidden z-50">
+    <div class="bg-white p-6 rounded-lg shadow-lg w-96">
+        <h2 class="text-lg font-bold text-gray-900 mb-4">Archive Faculty</h2>
+        <p class="text-gray-700 mb-6">Are you sure you want to archive this faculty? It will be temporarily stored in the archive.</p>
+        <div class="flex justify-end space-x-4">
+            <button onclick="closeArchiveModal()" class="text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-gray-800 dark:hover:bg-gray-700 dark:focus:ring-gray-700 dark:border-gray-700">Cancel</button>
+            <a id="confirmArchiveBtn" href="#" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">Confirm</a>
+        </div>
+    </div>
+</div>
+
+<!-- Add Faculty Modal -->
+<div id="modal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center hidden z-50">
+    <div class="bg-blue-700 border border-white p-12 rounded-3xl shadow-lg w-1/2">
+        <h2 class="text-xl font-bold mb-4 text-white ">Add Faculty</h2>
+        <div class="border-t border-white p-2 mt-auto"></div>
+        <form id="facultyForm" action="{% url 'add_faculty' %}" method="POST">
+            {% csrf_token %}
+
+            <!-- 2 Column Layout -->
+            <div class="grid grid-cols-2 gap-4">
+                <!-- Faculty ID -->
+                <div>
+                    <label class="block text-sm font-medium mb-2 text-white">Faculty ID <span> (required) </span></label>
+                    <input type="text" name="faculty_id" placeholder="Enter Faculty ID" class="w-full p-2 border border-gray-300 bg-white rounded-lg">
+                    <p id="faculty_id_error" class="text-red-500 text-sm hidden">Please enter Faculty ID</p>
+                </div>
+
+                <!-- First Name -->
+                <div>
+                    <label class="block text-sm font-medium mb-2 text-white">First Name <span> (required) </span></label>
+                    <input type="text" name="first_name" placeholder="Enter First Name" class="w-full p-2 border border-gray-300 bg-white rounded-lg">
+                    <p id="first_name_error" class="text-red-500 text-sm hidden">Please enter First Name</p>
+                </div>
+
+                <!-- Last Name -->
+                <div>
+                    <label class="block text-sm font-medium mb-2 text-white">Last Name <span> (required) </span></label>
+                    <input type="text" name="last_name" placeholder="Enter Last Name" class="w-full p-2 border border-gray-300 bg-white rounded-lg">
+                    <p id="last_name_error" class="text-red-500 text-sm hidden">Please enter Last Name</p>
+                </div>
+
+                <!-- Middle Initial -->
+                <div>
+                    <label class="block text-sm font-medium mb-2 text-white">Middle Initial <span> (optional) </span></label>
+                    <input type="text" name="middle_initial" placeholder="Enter Middle Initial" class="w-full p-2 border border-gray-300 bg-white rounded-lg">
+                </div>
+
+                <!-- Program -->
+                <div>
+                    <label class="block text-sm font-medium mb-2 text-white">Program <span> (required) </span></label>
+                    <select name="program" class="w-full p-2 border border-gray-300 bg-white rounded-lg">
+                        <option value="" disabled selected>-Select Option-</option>
+                        <option value="Computer Science">Computer Science</option>
+                        <option value="Information Technology">Information Technology</option>
+                    </select>
+                    <p id="program_error" class="text-red-500 text-sm hidden">Please select a Program</p>
+                </div>
+
+                <!-- Year & Section -->
+                <div>
+                    <label class="block text-sm font-medium mb-2 text-white">Year & Section <span> (Ex. 3A) </span></label>
+                    <input type="text" name="year_section" placeholder="Enter Year and Section" class="w-full p-2 border border-gray-300 bg-white rounded-lg">
+                    <p id="year_section_error" class="text-red-500 text-sm hidden">Please enter Year & Section</p>
+                </div>
+
+                <!-- Semester -->
+                <div>
+                    <label class="block text-sm font-medium mb-2 text-white">Semester <span> (required) </span></label>
+                    <select name="semester" class="w-full p-2 border border-gray-300 bg-white rounded-lg">
+                        <option value="" disabled selected>-Select Option-</option>
+                        <option value="1st Semester">1st Semester</option>
+                        <option value="2nd Semester">2nd Semester</option>
+                    </select>
+                    <p id="semester_error" class="text-red-500 text-sm hidden">Please select a Semester</p>
+                </div>
+            </div>
+
+            <!-- Buttons -->
+            <div class="flex justify-end mt-6">
+                <button type="button" onclick="closeModal()" class="text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2">Cancel</button>
+                <button type="submit" onclick="validateForm(event)" class="text-white bg-blue-800 hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-800 dark:hover:bg-blue-600 focus:outline-none dark:focus:ring-blue-800">Add Faculty</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="p-6 ml-20"> <!-- Added margin to prevent overlap with sidebar -->
+    <div class="bg-blue-900 shadow-lg rounded-2xl p-6 overflow-x-auto"> <!-- Ensures table responsiveness -->
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-bold text-white">Registered Faculty</h2>
+            <div class="flex items-center space-x-4">
+
+                <form class="flex items-center max-w-sm mx-auto">
+                    <label for="simple-search" class="sr-only">Search</label>
+                    <div class="relative w-full">
+                        <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+                            <svg viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 text-gray-500 dark:text-gray-400">
+                                <path fill-rule="evenodd" d="M12 6a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Zm-1.5 8a4 4 0 0 0-4 4 2 2 0 0 0 2 2h7a2 2 0 0 0 2-2 4 4 0 0 0-4-4h-3Zm6.82-3.096a5.51 5.51 0 0 0-2.797-6.293 3.5 3.5 0 1 1 2.796 6.292ZM19.5 18h.5a2 2 0 0 0 2-2 4 4 0 0 0-4-4h-1.1a5.503 5.503 0 0 1-.471.762A5.998 5.998 0 0 1 19.5 18ZM4 7.5a3.5 3.5 0 0 1 5.477-2.889 5.5 5.5 0 0 0-2.796 6.293A3.501 3.501 0 0 1 4 7.5ZM7.1 12H6a4 4 0 0 0-4 4 2 2 0 0 0 2 2h.5a5.998 5.998 0 0 1 3.071-5.238A5.505 5.505 0 0 1 7.1 12Z" clip-rule="evenodd"/>
+                            </svg>
+                        </div>
+                        <input type="text" id="searchBar" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-2xl focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5  dark:bg-white dark:border-blue-500 dark:placeholder-gray-400 dark:text-gray-500 dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Search Faculty..." required />
+                    </div>
+                    <button type="submit" class="p-2.5 ms-2 text-sm font-medium text-white bg-blue-700 rounded-2xl border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                        <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
+                        </svg>
+                        <span class="sr-only">Search</span>
+                    </button>
+                </form>
+                <!-- Add Button -->
+                <button class="bg-blue-600 text-white px-4 py-2 rounded-xl hover:bg-blue-700 transition duration-200" onclick="openModal()">Add +</button>
+            </div>
+        </div>
+
+
+
+
+
+        <!-- Faculty Table -->
+        <div class="overflow-hidden rounded-lg border border-blue-500">
+            <table class="w-full min-w-[800px] border-separate border-spacing-0 rounded-lg"> <!-- Ensures minimum width -->
+                <thead>
+                    <tr class="bg-blue-600 text-white">
+                        <th class="border border-blue-500 p-2">Faculty ID</th>
+                        <th class="border border-blue-500 p-2">Full Name</th>
+                        <th class="border border-blue-500 p-2">Program</th>
+                        <th class="border border-blue-500 p-2">Year & Section</th>
+                        <th class="border border-blue-500 p-2">Semester</th>
+                        <th class="border border-blue-500 p-2">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="facultyTableBody">
+                    {% for faculty in faculties %}
+                        <tr class="facultyRow text-white">
+                            <td class="border border-blue-500 p-2 text-center whitespace-nowrap">{{ faculty.faculty_id }}</td>
+                            <td class="border border-blue-500 p-2 text-center whitespace-nowrap">{{ faculty.first_name }} {{ faculty.middle_initial }} {{ faculty.last_name }}</td>
+                            <td class="border border-blue-500 p-2 text-center whitespace-nowrap">{{ faculty.program }}</td>
+                            <td class="border border-blue-500 p-2 text-center whitespace-nowrap">{{ faculty.year_section }}</td>
+                            <td class="border border-blue-500 p-2 text-center whitespace-nowrap">{{ faculty.semester }}</td>
+                            <td class="border border-blue-500 p-2 text-center whitespace-nowrap">
+                                <div class="flex items-center justify-center space-x-3">
+                                    <a href="{% url 'edit_faculty' faculty.faculty_id %}" class="text-blue-600 hover:text-blue-800">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="1.5" fill="currentColor" class="w-5 h-5">
+                                            <path d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-8.4 8.4a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32l8.4-8.4Z" />
+                                            <path d="M5.25 5.25a3 3 0 0 0-3 3v10.5a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3V13.5a.75.75 0 0 0-1.5 0v5.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5V8.25a1.5 1.5 0 0 1 1.5-1.5h5.25a.75.75 0 0 0 0-1.5H5.25Z" />
+                                        </svg>
+                                    </a>
+                                    <a href="#" onclick="openArchiveModal('{% url 'archive_faculty' faculty.faculty_id %}')" class="text-green-600 hover:text-green-800">
+                                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="1.5" fill="currentColor" class="w-5 h-5">
+                                            <path d="M3.375 3C2.339 3 1.5 3.84 1.5 4.875v.75c0 1.036.84 1.875 1.875 1.875h17.25c1.035 0 1.875-.84 1.875-1.875v-.75C22.5 3.839 21.66 3 20.625 3H3.375Z" />
+                                            <path fill-rule="evenodd" d="m3.087 9 .54 9.176A3 3 0 0 0 6.62 21h10.757a3 3 0 0 0 2.995-2.824L20.913 9H3.087Zm6.133 2.845a.75.75 0 0 1 1.06 0l1.72 1.72 1.72-1.72a.75.75 0 1 1 1.06 1.06l-1.72 1.72 1.72 1.72a.75.75 0 1 1-1.06 1.06L12 15.685l-1.72 1.72a.75.75 0 1 1-1.06-1.06l1.72-1.72-1.72-1.72a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" />
+                                          </svg>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+
+                    {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center border border-gray-300 p-4">No users registered yet.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Add Faculty Success Notification -->
+<div id="successNotification" class="hidden p-4 mb-4 text-sm text-green-800 rounded-lg bg-green-50 dark:bg-gray-800 dark:text-green-400 fixed top-5 right-5 shadow-lg" role="alert">
+    <span class="font-medium">Success!</span> Faculty <span id="facultyIdSpan"></span> has been added.
+</div>
+
+
+
+
+
+
+<!-- Added Faculty Notification-->
+<script>
+    function showSuccessNotification(facultyId) {
+        // Set the faculty ID in the notification
+        document.getElementById("facultyIdSpan").textContent = facultyId;
+
+        // Show the notification
+        let notification = document.getElementById("successNotification");
+        notification.classList.remove("hidden");
+
+        // Hide after 3 seconds
+        setTimeout(() => {
+            notification.classList.add("hidden");
+        }, 3000);
+    }
+
+    // Modify the form submission to show the notification
+    document.getElementById("facultyForm").addEventListener("submit", function(event) {
+        event.preventDefault(); // Prevent the form from submitting normally
+
+        // Get the faculty ID input value
+        let facultyId = document.querySelector('input[name="faculty_id"]').value;
+
+        // Submit the form after showing the notification
+        showSuccessNotification(facultyId);
+
+        // Allow the form to submit after a short delay
+        setTimeout(() => {
+            event.target.submit();
+        }, 10000);
+    });
+</script>
+
+
+<!-- Add Faculty Modal-->
+<script>
+    function openModal() { document.getElementById("modal").classList.remove("hidden"); }
+    function closeModal() { document.getElementById("modal").classList.add("hidden"); }
+</script>
+
+<!-- Add Faculty Field Validation -->
+<script>
+    function validateForm(event) {
+        event.preventDefault(); // Prevent default form submission
+
+        let form = document.getElementById("facultyForm");
+        let formData = new FormData(form);
+
+        fetch("{% url 'add_faculty' %}", {
+            method: "POST",
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Add the new faculty to the table
+                let table = document.getElementById("facultyTableBody"); // Update the correct ID
+                let newRow = document.createElement("tr");
+
+                newRow.innerHTML = `
+                    <td class="border border-blue-500 p-2 text-center text-white whitespace-nowrap">${formData.get("faculty_id")}</td>
+                    <td class="border border-blue-500 p-2 text-center text-white whitespace-nowrap">${formData.get("first_name")} ${formData.get("last_name")}</td>
+                    <td class="border border-blue-500 p-2 text-center text-white whitespace-nowrap">${formData.get("program")}</td>
+                    <td class="border border-blue-500 p-2 text-center text-white whitespace-nowrap">${formData.get("year_section")}</td>
+                    <td class="border border-blue-500 p-2 text-center text-white whitespace-nowrap">${formData.get("semester")}</td>
+                    <td class="border border-blue-500 p-2 text-center text-white whitespace-nowrap">
+                        <div class="flex items-center justify-center space-x-3">
+                                    <button class="text-blue-600 hover:text-blue-800">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="1.5" fill="currentColor" class="w-5 h-5">
+                                            <path d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-8.4 8.4a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32l8.4-8.4Z" />
+                                            <path d="M5.25 5.25a3 3 0 0 0-3 3v10.5a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3V13.5a.75.75 0 0 0-1.5 0v5.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5V8.25a1.5 1.5 0 0 1 1.5-1.5h5.25a.75.75 0 0 0 0-1.5H5.25Z" />
+                                        </svg>
+                                    </button>
+                                    <button class="text-green-600 hover:text-green-800">
+                                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="1.5" fill="currentColor" class="w-5 h-5">
+                                            <path d="M3.375 3C2.339 3 1.5 3.84 1.5 4.875v.75c0 1.036.84 1.875 1.875 1.875h17.25c1.035 0 1.875-.84 1.875-1.875v-.75C22.5 3.839 21.66 3 20.625 3H3.375Z" />
+                                            <path fill-rule="evenodd" d="m3.087 9 .54 9.176A3 3 0 0 0 6.62 21h10.757a3 3 0 0 0 2.995-2.824L20.913 9H3.087Zm6.133 2.845a.75.75 0 0 1 1.06 0l1.72 1.72 1.72-1.72a.75.75 0 1 1 1.06 1.06l-1.72 1.72 1.72 1.72a.75.75 0 1 1-1.06 1.06L12 15.685l-1.72 1.72a.75.75 0 1 1-1.06-1.06l1.72-1.72-1.72-1.72a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" />
+                                          </svg>
+                                    </button>
+                        </div>
+                    </td>
+                `;
+
+                table.appendChild(newRow);
+
+                // Show success notification
+                showNotification(`Faculty ${data.faculty_id} added successfully!`);
+
+                // Close the modal after a short delay
+                setTimeout(() => {
+                    closeModal();
+                }, 500);
+
+                // Clear form fields
+                form.reset();
+            }
+        })
+        .catch(error => console.error("Error:", error));
+    }
+
+    function showNotification(message) {
+        let notification = document.createElement("div");
+        notification.className = "p-4 mb-4 text-sm text-green-800 rounded-lg bg-green-50 fixed top-5 right-5 shadow-lg";
+        notification.innerHTML = `<span class="font-medium">Success!</span> ${message}`;
+
+        document.body.appendChild(notification);
+
+        setTimeout(() => {
+            notification.remove();
+        }, 6000); // Remove after 3 seconds
+    }
+
+    function closeModal() {
+        document.getElementById("modal").classList.add("hidden");
+    }
+</script>
+
+
+
+<!-- Search user suggestion-->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const searchBar = document.getElementById('searchBar');
+        const facultyRows = document.querySelectorAll('#facultyTableBody .facultyRow');
+
+        searchBar.addEventListener('input', function () {
+            const searchTerm = searchBar.value.trim().toLowerCase();
+
+            facultyRows.forEach(row => {
+                const facultyName = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
+
+                if (facultyName.includes(searchTerm)) {
+                    row.style.display = ''; // Show the row
+                } else {
+                    row.style.display = 'none'; // Hide the row
+                }
+            });
+        });
+    });
+</script>
+
+<!--Archive Confirmation Modal-->
+<script>
+    function openArchiveModal(url) {
+        document.getElementById("archiveModal").classList.remove("hidden");
+        document.getElementById("confirmArchiveBtn").setAttribute("href", url);
+    }
+
+    function closeArchiveModal() {
+        document.getElementById("archiveModal").classList.add("hidden");
+    }
+</script>
+
+{% endblock %}
