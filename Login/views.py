@@ -1,4 +1,10 @@
-from django.shortcuts import render
+from django.contrib import messages  # Corrected import for messages
+from django.shortcuts import render, redirect
+from firebase_admin import credentials, firestore
+import firebase_admin
+
+db = firestore.client()
+# Initialize Firebase Admin SDK
 
 # Create your views here.
 def Faculty_login_view(request):
@@ -7,18 +13,19 @@ def Faculty_login_view(request):
         password = request.POST.get('faculty_password')
 
         # Look for the faculty document
-        users_ref = db.collection('faculty')
+        users_ref = db.collection('Authorized Faculty')
         query = users_ref.where('faculty_id', '==', faculty_id).limit(1).get()
 
         if query:
             faculty_doc = query[0]
             faculty_data = faculty_doc.to_dict()
 
-            if faculty_data['password'] == password:  # Just for now, assuming plain text
+            # Check if the password matches the default password
+            if password == "welcomeadmin":
                 # Successful login logic
-                return redirect('student_dashboard')  # update this path
+                return redirect('home-page')  # Update this path as needed
             else:
-                messages.error(request, "Incorrect password.")
+                messages.error(request, "Incorrect password. Please use the default password: 'welcomeadmin'.")
         else:
             messages.error(request, "Faculty ID not found.")
 
@@ -26,3 +33,4 @@ def Faculty_login_view(request):
 
 def Superadmin_login_view(request):
     return render(request, 'Login/superadmin-login.html')
+
