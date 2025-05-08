@@ -25,9 +25,12 @@ firebase_admin.initialize_app(cred)
 db = firestore.client()
 # Application definition
 
+AUTHENTICATION_BACKENDS = [
+    'Login.auth_backend.FirestoreBackend',  # Custom backend for Faculty
+    'django.contrib.auth.backends.ModelBackend',
+]
 
 # Application definition
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',

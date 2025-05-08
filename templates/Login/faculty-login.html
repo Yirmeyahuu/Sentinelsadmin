@@ -23,38 +23,41 @@
     </div>
 
     <!-- Right Section (Login Form) -->
-    <div class="w-1/3 h-screen bg-gradient-to-r from-gray-200 to-gray/20 flex items-center justify-center p-2">
-        <div class="bg-white-100 pl-5 pr-5 rounded-3xl w-2/3 max-w-md shadow-2xl h-[500px]">
+    <div class="w-1/3 h-screen bg-gray-100 flex items-center justify-center rounded-l-3xl overflow-hidden">
+        <div class="bg-white 0 pl-5 pr-5 rounded-3xl w-2/3 max-w-md shadow-2xl h-[500px]">
             <div class="text-center">
                 <img src="{% static 'assets/img/Sentinels Logo Text Right.png' %}" alt="Sentinels Logo" class="mx-auto h-16 mb-16 mt-10">
             </div>
 
             <!-- Login Form --> 
-            <form method="POST" action="{% url 'login' %}" class="space-y-5">
+            <form method="POST" action="{% url 'faculty_login' %}" class="space-y-5">
                 {% csrf_token %}
 
-                  <div class="relative">
+                  <!-- Faculty ID Field -->
+                <div class="relative">
                     <label for="faculty_id" class="block mb-1 text-lg font-bold text-blue-500">Faculty ID</label>
-                    <input type="text" name="faculty_id" id="faculty_id" placeholder=" Enter Faculty ID" required
+                    <input type="text" name="faculty_id" id="faculty_id" placeholder="Enter Faculty ID" required
                         class="w-full px-4 py-3 pl-10 bg-white text-black border border-gray-400 rounded-2xl focus:border-none focus:outline-none focus:ring-2 focus:ring-blue-600">
-                    <span class="absolute left-3 top-11 text-blue-700">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9A3.75 3.75 0 1 1 8.25 9a3.75 3.75 0 0 1 7.5 0ZM4.5 20.25a8.25 8.25 0 0 1 15 0"/>
-                        </svg>
-                    </span>
-                  </div>
+                        <span class="absolute left-3 top-11 text-blue-700">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9A3.75 3.75 0 1 1 8.25 9a3.75 3.75 0 0 1 7.5 0ZM4.5 20.25a8.25 8.25 0 0 1 15 0"/>
+                            </svg>
+                        </span>
+                    <span id="faculty_id_error" class="text-red-500 text-xs hidden">Faculty not authorized. Enter a different ID.</span>
+                </div>
 
-
-                  <div class="relative">
-                    <label for="faculty_id" class="block mb-1 text-lg font-bold text-blue-500">Password</label>
+                <!-- Password Field -->
+                <div class="relative">
+                    <label for="faculty_password" class="block mb-1 text-lg font-bold text-blue-500">Password</label>
                     <input type="password" id="faculty_password" name="faculty_password" placeholder="Enter Password" required
                         class="w-full px-4 py-3 pl-10 bg-white text-black border border-gray-400 focus:border-none rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-600">
-                    <span class="absolute left-3 top-11 text-blue-700">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V7.875a4.5 4.5 0 1 0-9 0V10.5M7.5 10.5h9a1.5 1.5 0 0 1 1.5 1.5v6a1.5 1.5 0 0 1-1.5 1.5h-9a1.5 1.5 0 0 1-1.5-1.5v-6a1.5 1.5 0 0 1 1.5-1.5Z"/>
-                        </svg>
-                    </span>
-                  </div>
+                        <span class="absolute left-3 top-11 text-blue-700">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V7.875a4.5 4.5 0 1 0-9 0V10.5M7.5 10.5h9a1.5 1.5 0 0 1 1.5 1.5v6a1.5 1.5 0 0 1-1.5 1.5h-9a1.5 1.5 0 0 1-1.5-1.5v-6a1.5 1.5 0 0 1 1.5-1.5Z"/>
+                            </svg>
+                        </span>
+                    <span id="password_error" class="text-red-500 text-xs hidden">Incorrect password. Please try again.</span>
+                </div>
 
                 <button type="submit" class="w-full bg-blue-700 text-white font-bold py-3 rounded-2xl hover:bg-blue-500">Login</button>
             </form>
@@ -66,5 +69,19 @@
             </div>
         </div>
     </div>
+
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const errorField = "{{ error_field|escapejs }}";  // Get the error field from the context
+    
+            if (errorField === "faculty_id") {
+                document.getElementById("faculty_id_error").classList.remove("hidden");
+            } else if (errorField === "password") {
+                document.getElementById("password_error").classList.remove("hidden");
+            }
+        });
+    </script>
+
 </body>
 </html>

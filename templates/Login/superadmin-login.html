@@ -30,7 +30,7 @@
             </div>
 
             <!-- Login Form -->
-            <form method="POST" action="{% url 'login' %}" class="space-y-5">
+            <form method="POST" action="{% url 'faculty_login' %}" class="space-y-5">
                 {% csrf_token %}
 
                   <div class="relative">
@@ -60,7 +60,7 @@
             </form>
 
             <div class="text-left mt-4">
-                <a href="{% url 'login' %}" class="text-sm text-blue-500 hover:underline">
+                <a href="{% url 'faculty_login' %}" class="text-sm text-blue-500 hover:underline">
                     Login as Faculty
                 </a>
             </div>

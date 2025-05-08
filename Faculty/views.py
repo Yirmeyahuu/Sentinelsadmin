@@ -9,14 +9,29 @@ from django.templatetags.static import static
 
 # Initialize Firebase if not already initialized
 if not firebase_admin._apps:
-    cred = credentials.Certificate("C:/sentinels-repository/sentinels-a61ff-firebase-adminsdk-fbsvc-35c84e60a7.json")
+    cred = credentials.Certificate("/Users/jeremiahpantaras/Documents/sentinels-project/sentinels-a61ff-firebase-adminsdk-fbsvc-aaf9572a3f.json")
     firebase_admin.initialize_app(cred)
 
 db = firestore.client()
 
+@login_required(login_url='faculty_login')
 def Faculty_home(request):
-    return render(request, 'Home/faculty-home.html')
+    if request.headers.get('HX-Request'):
+        # Handle the request as an HTMX request
+        return render(request, 'Home/faculty-home.html')
+    faculty_id = request.user.username
 
+    users_ref = db.collection('Authorized Faculty')
+    query = users_ref.where('faculty_id', '==', faculty_id).limit(1).get()
+
+    faculty_data = None
+    if query:
+        faculty_doc = query[0]
+        faculty_data = faculty_doc.to_dict()
+
+    return render(request, 'Home/faculty-home.html', {"faculty_data": faculty_data})
+
+@login_required(login_url='faculty_login')
 def student_list(request):
     """Fetch all active student members"""
     student_ref = db.collection("Registered_Students")
@@ -120,6 +135,16 @@ def restore_student(request, student_id):
         messages.error(request, "student member not found in archive.")
 
     return redirect("archive-page")
+
+def Verify_Student(request):
+    """Verify student member"""
+    verify_ref = db.collection("Student Verification")
+    docs = verify_ref.stream()
+
+    verify_students = [{**doc.to_dict(), "student_id": doc.id} for doc in docs]  # Ensure student_id is included
+
+    return render(request, "Students/students-verify-list.html", {"verify_students": verify_students})  # Corrected context name
+
 
 
 
@@ -232,3 +257,5 @@ def activity_page(request):
 
     return render(request, "Activities/activities.html",
                   {"activities_novice": activities_novice, "activities_junior": activities_junior, "activities_senior": activities_senior})
+
+

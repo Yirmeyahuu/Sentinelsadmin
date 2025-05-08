@@ -156,12 +156,20 @@
 </div>
 
 
+
+
 <!-- Add Student Modal -->
-<div id="modal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center hidden z-50">
-    <div class="bg-blue-700 border border-white p-12 rounded-3xl shadow-lg w-1/2">
+<!-- Replace the existing Add Student Modal div with this updated version -->
+<div id="modal" class="fixed inset-0 flex justify-center items-center hidden z-50">
+    <!-- Backdrop with blur effect -->
+    <div class="fixed inset-0 backdrop-blur-sm bg-gray-900/50"></div>
+    
+    <!-- Modal Content -->
+    <div class="bg-blue-700 border border-white p-12 rounded-3xl shadow-lg w-1/2 z-10">
         <h2 class="text-xl font-bold mb-4 text-white">Add Student</h2>
         <div class="border-t border-white p-2 mt-auto"></div>
-        <form id="studentForm" action="{% url 'add_student' %}" method="POST">
+        <!-- ... rest of your form content ... -->
+         <form id="studentForm" action="{% url 'add_student' %}" method="POST">
             {% csrf_token %}
 
             <!-- 2 Column Layout -->
@@ -229,6 +237,17 @@
                 <button type="submit" onclick="validateForm(event)" class="text-white bg-blue-800 hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-800 dark:hover:bg-blue-600 focus:outline-none dark:focus:ring-blue-800">Add Student</button>
             </div>
         </form>
+
+
+        
+    </div>
+</div>
+
+<div id="modal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center hidden z-50">
+    <div class="bg-blue-700 border border-white p-12 rounded-3xl shadow-lg w-1/2">
+        <h2 class="text-xl font-bold mb-4 text-white">Add Student</h2>
+        <div class="border-t border-white p-2 mt-auto"></div>
+        
     </div>
 </div>
 
