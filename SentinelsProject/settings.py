@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'Login',
     'Faculty',
     'SuperAdmin',
+    'Student',
     
     
     'tailwind',

@@ -10,4 +10,5 @@ urlpatterns = [
     #This is the URl's for the main apps. Serves as the root urls for the apps.
     path('Faculty/', include("Faculty.urls")),
     path('Superadmin/', include("SuperAdmin.urls")),
+    path('Student/', include("Student.urls")),
 ]
