@@ -16,9 +16,6 @@ db = firestore.client()
 
 @login_required(login_url='faculty_login')
 def Faculty_home(request):
-    if request.headers.get('HX-Request'):
-        # Handle the request as an HTMX request
-        return render(request, 'Home/faculty-home.html')
     faculty_id = request.user.username
 
     users_ref = db.collection('Authorized Faculty')
@@ -29,7 +26,63 @@ def Faculty_home(request):
         faculty_doc = query[0]
         faculty_data = faculty_doc.to_dict()
 
-    return render(request, 'Home/faculty-home.html', {"faculty_data": faculty_data})
+    # Count total users from Registered_Students collection
+    students_ref = db.collection("Registered_Students")
+    students = students_ref.stream()
+    total_users = sum(1 for _ in students)
+
+    # Placeholder values for now
+    active_percentage = 50
+    inactive_percentage = 25
+
+    calendar_days = [
+        {'date': 29, 'today': False},
+        {'date': 30, 'today': False},
+        {'date': 31, 'today': False},
+        {'date': 1, 'today': False},
+        {'date': 2, 'today': False},
+        {'date': 3, 'today': False},
+        {'date': 4, 'today': False},
+        {'date': 5, 'today': False},
+        {'date': 6, 'today': False},
+        {'date': 7, 'today': False},
+        {'date': 8, 'today': False},
+        {'date': 9, 'today': False},
+        {'date': 10, 'today': False},
+        {'date': 11, 'today': False},
+        {'date': 12, 'today': False},
+        {'date': 13, 'today': False},
+        {'date': 14, 'today': False},
+        {'date': 15, 'today': False},
+        {'date': 16, 'today': False},
+        {'date': 17, 'today': False},
+        {'date': 18, 'today': False},
+        {'date': 19, 'today': False},
+        {'date': 20, 'today': True},
+        {'date': 21, 'today': False},
+        {'date': 22, 'today': False},
+        {'date': 23, 'today': False},
+        {'date': 24, 'today': False},
+        {'date': 25, 'today': False},
+        {'date': 26, 'today': False},
+        {'date': 27, 'today': False},
+        {'date': 28, 'today': True},
+    ]
+
+    almost_due_tasks = [
+        {'name': 'Activity 1: Novice', 'color': 'red'},
+        {'name': 'Activity 2: Novice', 'color': 'yellow'},
+        {'name': 'Project 1: Novice', 'color': 'green'}
+    ]
+
+    return render(request, 'Home/faculty-home.html', {
+        "faculty_data": faculty_data,
+        "total_users": total_users,
+        "active_percentage": active_percentage,
+        "inactive_percentage": inactive_percentage,
+        "calendar_days": calendar_days,
+        "almost_due_tasks": almost_due_tasks,
+    })
 
 @login_required(login_url='faculty_login')
 def student_list(request):

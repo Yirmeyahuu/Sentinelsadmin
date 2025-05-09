@@ -46,7 +46,7 @@
 
             <!-- Sidebar Menu -->
             <nav>
-                <p class="text-white font-bold uppercase transition-all duration-300 ease-in-out mb-6"
+                <p class="text-white font-bold uppercase transition-all duration-600 ease-in-out mb-6"
                    :class="expanded ? 'text-sm opacity-100' : 'text-[10px] opacity-80'">
                     Menu
                 </p>
@@ -54,13 +54,13 @@
                 <ul class="space-y-2">
 
                     <li>
-                        <a href="{% url 'home-page' %}" class="flex items-center p-2 hover:bg-blue-700 rounded rounded-2xl cursor-pointer transition-all duration-300 ease-in-out
+                        <a href="{% url 'home-page' %}" class="flex items-center p-2 hover:bg-blue-700 rounded rounded-2xl cursor-pointer transition-all duration-500 ease-in-out
                                                                 {% if request.path == '/Faculty/homepage/' %} bg-blue-700 {% else %} hover:bg-blue-700 {% endif %} ">
                             <svg viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5 mr-2 flex-shrink-0">
                                 <path d="M11.47 3.841a.75.75 0 0 1 1.06 0l8.69 8.69a.75.75 0 1 0 1.06-1.061l-8.689-8.69a2.25 2.25 0 0 0-3.182 0l-8.69 8.69a.75.75 0 1 0 1.061 1.06l8.69-8.689Z" />
                                 <path d="m12 5.432 8.159 8.159c.03.03.06.058.091.086v6.198c0 1.035-.84 1.875-1.875 1.875H15a.75.75 0 0 1-.75-.75v-4.5a.75.75 0 0 0-.75-.75h-3a.75.75 0 0 0-.75.75V21a.75.75 0 0 1-.75.75H5.625a1.875 1.875 0 0 1-1.875-1.875v-6.198a2.29 2.29 0 0 0 .091-.086L12 5.432Z" />
                             </svg>
-                            <span x-show="expanded" class="w-full transition-all duration-500 ease-in-out">Home</span>
+                            <span x-show="expanded" class="w-full transition-all duration-800 ease-in-out">Home</span>
                         </a>
                     </li>
                     
@@ -226,9 +226,13 @@
                 <!-- Content Wrapper -->
         <div class="flex flex-col flex-1">
             <!-- Page Content (Dynamic Content) -->
-            <main id="mainContent" class="p-6 mt-16">
-                {% block content %}{% endblock %}
+            <main id="mainContent" class="p-6 mt-8">
+                {% block content %}
+                {% endblock %}
             </main>
+            <footer class="w-full text-center py-4 text-gray-500 text-sm mt-auto">
+                &copy; {% now "Y" %}  Sentinels. All rights reserved.
+            </footer>
         </div>
     </div>
 

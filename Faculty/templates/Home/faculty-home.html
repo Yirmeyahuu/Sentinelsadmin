@@ -2,101 +2,135 @@
 {% load static %}
 
 {% block content %}
-<div class="p-6 flex justify-center">
-    <div class="w-full max-w-6xl">
-  
-        <div class="flex flex-col items-center space-y-6 p-6 w-full max-w-7xl">
-            <!-- Dashboard Cards Row -->
-            <div class="flex space-x-10 ml-24">
-                
-              <!-- Total Users -->
-              <div class="relative bg-blue-600 shadow-xl rounded-2xl p-6 w-[22rem] flex flex-col items-center overflow-hidden">
-                <div class="absolute inset-0 opacity-30">
-                  <svg class="w-full h-full" viewBox="0 0 200 200">
-                    <path fill="none" stroke="#3B82F6" stroke-width="8" d="M10 50 Q100 0, 190 50 T 390 50" />
-                    <path fill="none" stroke="#FACC15" stroke-width="8" d="M10 150 Q100 200, 190 150 T 390 150" />
-                  </svg>
-                </div>
-                <div class="absolute -top-4 -left-6 w-20 h-20 bg-blue-900 blur-2xl opacity-90 rounded-full"></div>
-                <div class="absolute bottom-0 right-2 w-24 h-24 bg-blue-700 blur-2xl opacity-90 rounded-full"></div>
-          
-                <h2 class="text-lg font-semibold text-white mb-4 z-10">Total Users</h2>
-                <p class="text-4xl font-bold text-white z-10">1</p>
-              </div>
-          
-              <!-- Active Users -->
-              <div class="relative bg-green-500 shadow-xl rounded-2xl p-6 w-[22rem] flex flex-col items-center overflow-hidden">
-                <div class="absolute inset-0 opacity-30">
-                  <svg class="w-full h-full" viewBox="0 0 200 200">
-                    <path fill="none" stroke="#34D399" stroke-width="8" d="M10 50 Q100 0, 190 50 T 390 50" />
-                    <path fill="none" stroke="#FACC15" stroke-width="8" d="M10 150 Q100 200, 190 150 T 390 150" />
-                  </svg>
-                </div>
-                <div class="absolute -top-4 -left-6 w-20 h-20 bg-green-800 blur-2xl opacity-90 rounded-full"></div>
-                <div class="absolute bottom-0 right-2 w-24 h-24 bg-green-600 blur-2xl opacity-90 rounded-full"></div>
-          
-                <h2 class="text-lg font-semibold text-white mb-4 z-10">Active Users</h2>
+<div class="p-0 pb-6 px-6 flex justify-center">
+    <div class="w-full max-w-7xl flex space-x-6 ml-auto mr-auto">
+        <!-- Left side with dashboard cards -->
+        <div class="flex-1 ml-24">
+            <div class="flex flex-col space-y-6">
+                <!-- Dashboard Cards Row -->
+                <div class="flex space-x-6">
+                    <!-- Total Users -->
+                    <div class="relative bg-blue-600 shadow-xl rounded-2xl p-6 w-72 flex flex-col items-center overflow-hidden">
+                        <div class="absolute inset-0 opacity-30">
+                            <svg class="w-full h-full" viewBox="0 0 200 200">
+                                <path fill="none" stroke="#3B82F6" stroke-width="8" d="M10 50 Q100 0, 190 50 T 390 50" />
+                                <path fill="none" stroke="#FACC15" stroke-width="8" d="M10 150 Q100 200, 190 150 T 390 150" />
+                            </svg>
+                        </div>
+                        <div class="absolute -top-4 -left-6 w-16 h-16 bg-blue-900 blur-2xl opacity-90 rounded-full"></div>
+                        <div class="absolute bottom-0 right-2 w-20 h-20 bg-blue-700 blur-2xl opacity-90 rounded-full"></div>
+                        <h2 class="text-lg font-semibold text-white mb-4 z-10">Total Users</h2>
+                        <p class="text-4xl font-bold text-white z-10">{{ total_users }}</p>
+                    </div>
 
-                <div class="relative w-24 h-24">
-                    <svg class="w-full h-full" viewBox="0 0 100 100">
-                        <circle cx="50" cy="50" r="40" stroke="#ffffff" stroke-width="10" fill="transparent"/>
-                        <circle id="progressCS" cx="50" cy="50" r="40" stroke="#3B82F6" stroke-width="10" fill="transparent"
-                                stroke-dasharray="251.2" stroke-dashoffset="251.2"
-                                stroke-linecap="round" />
-                    </svg>
-                    <div class="absolute inset-0 flex justify-center items-center text-lg font-bold text-white">
-                        <span id="progressTextCS">0%</span>
+                    <!-- Active Users -->
+                    <div class="relative bg-green-500 shadow-xl rounded-2xl p-6 w-72 flex flex-col items-center overflow-hidden">
+                        <div class="absolute inset-0 opacity-30">
+                            <svg class="w-full h-full" viewBox="0 0 200 200">
+                                <path fill="none" stroke="#34D399" stroke-width="8" d="M10 50 Q100 0, 190 50 T 390 50" />
+                                <path fill="none" stroke="#FACC15" stroke-width="8" d="M10 150 Q100 200, 190 150 T 390 150" />
+                            </svg>
+                        </div>
+                        <div class="absolute -top-4 -left-6 w-16 h-16 bg-green-800 blur-2xl opacity-90 rounded-full"></div>
+                        <div class="absolute bottom-0 right-2 w-20 h-20 bg-green-600 blur-2xl opacity-90 rounded-full"></div>
+                        <h2 class="text-lg font-semibold text-white mb-4 z-10">Active Users</h2>
+                        <div class="relative w-20 h-20">
+                            <svg class="w-full h-full" viewBox="0 0 100 100">
+                                <circle cx="50" cy="50" r="40" stroke="#ffffff" stroke-width="10" fill="transparent"/>
+                                <circle id="progressActive" cx="50" cy="50" r="40" stroke="#3B82F6" stroke-width="10" 
+                                        fill="transparent" stroke-dasharray="251.2" stroke-dashoffset="125.6"
+                                        stroke-linecap="round" />
+                            </svg>
+                            <div class="absolute inset-0 flex justify-center items-center text-lg font-bold text-white">
+                                <span>{{ active_percentage }}%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Inactive Users -->
+                    <div class="relative bg-red-400 shadow-xl rounded-2xl p-6 w-72 flex flex-col items-center overflow-hidden">
+                        <div class="absolute inset-0 opacity-30">
+                            <svg class="w-full h-full" viewBox="0 0 200 200">
+                                <path fill="none" stroke="#EF4444" stroke-width="8" d="M10 50 Q100 0, 190 50 T 390 50" />
+                                <path fill="none" stroke="#FACC15" stroke-width="8" d="M10 150 Q100 200, 190 150 T 390 150" />
+                            </svg>
+                        </div>
+                        <div class="absolute -top-4 -left-6 w-16 h-16 bg-red-700 blur-2xl opacity-90 rounded-full"></div>
+                        <div class="absolute bottom-0 right-2 w-20 h-20 bg-red-600 blur-2xl opacity-90 rounded-full"></div>
+                        <h2 class="text-lg font-semibold text-white mb-4 z-10">Inactive Users</h2>
+                        <div class="relative w-20 h-20">
+                            <svg class="w-full h-full" viewBox="0 0 100 100">
+                                <circle cx="50" cy="50" r="40" stroke="#ffffff" stroke-width="10" fill="transparent"/>
+                                <circle id="progressInactive" cx="50" cy="50" r="40" stroke="#EF4444" stroke-width="10"
+                                        fill="transparent" stroke-dasharray="251.2" stroke-dashoffset="188.4"
+                                        stroke-linecap="round" />
+                            </svg>
+                            <div class="absolute inset-0 flex justify-center items-center text-lg font-bold text-white">
+                                <span>{{ inactive_percentage }}%</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
-              </div>
-          
-              <!-- Inactive Users -->
-              <div class="relative bg-red-400 shadow-xl rounded-2xl p-6 w-[22rem] flex flex-col items-center overflow-hidden">
-                <div class="absolute inset-0 opacity-30">
-                  <svg class="w-full h-full" viewBox="0 0 200 200">
-                    <path fill="none" stroke="#EF4444" stroke-width="8" d="M10 50 Q100 0, 190 50 T 390 50" />
-                    <path fill="none" stroke="#FACC15" stroke-width="8" d="M10 150 Q100 200, 190 150 T 390 150" />
-                  </svg>
-                </div>
-                <div class="absolute -top-4 -left-6 w-20 h-20 bg-red-700 blur-2xl opacity-90 rounded-full"></div>
-                <div class="absolute bottom-0 right-2 w-24 h-24 bg-red-600 blur-2xl opacity-90 rounded-full"></div>
-          
-                <h2 class="text-lg font-semibold text-white mb-4 z-10">Inactive Users</h2>
-                <div class="relative w-24 h-24">
-                    <svg class="w-full h-full" viewBox="0 0 100 100">
-                        <circle cx="50" cy="50" r="40" stroke="#ffffff" stroke-width="10" fill="transparent"/>
-                        <circle id="progressCS" cx="50" cy="50" r="40" stroke="#3B82F6" stroke-width="10" fill="transparent"
-                                stroke-dasharray="251.2" stroke-dashoffset="251.2"
-                                stroke-linecap="round" />
-                    </svg>
-                    <div class="absolute inset-0 flex justify-center items-center text-lg font-bold text-white">
-                        <span id="progressTextCS">0%</span>
-                    </div>
-                </div>
-              </div>
+                <!-- Add your weekly report or other content here -->
             </div>
-          </div>
-
+        </div>
     </div>
-  </div>
 
-<!-- Auto-Slide Script -->
-<script>
-    document.addEventListener('alpine:init', () => {
-        Alpine.data('slider', () => ({
-            activeSlide: 0,
-            images: [
-                `{% static 'assets/img/Photo1.png' %}`,
-                `{% static 'assets/img/Photo2.png' %}`,
-                `{% static 'assets/img/Photo3.png' %}`
-            ],
-            init() {
-                setInterval(() => {
-                    this.activeSlide = (this.activeSlide + 1) % this.images.length;
-                }, 3000);
-            }
-        }));
-    });
-</script>
-
+    <!-- Right Sticky Blue Container -->
+    <div class="fixed top-0 right-0 h-screen w-70 z-40">
+        <div class="bg-blue-700 rounded-l-2xl h-full flex flex-col items-center py-8 px-6 shadow-xl">
+            <!-- Profile Section -->
+            <div class="flex flex-col items-center mb-8 mt-4">
+                <div class="w-28 h-28 rounded-full overflow-hidden border-4 border-white mb-4">
+                    <img src="{% static 'assets/img/Default Profile.jpg' %}" 
+                         alt="User Profile">
+                </div>
+                <h2 class="text-lg font-bold text-white mb-1 text-center">{{ faculty_data.first_name }} {{ faculty_data.middle_initial }} {{ faculty_data.last_name }}</h2>
+                <p class="text-sm text-blue-100 text-center">CICT Faculty</p>
+            </div>
+            <!-- Calendar Section -->
+            <div class="bg-white rounded-2xl w-full p-4 mb-8 shadow">
+                <div class="flex justify-between items-center mb-2">
+                    <h3 class="text-base font-semibold text-gray-800">January, 2025</h3>
+                    <button class="text-gray-600 hover:text-gray-800">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" 
+                             stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                    </button>
+                </div>
+                <div class="grid grid-cols-7 gap-1 text-center text-xs">
+                    <div class="text-gray-500">S</div>
+                    <div class="text-gray-500">M</div>
+                    <div class="text-gray-500">T</div>
+                    <div class="text-gray-500">W</div>
+                    <div class="text-gray-500">T</div>
+                    <div class="text-gray-500">F</div>
+                    <div class="text-gray-500">S</div>
+                    {% for day in calendar_days %}
+                        <div class="p-2 {% if day.today %}bg-blue-100 text-blue-600 font-bold{% endif %} hover:bg-gray-100 rounded-full cursor-pointer">
+                            {{ day.date }}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+            <!-- Almost Due Section -->
+            <div class="bg-white rounded-2xl w-full p-4 shadow flex-1 flex flex-col">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-base font-semibold text-gray-800">Almost Due</h3>
+                    <a href="#" class="text-xs text-blue-600 hover:text-blue-800">View all</a>
+                </div>
+                <div class="space-y-3">
+                    {% for task in almost_due_tasks %}
+                    <div class="flex items-center">
+                        <div class="w-2 h-2 bg-{{ task.color }}-500 rounded-full mr-3"></div>
+                        <span class="text-sm text-gray-700">{{ task.name }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
