@@ -75,6 +75,29 @@
             <h2 class="text-xl font-bold text-white">Registered Student</h2>
             <div class="flex items-center space-x-4">
 
+                <form method="get" class="flex items-center space-x-2">
+                    <!-- Program Filter -->
+                    <select name="program" onchange="this.form.submit()" class="p-2 text-sm font-medium text-blue-800 bg-white border border-blue-300 rounded-2xl">
+                        <option value="all" {% if selected_program == "all" %}selected{% endif %}>All Programs</option>
+                        <option value="Computer Science" {% if selected_program == "Computer Science" %}selected{% endif %}>Computer Science</option>
+                        <option value="Information Technology" {% if selected_program == "Information Technology" %}selected{% endif %}>Information Technology</option>
+                    </select>
+                    <!-- Year & Section Filter -->
+                    <select name="year_section" onchange="this.form.submit()" class="p-2 text-sm font-medium text-blue-800 bg-white border border-blue-300 rounded-2xl">
+                        <option value="all" {% if selected_year_section == "all" %}selected{% endif %}>All Years</option>
+                        {% for ys in year_section_options %}
+                            <option value="{{ ys }}" {% if selected_year_section == ys %}selected{% endif %}>{{ ys }}</option>
+                        {% endfor %}
+                    </select>
+                    <!-- Semester Filter -->
+                    <select name="semester" onchange="this.form.submit()" class="p-2 text-sm font-medium text-blue-800 bg-white border border-blue-300 rounded-2xl">
+                        <option value="all" {% if selected_semester == "all" %}selected{% endif %}>All Semesters</option>
+                        {% for sem in semester_options %}
+                            <option value="{{ sem }}" {% if selected_semester == sem %}selected{% endif %}>{{ sem }}</option>
+                        {% endfor %}
+                    </select>
+                </form>
+
                 <form class="flex items-center max-w-sm mx-auto">
                     <label for="simple-search" class="sr-only">Search</label>
                     <div class="relative w-full">
@@ -164,86 +187,59 @@
     <div class="bg-gray-100 border border-white p-12 rounded-3xl shadow-lg w-1/2 z-10">
         <h2 class="text-xl font-bold mb-4 text-blue-500">Add Student</h2>
         <div class="border-t border-blue-500 p-2 mt-auto"></div>
-        <!-- ... rest of your form content ... -->
-         <form id="studentForm" action="{% url 'add_student' %}" method="POST">
+        <form id="studentForm" action="{% url 'add_student' %}" method="POST">
             {% csrf_token %}
-
-            <!-- 2 Column Layout -->
             <div class="grid grid-cols-2 gap-4">
                 <!-- Student ID -->
                 <div>
                     <label class="block text-sm font-bold mb-2 text-blue-500">Student ID <span> (e.g. 12-1234-56) </span></label>
-                    <input type="text" name="student_id" placeholder="Enter Student ID" class="w-full p-4 border border-gray-300 rounded-2xl">
-                    <p id="student_id_error" class="text-red-500 text-sm hidden">Please enter Student ID</p>
+                    <input type="text" name="student_id" placeholder="Enter Student ID" class="w-full p-4 border border-gray-300 rounded-2xl" required>
                 </div>
-
                 <!-- First Name -->
                 <div>
                     <label class="block text-sm font-bold mb-2 text-blue-500">First Name</label>
-                    <input type="text" name="first_name" placeholder="Enter First Name" class="w-full p-4 border border-gray-300 rounded-2xl">
-                    <p id="first_name_error" class="text-red-500 text-sm hidden">Please enter First Name</p>
+                    <input type="text" name="first_name" placeholder="Enter First Name" class="w-full p-4 border border-gray-300 rounded-2xl" required>
                 </div>
-
                 <!-- Last Name -->
                 <div>
                     <label class="block text-sm font-bold mb-2 text-blue-500">Last Name</label>
-                    <input type="text" name="last_name" placeholder="Enter Last Name" class="w-full p-4 border border-gray-300 rounded-2xl">
-                    <p id="last_name_error" class="text-red-500 text-sm hidden">Please enter Last Name</p>
+                    <input type="text" name="last_name" placeholder="Enter Last Name" class="w-full p-4 border border-gray-300 rounded-2xl" required>
                 </div>
-
                 <!-- Middle Initial -->
                 <div>
-                    <label class="block text-sm font-bold mb-2 text-blue-500">Middle Initial <span></label>
+                    <label class="block text-sm font-bold mb-2 text-blue-500">Middle Initial</label>
                     <input type="text" name="middle_initial" placeholder="Enter Middle Initial" class="w-full p-4 border border-gray-300 rounded-2xl">
                 </div>
-
                 <!-- Program -->
                 <div>
                     <label class="block text-sm font-bold mb-2 text-blue-500">Program</label>
-                    <select name="program" class="w-full p-4 border border-gray-300 rounded-2xl">
+                    <select name="program" class="w-full p-4 border border-gray-300 rounded-2xl" required>
                         <option value="" disabled selected>-Select Option-</option>
                         <option value="Computer Science">Computer Science</option>
                         <option value="Information Technology">Information Technology</option>
                     </select>
-                    <p id="program_error" class="text-red-500 text-sm hidden">Please select a Program</p>
                 </div>
-
                 <!-- Year & Section -->
                 <div>
                     <label class="block text-sm font-bold mb-2 text-blue-500">Year & Section <span> (Ex. 3A) </span></label>
-                    <input type="text" name="year_section" placeholder="Enter Year and Section" class="w-full p-4 border border-gray-300 rounded-2xl">
-                    <p id="year_section_error" class="text-red-500 text-sm hidden">Please enter Year & Section</p>
+                    <input type="text" name="year_section" placeholder="Enter Year and Section" class="w-full p-4 border border-gray-300 rounded-2xl" required>
                 </div>
-
                 <!-- Semester -->
                 <div>
                     <label class="block text-sm font-bold mb-2 text-blue-500">Semester</label>
-                    <select name="semester" class="w-full p-4 border border-gray-300 rounded-2xl">
+                    <select name="semester" class="w-full p-4 border border-gray-300 rounded-2xl" required>
                         <option value="" disabled selected>-Select Option-</option>
                         <option value="1st Semester">1st Semester</option>
                         <option value="2nd Semester">2nd Semester</option>
                     </select>
-                    <p id="semester_error" class="text-red-500 text-sm hidden">Please select a Semester</p>
                 </div>
             </div>
-
             <!-- Buttons -->
             <div class="flex justify-end mt-6">
                 <button type="button" onclick="closeModal()" class="text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2">Cancel</button>
-                <button type="submit" onclick="validateForm(event)" class="text-white bg-blue-800 hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-800 dark:hover:bg-blue-600 focus:outline-none dark:focus:ring-blue-800">Add Student</button>
+                <button type="submit" class="text-white bg-blue-800 hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2">Add Student</button>
             </div>
         </form>
-
-
-        
-    </div>
-</div>
-
-<div id="modal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center hidden z-50">
-    <div class="bg-blue-700 border border-white p-12 rounded-3xl shadow-lg w-1/2">
-        <h2 class="text-xl font-bold mb-4 text-white">Add Student</h2>
-        <div class="border-t border-white p-2 mt-auto"></div>
-        
     </div>
 </div>
 

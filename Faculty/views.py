@@ -16,6 +16,7 @@ db = firestore.client()
 
 @login_required(login_url='faculty_login')
 def Faculty_home(request):
+    
     faculty_id = request.user.username
 
     users_ref = db.collection('Authorized Faculty')
@@ -86,38 +87,89 @@ def Faculty_home(request):
 
 @login_required(login_url='faculty_login')
 def student_list(request):
-    """Fetch all active student members"""
+    faculty_id = request.user.username
+    users_ref = db.collection('Authorized Faculty')
+    query = users_ref.where('faculty_id', '==', faculty_id).limit(1).get()
+    faculty_data = None
+    if query:
+        faculty_doc = query[0]
+        faculty_data = faculty_doc.to_dict()
+
+    program_filter = request.GET.get('program')
+    year_section_filter = request.GET.get('year_section')
+    semester_filter = request.GET.get('semester')
+
     student_ref = db.collection("Registered_Students")
-    docs = student_ref.stream()
+    filters = []
+    if program_filter and program_filter != "all":
+        filters.append(("program", "==", program_filter))
+    if year_section_filter and year_section_filter != "all":
+        filters.append(("year_section", "==", year_section_filter))
+    if semester_filter and semester_filter != "all":
+        filters.append(("semester", "==", semester_filter))
 
-    students = [{**doc.to_dict(), "student_id": doc.id} for doc in docs]  # Ensure student_id is included
+    # Apply filters
+    docs_query = student_ref
+    for field, op, value in filters:
+        docs_query = docs_query.where(field, op, value)
+    docs = docs_query.stream()
 
-    return render(request, "Students/student-list.html", {"students": students})  # Corrected context name
+    students = [{**doc.to_dict(), "student_id": doc.id} for doc in docs]
+
+    # For dropdown options (optional: you can hardcode or fetch unique values)
+    year_section_options = ["1A", "1B", "2A", "2B", "3A", "3B", "4A", "4B"]
+    semester_options = ["1st Semester", "2nd Semester"]
+
+    return render(request, "Students/student-list.html", {
+        "students": students,
+        "faculty_data": faculty_data,
+        "selected_program": program_filter or "all",
+        "selected_year_section": year_section_filter or "all",
+        "selected_semester": semester_filter or "all",
+        "year_section_options": year_section_options,
+        "semester_options": semester_options,
+    })
 
 def student_dashboard (request):
-    return render(request, 'Students/students-dashboard.html')
+    faculty_id = request.user.username
+    users_ref = db.collection('Authorized Faculty')
+    query = users_ref.where('faculty_id', '==', faculty_id).limit(1).get()
+    faculty_data = None
+    if query:
+        faculty_doc = query[0]
+        faculty_data = faculty_doc.to_dict()
+
+    return render(request, 'Students/students-dashboard.html', {
+        "faculty_data": faculty_data,
+    })  # Corrected context name
 
 
 
+@login_required(login_url='faculty_login')
 def add_student(request):
-    """Add a new student member to Firestore"""
     if request.method == "POST":
-        student_data = {
-            "student_id": request.POST.get("student_id"),
-            "first_name": request.POST.get("first_name"),
-            "last_name": request.POST.get("last_name"),
-            "middle_initial": request.POST.get("middle_initial"),
-            "program": request.POST.get("program"),
-            "year_section": request.POST.get("year_section"),
-            "semester": request.POST.get("semester")
-        }
+        # Get form data and add to Firestore
+        student_id = request.POST.get("student_id")
+        first_name = request.POST.get("first_name")
+        last_name = request.POST.get("last_name")
+        middle_initial = request.POST.get("middle_initial")
+        program = request.POST.get("program")
+        year_section = request.POST.get("year_section")
+        semester = request.POST.get("semester")
 
-        db.collection("Registered_Students").document(student_data["student_id"]).set(student_data)
-
-        messages.success(request, "Student member added successfully!")
-        return redirect("student-list")  # Redirect to the list
-
-    return render(request, "Students/student-list.html")  # Render the form for adding a student
+        db.collection("Registered_Students").document(student_id).set({
+            "student_id": student_id,
+            "first_name": first_name,
+            "last_name": last_name,
+            "middle_initial": middle_initial,
+            "program": program,
+            "year_section": year_section,
+            "semester": semester,
+        })
+        # Optionally add a Django message here
+        messages.success(request, f"Student {student_id} added successfully!")
+        return redirect("student-list")
+    return redirect("student-list")
 
 
 def edit_student(request, student_id):
@@ -164,6 +216,14 @@ def archive_student(request, student_id):
     return redirect("student-list")
 
 def archived_student_list(request):
+    faculty_id = request.user.username
+    users_ref = db.collection('Authorized Faculty')
+    query = users_ref.where('faculty_id', '==', faculty_id).limit(1).get()
+    faculty_data = None
+    if query:
+        faculty_doc = query[0]
+        faculty_data = faculty_doc.to_dict()
+
     """Fetch all archived student members"""
     archive_ref = db.collection("Archived Students")
     docs = archive_ref.stream()
@@ -172,7 +232,8 @@ def archived_student_list(request):
         {**doc.to_dict(), "student_id": doc.id} for doc in docs
     ]  # Ensuring student_id is included
 
-    return render(request, "Students/students-archived.html", {"archived_students": archived_students})  # Corrected context name
+    return render(request, "Students/students-archived.html", {"archived_students": archived_students,
+    "faculty_data": faculty_data} )  # Corrected context name
 
 def restore_student(request, student_id):
     """Restore student member from 'archive' collection"""
@@ -191,18 +252,35 @@ def restore_student(request, student_id):
 
 def Verify_Student(request):
     """Verify student member"""
+    faculty_id = request.user.username
+    users_ref = db.collection('Authorized Faculty')
+    query = users_ref.where('faculty_id', '==', faculty_id).limit(1).get()
+    faculty_data = None
+    if query:
+        faculty_doc = query[0]
+        faculty_data = faculty_doc.to_dict()
+
     verify_ref = db.collection("Student Verification")
     docs = verify_ref.stream()
 
     verify_students = [{**doc.to_dict(), "student_id": doc.id} for doc in docs]  # Ensure student_id is included
 
-    return render(request, "Students/students-verify-list.html", {"verify_students": verify_students})  # Corrected context name
+    return render(request, "Students/students-verify-list.html", {"verify_students": verify_students, 
+    "faculty_data": faculty_data})  # Corrected context name
 
 
 
 
 #This is the activity page for the faculty
 def activity_page(request):
+    faculty_id = request.user.username
+    users_ref = db.collection('Authorized Faculty')
+    query = users_ref.where('faculty_id', '==', faculty_id).limit(1).get()
+    faculty_data = None
+    if query:
+        faculty_doc = query[0]
+        faculty_data = faculty_doc.to_dict()
+
     activities_novice = [
         {
             "title": "",
@@ -309,6 +387,7 @@ def activity_page(request):
     ]
 
     return render(request, "Activities/activities.html",
-                  {"activities_novice": activities_novice, "activities_junior": activities_junior, "activities_senior": activities_senior})
+                  {"activities_novice": activities_novice, "activities_junior": activities_junior, "activities_senior": activities_senior,
+                   "faculty_data": faculty_data})  # Corrected context name
 
 
