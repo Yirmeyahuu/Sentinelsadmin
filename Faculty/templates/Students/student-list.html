@@ -2,6 +2,76 @@
 {% load static %}
 
 {% block content %}
+
+<!-- Replace the existing dashboard cards section -->
+<div class="flex flex-col items-center space-y-4">
+    <!-- Row 1 -->
+    <div class="flex space-x-4">
+        <!-- Total Students Card -->
+        <div class="relative bg-blue-500 shadow-lg rounded-2xl p-4 w-64 flex flex-col items-center overflow-hidden">
+            <div class="absolute inset-0 opacity-30">
+                <svg class="w-full h-full" viewBox="0 0 200 200">
+                    <path fill="none" stroke="#3B82F6" stroke-width="8" d="M10 50 Q100 0, 190 50 T 390 50" />
+                    <path fill="none" stroke="#FACC15" stroke-width="8" d="M10 150 Q100 200, 190 150 T 390 150" />
+                </svg>
+            </div>
+            <div class="absolute -top-4 -left-6 w-16 h-16 bg-blue-900 blur-2xl opacity-90 rounded-full"></div>
+            <div class="absolute bottom-0 right-2 w-20 h-20 bg-blue-700 blur-2xl opacity-90 rounded-full"></div>
+            <h2 class="text-lg font-semibold text-white mb-2 z-10">Total Students</h2>
+            <p class="text-3xl font-bold text-white z-10">{{ total_users }}</p>
+        </div>
+
+        <!-- Computer Science Card -->
+        <div class="relative bg-blue-400 shadow-lg rounded-2xl p-4 w-64 flex flex-col items-center overflow-hidden">
+            <div class="absolute inset-0 opacity-30">
+                <svg class="w-full h-full" viewBox="0 0 200 200">
+                    <path fill="none" stroke="#3B82F6" stroke-width="8" d="M10 50 Q100 0, 190 50 T 390 50" />
+                    <path fill="none" stroke="#FACC15" stroke-width="8" d="M10 150 Q100 200, 190 150 T 390 150" />
+                </svg>
+            </div>
+            <div class="absolute -top-4 -left-6 w-16 h-16 bg-blue-900 blur-2xl opacity-90 rounded-full"></div>
+            <div class="absolute bottom-0 right-2 w-20 h-20 bg-blue-700 blur-2xl opacity-90 rounded-full"></div>
+            <h2 class="text-lg font-semibold text-white mb-2 z-10">Computer Science</h2>
+            <div class="relative w-20 h-20">
+                <svg class="w-full h-full" viewBox="0 0 100 100">
+                    <circle cx="50" cy="50" r="40" stroke="#ffffff" stroke-width="10" fill="transparent"/>
+                    <circle id="progressCS" cx="50" cy="50" r="40" stroke="#3B82F6" stroke-width="10" fill="transparent"
+                            stroke-dasharray="251.2" stroke-dashoffset="251.2"
+                            stroke-linecap="round" />
+                </svg>
+                <div class="absolute inset-0 flex justify-center items-center text-lg font-bold text-white">
+                    <span id="progressTextCS">0%</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Information Technology Card -->
+        <div class="relative bg-green-400 shadow-lg rounded-2xl p-4 w-64 flex flex-col items-center overflow-hidden">
+            <div class="absolute inset-0 opacity-30">
+                <svg class="w-full h-full" viewBox="0 0 200 200">
+                    <path fill="none" stroke="#3B82F6" stroke-width="8" d="M10 50 Q100 0, 190 50 T 390 50" />
+                    <path fill="none" stroke="#FACC15" stroke-width="8" d="M10 150 Q100 200, 190 150 T 390 150" />
+                </svg>
+            </div>
+            <div class="absolute -top-4 -left-6 w-16 h-16 bg-green-200 blur-2xl opacity-90 rounded-full"></div>
+            <div class="absolute bottom-0 right-2 w-20 h-20 bg-green-100 blur-2xl opacity-90 rounded-full"></div>
+            <h2 class="text-lg font-semibold text-white mb-2 z-10">Information Technology</h2>
+            <div class="relative w-20 h-20">
+                <svg class="w-full h-full" viewBox="0 0 100 100">
+                    <circle cx="50" cy="50" r="40" stroke="#ffffff" stroke-width="10" fill="transparent"/>
+                    <circle id="progressIT" cx="50" cy="50" r="40" stroke="#22c55e" stroke-width="10" fill="transparent"
+                            stroke-dasharray="251.2" stroke-dashoffset="251.2"
+                            stroke-linecap="round" />
+                </svg>
+                <div class="absolute inset-0 flex justify-center items-center text-lg font-bold text-white">
+                    <span id="progressTextIT">0%</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 <!-- Archive Confirmation Modal -->
 <div id="archiveModal" class="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 hidden z-50">
     <div class="bg-white p-6 rounded-lg shadow-lg w-96">
@@ -70,12 +140,12 @@
 
 <!-- Student Table -->
 <div class="p-6 ml-20"> <!-- Added margin to prevent overlap with sidebar -->
-    <div class="bg-blue-600 shadow-2xl rounded-2xl p-6 overflow-x-auto"> <!-- Ensures table responsiveness -->
+    <div class="bg-blue-600 shadow-2xl rounded-2xl p-6"> <!-- Ensures table responsiveness -->
         <div class="flex justify-between items-center mb-4">
             <h2 class="text-xl font-bold text-white">Registered Student</h2>
-            <div class="flex items-center space-x-4">
+            <div class="flex flex-wrap items-center gap-4">
 
-                <form method="get" class="flex items-center space-x-2">
+                <form method="get" class="flex flex-wrap items-center gap-2">
                     <!-- Program Filter -->
                     <select name="program" onchange="this.form.submit()" class="p-2 text-sm font-medium text-blue-800 bg-white border border-blue-300 rounded-2xl">
                         <option value="all" {% if selected_program == "all" %}selected{% endif %}>All Programs</option>
@@ -121,8 +191,8 @@
         </div>
 
         <!-- Student Table -->
-        <div class="overflow-hidden rounded-2xl shadow-xl ">
-            <table class="w-full min-w-[800px] border-separate border-spacing-0 rounded-lg"> <!-- Ensures minimum width -->
+        <div class="overflow-hidden rounded-2xl shadow-xl w-full ">
+            <table class="w-full border-separate border-spacing-0 rounded-lg"> <!-- Ensures minimum width -->
                 <thead>
                     <tr class="bg-blue-400 text-white">
                         <th class="border border-blue-500 p-2">Student ID</th>
@@ -428,6 +498,25 @@
     function closeEditModal() {
         document.getElementById("editStudentModal").classList.add("hidden");
     }
+</script>
+
+
+<!--cardbox progress-->
+<script>
+    function updateProgress(percent) {
+        const circle = document.getElementById("progressCircle");
+        const text = document.getElementById("progressText");
+        
+        // Max dasharray value (full circle)
+        const circumference = 2 * Math.PI * 40;  
+        const offset = circumference - (percent / 100) * circumference;
+        
+        circle.style.strokeDashoffset = offset; 
+        text.textContent = percent + "%";
+    }
+
+    // Set initial progress to 0% (This will later be dynamic)
+    updateProgress(0);
 </script>
 
 

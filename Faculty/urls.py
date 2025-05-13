@@ -15,6 +15,11 @@ urlpatterns = [
     path('edit/<str:student_id>/', views.edit_student, name='edit_student'),
     path('Verify-students/', views.Verify_Student, name='verify-students'),
 
+    path('accept-student/<str:student_id>/', views.accept_student, name='accept_student'),
+    path('reject-student/<str:student_id>/', views.reject_student, name='reject_student'),
+
+    path('notifications/mark-all-read/', views.mark_all_notifications_read, name='mark_all_notifications_read'),
+
     
     #URLS FOR ACTIVITY PAGE
     path("Activity-list/", views.activity_page, name='activities-page'),

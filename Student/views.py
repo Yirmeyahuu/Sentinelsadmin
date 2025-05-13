@@ -17,7 +17,18 @@ def StudentRegister(request):
             "semester": request.POST.get("semester")
         }
 
-        db.collection("Student Verification").document(student_data["student_id"]).set(student_data)
+        db.collection("Pending Students").document(student_data["student_id"]).set(student_data)
+
+        # --- Add this block to create a notification ---
+        full_name = f"{student_data['first_name']} {student_data['middle_initial']} {student_data['last_name']}".strip()
+        notification = {
+            "message": f"A student {full_name} just registered. Kindly check 'Pending Approval' menu to view student.",
+            "timestamp": firestore.SERVER_TIMESTAMP,
+            "seen": False
+        }
+        db.collection("Notifications").add(notification)
+        # ------------------------------------------------
+
         messages.success(request, "Student member added successfully!")
         return redirect("register_success")  # Redirect to the success page
 
