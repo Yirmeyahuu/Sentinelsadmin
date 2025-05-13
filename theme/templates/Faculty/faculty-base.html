@@ -305,8 +305,10 @@
                             Faculty ID Not Authorized
                         {% endif %}
                     </span>
-                    <span class="text-gray-300 text-sm block text-center whitespace-nowrap mt-2 cursor-pointer hover:text-blue-500 transition-all duration-300 ease-in-out">
-                        Edit Profile
+                    <!-- Replace the Edit Profile span in faculty-base.html -->
+                    <span onclick="window.location.href='{% url 'faculty-account' %}'" 
+                    class="text-gray-300 text-sm block text-center whitespace-nowrap mt-2 cursor-pointer hover:text-blue-500 transition-all duration-300 ease-in-out">
+                    Edit Profile
                     </span>
                 </div>
             </div>

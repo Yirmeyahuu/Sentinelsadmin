@@ -6,6 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.templatetags.static import static
 from django.views.decorators.http import require_POST
+from django.contrib.auth import logout
 
 
 
@@ -529,3 +530,46 @@ def mark_all_notifications_read(request):
         notif.reference.update({"seen": True})
     messages.success(request, "All notifications marked as read.")
     return redirect(request.META.get('HTTP_REFERER', '/'))
+
+@login_required(login_url='faculty_login')
+def faculty_account(request):
+    faculty_id = request.user.username
+    faculty_ref = db.collection('Authorized Faculty').document(faculty_id)
+    faculty_doc = faculty_ref.get()
+    faculty_data = faculty_doc.to_dict() if faculty_doc.exists else None
+
+    if request.method == "POST":
+        # ... image upload code ...
+
+        faculty_password = request.POST.get('faculty_password')
+        updates = {
+            'first_name': request.POST.get('first_name'),
+            'last_name': request.POST.get('last_name'),
+            'middle_initial': request.POST.get('middle_initial'),
+        }
+        password_changed = False
+        if faculty_password:
+            updates['faculty_password'] = faculty_password
+            password_changed = True
+        faculty_ref.update(updates)
+
+        if password_changed:
+            messages.success(request, "Password set successfully! Please log in with your new password.")
+            logout(request)
+            return redirect('faculty_login')
+        else:
+            messages.success(request, "Profile updated successfully!")
+            return redirect('faculty-account')
+
+    return render(request, 'Faculty/faculty-account.html', {
+        'faculty_data': faculty_data,
+    })
+
+def handle_image_upload(image):
+    """
+    Implement your image upload logic here
+    This could involve uploading to Firebase Storage or another storage solution
+    Return the URL of the uploaded image
+    """
+    # Implement your image upload logic
+    pass

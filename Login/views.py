@@ -3,34 +3,56 @@ from django.shortcuts import render, redirect
 from firebase_admin import credentials, firestore
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import get_user_model
 
 db = firestore.client()
 # Initialize Firebase Admin SDK
 
 # Create your views here.
 
+
 def Faculty_login_view(request):
     if request.method == 'POST':
         faculty_id = request.POST.get('faculty_id')
         password = request.POST.get('faculty_password')
 
-        # Look for the faculty document
         users_ref = db.collection('Authorized Faculty')
         query = users_ref.where('faculty_id', '==', faculty_id).limit(1).get()
 
         if query:
             faculty_doc = query[0]
             faculty_data = faculty_doc.to_dict()
+            faculty_password = faculty_data.get('faculty_password')
 
-            # Check if the password matches the default password
-            if password == "welcomeadmin":
-                user = authenticate(request, username=faculty_id, password=password)
-                if user:
+            # If faculty has set a password, use it. Otherwise, use default.
+            if faculty_password:
+                if password == faculty_password:
+                    # Create or get Django user
+                    User = get_user_model()
+                    user, created = User.objects.get_or_create(username=faculty_id)
+                    # Optionally set unusable password so Django password auth is disabled
+                    if created:
+                        user.set_unusable_password()
+                        user.save()
+                    user.backend = 'Login.auth_backend.FirestoreBackend'
                     login(request, user)
-                    return redirect('home-page')  # Redirect to Faculty home page
+                    return redirect('home-page')
+                else:
+                    messages.error(request, "Incorrect password. Please enter your set password.")
+                    return render(request, 'Login/faculty-login.html', {'error_field': 'password'})
             else:
-                messages.error(request, "Incorrect password. Please enter the correct password.")
-                return render(request, 'Login/faculty-login.html', {'error_field': 'password'})
+                if password == "welcomeadmin":
+                    User = get_user_model()
+                    user, created = User.objects.get_or_create(username=faculty_id)
+                    if created:
+                        user.set_unusable_password()
+                        user.save()
+                    user.backend = 'Login.auth_backend.FirestoreBackend'
+                    login(request, user)
+                    return redirect('home-page')
+                else:
+                    messages.error(request, "Incorrect password. Please enter the default password.")
+                    return render(request, 'Login/faculty-login.html', {'error_field': 'password'})
         else:
             messages.error(request, "Faculty not authorized. Enter a different ID.")
             return render(request, 'Login/faculty-login.html', {'error_field': 'faculty_id'})

@@ -20,6 +20,8 @@ urlpatterns = [
 
     path('notifications/mark-all-read/', views.mark_all_notifications_read, name='mark_all_notifications_read'),
 
+    # Add this to your urlpatterns
+    path('account/', views.faculty_account, name='faculty-account'),
     
     #URLS FOR ACTIVITY PAGE
     path("Activity-list/", views.activity_page, name='activities-page'),
