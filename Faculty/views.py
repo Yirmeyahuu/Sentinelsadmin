@@ -357,106 +357,94 @@ def activity_page(request):
 
     activities_novice = [
         {
-            "title": "",
-            "subject": "",
-            "date": "",
+            "title": "Novice Task 1",
+            "description": "Short description of the task 1.",
+            "deadline": "2023-10-15",
             "progress": 0,  # percentage
-            "modules": 0,
-            "image": static("assets/img/Photo1.png"),  # Update with your actual image path
+            "image": static("assets/img/Photo1.png"),
         },
         {
-            "title": "",
-            "subject": "",
-            "date": "",
-            "progress": 0,
-            "modules": 0,
+            "title": "Novice Task 2",
+            "description": "Short description of the task 2.",
+            "deadline": "2023-10-15",
+            "progress": 0,  # percentage
             "image": static("assets/img/Photo2.png"),
         },
         {
-            "title": "",
-            "subject": "",
-            "date": "",
-            "progress": 0,
-            "modules": 0,
+            "title": "Novice Task 3",
+            "description": "Short description of the task 3.",
+            "deadline": "2023-10-15",
+            "progress": 0,  # percentage
             "image": static("assets/img/Photo3.png"),
         },
         {
-            "title": "",
-            "subject": "",
-            "date": "",
-            "progress": 0,
-            "modules": 0,
+            "title": "Novice Boss Battle",
+            "description": "Short description of the Boss Battle 1.",
+            "deadline": "2023-10-15",
+            "progress": 0,  # percentage
             "image": static("assets/img/Photo4.png"),
         },
     ]
 
     activities_junior = [
         {
-            "title": "",
-            "subject": "",
-            "date": "",
+            "title": "Junior Task 1",
+            "description": "Short description of the task 1.",
+            "deadline": "2023-10-15",
             "progress": 0,  # percentage
-            "modules": 0,
-            "image": static("assets/img/Photo2.png"),  # Update with your actual image path
+            "image": static("assets/img/Photo1.png"),
         },
         {
-            "title": "",
-            "subject": "",
-            "date": "",
-            "progress": 0,
-            "modules": 0,
+            "title": "Junior Task 2",
+            "description": "Short description of the task 2.",
+            "deadline": "2023-10-15",
+            "progress": 0,  # percentage
+            "image": static("assets/img/Photo2.png"),
+        },
+        {
+            "title": "Junior Task 3",
+            "description": "Short description of the task 3.",
+            "deadline": "2023-10-15",
+            "progress": 0,  # percentage
             "image": static("assets/img/Photo3.png"),
         },
         {
-            "title": "",
-            "subject": "",
-            "date": "",
-            "progress": 0,
-            "modules": 0,
+            "title": "Junior Boss Battle",
+            "description": "Short description of the Boss Battle 2.",
+            "deadline": "2023-10-15",
+            "progress": 0,  # percentage
             "image": static("assets/img/Photo4.png"),
-        },
-        {
-            "title": "",
-            "subject": "",
-            "date": "",
-            "progress": 0,
-            "modules": 0,
-            "image": static("assets/img/Photo1.png"),
         },
     ]
 
     activities_senior = [
         {
-            "title": "",
-            "subject": "",
-            "date": "",
+            "title": "Senior Task 1",
+            "description": "Short description of the task 1.",
+            "deadline": "2023-10-15",
             "progress": 0,  # percentage
-            "modules": 0,
-            "image": static("assets/img/Photo3.png"),  # Update with your actual image path
-        },
-        {
-            "title": "",
-            "subject": "",
-            "date": "",
-            "progress": 0,
-            "modules": 0,
-            "image": static("assets/img/Photo4.png"),
-        },
-        {
-            "title": "",
-            "subject": "",
-            "date": "",
-            "progress": 0,
-            "modules": 0,
             "image": static("assets/img/Photo1.png"),
         },
         {
-            "title": "",
-            "subject": "",
-            "date": "",
-            "progress": 0,
-            "modules": 0,
+            "title": "Senior Task 2",
+            "description": "Short description of the task 2.",
+            "deadline": "2023-10-15",
+            "progress": 0,  # percentage
             "image": static("assets/img/Photo2.png"),
+        },
+        {
+            "title": "Senior Task 3",
+            "description": "Short description of the task 3.",
+            "deadline": "2023-10-15",
+            "progress": 0,  # percentage
+            "image": static("assets/img/Photo3.png"),
+        },
+        {
+            "title": "Senior Boss Battle",
+            "description": "Short description of the Boss Battle 3.",
+            "deadline": "2023-10-15",
+            "progress": 0,  # percentage
+            "image": static("assets/img/Photo4.png"),
         },
     ]
 
@@ -538,31 +526,31 @@ def faculty_account(request):
     faculty_doc = faculty_ref.get()
     faculty_data = faculty_doc.to_dict() if faculty_doc.exists else None
 
-    if request.method == "POST":
-        # ... image upload code ...
+    show_logout_modal = False
 
-        faculty_password = request.POST.get('faculty_password')
+    if request.method == "POST":
         updates = {
             'first_name': request.POST.get('first_name'),
             'last_name': request.POST.get('last_name'),
             'middle_initial': request.POST.get('middle_initial'),
         }
         password_changed = False
-        if faculty_password:
-            updates['faculty_password'] = faculty_password
-            password_changed = True
+
+        # Only allow password creation if not set yet
+        if not faculty_data.get('faculty_password'):
+            faculty_password = request.POST.get('faculty_password')
+            if faculty_password:
+                updates['faculty_password'] = faculty_password
+                password_changed = True
+
         faculty_ref.update(updates)
 
         if password_changed:
-            messages.success(request, "Password set successfully! Please log in with your new password.")
-            logout(request)
-            return redirect('faculty_login')
-        else:
-            messages.success(request, "Profile updated successfully!")
-            return redirect('faculty-account')
+            show_logout_modal = True  # Show modal instead of logging out immediately
 
     return render(request, 'Faculty/faculty-account.html', {
         'faculty_data': faculty_data,
+        'show_logout_modal': show_logout_modal,
     })
 
 def handle_image_upload(image):

@@ -52,19 +52,39 @@
 
                 <!-- Create Password -->
                 <div class="relative">
-                    <label class="block text-sm font-medium text-white mb-1">Create Password</label>
+                    <label class="block text-sm font-medium text-white mb-1">Password</label>
                     <div class="relative">
-                        <input type="password" id="faculty_password" name="faculty_password"
+                        <input 
+                            type="password"
+                            id="faculty_password"
+                            name="faculty_password"
+                            {% if faculty_data.faculty_password %}
+                                value="{{ faculty_data.faculty_password }}"
+                                readonly
+                            {% endif %}
                             class="w-full p-3 pl-10 bg-blue-500 text-white rounded-lg border border-blue-400 focus:outline-none focus:border-white"
-                            placeholder="Enter new password">
-                        <span class="absolute right-3 top-3 text-white cursor-pointer" onclick="togglePassword('faculty_password')">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            placeholder="{% if faculty_data.faculty_password %}********{% else %}Create your password{% endif %}"
+                        >
+                        <!-- Eye icon (toggle visibility) -->
+                        {% if faculty_data.faculty_password %}
+                        <span id="togglePasswordIcon" class="absolute right-3 top-3 text-white cursor-pointer" onclick="togglePassword('faculty_password')">
+                            <svg id="eyeOpen" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                             </svg>
+                            <svg id="eyeClosed" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="display:none;">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.477 0-8.268-2.943-9.542-7a9.956 9.956 0 012.293-3.95m3.25-2.568A9.956 9.956 0 0112 5c4.477 0 8.268 2.943 9.542 7a9.956 9.956 0 01-4.421 5.568M15 12a3 3 0 11-6 0 3 3 0 016 0zm-6.364 6.364l12-12" />
+                            </svg>
                         </span>
+                        {% endif %}
                     </div>
-                    <small class="text-gray-200">Leave blank if you do not want to change your password.</small>
+                    <small class="text-gray-200">
+                        {% if faculty_data.faculty_password %}
+                            Password can only be set once. Contact admin to reset.
+                        {% else %}
+                            You can only set your password once.
+                        {% endif %}
+                    </small>
                 </div>
 
                 <!-- First Name -->
@@ -125,6 +145,25 @@
     </div>
 </div>
 
+{% if show_logout_modal %}
+<div id="logoutModal" class="fixed inset-0 flex items-center justify-center z-50">
+    <div class="fixed inset-0 bg-gray-900 opacity-50"></div>
+    <div class="bg-white rounded-lg shadow-lg p-8 z-10 max-w-sm w-full text-center">
+        <h2 class="text-xl font-bold mb-4 text-gray-800">Password Changed</h2>
+        <p class="mb-6 text-gray-700">
+            You have successfully set your password.<br>
+            For security, you will now be logged out and must log in again with your new password.
+        </p>
+        <form method="POST" action="{% url 'faculty_logout' %}">
+            {% csrf_token %}
+            <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition">
+                Okay, logout.
+            </button>
+        </form>
+    </div>
+</div>
+{% endif %}
+
 <script>
 function previewImage(input) {
     if (input.files && input.files[0]) {
@@ -136,16 +175,23 @@ function previewImage(input) {
     }
 }
 
-// Enable editing for a specific field
-function enableEdit(fieldId) {
-    const input = document.getElementById(fieldId);
-    input.removeAttribute('readonly');
-    input.focus();
-}
-
 function togglePassword(fieldId) {
     const input = document.getElementById(fieldId);
-    input.type = input.type === "password" ? "text" : "password";
+    const eyeOpen = document.getElementById('eyeOpen');
+    const eyeClosed = document.getElementById('eyeClosed');
+    if (input.type === "password") {
+        input.type = "text";
+        if (eyeOpen && eyeClosed) {
+            eyeOpen.style.display = "none";
+            eyeClosed.style.display = "";
+        }
+    } else {
+        input.type = "password";
+        if (eyeOpen && eyeClosed) {
+            eyeOpen.style.display = "";
+            eyeClosed.style.display = "none";
+        }
+    }
 }
 </script>
 {% endblock %}

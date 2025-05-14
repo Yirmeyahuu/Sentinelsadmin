@@ -11,13 +11,17 @@
     <hr class="mb-4 border border-blue-500 my-4">
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {% for activity in activities_novice %}
-        <div class="bg-gray-800 shadow-lg rounded-3xl overflow-hidden border border-blue-400 cursor-pointer">
+        <div class="bg-gray-800 shadow-lg rounded-3xl overflow-hidden border border-blue-400 cursor-pointer"
+             onclick="openActivityModal(
+                '{{ activity.title|escapejs }}',
+                '{{ activity.description|default:"No description."|escapejs }}',
+                '{{ activity.deadline|default:"No deadline set."|escapejs }}'
+             )">
             <img src="{{ activity.image }}" alt="Activity Image" class="w-full h-40 object-cover">
             <div class="p-4 text-white">
                 <h2 class="text-lg font-semibold">{{ activity.title }}</h2>
                 <p class="text-sm text-gray-400">{{ activity.subject }}</p>
                 <p class="text-xs text-gray-500 mt-1">When: {{ activity.date }}</p>
-
                 <div class="flex items-center mt-3 text-xs text-gray-300">
                     <span class="bg-green-600 text-white px-2 py-1 rounded">{{ activity.progress }}% Resume</span>
                     <span class="ml-auto flex items-center">{{ activity.modules }} modules</span>
@@ -34,13 +38,17 @@
     <hr class="mb-4 border border-blue-500 my-4">
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {% for activity in activities_junior %}
-        <div class="bg-gray-800 shadow-lg rounded-3xl overflow-hidden border border-blue-400">
+        <div class="bg-gray-800 shadow-lg rounded-3xl overflow-hidden border border-blue-400 cursor-pointer"
+             onclick="openActivityModal(
+                '{{ activity.title|escapejs }}',
+                '{{ activity.description|default:"No description."|escapejs }}',
+                '{{ activity.deadline|default:"No deadline set."|escapejs }}'
+             )">
             <img src="{{ activity.image }}" alt="Activity Image" class="w-full h-40 object-cover">
             <div class="p-4 text-white">
                 <h2 class="text-lg font-semibold">{{ activity.title }}</h2>
                 <p class="text-sm text-gray-400">{{ activity.subject }}</p>
                 <p class="text-xs text-gray-500 mt-1">When: {{ activity.date }}</p>
-
                 <div class="flex items-center mt-3 text-xs text-gray-300">
                     <span class="bg-green-600 text-white px-2 py-1 rounded">{{ activity.progress }}% Resume</span>
                     <span class="ml-auto flex items-center">{{ activity.modules }} modules</span>
@@ -50,7 +58,6 @@
         {% endfor %}
     </div>
 
-    
     <hr class="border-t-2 border-blue-500 my-4 mt-12">
 
     <!-- Senior Section -->
@@ -58,13 +65,17 @@
     <hr class="mb-4 border border-blue-500 my-4">
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {% for activity in activities_senior %}
-        <div class="bg-gray-800 shadow-lg rounded-3xl overflow-hidden border border-blue-400">
+        <div class="bg-gray-800 shadow-lg rounded-3xl overflow-hidden border border-blue-400 cursor-pointer"
+             onclick="openActivityModal(
+                '{{ activity.title|escapejs }}',
+                '{{ activity.description|default:"No description."|escapejs }}',
+                '{{ activity.deadline|default:"No deadline set."|escapejs }}'
+             )">
             <img src="{{ activity.image }}" alt="Activity Image" class="w-full h-40 object-cover">
             <div class="p-4 text-white">
                 <h2 class="text-lg font-semibold">{{ activity.title }}</h2>
                 <p class="text-sm text-gray-400">{{ activity.subject }}</p>
                 <p class="text-xs text-gray-500 mt-1">When: {{ activity.date }}</p>
-
                 <div class="flex items-center mt-3 text-xs text-gray-300">
                     <span class="bg-green-600 text-white px-2 py-1 rounded">{{ activity.progress }}% Resume</span>
                     <span class="ml-auto flex items-center">{{ activity.modules }} modules</span>
@@ -73,8 +84,32 @@
         </div>
         {% endfor %}
     </div>
-
-
 </div>
 
+<!-- Activity Modal -->
+<div id="activityModal" class="fixed inset-0 z-50 hidden items-center justify-center">
+    <div class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm"></div>
+    <div class="relative bg-white rounded-2xl shadow-lg max-w-md w-full mx-auto p-8 z-10">
+        <button onclick="closeActivityModal()" class="absolute top-3 right-3 text-gray-400 hover:text-red-500 text-2xl font-bold">&times;</button>
+        <h2 id="modalTitle" class="text-2xl font-bold text-blue-700 mb-2"></h2>
+        <p id="modalDescription" class="text-gray-700 mb-4"></p>
+        <div class="text-sm text-gray-500 mb-2">
+            <span class="font-semibold">Deadline:</span> <span id="modalDeadline"></span>
+        </div>
+    </div>
+</div>
+
+<script>
+function openActivityModal(title, description, deadline) {
+    document.getElementById('modalTitle').textContent = title;
+    document.getElementById('modalDescription').textContent = description;
+    document.getElementById('modalDeadline').textContent = deadline;
+    document.getElementById('activityModal').classList.remove('hidden');
+    document.getElementById('activityModal').classList.add('flex');
+}
+function closeActivityModal() {
+    document.getElementById('activityModal').classList.remove('flex');
+    document.getElementById('activityModal').classList.add('hidden');
+}
+</script>
 {% endblock %}
