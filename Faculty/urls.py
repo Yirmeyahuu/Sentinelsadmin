@@ -19,15 +19,20 @@ urlpatterns = [
     path('reject-student/<str:student_id>/', views.reject_student, name='reject_student'),
 
     path('notifications/mark-all-read/', views.mark_all_notifications_read, name='mark_all_notifications_read'),
+    path('save-activity-deadline/', views.saveActivityDeadline, name='save-activity-deadline'),
 
     # Add this to your urlpatterns
     path('account/', views.faculty_account, name='faculty-account'),
+
+    path('remove-deadline/', views.remove_deadline, name='remove-deadline'),    
     
     #URLS FOR ACTIVITY PAGE
     path("Activity-list/", views.activity_page, name='activities-page'),
     
     #URLS FOR STUDENT DASHBOARD
     path("dashboard/", views.student_dashboard, name="student-dashboard"),
+
+    
 
 
 ]

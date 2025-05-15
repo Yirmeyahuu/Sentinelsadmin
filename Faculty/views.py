@@ -7,6 +7,11 @@ from django.contrib import messages
 from django.templatetags.static import static
 from django.views.decorators.http import require_POST
 from django.contrib.auth import logout
+from django.http import JsonResponse
+import json
+from .forms import ActivityDeadlineForm
+from django.views.decorators.csrf import csrf_exempt
+
 
 
 
@@ -17,10 +22,35 @@ if not firebase_admin._apps:
 
 db = firestore.client()
 
+
+
+def saveActivityDeadline(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            activity_id = data.get('activity_id')
+            title = data.get('title')
+            date = data.get('date')
+            time = data.get('time')
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)})
+
+        db.collection('Activity Deadlines').add({
+            'activity_id': activity_id,
+            'title': title,
+            'deadline_date': date,
+            'deadline_time': time,
+            'created_at': firestore.SERVER_TIMESTAMP
+        })
+        return JsonResponse({'status': 'success'})
+    return JsonResponse({'status': 'error', 'message': 'Invalid request'})
+
+
 @login_required(login_url='faculty_login')
 def Faculty_home(request):
     faculty_id = request.user.username
 
+    # Get faculty data
     users_ref = db.collection('Authorized Faculty')
     query = users_ref.where('faculty_id', '==', faculty_id).limit(1).get()
 
@@ -29,65 +59,82 @@ def Faculty_home(request):
         faculty_doc = query[0]
         faculty_data = faculty_doc.to_dict()
 
-    # Count total users from Registered_Students collection
+    # Count total users
     students_ref = db.collection("Registered_Students")
     students = students_ref.stream()
     total_users = sum(1 for _ in students)
 
-    # Fetch notifications from Firestore, newest first
-    
+    # Fetch notifications
     notifications_ref = db.collection("Notifications").order_by("timestamp", direction=firestore.Query.DESCENDING)
     notifications = []
     for doc in notifications_ref.stream():
         notif = doc.to_dict()
         notif['id'] = doc.id
         notifications.append(notif)
-        unseen_count = sum(1 for notif in notifications if notif.get('seen', False))
+    unseen_count = sum(1 for notif in notifications if not notif.get('seen', False))
 
+    # Get activity deadlines from Firestore
+    deadlines_ref = db.collection('Activity Deadlines').stream()
+    activity_deadlines = {}
+    almost_due_tasks = []
+    
+    from datetime import datetime, timedelta
+    current_date = datetime.now()
+    
+    for deadline in deadlines_ref:
+        deadline_data = deadline.to_dict()
+        deadline_date = datetime.strptime(deadline_data['date_of_deadline'], '%Y-%m-%d')
+        day = deadline_date.day
+        activity_deadlines[day] = {
+            'title': deadline_data['title'],
+            'description': deadline_data.get('description', ''),
+            'date_of_deadline': deadline_data['date_of_deadline'],
+            'time_of_deadline': deadline_data['time_of_deadline'],
+        }
+        
+        # Check if deadline is within next 7 days for "Almost Due" section
+        if current_date <= deadline_date <= (current_date + timedelta(days=7)):
+            color = 'red' if deadline_date <= (current_date + timedelta(days=2)) else \
+                   'yellow' if deadline_date <= (current_date + timedelta(days=4)) else 'green'
+            
+            almost_due_tasks.append({
+                'name': deadline_data['title'],
+                'color': color,
+                'deadline': deadline_date.strftime('%Y-%m-%d')
+            })
 
-    # Placeholder values for now
-    active_percentage = 50
-    inactive_percentage = 25
+    # Sort almost due tasks by deadline
+    almost_due_tasks.sort(key=lambda x: x['deadline'])
 
-    calendar_days = [
-        {'date': 29, 'today': False},
-        {'date': 30, 'today': False},
-        {'date': 31, 'today': False},
-        {'date': 1, 'today': False},
-        {'date': 2, 'today': False},
-        {'date': 3, 'today': False},
-        {'date': 4, 'today': False},
-        {'date': 5, 'today': False},
-        {'date': 6, 'today': False},
-        {'date': 7, 'today': False},
-        {'date': 8, 'today': False},
-        {'date': 9, 'today': False},
-        {'date': 10, 'today': False},
-        {'date': 11, 'today': False},
-        {'date': 12, 'today': False},
-        {'date': 13, 'today': False},
-        {'date': 14, 'today': False},
-        {'date': 15, 'today': False},
-        {'date': 16, 'today': False},
-        {'date': 17, 'today': False},
-        {'date': 18, 'today': False},
-        {'date': 19, 'today': False},
-        {'date': 20, 'today': True},
-        {'date': 21, 'today': False},
-        {'date': 22, 'today': False},
-        {'date': 23, 'today': False},
-        {'date': 24, 'today': False},
-        {'date': 25, 'today': False},
-        {'date': 26, 'today': False},
-        {'date': 27, 'today': False},
-        {'date': 28, 'today': True},
-    ]
+    # Calendar days with deadline information
+    import calendar
+    current_year = current_date.year
+    current_month = current_date.month
+    
+    cal = calendar.monthcalendar(current_year, current_month)
+    calendar_days = []
+    
+    # ...existing code...
+    for week in cal:
+        for day in week:
+            if day != 0:
+                day_data = {
+                    'date': day,
+                    'today': day == current_date.day,
+                    'has_deadline': day in activity_deadlines,
+                }
+                if day in activity_deadlines:
+                    day_data.update({
+                        'deadline_title': activity_deadlines[day]['title'],
+                        'deadline_description': activity_deadlines[day].get('description', ''),
+                        'deadline_date': activity_deadlines[day]['date_of_deadline'],
+                        'deadline_time': activity_deadlines[day]['time_of_deadline'],
+                    })
+                calendar_days.append(day_data)
 
-    almost_due_tasks = [
-        {'name': 'Activity 1: Novice', 'color': 'red'},
-        {'name': 'Activity 2: Novice', 'color': 'yellow'},
-        {'name': 'Project 1: Novice', 'color': 'green'}
-    ]
+    # Statistics
+    active_percentage = 50  # Replace with actual calculation
+    inactive_percentage = 25  # Replace with actual calculation
 
     return render(request, 'Home/faculty-home.html', {
         "faculty_data": faculty_data,
@@ -96,9 +143,24 @@ def Faculty_home(request):
         "inactive_percentage": inactive_percentage,
         "calendar_days": calendar_days,
         "almost_due_tasks": almost_due_tasks,
-        "notifications": notifications,  # Pass notifications to template
-        "unseen_count": unseen_count,  # Pass unseen count to template
+        "notifications": notifications,
+        "unseen_count": unseen_count,
+        "current_month": current_date.strftime('%B'),
+        "current_year": current_year
     })
+
+# views.py
+
+
+@csrf_exempt  # If you use POST and CSRF token in the form, you can remove this decorator
+def remove_deadline(request):
+    if request.method == "POST":
+        title = request.POST.get('title')
+        if title:
+            from django.utils.text import slugify
+            doc_name = slugify(title)
+            db.collection('Activity Deadlines').document(doc_name).delete()
+    return redirect('home-page')
 
 @login_required(login_url='faculty_login')
 def student_list(request):
@@ -342,6 +404,8 @@ def activity_page(request):
     users_ref = db.collection('Authorized Faculty')
     query = users_ref.where('faculty_id', '==', faculty_id).limit(1).get()
     faculty_data = None
+    deadline_form = ActivityDeadlineForm()
+
 
     # Fetch notifications from Firestore, newest first
     notifications_ref = db.collection("Notifications").order_by("timestamp", direction=firestore.Query.DESCENDING)
@@ -359,7 +423,7 @@ def activity_page(request):
         {
             "title": "Novice Task 1",
             "description": "Short description of the task 1.",
-            "deadline": "2023-10-15",
+            "deadline": "",
             "progress": 0,  # percentage
             "image": static("assets/img/Photo1.png"),
         },
@@ -448,12 +512,31 @@ def activity_page(request):
         },
     ]
 
+    if request.method == "POST":
+        deadline_form = ActivityDeadlineForm(request.POST)
+        if deadline_form.is_valid():
+            data = deadline_form.cleaned_data
+            # Use the title as the document name (slugify for safety)
+            from django.utils.text import slugify
+            doc_name = slugify(data['title'])
+            db.collection('Activity Deadlines').document(doc_name).set({
+                'activity_id': data['activity_id'],
+                'title': data['title'],
+                'description': data['description'],
+                'date_of_deadline': str(data['date']),
+                'time_of_deadline': str(data['time']),
+                'created_at': firestore.SERVER_TIMESTAMP
+            })
+            messages.success(request, "Deadline set successfully!")
+            return redirect('activities-page')
+
     return render(request, "Activities/activities.html",
                   {"activities_novice": activities_novice,
                    "activities_junior": activities_junior,
                    "activities_senior": activities_senior,
                    "faculty_data": faculty_data,
                     "notifications": notifications,  # Pass notifications to template
+                     "deadline_form": deadline_form,
                    })  # Corrected context name
 
 

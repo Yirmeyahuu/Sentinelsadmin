@@ -45,7 +45,7 @@ def Faculty_login_view(request):
                     User = get_user_model()
                     user, created = User.objects.get_or_create(username=faculty_id)
                     if created:
-                        user.set_unusable_password()
+                        user.set_unusable_password()    
                         user.save()
                     user.backend = 'Login.auth_backend.FirestoreBackend'
                     login(request, user)

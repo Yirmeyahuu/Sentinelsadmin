@@ -109,9 +109,26 @@
                     <div class="text-gray-500">F</div>
                     <div class="text-gray-500">S</div>
                     {% for day in calendar_days %}
-                        <div class="p-2 {% if day.today %}bg-blue-100 text-blue-600 font-bold{% endif %} hover:bg-gray-100 rounded-full cursor-pointer">
-                            {{ day.date }}
-                        </div>
+                    <div class="relative p-2 
+                        {% if day.today %}bg-blue-100 text-blue-600 font-bold
+                        {% elif day.has_deadline %}bg-orange-100 hover:bg-orange-200
+                        {% else %}hover:bg-gray-100{% endif %}
+                        rounded-full cursor-pointer
+                        {% if day.has_deadline %}calendar-deadline{% endif %}"
+                        {% if day.has_deadline %}
+                            onclick="openDeadlineInfoModal(
+                                '{{ day.deadline_title|escapejs }}',
+                                '{{ day.deadline_description|default:"No description"|escapejs }}',
+                                '{{ day.deadline_date|escapejs }}',
+                                '{{ day.deadline_time|escapejs }}'
+                            )"
+                        {% endif %}
+                    >
+                        {{ day.date }}
+                        {% if day.has_deadline %}
+                        <div class="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-orange-500 rounded-full"></div>
+                        {% endif %}
+                    </div>
                     {% endfor %}
                 </div>
             </div>
@@ -133,4 +150,48 @@
         </div>
     </div>
 </div>
+
+<!-- Deadline Info Modal -->
+<div id="deadlineInfoModal" class="fixed inset-0 z-50 hidden items-center justify-center">
+    <div class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm"></div>
+    <div class="relative bg-blue-700 rounded-2xl shadow-lg max-w-md w-full mx-8 p-8 z-10 text-white">
+        <button type="button" onclick="closeDeadlineInfoModal()" class="absolute top-3 right-3 text-white/70 hover:text-white text-2xl font-bold">&times;</button>
+        <h2 id="modalDeadlineTitle" class="text-2xl font-extrabold text-white mb-2"></h2>
+        <p id="modalDeadlineDescription" class="text-lg text-white mb-4"></p>
+        <div class="text-base font-semibold mb-2">
+            <span class="font-bold">Date:</span> <span id="modalDeadlineDate"></span>
+        </div>
+        <div class="text-base font-semibold mb-6">
+            <span class="font-bold">Time:</span> <span id="modalDeadlineTime"></span>
+        </div>
+        <div class="flex space-x-4">
+            <form method="post" action="{% url 'remove-deadline' %}">
+                {% csrf_token %}
+                <input type="hidden" id="removeDeadlineTitle" name="title">
+                <button type="submit" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg">Remove Deadline</button>
+            </form>
+            <button type="button" onclick="editDeadline()" class="bg-yellow-400 hover:bg-yellow-500 text-blue-900 font-bold py-2 px-4 rounded-lg">Edit</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openDeadlineInfoModal(title, description, date, time) {
+        document.getElementById('modalDeadlineTitle').textContent = title;
+        document.getElementById('modalDeadlineDescription').textContent = description;
+        document.getElementById('modalDeadlineDate').textContent = date;
+        document.getElementById('modalDeadlineTime').textContent = time;
+        document.getElementById('removeDeadlineTitle').value = title;
+        document.getElementById('deadlineInfoModal').classList.remove('hidden');
+        document.getElementById('deadlineInfoModal').classList.add('flex');
+    }
+    function closeDeadlineInfoModal() {
+        document.getElementById('deadlineInfoModal').classList.remove('flex');
+        document.getElementById('deadlineInfoModal').classList.add('hidden');
+    }
+    function editDeadline() {
+        // Implement your edit logic here (e.g., open the set deadline modal pre-filled)
+        alert('Edit deadline feature coming soon!');
+    }
+</script>
 {% endblock %}
