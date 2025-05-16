@@ -1,9 +1,8 @@
 from django.contrib import messages  # Corrected import for messages
 from django.shortcuts import render, redirect
 from firebase_admin import credentials, firestore
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import get_user_model
 
 db = firestore.client()
 # Initialize Firebase Admin SDK
@@ -59,9 +58,6 @@ def Faculty_login_view(request):
 
     return render(request, 'Login/faculty-login.html')
 
-def Superadmin_login_view(request):
-    return render(request, 'Login/superadmin-login.html')
-
 def Faculty_logout_view(request):
     """Logs out the faculty account and redirects to the login page."""
     if request.method == 'POST':  # Ensure logout is triggered via POST for security
@@ -72,3 +68,30 @@ def Faculty_logout_view(request):
     else:
         # If accessed via GET, redirect to the home page or login page
         return redirect('faculty_login')
+    
+
+
+def Superadmin_login_view(request):
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        user = authenticate(request, username=username, password=password)
+        if user is not None and user.is_superuser:
+            login(request, user)
+            return redirect('Superadmin-homepage')  # or your superadmin homepage URL name
+        else:
+            messages.error(request, "Invalid credentials or not a superadmin.")
+            return render(request, 'Login/superadmin-login.html')
+    return render(request, 'Login/superadmin-login.html')
+
+
+
+def superadmin_logout(request):
+    if request.method == 'POST':  # Ensure logout is triggered via POST for security
+        # Clear the session
+        request.session.flush()
+        messages.success(request, "You have been logged out successfully.")
+        return redirect('superadmin_login')  # Redirect to the faculty login page
+    else:
+        # If accessed via GET, redirect to the home page or login page
+        return redirect('superadmin_login')
