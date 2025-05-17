@@ -3,6 +3,7 @@ from django.shortcuts import render, redirect
 from firebase_admin import credentials, firestore
 from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib.auth.decorators import login_required
+from Login.decorators import faculty_required, superadmin_required
 
 db = firestore.client()
 # Initialize Firebase Admin SDK
@@ -26,10 +27,12 @@ def Faculty_login_view(request):
             # If faculty has set a password, use it. Otherwise, use default.
             if faculty_password:
                 if password == faculty_password:
-                    # Create or get Django user
+                    # Set session for faculty
+                    request.session['user_type'] = 'faculty'
+                    request.session['faculty_id'] = faculty_id
+                    # Optionally create a Django user for session auth
                     User = get_user_model()
                     user, created = User.objects.get_or_create(username=faculty_id)
-                    # Optionally set unusable password so Django password auth is disabled
                     if created:
                         user.set_unusable_password()
                         user.save()
@@ -41,10 +44,12 @@ def Faculty_login_view(request):
                     return render(request, 'Login/faculty-login.html', {'error_field': 'password'})
             else:
                 if password == "welcomeadmin":
+                    request.session['user_type'] = 'faculty'
+                    request.session['faculty_id'] = faculty_id
                     User = get_user_model()
                     user, created = User.objects.get_or_create(username=faculty_id)
                     if created:
-                        user.set_unusable_password()    
+                        user.set_unusable_password()
                         user.save()
                     user.backend = 'Login.auth_backend.FirestoreBackend'
                     login(request, user)

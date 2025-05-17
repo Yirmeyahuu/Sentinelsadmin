@@ -4,7 +4,8 @@ import firebase_admin
 from firebase_admin import credentials, firestore
 from django.http import JsonResponse
 from django.templatetags.static import static
-from django.contrib.auth.decorators import login_required, user_passes_test
+from Login.decorators import superadmin_required
+
 
 
 
@@ -17,11 +18,11 @@ if not firebase_admin._apps:
 db = firestore.client()
 
 
-@login_required(login_url='superadmin_login')
+@superadmin_required
 def Superadmin_Home(request):
     return render(request, 'Home/superadmin-home.html')
 
-@login_required(login_url='superadmin_login')
+@superadmin_required
 def Faculty_list(request):
     """Fetch all active faculty members"""
     faculty_ref = db.collection("Authorized Faculty")
@@ -92,7 +93,7 @@ def archive_faculty(request, faculty_id):
 
     return redirect("FacultyList")
 
-@login_required(login_url='superadmin_login')
+@superadmin_required
 def Archived_faculty_list(request):
     """Fetch all archived faculty members"""
     archive_ref = db.collection("Archived Faculty")
@@ -117,7 +118,7 @@ def restore_faculty(request, faculty_id):
 
     return redirect("archive-page")
 
-@login_required(login_url='superadmin_login')
+@superadmin_required
 def activity_page(request):
     activities_novice = [
         {

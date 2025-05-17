@@ -2,7 +2,6 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 import firebase_admin
 from firebase_admin import credentials, firestore
-from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.templatetags.static import static
 from django.views.decorators.http import require_POST
@@ -11,6 +10,7 @@ from django.http import JsonResponse
 import json
 from .forms import ActivityDeadlineForm
 from django.views.decorators.csrf import csrf_exempt
+from Login.decorators import faculty_required, superadmin_required
 
 
 
@@ -46,7 +46,7 @@ def saveActivityDeadline(request):
     return JsonResponse({'status': 'error', 'message': 'Invalid request'})
 
 
-@login_required(login_url='faculty_login')
+@faculty_required
 def Faculty_home(request):
     faculty_id = request.user.username
 
@@ -162,7 +162,7 @@ def remove_deadline(request):
             db.collection('Activity Deadlines').document(doc_name).delete()
     return redirect('home-page')
 
-@login_required(login_url='faculty_login')
+@faculty_required
 def student_list(request):
     # Add this block to fetch faculty_data
     faculty_id = request.user.username
@@ -247,7 +247,7 @@ def student_dashboard (request):
 
 
 
-@login_required(login_url='faculty_login')
+@faculty_required
 def add_student(request):
     if request.method == "POST":
         # Get form data and add to Firestore
@@ -364,7 +364,7 @@ def restore_student(request, student_id):
 
     return redirect("archive-page")
 
-@login_required(login_url='faculty_login')
+@faculty_required
 def Verify_Student(request):
     """Verify student member"""
     faculty_id = request.user.username
@@ -540,7 +540,7 @@ def activity_page(request):
                    })  # Corrected context name
 
 
-@login_required(login_url='faculty_login')
+@faculty_required
 def accept_student(request, student_id):
     """Accept student and move to Registered_Students collection"""
     pending_ref = db.collection("Pending Students").document(student_id)
@@ -566,7 +566,7 @@ def accept_student(request, student_id):
 
     return redirect("verify-students")
 
-@login_required(login_url='faculty_login')
+@faculty_required
 def reject_student(request, student_id):
     """Reject and remove student from Pending Students"""
     pending_ref = db.collection("Pending Students").document(student_id)
@@ -594,7 +594,7 @@ def reject_student(request, student_id):
 
 
 @require_POST
-@login_required(login_url='faculty_login')
+@faculty_required
 def mark_all_notifications_read(request):
     notifications_ref = db.collection("Notifications")
     for notif in notifications_ref.stream():
@@ -602,7 +602,7 @@ def mark_all_notifications_read(request):
     messages.success(request, "All notifications marked as read.")
     return redirect(request.META.get('HTTP_REFERER', '/'))
 
-@login_required(login_url='faculty_login')
+@faculty_required
 def faculty_account(request):
     faculty_id = request.user.username
     faculty_ref = db.collection('Authorized Faculty').document(faculty_id)
