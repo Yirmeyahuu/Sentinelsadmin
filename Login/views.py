@@ -8,8 +8,6 @@ from Login.decorators import faculty_required, superadmin_required
 db = firestore.client()
 # Initialize Firebase Admin SDK
 
-# Create your views here.
-
 
 def Faculty_login_view(request):
     if request.method == 'POST':

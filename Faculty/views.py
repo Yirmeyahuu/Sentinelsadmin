@@ -53,7 +53,6 @@ def Faculty_home(request):
     # Get faculty data
     users_ref = db.collection('Authorized Faculty')
     query = users_ref.where('faculty_id', '==', faculty_id).limit(1).get()
-
     faculty_data = None
     if query:
         faculty_doc = query[0]
@@ -63,6 +62,16 @@ def Faculty_home(request):
     students_ref = db.collection("Registered_Students")
     students = students_ref.stream()
     total_users = sum(1 for _ in students)
+
+    # Count Computer Science students
+    cs_students_ref = db.collection("Registered_Students").where("program", "==", "Computer Science")
+    cs_students = cs_students_ref.stream()
+    cs_count = sum(1 for _ in cs_students)
+
+    # Count Information Technology students
+    it_students_ref = db.collection("Registered_Students").where("program", "==", "Information Technology")
+    it_students = it_students_ref.stream()
+    it_count = sum(1 for _ in it_students)
 
     # Fetch notifications
     notifications_ref = db.collection("Notifications").order_by("timestamp", direction=firestore.Query.DESCENDING)
@@ -132,15 +141,12 @@ def Faculty_home(request):
                     })
                 calendar_days.append(day_data)
 
-    # Statistics
-    active_percentage = 50  # Replace with actual calculation
-    inactive_percentage = 25  # Replace with actual calculation
 
     return render(request, 'Home/faculty-home.html', {
         "faculty_data": faculty_data,
         "total_users": total_users,
-        "active_percentage": active_percentage,
-        "inactive_percentage": inactive_percentage,
+        "cs_count": cs_count,
+        "it_count": it_count,
         "calendar_days": calendar_days,
         "almost_due_tasks": almost_due_tasks,
         "notifications": notifications,
@@ -178,17 +184,19 @@ def student_list(request):
     all_students_docs = all_students_ref.stream()
     total_users = sum(1 for _ in all_students_docs)
     
-    # Now apply filters for the table
-    program_filter = request.GET.get('program')
-    year_section_filter = request.GET.get('year_section')
-    semester_filter = request.GET.get('semester')
+    # Get faculty's assigned program and year_section
+    faculty_program = faculty_data.get('program')
+    faculty_year_section = faculty_data.get('year_section')
 
     student_ref = db.collection("Registered_Students")
     filters = []
-    if program_filter and program_filter != "all":
-        filters.append(("program", "==", program_filter))
-    if year_section_filter and year_section_filter != "all":
-        filters.append(("year_section", "==", year_section_filter))
+    if faculty_program:
+        filters.append(("program", "==", faculty_program))
+    if faculty_year_section:
+        filters.append(("year_section", "==", faculty_year_section))
+
+    # Optionally, allow further filtering by semester (if you want)
+    semester_filter = request.GET.get('semester')
     if semester_filter and semester_filter != "all":
         filters.append(("semester", "==", semester_filter))
 
@@ -212,9 +220,7 @@ def student_list(request):
 
     return render(request, "Students/student-list.html", {
         "students": students,
-        "faculty_data": faculty_data,  # Now faculty_data is defined
-        "selected_program": program_filter or "all",
-        "selected_year_section": year_section_filter or "all",
+        "faculty_data": faculty_data,
         "selected_semester": semester_filter or "all",
         "year_section_options": year_section_options,
         "semester_options": semester_options,
@@ -232,6 +238,22 @@ def student_dashboard (request):
         faculty_doc = query[0]
         faculty_data = faculty_doc.to_dict()
 
+    # Get assigned program and year_section
+    faculty_program = faculty_data.get('program')
+    faculty_year_section = faculty_data.get('year_section')
+
+    # Count students in assigned program/year_section
+    students_ref = db.collection("Registered_Students")
+    students_query = students_ref.where("program", "==", faculty_program).where("year_section", "==", faculty_year_section)
+    students = list(students_query.stream())
+    total_students = len(students)
+
+    # Count active and inactive users (assuming you have an 'is_active' field)
+    active_students = [s for s in students if s.to_dict().get('is_active')]
+    inactive_students = [s for s in students if not s.to_dict().get('is_active')]
+    active_count = len(active_students)
+    inactive_count = len(inactive_students)
+
     # Fetch notifications from Firestore, newest first
     notifications_ref = db.collection("Notifications").order_by("timestamp", direction=firestore.Query.DESCENDING)
     notifications = []
@@ -242,8 +264,11 @@ def student_dashboard (request):
 
     return render(request, 'Students/students-dashboard.html', {
         "faculty_data": faculty_data,
-        "notifications": notifications,  # Pass notifications to template
-    })  # Corrected context name
+        "notifications": notifications,
+        "total_students": total_students,
+        "active_count": active_count,
+        "inactive_count": inactive_count
+    })
 
 
 
@@ -366,13 +391,11 @@ def restore_student(request, student_id):
 
 @faculty_required
 def Verify_Student(request):
-    """Verify student member"""
     faculty_id = request.user.username
     users_ref = db.collection('Authorized Faculty')
     query = users_ref.where('faculty_id', '==', faculty_id).limit(1).get()
     faculty_data = None
 
-    # Fetch notifications from Firestore, newest first
     notifications_ref = db.collection("Notifications").order_by("timestamp", direction=firestore.Query.DESCENDING)
     notifications = []
     for doc in notifications_ref.stream():
@@ -384,15 +407,29 @@ def Verify_Student(request):
         faculty_doc = query[0]
         faculty_data = faculty_doc.to_dict()
 
-    verify_ref = db.collection("Pending Students")  # <-- Correct collection
-    docs = verify_ref.stream()
+    # Get faculty's assigned program and year_section
+    faculty_program = faculty_data.get('program')
+    faculty_year_section = faculty_data.get('year_section')
+
+    # Filter pending students by assigned program and year_section
+    verify_ref = db.collection("Pending Students")
+    filters = []
+    if faculty_program:
+        filters.append(("program", "==", faculty_program))
+    if faculty_year_section:
+        filters.append(("year_section", "==", faculty_year_section))
+
+    docs_query = verify_ref
+    for field, op, value in filters:
+        docs_query = docs_query.where(field, op, value)
+    docs = docs_query.stream()
 
     verify_students = [{**doc.to_dict(), "student_id": doc.id} for doc in docs]
 
     return render(request, "Students/students-verify-list.html", {
         "verify_students": verify_students,
         "faculty_data": faculty_data,
-        "notifications": notifications,  # Pass notifications to template
+        "notifications": notifications,  
     })
 
 

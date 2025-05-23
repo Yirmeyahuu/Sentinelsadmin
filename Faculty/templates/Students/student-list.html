@@ -138,28 +138,15 @@
     </div>
 </div>
 
-<!-- Student Table -->
-<div class="p-6 ml-20"> <!-- Added margin to prevent overlap with sidebar -->
-    <div class="bg-blue-600 shadow-2xl rounded-2xl p-6"> <!-- Ensures table responsiveness -->
+<div class="p-6 ml-20">
+    <div class="bg-blue-600 shadow-2xl rounded-2xl p-6">
         <div class="flex justify-between items-center mb-4">
-            <h2 class="text-xl font-bold text-white">Registered Student</h2>
+            <h2 class="text-xl font-bold text-white">
+                Registered Students - {{ faculty_data.program }} {{ faculty_data.year_section }}
+            </h2>
             <div class="flex flex-wrap items-center gap-4">
-
+                <!-- Only Semester Filter -->
                 <form method="get" class="flex flex-wrap items-center gap-2">
-                    <!-- Program Filter -->
-                    <select name="program" onchange="this.form.submit()" class="p-2 text-sm font-medium text-blue-800 bg-white border border-blue-300 rounded-2xl">
-                        <option value="all" {% if selected_program == "all" %}selected{% endif %}>All Programs</option>
-                        <option value="Computer Science" {% if selected_program == "Computer Science" %}selected{% endif %}>Computer Science</option>
-                        <option value="Information Technology" {% if selected_program == "Information Technology" %}selected{% endif %}>Information Technology</option>
-                    </select>
-                    <!-- Year & Section Filter -->
-                    <select name="year_section" onchange="this.form.submit()" class="p-2 text-sm font-medium text-blue-800 bg-white border border-blue-300 rounded-2xl">
-                        <option value="all" {% if selected_year_section == "all" %}selected{% endif %}>All Years</option>
-                        {% for ys in year_section_options %}
-                            <option value="{{ ys }}" {% if selected_year_section == ys %}selected{% endif %}>{{ ys }}</option>
-                        {% endfor %}
-                    </select>
-                    <!-- Semester Filter -->
                     <select name="semester" onchange="this.form.submit()" class="p-2 text-sm font-medium text-blue-800 bg-white border border-blue-300 rounded-2xl">
                         <option value="all" {% if selected_semester == "all" %}selected{% endif %}>All Semesters</option>
                         {% for sem in semester_options %}
@@ -167,7 +154,7 @@
                         {% endfor %}
                     </select>
                 </form>
-
+                <!-- Search Bar -->
                 <form class="flex items-center max-w-sm mx-auto">
                     <label for="simple-search" class="sr-only">Search</label>
                     <div class="relative w-full">
@@ -192,7 +179,7 @@
 
         <!-- Student Table -->
         <div class="overflow-hidden rounded-2xl shadow-xl w-full ">
-            <table class="w-full border-separate border-spacing-0 rounded-lg"> <!-- Ensures minimum width -->
+            <table class="w-full border-separate border-spacing-0 rounded-lg">
                 <thead>
                     <tr class="bg-blue-400 text-white">
                         <th class="border border-blue-500 p-2">Student ID</th>
@@ -214,21 +201,14 @@
                             <td class="border border-blue-500 p-2 text-center whitespace-nowrap">
                                 <div class="flex items-center justify-center space-x-3">
                                     <button onclick="openEditModal('{{ student.student_id }}', '{{ student.first_name }}', '{{ student.middle_initial }}', '{{ student.last_name }}', '{{ student.program }}', '{{ student.year_section }}', '{{ student.semester }}')"  class="text-gray-200 hover:text-blue-600">
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="1.5" fill="currentColor" class="w-5 h-5">
-                                            <path d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-8.4 8.4a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32l8.4-8.4Z" />
-                                            <path d="M5.25 5.25a3 3 0 0 0-3 3v10.5a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3V13.5a.75.75 0 0 0-1.5 0v5.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5V8.25a1.5 1.5 0 0 1 1.5-1.5h5.25a.75.75 0 0 0 0-1.5H5.25Z" />
-                                        </svg>
+                                        <!-- Edit SVG -->
                                     </button>
                                     <button href="/archive/" onclick="openArchiveModal('{% url 'archive_student' student.student_id %}')" class="text-gray-200 hover:text-green-600">
-                                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="1.5" fill="currentColor" class="w-5 h-5">
-                                            <path d="M3.375 3C2.339 3 1.5 3.84 1.5 4.875v.75c0 1.036.84 1.875 1.875 1.875h17.25c1.035 0 1.875-.84 1.875-1.875v-.75C22.5 3.839 21.66 3 20.625 3H3.375Z" />
-                                            <path fill-rule="evenodd" d="m3.087 9 .54 9.176A3 3 0 0 0 6.62 21h10.757a3 3 0 0 0 2.995-2.824L20.913 9H3.087Zm6.133 2.845a.75.75 0 0 1 1.06 0l1.72 1.72 1.72-1.72a.75.75 0 1 1 1.06 1.06l-1.72 1.72 1.72 1.72a.75.75 0 1 1-1.06 1.06L12 15.685l-1.72 1.72a.75.75 0 1 1-1.06-1.06l1.72-1.72-1.72-1.72a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" />
-                                          </svg>
+                                        <!-- Archive SVG -->
                                     </button>
                                 </div>
                             </td>
                         </tr>
-
                     {% empty %}
                         <tr>
                             <td colspan="6" class="text-center border border-gray-300 p-4">No users registered yet.</td>

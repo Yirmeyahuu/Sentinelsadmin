@@ -3,8 +3,8 @@
 
 {% block content %}
 <!-- Student Table -->
-<div class="p-6 ml-20"> <!-- Added margin to prevent overlap with sidebar -->
-    <div class="bg-blue-600 shadow-2xl rounded-2xl p-6"> <!-- Ensures table responsiveness -->
+<div class="p-6 ml-20">
+    <div class="bg-blue-600 shadow-2xl rounded-2xl p-6">
         <div class="flex justify-between items-center mb-4">
             <h2 class="text-xl font-bold text-white">Pending Students Approval</h2>
             <div class="flex flex-wrap items-center gap-4">
@@ -84,29 +84,6 @@
     </div>
 </div>
 
-<!-- Replace the existing action buttons with these -->
-<td class="border border-blue-500 p-2 text-center whitespace-nowrap">
-    <div class="flex items-center justify-center space-x-3">
-        <!-- Accept Button -->
-        <a href="{% url 'accept_student' student.student_id %}" 
-           onclick="return confirm('Are you sure you want to accept this student?')"
-           class="text-gray-200 hover:text-green-500 transition-colors duration-200">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6">
-                <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm13.36-1.814a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25Z" clip-rule="evenodd" />
-            </svg>
-        </a>
-        <!-- Reject Button -->
-        <a href="{% url 'reject_student' student.student_id %}"
-           onclick="return confirm('Are you sure you want to reject this student?')"
-           class="text-gray-200 hover:text-red-500 transition-colors duration-200">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6">
-                <path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25Zm-1.72 6.97a.75.75 0 1 0-1.06 1.06L10.94 12l-1.72 1.72a.75.75 0 1 0 1.06 1.06L12 13.06l1.72 1.72a.75.75 0 1 0 1.06-1.06L13.06 12l1.72-1.72a.75.75 0 1 0-1.06-1.06L12 10.94l-1.72-1.72Z" clip-rule="evenodd" />
-            </svg>
-        </a>
-    </div>
-</td>
-
-<!-- Include the same scripts for search functionality -->
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const searchBar = document.getElementById('searchBar');
@@ -125,42 +102,6 @@
                 }
             });
         });
-    });
-</script>
-
-<!-- Add this script at the bottom of your students-verify-list.html -->
-<script>
-    function openAcceptModal(url) {
-        const modal = document.getElementById("acceptModal");
-        const confirmButton = document.getElementById("acceptConfirmButton");
-        confirmButton.href = url;
-        modal.classList.remove("hidden");
-    }
-
-    function closeAcceptModal() {
-        document.getElementById("acceptModal").classList.add("hidden");
-    }
-
-    function openRejectModal(url) {
-        const modal = document.getElementById("rejectModal");
-        const confirmButton = document.getElementById("rejectConfirmButton");
-        confirmButton.href = url;
-        modal.classList.remove("hidden");
-    }
-
-    function closeRejectModal() {
-        document.getElementById("rejectModal").classList.add("hidden");
-    }
-
-    // Close modals when clicking outside
-    document.addEventListener('click', function(e) {
-        const acceptModal = document.getElementById("acceptModal");
-        const rejectModal = document.getElementById("rejectModal");
-        
-        if (e.target.classList.contains('backdrop-blur-sm')) {
-            acceptModal.classList.add("hidden");
-            rejectModal.classList.add("hidden");
-        }
     });
 </script>
 {% endblock %}
