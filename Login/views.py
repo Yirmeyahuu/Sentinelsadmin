@@ -8,58 +8,44 @@ from Login.decorators import faculty_required, superadmin_required
 db = firestore.client()
 # Initialize Firebase Admin SDK
 
-
-def Faculty_login_view(request):
+def Sentinels_login_view(request):
     if request.method == 'POST':
-        faculty_id = request.POST.get('faculty_id')
-        password = request.POST.get('faculty_password')
+        username_or_id = request.POST.get('username_or_id')
+        password = request.POST.get('password')
 
+        # 1. Try Django superuser authentication (Superadmin)
+        user = authenticate(request, username=username_or_id, password=password)
+        if user is not None and user.is_superuser:
+            login(request, user)
+            request.session['user_type'] = 'superadmin'
+            return redirect('Superadmin-homepage')
+
+        # 2. Try Faculty authentication (Firestore)
         users_ref = db.collection('Authorized Faculty')
-        query = users_ref.where('faculty_id', '==', faculty_id).limit(1).get()
-
+        query = users_ref.where('faculty_id', '==', username_or_id).limit(1).get()
         if query:
             faculty_doc = query[0]
             faculty_data = faculty_doc.to_dict()
             faculty_password = faculty_data.get('faculty_password')
-
-            # If faculty has set a password, use it. Otherwise, use default.
-            if faculty_password:
-                if password == faculty_password:
-                    # Set session for faculty
-                    request.session['user_type'] = 'faculty'
-                    request.session['faculty_id'] = faculty_id
-                    # Optionally create a Django user for session auth
-                    User = get_user_model()
-                    user, created = User.objects.get_or_create(username=faculty_id)
-                    if created:
-                        user.set_unusable_password()
-                        user.save()
-                    user.backend = 'Login.auth_backend.FirestoreBackend'
-                    login(request, user)
-                    return redirect('home-page')
-                else:
-                    messages.error(request, "Incorrect password. Please enter your set password.")
-                    return render(request, 'Login/faculty-login.html', {'error_field': 'password'})
+            if (faculty_password and password == faculty_password) or (not faculty_password and password == "welcomeadmin"):
+                request.session['user_type'] = 'faculty'
+                request.session['faculty_id'] = username_or_id
+                User = get_user_model()
+                user, created = User.objects.get_or_create(username=username_or_id)
+                if created:
+                    user.set_unusable_password()
+                    user.save()
+                user.backend = 'Login.auth_backend.FirestoreBackend'
+                login(request, user)
+                return redirect('home-page')
             else:
-                if password == "welcomeadmin":
-                    request.session['user_type'] = 'faculty'
-                    request.session['faculty_id'] = faculty_id
-                    User = get_user_model()
-                    user, created = User.objects.get_or_create(username=faculty_id)
-                    if created:
-                        user.set_unusable_password()
-                        user.save()
-                    user.backend = 'Login.auth_backend.FirestoreBackend'
-                    login(request, user)
-                    return redirect('home-page')
-                else:
-                    messages.error(request, "Incorrect password. Please enter the default password.")
-                    return render(request, 'Login/faculty-login.html', {'error_field': 'password'})
+                messages.error(request, "Incorrect password.")
+                return render(request, 'Login/sentinels-login.html', {'error_field': 'password'})
         else:
-            messages.error(request, "Faculty not authorized. Enter a different ID.")
-            return render(request, 'Login/faculty-login.html', {'error_field': 'faculty_id'})
+            messages.error(request, "User not found or not authorized.")
+            return render(request, 'Login/sentinels-login.html', {'error_field': 'username_or_id'})
 
-    return render(request, 'Login/faculty-login.html')
+    return render(request, 'Login/sentinels-login.html')
 
 def Faculty_logout_view(request):
     """Logs out the faculty account and redirects to the login page."""
@@ -67,26 +53,10 @@ def Faculty_logout_view(request):
         # Clear the session
         request.session.flush()
         messages.success(request, "You have been logged out successfully.")
-        return redirect('faculty_login')  # Redirect to the faculty login page
+        return redirect('sentinels_login')  # Redirect to the faculty login page
     else:
         # If accessed via GET, redirect to the home page or login page
-        return redirect('faculty_login')
-    
-
-
-def Superadmin_login_view(request):
-    if request.method == 'POST':
-        username = request.POST.get('username')
-        password = request.POST.get('password')
-        user = authenticate(request, username=username, password=password)
-        if user is not None and user.is_superuser:
-            login(request, user)
-            return redirect('Superadmin-homepage')  # or your superadmin homepage URL name
-        else:
-            messages.error(request, "Invalid credentials or not a superadmin.")
-            return render(request, 'Login/superadmin-login.html')
-    return render(request, 'Login/superadmin-login.html')
-
+        return redirect('sentinels_login')
 
 
 def superadmin_logout(request):
@@ -94,7 +64,7 @@ def superadmin_logout(request):
         # Clear the session
         request.session.flush()
         messages.success(request, "You have been logged out successfully.")
-        return redirect('superadmin_login')  # Redirect to the faculty login page
+        return redirect('sentinels_login')  # Redirect to the faculty login page
     else:
         # If accessed via GET, redirect to the home page or login page
-        return redirect('superadmin_login')
+        return redirect('sentinels_login')

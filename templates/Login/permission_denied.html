@@ -1,0 +1,63 @@
+{% load static %}
+{% load tailwind_tags %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Permission Denied</title>
+    {% tailwind_css %}
+</head>
+<body class="bg-gradient-to-br from-blue-900 to-gray-900 flex items-center justify-center min-h-screen p-4">
+    <div class="bg-blue-500 p-8 rounded-3xl shadow-2xl text-center max-w-md w-full relative overflow-hidden">
+        <!-- Background Pattern -->
+        <div class="absolute inset-0 opacity-5">
+            <svg class="w-full h-full" viewBox="0 0 100 100" fill="none">
+                <pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse">
+                    <path d="M 10 0 L 0 0 0 10" fill="none" stroke="currentColor" stroke-width="0.5"/>
+                </pattern>
+                <rect width="100" height="100" fill="url(#grid)"/>
+            </svg>
+        </div>
+
+        <!-- Error Icon -->
+        <div class="mb-6 relative">
+            <div class="w-24 h-24 mx-auto bg-white rounded-full flex items-center justify-center">
+                <svg class="w-12 h-12 text-red-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                </svg>
+            </div>
+        </div>
+
+        <h1 class="text-3xl font-bold text-red-500 mb-2">Access Denied</h1>
+        <p class="text-white mb-2">Error Code: 403</p>
+        <div class="w-16 h-1 bg-red-200 mx-auto mb-4 rounded-full"></div>
+        
+        <p class="mb-8 text-white">
+            You don't have permission to access this page.<br>
+            Please login with the correct account credentials.
+        </p>
+
+        <!-- Decorative elements -->
+        <div class="absolute -left-1 -bottom-1 w-24 h-24 bg-blue-300/50 rounded-full "></div>
+        <div class="absolute -right-4 -top-4 w-20 h-20 bg-red-300/50 rounded-full"></div>
+        <div class="absolute -right-4 -bottom-4 w-20 h-20 bg-green-300/50 rounded-full"></div>
+        
+        <form method="post" action="{% url 'sentinels_logout' %}" class="relative">
+            {% csrf_token %}
+            <button type="submit" 
+                class="group bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold py-3 px-8 rounded-xl
+                       shadow-lg transform transition duration-200 hover:scale-105 hover:from-blue-700 hover:to-blue-800
+                       flex items-center justify-center space-x-2 w-full cursor-pointer">
+                <svg class="w-5 h-5 transform group-hover:rotate-180 transition-transform duration-300" 
+                     xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                    <path fill-rule="evenodd" 
+                          d="M7.5 3.75A1.5 1.5 0 006 5.25v13.5a1.5 1.5 0 001.5 1.5h6a1.5 1.5 0 001.5-1.5V15a.75.75 0 011.5 0v3.75a3 3 0 01-3 3h-6a3 3 0 01-3-3V5.25a3 3 0 013-3h6a3 3 0 013 3V9A.75.75 0 0115 9V5.25a1.5 1.5 0 00-1.5-1.5h-6zm5.03 4.72a.75.75 0 010 1.06l-1.72 1.72h10.94a.75.75 0 010 1.5H10.81l1.72 1.72a.75.75 0 11-1.06 1.06l-3-3a.75.75 0 010-1.06l3-3a.75.75 0 011.06 0z" 
+                          clip-rule="evenodd" />
+                </svg>
+                <span>Logout and Return</span>
+            </button>
+        </form>
+    </div>
+</body>
+</html>
