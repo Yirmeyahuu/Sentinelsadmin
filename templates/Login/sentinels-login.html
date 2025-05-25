@@ -5,7 +5,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>{% block title %}SENTINELS | Faculty Login{% endblock %}</title>
+    <title>{% block title %}SENTINELS | Login{% endblock %}</title>
     <link rel="icon" href="{% static 'assets/img/Sentinels New Logo.png' %}">
     <script src="https://cdn.tailwindcss.com"></script>
 
@@ -30,7 +30,7 @@
             </div>
             
             <!-- Login Form --> 
-            <form method="POST" action="{% url 'sentinels_login' %}" class="space-y-8">
+            <form method="POST" action="{% url 'sentinels_login' %}" class="space-y-6">
                 {% csrf_token %}
                 
                 <!-- Username/Faculty ID Input -->
@@ -46,7 +46,8 @@
                         required
                         class="peer w-full pl-10 pr-5 py-2.5 text-gray-600 text-base border-2 border-blue-200 rounded-2xl focus:outline-none focus:border-blue-400 placeholder-transparent">
                         <label for="username_or_id" 
-                        class="absolute left-10 -top-3 text-blue-400 text-sm transition-all
+                        class="absolute left-10 -top-3 text-blue-400 text-sm transition-all ease-in-out
+                                duration-500
                                 bg-white px-1
                                 peer-placeholder-shown:text-gray-400
                                 peer-placeholder-shown:top-3.5
@@ -71,7 +72,8 @@
                         required
                         class="peer w-full pl-10 pr-12 py-2.5 text-gray-600 text-base border-2 border-blue-200 rounded-2xl focus:outline-none focus:border-blue-400 placeholder-transparent">
                     <label for="password" 
-                        class="absolute left-10 -top-3 text-blue-400 text-sm transition-all
+                        class="absolute left-10 -top-3 text-blue-400 text-sm transition-all ease-in-out
+                                duration-500
                                 bg-white px-1
                                 peer-placeholder-shown:text-gray-400
                                 peer-placeholder-shown:top-3.5

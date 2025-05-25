@@ -1,14 +1,16 @@
 {% extends 'Faculty/faculty-base.html' %}
 {% load static %}
+<title>{% block title %}SENTINELS{% endblock %}</title>
+
 
 {% block content %}
 <div class="p-0 pb-6 px-6 flex justify-center">
-    <div class="w-full max-w-7xl flex space-x-6 ml-auto mr-auto">
-        <!-- Left side with dashboard cards -->
-        <div class="flex-1 ml-24">
-            <div class="flex flex-col space-y-6">
+    <div class="w-full max-w-8xl flex space-x-6 mx-auto" style="margin-left: 110px; margin-right: 300px;">
+        <!-- Left side with dashboard cards and quick students table -->
+        <div class="flex-1 flex flex-col items-center">
+            <div class="flex flex-col space-y-6 items-center w-[864px]">
                 <!-- Dashboard Cards Row -->
-                <div class="flex space-x-6">
+                <div class="flex space-x-6 w-full">
                     <!-- Total Users -->
                     <div class="relative bg-blue-600 shadow-xl rounded-2xl p-6 w-72 flex flex-col items-center overflow-hidden">
                         <div class="absolute inset-0 opacity-30">
@@ -22,7 +24,7 @@
                         <h2 class="text-lg font-semibold text-white mb-4 z-10">Total Users</h2>
                         <p class="text-4xl font-bold text-white z-10">{{ total_users }}</p>
                     </div>
-                    <!-- Total Users -->
+                    <!-- Computer Science -->
                     <div class="relative bg-green-600 shadow-xl rounded-2xl p-6 w-72 flex flex-col items-center overflow-hidden">
                         <div class="absolute inset-0 opacity-30">
                             <svg class="w-full h-full" viewBox="0 0 200 200">
@@ -35,7 +37,7 @@
                         <h2 class="text-lg font-semibold text-white mb-4 z-10">Computer Science</h2>
                         <p class="text-4xl font-bold text-white z-10">{{ cs_count }}</p>
                     </div>
-                    <!-- Total Users -->
+                    <!-- Information Technology -->
                     <div class="relative bg-red-600 shadow-xl rounded-2xl p-6 w-72 flex flex-col items-center overflow-hidden">
                         <div class="absolute inset-0 opacity-30">
                             <svg class="w-full h-full" viewBox="0 0 200 200">
@@ -48,80 +50,148 @@
                         <h2 class="text-lg font-semibold text-white mb-4 z-10">Information Technology</h2>
                         <p class="text-4xl font-bold text-white z-10">{{ it_count }}</p>
                     </div>
-                <!-- Add your weekly report or other content here -->
+                </div>
+                <!-- Quick Students Table -->
+                <div class="bg-blue-600 rounded-2xl shadow-xl p-6 w-full">
+                    <!-- Header Section -->
+                    <div class="flex justify-between items-center mb-6">
+                        <div class="flex items-center space-x-3">
+                            <h3 class="text-xl font-bold text-white">Recently Added Students</h3>
+                        </div>
+                        <a href="{% url 'student-list' %}" 
+                        class="flex items-center space-x-2 text-sm text-blue-200 hover:text-white transition-colors duration-200">
+                            <span>View All</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                            </svg>
+                        </a>
+                    </div>
+
+                    <!-- Table Section -->
+                    <div class="overflow-hidden rounded-xl border border-blue-800/50">
+                        <table class="w-full">
+                            <thead>
+                                <tr class="bg-blue-950/50">
+                                    <th class="px-6 py-4 text-left text-sm font-semibold text-blue-200 border-b border-r border-blue-800/50">
+                                        Student ID
+                                    </th>
+                                    <th class="px-6 py-4 text-left text-sm font-semibold text-blue-200 border-b border-r border-blue-800/50">
+                                        Name
+                                    </th>
+                                    <th class="px-6 py-4 text-left text-sm font-semibold text-blue-200 border-b border-r border-blue-800/50">
+                                        Program
+                                    </th>
+                                    <th class="px-6 py-4 text-left text-sm font-semibold text-blue-200 border-b border-blue-800/50">
+                                        Year &amp; Section
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-blue-800/50">
+                                {% for student in quick_students %}
+                                <tr class="group hover:bg-blue-950/30 transition-colors duration-200">
+                                    <td class="px-6 py-4 text-sm font-medium text-white border-r border-blue-800/50">
+                                        {{ student.student_id }}
+                                    </td>
+                                    <td class="px-6 py-4 text-sm text-blue-100 border-r border-blue-800/50">
+                                        {{ student.first_name }} {{ student.middle_initial }} {{ student.last_name }}
+                                    </td>
+                                    <td class="px-6 py-4 text-sm text-blue-100 border-r border-blue-800/50">
+                                        <span class="px-2 py-1 rounded-lg text-xs font-medium
+                                            {% if student.program == 'Computer Science' %}
+                                                bg-green-500/50 text-green-200
+                                            {% else %}
+                                                bg-red-500/20 text-red-200
+                                            {% endif %}">
+                                            {{ student.program }}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 text-sm text-blue-100">
+                                        {{ student.year_section }}
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="4" class="px-6 py-8 text-center text-blue-200">
+                                        <p class="text-sm">No students found</p>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
-
-    <!-- Right Sticky Blue Container -->
-    <div class="fixed top-0 right-0 h-screen w-70 z-40">
-        <div class="bg-blue-700 rounded-l-2xl h-full flex flex-col items-center py-8 px-6 shadow-xl">
-            <!-- Profile Section -->
-            <div class="flex flex-col items-center mb-8 mt-4">
-                <div class="w-28 h-28 rounded-full overflow-hidden border-4 border-white mb-4">
-                    <img src="{% static 'assets/img/Default Profile.jpg' %}" 
-                         alt="User Profile">
-                </div>
-                <h2 class="text-lg font-bold text-white mb-1 text-center">{{ faculty_data.first_name }} {{ faculty_data.middle_initial }} {{ faculty_data.last_name }}</h2>
-                <p class="text-sm text-blue-100 text-center">CICT Faculty</p>
-            </div>
-            <!-- Calendar Section -->
-            <div class="bg-white rounded-2xl w-full p-4 mb-8 shadow">
-                <div class="flex justify-between items-center mb-2">
-                    <h3 class="text-base font-semibold text-gray-800">January, 2025</h3>
-                    <button class="text-gray-600 hover:text-gray-800">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" 
-                             stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                    </button>
-                </div>
-                <div class="grid grid-cols-7 gap-1 text-center text-xs">
-                    <div class="text-gray-500">S</div>
-                    <div class="text-gray-500">M</div>
-                    <div class="text-gray-500">T</div>
-                    <div class="text-gray-500">W</div>
-                    <div class="text-gray-500">T</div>
-                    <div class="text-gray-500">F</div>
-                    <div class="text-gray-500">S</div>
-                    {% for day in calendar_days %}
-                    <div class="relative p-2 
-                        {% if day.today %}bg-blue-100 text-blue-600 font-bold
-                        {% elif day.has_deadline %}bg-orange-100 hover:bg-orange-200
-                        {% else %}hover:bg-gray-100{% endif %}
-                        rounded-full cursor-pointer
-                        {% if day.has_deadline %}calendar-deadline{% endif %}"
-                        {% if day.has_deadline %}
-                            onclick="openDeadlineInfoModal(
-                                '{{ day.deadline_title|escapejs }}',
-                                '{{ day.deadline_description|default:"No description"|escapejs }}',
-                                '{{ day.deadline_date|escapejs }}',
-                                '{{ day.deadline_time|escapejs }}'
-                            )"
-                        {% endif %}
-                    >
-                        {{ day.date }}
-                        {% if day.has_deadline %}
-                        <div class="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-orange-500 rounded-full"></div>
-                        {% endif %}
+        <!-- Right Sticky Blue Container -->
+        <div class="fixed top-0 right-0 h-screen w-70 z-40">
+            <div class="bg-blue-700 rounded-l-2xl h-full flex flex-col items-center py-8 px-6 shadow-xl">
+                <!-- Profile Section -->
+                <div class="flex flex-col items-center mb-8 mt-4">
+                    <div class="w-28 h-28 rounded-full overflow-hidden border-4 border-white mb-4">
+                        <img src="{% static 'assets/img/Default Profile.jpg' %}" 
+                             alt="User Profile">
                     </div>
-                    {% endfor %}
+                    <h2 class="text-lg font-bold text-white mb-1 text-center">{{ faculty_data.first_name }} {{ faculty_data.middle_initial }} {{ faculty_data.last_name }}</h2>
+                    <p class="text-sm text-blue-100 text-center">CICT Faculty</p>
                 </div>
-            </div>
-            <!-- Almost Due Section -->
-            <div class="bg-white rounded-2xl w-full p-4 shadow flex-1 flex flex-col">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-base font-semibold text-gray-800">Almost Due</h3>
-                    <a href="#" class="text-xs text-blue-600 hover:text-blue-800">View all</a>
-                </div>
-                <div class="space-y-3">
-                    {% for task in almost_due_tasks %}
-                    <div class="flex items-center">
-                        <div class="w-2 h-2 bg-{{ task.color }}-500 rounded-full mr-3"></div>
-                        <span class="text-sm text-gray-700">{{ task.name }}</span>
+                <!-- Calendar Section -->
+                <div class="bg-white rounded-2xl w-full p-4 mb-8 shadow">
+                    <div class="flex justify-between items-center mb-2">
+                        <h3 class="text-base font-semibold text-gray-800">January, 2025</h3>
+                        <button class="text-gray-600 hover:text-gray-800">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" 
+                                 stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                        </button>
                     </div>
-                    {% endfor %}
+                    <div class="grid grid-cols-7 gap-1 text-center text-xs">
+                        <div class="text-gray-500">S</div>
+                        <div class="text-gray-500">M</div>
+                        <div class="text-gray-500">T</div>
+                        <div class="text-gray-500">W</div>
+                        <div class="text-gray-500">T</div>
+                        <div class="text-gray-500">F</div>
+                        <div class="text-gray-500">S</div>
+                        {% for day in calendar_days %}
+                        <div class="relative p-2 
+                            {% if day.today %}bg-blue-100 text-blue-600 font-bold
+                            {% elif day.has_deadline %}bg-orange-100 hover:bg-orange-200
+                            {% else %}hover:bg-gray-100{% endif %}
+                            rounded-full cursor-pointer
+                            {% if day.has_deadline %}calendar-deadline{% endif %}"
+                            {% if day.has_deadline %}
+                                onclick="openDeadlineInfoModal(
+                                    '{{ day.deadline_title|escapejs }}',
+                                    '{{ day.deadline_description|default:"No description"|escapejs }}',
+                                    '{{ day.deadline_date|escapejs }}',
+                                    '{{ day.deadline_time|escapejs }}'
+                                )"
+                            {% endif %}
+                        >
+                            {{ day.date }}
+                            {% if day.has_deadline %}
+                            <div class="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-orange-500 rounded-full"></div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <!-- Almost Due Section -->
+                <div class="bg-white rounded-2xl w-full p-4 shadow flex-1 flex flex-col">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-base font-semibold text-gray-800">Almost Due</h3>
+                        <a href="#" class="text-xs text-blue-600 hover:text-blue-800">View all</a>
+                    </div>
+                    <div class="space-y-3">
+                        {% for task in almost_due_tasks %}
+                        <div class="flex items-center">
+                            <div class="w-2 h-2 bg-{{ task.color }}-500 rounded-full mr-3"></div>
+                            <span class="text-sm text-gray-700">{{ task.name }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
                 </div>
             </div>
         </div>

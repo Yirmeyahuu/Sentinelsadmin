@@ -1,9 +1,141 @@
 {% extends 'Faculty/faculty-base.html' %}
 {% load static %}
 
+<title>{% block title %}SENTINELS | Students{% endblock %}</title>
+
 {% block content %}
 
-<!-- Replace the existing dashboard cards section -->
+<!-- Archive Confirmation Modal -->
+<div id="archiveModal" class="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 hidden z-50">
+    <div class="bg-white p-6 rounded-lg shadow-lg w-96">
+        <h2 class="text-lg font-bold text-gray-900 mb-4">Archive Student</h2>
+        <p class="text-gray-700 mb-6">Are you sure you want to archive this student? It will be temporarily stored in the archive.</p>
+        <div class="flex justify-end space-x-4">
+            <button onclick="closeArchiveModal()" class="text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-gray-800 dark:hover:bg-gray-700 dark:focus:ring-gray-700 dark:border-gray-700">Cancel</button>
+            <a id="confirmArchiveBtn" href="#" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">Confirm</a>
+        </div>
+    </div>
+</div>
+
+<!-- Add Student Modal -->
+<div id="modal" class="fixed inset-0 flex justify-center items-center hidden z-50">
+    <!-- Backdrop with blur effect -->
+    <div class="fixed inset-0 backdrop-blur-sm bg-gray-900/50"></div>
+    
+    <!-- Modal Content -->
+    <div class="bg-gray-100 border border-white p-12 rounded-3xl shadow-lg w-1/2 z-10">
+        <h2 class="text-xl font-bold mb-4 text-blue-500">Add Student</h2>
+        <div class="border-t border-blue-500 p-2 mt-auto"></div>
+        <form id="studentForm" action="{% url 'add_student' %}" method="POST">
+            {% csrf_token %}
+            <div class="grid grid-cols-2 gap-4">
+                <!-- Student ID -->
+                <div>
+                    <label class="block text-sm font-bold mb-2 text-blue-500">Student ID <span> (e.g. 12-1234-56) </span></label>
+                    <input type="text" name="student_id" placeholder="Enter Student ID" class="w-full p-4 border border-gray-300 rounded-2xl" required>
+                </div>
+                <!-- First Name -->
+                <div>
+                    <label class="block text-sm font-bold mb-2 text-blue-500">First Name</label>
+                    <input type="text" name="first_name" placeholder="Enter First Name" class="w-full p-4 border border-gray-300 rounded-2xl" required>
+                </div>
+                <!-- Last Name -->
+                <div>
+                    <label class="block text-sm font-bold mb-2 text-blue-500">Last Name</label>
+                    <input type="text" name="last_name" placeholder="Enter Last Name" class="w-full p-4 border border-gray-300 rounded-2xl" required>
+                </div>
+                <!-- Middle Initial -->
+                <div>
+                    <label class="block text-sm font-bold mb-2 text-blue-500">Middle Initial</label>
+                    <input type="text" name="middle_initial" placeholder="Enter Middle Initial" class="w-full p-4 border border-gray-300 rounded-2xl">
+                </div>
+                <!-- Program -->
+                <div>
+                    <label class="block text-sm font-bold mb-2 text-blue-500">Program</label>
+                    <select name="program" class="w-full p-4 border border-gray-300 rounded-2xl" required>
+                        <option value="" disabled selected>-Select Option-</option>
+                        <option value="Computer Science">Computer Science</option>
+                        <option value="Information Technology">Information Technology</option>
+                    </select>
+                </div>
+                <!-- Year & Section -->
+                <div>
+                    <label class="block text-sm font-bold mb-2 text-blue-500">Year & Section <span> (Ex. 3A) </span></label>
+                    <input type="text" name="year_section" placeholder="Enter Year and Section" class="w-full p-4 border border-gray-300 rounded-2xl" required>
+                </div>
+                <!-- Semester -->
+                <div>
+                    <label class="block text-sm font-bold mb-2 text-blue-500">Semester</label>
+                    <select name="semester" class="w-full p-4 border border-gray-300 rounded-2xl" required>
+                        <option value="" disabled selected>-Select Option-</option>
+                        <option value="1st Semester">1st Semester</option>
+                        <option value="2nd Semester">2nd Semester</option>
+                    </select>
+                </div>
+            </div>
+            <!-- Buttons -->
+            <div class="flex justify-end mt-6">
+                <button type="button" onclick="closeModal()" class="text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2">Cancel</button>
+                <button type="submit" class="text-white bg-blue-800 hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2">Add Student</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Edit Student Modal -->
+<div id="editStudentModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center hidden z-50">
+    <div class="bg-white rounded-lg p-6 w-96">
+        <h2 class="text-xl font-bold mb-4">Edit Student</h2>
+        <form id="editStudentForm" method="POST">
+            <form id="editStudentForm" method="POST">
+                {% csrf_token %}
+                <input type="hidden" name="student_id" id="edit-student-id">
+
+                <div class="mb-2">
+                    <label class="block text-sm">First Name</label>
+                    <input type="text" name="first_name" id="edit-first-name" class="w-full p-2 border rounded">
+                </div>
+
+                <div class="mb-2">
+                    <label class="block text-sm">Last Name</label>
+                    <input type="text" name="last_name" id="edit-last-name" class="w-full p-2 border rounded">
+                </div>
+
+                <div class="mb-2">
+                    <label class="block text-sm">Middle Initial</label>
+                    <input type="text" name="middle_initial" id="edit-middle-initial" class="w-full p-2 border rounded">
+                </div>
+
+                <div class="mb-2">
+                    <label class="block text-sm">Program</label>
+                    <select name="program" id="edit-program" class="w-full p-2 border rounded">
+                        <option value="Computer Science">Computer Science</option>
+                        <option value="Information Technology">Information Technology</option>
+                    </select>
+                </div>
+
+                <div class="mb-2">
+                    <label class="block text-sm">Year & Section</label>
+                    <input type="text" name="year_section" id="edit-year-section" class="w-full p-2 border rounded">
+                </div>
+
+                <div class="mb-2">
+                    <label class="block text-sm">Semester</label>
+                    <select name="semester" id="edit-semester" class="w-full p-2 border rounded">
+                        <option value="1st Semester">1st Semester</option>
+                        <option value="2nd Semester">2nd Semester</option>
+                    </select>
+                </div>
+
+                <div class="flex justify-end">
+                    <button type="button" onclick="closeEditModal()" class="mr-2 text-gray-500">Cancel</button>
+                    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">Save Changes</button>
+                </div>
+            </form>
+    </div>
+</div>
+
+<!-- Dashboard Cards -->
 <div class="flex flex-col items-center space-y-4">
     <!-- Row 1 -->
     <div class="flex space-x-4">
@@ -72,72 +204,8 @@
 </div>
 
 
-<!-- Archive Confirmation Modal -->
-<div id="archiveModal" class="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 hidden z-50">
-    <div class="bg-white p-6 rounded-lg shadow-lg w-96">
-        <h2 class="text-lg font-bold text-gray-900 mb-4">Archive Student</h2>
-        <p class="text-gray-700 mb-6">Are you sure you want to archive this student? It will be temporarily stored in the archive.</p>
-        <div class="flex justify-end space-x-4">
-            <button onclick="closeArchiveModal()" class="text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-gray-800 dark:hover:bg-gray-700 dark:focus:ring-gray-700 dark:border-gray-700">Cancel</button>
-            <a id="confirmArchiveBtn" href="#" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">Confirm</a>
-        </div>
-    </div>
-</div>
 
-<!-- Edit Student Modal -->
-<div id="editStudentModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center hidden z-50">
-    <div class="bg-white rounded-lg p-6 w-96">
-        <h2 class="text-xl font-bold mb-4">Edit Student</h2>
-        <form id="editStudentForm" method="POST">
-            <form id="editStudentForm" method="POST">
-                {% csrf_token %}
-                <input type="hidden" name="student_id" id="edit-student-id">
-
-                <div class="mb-2">
-                    <label class="block text-sm">First Name</label>
-                    <input type="text" name="first_name" id="edit-first-name" class="w-full p-2 border rounded">
-                </div>
-
-                <div class="mb-2">
-                    <label class="block text-sm">Last Name</label>
-                    <input type="text" name="last_name" id="edit-last-name" class="w-full p-2 border rounded">
-                </div>
-
-                <div class="mb-2">
-                    <label class="block text-sm">Middle Initial</label>
-                    <input type="text" name="middle_initial" id="edit-middle-initial" class="w-full p-2 border rounded">
-                </div>
-
-                <div class="mb-2">
-                    <label class="block text-sm">Program</label>
-                    <select name="program" id="edit-program" class="w-full p-2 border rounded">
-                        <option value="Computer Science">Computer Science</option>
-                        <option value="Information Technology">Information Technology</option>
-                    </select>
-                </div>
-
-                <div class="mb-2">
-                    <label class="block text-sm">Year & Section</label>
-                    <input type="text" name="year_section" id="edit-year-section" class="w-full p-2 border rounded">
-                </div>
-
-                <div class="mb-2">
-                    <label class="block text-sm">Semester</label>
-                    <select name="semester" id="edit-semester" class="w-full p-2 border rounded">
-                        <option value="1st Semester">1st Semester</option>
-                        <option value="2nd Semester">2nd Semester</option>
-                    </select>
-                </div>
-
-                <div class="flex justify-end">
-                    <button type="button" onclick="closeEditModal()" class="mr-2 text-gray-500">Cancel</button>
-                    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">Save Changes</button>
-                </div>
-            </form>
-
-    </div>
-</div>
-
+<!-- Main Content-->
 <div class="p-6 ml-20">
     <div class="bg-blue-600 shadow-2xl rounded-2xl p-6">
         <div class="flex justify-between items-center mb-4">
@@ -173,7 +241,7 @@
                     </button>
                 </form>
                 <!-- Add Button -->
-                <button class="bg-blue-800 text-white ms-2 px-6 py-2 shadow-lg rounded-2xl hover:bg-blue-700 transition duration-200" onclick="openModal()">Add +</button>
+                <button class="bg-blue-800 text-white ms-2 px-6 py-2 shadow-lg rounded-2xl cursor-pointer hover:bg-blue-700 transition duration-200" onclick="openModal()">Add +</button>
             </div>
         </div>
 
@@ -194,7 +262,7 @@
                     {% for student in students %}
                         <tr class="studentRow text-white">
                             <td class="border border-blue-500 p-2 text-center whitespace-nowrap">{{ student.student_id }}</td>
-                            <td class="border border-blue-500 p-2 text-center whitespace-nowrap">{{ student.first_name }} {{ student.middle_initial }} {{ student.last_name }}</td>
+                            <td class="border border-blue-500 pl-14 pr-2 text-left whitespace-nowrap">{{ student.first_name }} {{ student.middle_initial }} {{ student.last_name }}</td>
                             <td class="border border-blue-500 p-2 text-center whitespace-nowrap">{{ student.program }}</td>
                             <td class="border border-blue-500 p-2 text-center whitespace-nowrap">{{ student.year_section }}</td>
                             <td class="border border-blue-500 p-2 text-center whitespace-nowrap">{{ student.semester }}</td>
@@ -224,75 +292,6 @@
 <div id="successNotification" class="hidden p-4 mb-4 text-sm text-green-800 rounded-lg bg-green-50 dark:bg-gray-800 dark:text-green-400 fixed top-5 right-5 shadow-lg" role="alert">
     <span class="font-medium">Success!</span> Student <span id="studentIdSpan"></span> has been added.
 </div>
-
-
-
-
-<!-- Add Student Modal -->
-<div id="modal" class="fixed inset-0 flex justify-center items-center hidden z-50">
-    <!-- Backdrop with blur effect -->
-    <div class="fixed inset-0 backdrop-blur-sm bg-gray-900/50"></div>
-    
-    <!-- Modal Content -->
-    <div class="bg-gray-100 border border-white p-12 rounded-3xl shadow-lg w-1/2 z-10">
-        <h2 class="text-xl font-bold mb-4 text-blue-500">Add Student</h2>
-        <div class="border-t border-blue-500 p-2 mt-auto"></div>
-        <form id="studentForm" action="{% url 'add_student' %}" method="POST">
-            {% csrf_token %}
-            <div class="grid grid-cols-2 gap-4">
-                <!-- Student ID -->
-                <div>
-                    <label class="block text-sm font-bold mb-2 text-blue-500">Student ID <span> (e.g. 12-1234-56) </span></label>
-                    <input type="text" name="student_id" placeholder="Enter Student ID" class="w-full p-4 border border-gray-300 rounded-2xl" required>
-                </div>
-                <!-- First Name -->
-                <div>
-                    <label class="block text-sm font-bold mb-2 text-blue-500">First Name</label>
-                    <input type="text" name="first_name" placeholder="Enter First Name" class="w-full p-4 border border-gray-300 rounded-2xl" required>
-                </div>
-                <!-- Last Name -->
-                <div>
-                    <label class="block text-sm font-bold mb-2 text-blue-500">Last Name</label>
-                    <input type="text" name="last_name" placeholder="Enter Last Name" class="w-full p-4 border border-gray-300 rounded-2xl" required>
-                </div>
-                <!-- Middle Initial -->
-                <div>
-                    <label class="block text-sm font-bold mb-2 text-blue-500">Middle Initial</label>
-                    <input type="text" name="middle_initial" placeholder="Enter Middle Initial" class="w-full p-4 border border-gray-300 rounded-2xl">
-                </div>
-                <!-- Program -->
-                <div>
-                    <label class="block text-sm font-bold mb-2 text-blue-500">Program</label>
-                    <select name="program" class="w-full p-4 border border-gray-300 rounded-2xl" required>
-                        <option value="" disabled selected>-Select Option-</option>
-                        <option value="Computer Science">Computer Science</option>
-                        <option value="Information Technology">Information Technology</option>
-                    </select>
-                </div>
-                <!-- Year & Section -->
-                <div>
-                    <label class="block text-sm font-bold mb-2 text-blue-500">Year & Section <span> (Ex. 3A) </span></label>
-                    <input type="text" name="year_section" placeholder="Enter Year and Section" class="w-full p-4 border border-gray-300 rounded-2xl" required>
-                </div>
-                <!-- Semester -->
-                <div>
-                    <label class="block text-sm font-bold mb-2 text-blue-500">Semester</label>
-                    <select name="semester" class="w-full p-4 border border-gray-300 rounded-2xl" required>
-                        <option value="" disabled selected>-Select Option-</option>
-                        <option value="1st Semester">1st Semester</option>
-                        <option value="2nd Semester">2nd Semester</option>
-                    </select>
-                </div>
-            </div>
-            <!-- Buttons -->
-            <div class="flex justify-end mt-6">
-                <button type="button" onclick="closeModal()" class="text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2">Cancel</button>
-                <button type="submit" class="text-white bg-blue-800 hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2">Add Student</button>
-            </div>
-        </form>
-    </div>
-</div>
-
 
 
 

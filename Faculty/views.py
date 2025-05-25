@@ -122,8 +122,6 @@ def Faculty_home(request):
     
     cal = calendar.monthcalendar(current_year, current_month)
     calendar_days = []
-    
-    # ...existing code...
     for week in cal:
         for day in week:
             if day != 0:
@@ -141,6 +139,21 @@ def Faculty_home(request):
                     })
                 calendar_days.append(day_data)
 
+    # --- Quick Students Table Logic ---
+    quick_students = []
+    if faculty_data:
+        faculty_program = faculty_data.get('program')
+        faculty_year_section = faculty_data.get('year_section')
+        if faculty_program and faculty_year_section:
+            students_ref = db.collection("Registered_Students")
+            students_query = (
+                students_ref
+                .where("program", "==", faculty_program)
+                .where("year_section", "==", faculty_year_section)
+                .order_by("created_at", direction=firestore.Query.DESCENDING)
+                .limit(3)
+            )
+            quick_students = [doc.to_dict() for doc in students_query.stream()]
 
     return render(request, 'Home/faculty-home.html', {
         "faculty_data": faculty_data,
@@ -152,10 +165,9 @@ def Faculty_home(request):
         "notifications": notifications,
         "unseen_count": unseen_count,
         "current_month": current_date.strftime('%B'),
-        "current_year": current_year
+        "current_year": current_year,
+        "quick_students": quick_students,  # Pass to template for quick actions table
     })
-
-# views.py
 
 
 @csrf_exempt  # If you use POST and CSRF token in the form, you can remove this decorator
@@ -292,8 +304,8 @@ def add_student(request):
             "program": program,
             "year_section": year_section,
             "semester": semester,
+            "created_at": firestore.SERVER_TIMESTAMP,
         })
-        # Optionally add a Django message here
         messages.success(request, f"Student {student_id} added successfully!")
         return redirect("student-list")
     return redirect("student-list")
@@ -579,17 +591,14 @@ def activity_page(request):
 
 @faculty_required
 def accept_student(request, student_id):
-    """Accept student and move to Registered_Students collection"""
     pending_ref = db.collection("Pending Students").document(student_id)
     student = pending_ref.get()
-
     if student.exists:
-        # Move to Registered_Students
-        db.collection("Registered_Students").document(student_id).set(student.to_dict())
-        # Delete from Pending Students
+        student_data = student.to_dict()
+        student_data["created_at"] = firestore.SERVER_TIMESTAMP  # <-- Add this line
+        db.collection("Registered_Students").document(student_id).set(student_data)
         pending_ref.delete()
         
-        # Add success notification
         notification = {
             "message": f"Student {student.to_dict()['first_name']} {student.to_dict()['last_name']} has been accepted and registered.",
             "timestamp": firestore.SERVER_TIMESTAMP,
