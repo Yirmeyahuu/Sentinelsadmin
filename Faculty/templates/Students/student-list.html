@@ -112,6 +112,28 @@
     </div>
 </div>
 
+<!-- Move Student Modal -->
+<div id="moveModal" class="fixed inset-0 flex items-center justify-center bg-gray-900/70 hidden z-50">
+    <div class="bg-blue-900 p-6 rounded-lg shadow-lg w-96">
+        <h2 class="text-lg font-bold text-white mb-4">Move Student</h2>
+        <form id="moveStudentForm" method="POST" action="{% url 'move_student' %}">
+            {% csrf_token %}
+            <input type="hidden" name="student_id" id="move-student-id">
+            <label class="block mb-2 text-white">Move to:</label>
+            <select name="destination" id="move-destination" class="w-full p-2 border rounded mb-4 text-white" required>
+                <option value="" disabled selected>Select destination</option>
+                <option value="continuing">Continuing</option>
+                <option value="dropout">Drop-out</option>
+                <option value="archive">Archive</option>
+            </select>
+            <div class="flex justify-end space-x-2">
+                <button type="button" onclick="closeMoveModal()" class="bg-gray-300 text-gray-700 px-4 py-2 rounded">Cancel</button>
+                <button type="submit" class="bg-blue-700 text-white px-4 py-2 rounded">Move</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <!-- Dashboard Cards -->
 <div class="flex flex-col items-center space-y-4">
     <!-- Row 1 -->
@@ -245,11 +267,18 @@
                             <td class="border border-blue-500 p-2 text-center whitespace-nowrap">{{ student.semester }}</td>
                             <td class="border border-blue-500 p-2 text-center whitespace-nowrap">
                                 <div class="flex items-center justify-center space-x-3">
-                                    <button onclick="openEditModal('{{ student.student_id }}', '{{ student.first_name }}', '{{ student.middle_initial }}', '{{ student.last_name }}', '{{ student.program }}', '{{ student.year_section }}', '{{ student.semester }}')"  class="text-gray-200 hover:text-blue-600">
-                                        <!-- Edit SVG -->
+                                    <button onclick="openEditModal('{{ student.student_id }}', '{{ student.first_name }}', '{{ student.middle_initial }}', '{{ student.last_name }}', '{{ student.program }}', '{{ student.year_section }}', '{{ student.semester }}')"  class="text-gray-200 hover:text-blue-800">
+                                        <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                            <path stroke="currentColor" stroke-linecap="square" stroke-linejoin="round" stroke-width="2" d="M7 19H5a1 1 0 0 1-1-1v-1a3 3 0 0 1 3-3h1m4-6a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm7.441 1.559a1.907 1.907 0 0 1 0 2.698l-6.069 6.069L10 19l.674-3.372 6.07-6.07a1.907 1.907 0 0 1 2.697 0Z"/>
+                                          </svg>                                          
                                     </button>
-                                    <button href="/archive/" onclick="openArchiveModal('{% url 'archive_student' student.student_id %}')" class="text-gray-200 hover:text-green-600">
-                                        <!-- Archive SVG -->
+                                    <!-- Move Button -->
+                                    <button type="button"
+                                    onclick="openMoveModal('{{ student.student_id }}')"
+                                    class="text-gray-200 hover:text-yellow-500">
+                                    <svg class="w-6 h-6 text-white hover:text-blue-400 transition-all ease-in-out duration-150 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 14v4.833A1.166 1.166 0 0 1 16.833 20H5.167A1.167 1.167 0 0 1 4 18.833V7.167A1.166 1.166 0 0 1 5.167 6h4.618m4.447-2H20v5.768m-7.889 2.121 7.778-7.778"/>
+                                      </svg>                                      
                                     </button>
                                 </div>
                             </td>
@@ -474,6 +503,17 @@
     // Set initial progress to 0% (This will later be dynamic)
     updateProgress(0);
 </script>
+
+<!-- Move Modal-->
+<script>
+    function openMoveModal(studentId) {
+        document.getElementById('move-student-id').value = studentId;
+        document.getElementById('moveModal').classList.remove('hidden');
+    }
+    function closeMoveModal() {
+        document.getElementById('moveModal').classList.add('hidden');
+    }
+    </script>
 
 
 {% endblock %}

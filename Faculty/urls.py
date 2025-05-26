@@ -32,6 +32,9 @@ urlpatterns = [
     #URLS FOR STUDENT DASHBOARD
     path("dashboard/", views.student_dashboard, name="student-dashboard"),
 
+
+    path("move-student/", views.move_student, name="move_student"),
+
     
 
 

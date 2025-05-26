@@ -711,3 +711,32 @@ def faculty_account(request):
 def handle_image_upload(image):
     # Implement your image upload logic
     pass
+
+
+@faculty_required
+def move_student(request):
+    if request.method == "POST":
+        student_id = request.POST.get("student_id")
+        destination = request.POST.get("destination")
+        student_ref = db.collection("Registered_Students").document(student_id)
+        student = student_ref.get()
+        if not student.exists:
+            messages.error(request, "Student not found.")
+            return redirect("student-list")
+        student_data = student.to_dict()
+        # Move to the selected collection
+        if destination == "continuing":
+            messages.info(request, "Student is already marked as Continuing.")
+            # Optionally, you could update a status field here if you want
+        elif destination == "dropout":
+            db.collection("Drop-out Students").document(student_id).set(student_data)
+            student_ref.delete()
+            messages.success(request, "Student moved to Drop-out Students successfully!")
+        elif destination == "archive":
+            db.collection("Archived Students").document(student_id).set(student_data)
+            student_ref.delete()
+            messages.success(request, "Student moved to Archived Students successfully!")
+        else:
+            messages.error(request, "Invalid destination.")
+            return redirect("student-list")
+    return redirect("student-list")
