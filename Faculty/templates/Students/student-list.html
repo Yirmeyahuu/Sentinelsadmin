@@ -18,7 +18,7 @@
 </div>
 
 <!-- Add Student Modal -->
-<div id="modal" class="fixed inset-0 flex justify-center items-center hidden z-50">
+<div id="modal" class="fixed inset-0 flex justify-center bg-gray-900/60 items-center hidden z-50">
     <!-- Backdrop with blur effect -->
     <div class="fixed inset-0 backdrop-blur-sm bg-gray-900/50"></div>
     
@@ -60,61 +60,45 @@
 </div>
 
 <!-- Edit Student Modal -->
-<div id="editStudentModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center hidden z-50">
-    <div class="bg-white rounded-lg p-6 w-96">
-        <h2 class="text-xl font-bold mb-4">Edit Student</h2>
+<div id="editStudentModal" class="fixed inset-0 flex justify-center bg-gray-900/60 items-center hidden z-50">
+    <!-- Backdrop with blur effect -->
+    <div class="fixed inset-0 backdrop-blur-sm bg-gray-900/50"></div>
+    <!-- Modal Content -->
+    <div class="bg-gray-100 border border-white p-12 rounded-3xl shadow-lg w-1/2 z-10">
+        <h2 class="text-xl font-bold mb-4 text-blue-500">Edit Student</h2>
+        <div class="border-t border-blue-500 p-2 mt-auto"></div>
         <form id="editStudentForm" method="POST">
-            <form id="editStudentForm" method="POST">
-                {% csrf_token %}
-                <input type="hidden" name="student_id" id="edit-student-id">
-
-                <div class="mb-2">
-                    <label class="block text-sm">First Name</label>
-                    <input type="text" name="first_name" id="edit-first-name" class="w-full p-2 border rounded">
+            {% csrf_token %}
+            <input type="hidden" name="student_id" id="edit-student-id">
+            <div class="grid grid-cols-2 gap-4">
+                <!-- First Name -->
+                <div>
+                    <label class="block text-sm font-bold mb-2 text-blue-500">First Name</label>
+                    <input type="text" name="first_name" id="edit-first-name" class="w-full p-4 border border-gray-300 rounded-2xl" required>
                 </div>
-
-                <div class="mb-2">
-                    <label class="block text-sm">Last Name</label>
-                    <input type="text" name="last_name" id="edit-last-name" class="w-full p-2 border rounded">
+                <!-- Last Name -->
+                <div>
+                    <label class="block text-sm font-bold mb-2 text-blue-500">Last Name</label>
+                    <input type="text" name="last_name" id="edit-last-name" class="w-full p-4 border border-gray-300 rounded-2xl" required>
                 </div>
-
-                <div class="mb-2">
-                    <label class="block text-sm">Middle Initial</label>
-                    <input type="text" name="middle_initial" id="edit-middle-initial" class="w-full p-2 border rounded">
+                <!-- Middle Initial -->
+                <div>
+                    <label class="block text-sm font-bold mb-2 text-blue-500">Middle Initial</label>
+                    <input type="text" name="middle_initial" id="edit-middle-initial" class="w-full p-4 border border-gray-300 rounded-2xl">
                 </div>
-
-                <div class="mb-2">
-                    <label class="block text-sm">Program</label>
-                    <select name="program" id="edit-program" class="w-full p-2 border rounded">
-                        <option value="Computer Science">Computer Science</option>
-                        <option value="Information Technology">Information Technology</option>
-                    </select>
-                </div>
-
-                <div class="mb-2">
-                    <label class="block text-sm">Year & Section</label>
-                    <input type="text" name="year_section" id="edit-year-section" class="w-full p-2 border rounded">
-                </div>
-
-                <div class="mb-2">
-                    <label class="block text-sm">Semester</label>
-                    <select name="semester" id="edit-semester" class="w-full p-2 border rounded">
-                        <option value="1st Semester">1st Semester</option>
-                        <option value="2nd Semester">2nd Semester</option>
-                    </select>
-                </div>
-
-                <div class="flex justify-end">
-                    <button type="button" onclick="closeEditModal()" class="mr-2 text-gray-500">Cancel</button>
-                    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">Save Changes</button>
-                </div>
-            </form>
+            </div>
+            <!-- Buttons -->
+            <div class="flex justify-end mt-6">
+                <button type="button" onclick="closeEditModal()" class="text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2">Cancel</button>
+                <button type="submit" class="text-white bg-blue-800 hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2">Save Changes</button>
+            </div>
+        </form>
     </div>
 </div>
 
 <!-- Move Student Modal -->
-<div id="moveModal" class="fixed inset-0 flex items-center justify-center bg-gray-900/70 hidden z-50">
-    <div class="bg-blue-900 p-6 rounded-lg shadow-lg w-96">
+<div id="moveModal" class="fixed inset-0 flex items-center justify-center bg-gray-900/80 hidden z-50">
+    <div class="bg-blue-700 p-6 rounded-lg shadow-lg w-96">
         <h2 class="text-lg font-bold text-white mb-4">Move Student</h2>
         <form id="moveStudentForm" method="POST" action="{% url 'move_student' %}">
             {% csrf_token %}
@@ -122,13 +106,13 @@
             <label class="block mb-2 text-white">Move to:</label>
             <select name="destination" id="move-destination" class="w-full p-2 border rounded mb-4 text-white" required>
                 <option value="" disabled selected>Select destination</option>
-                <option value="continuing">Continuing</option>
-                <option value="dropout">Drop-out</option>
-                <option value="archive">Archive</option>
+                <option value="continuing">Completed Students</option>
+                <option value="dropout">Drop-out Students</option>
+                <option value="archive">Archive Students</option>
             </select>
             <div class="flex justify-end space-x-2">
-                <button type="button" onclick="closeMoveModal()" class="bg-gray-300 text-gray-700 px-4 py-2 rounded">Cancel</button>
-                <button type="submit" class="bg-blue-700 text-white px-4 py-2 rounded">Move</button>
+                <button type="button" onclick="closeMoveModal()" class="bg-gray-300 text-gray-700 px-4 py-2 rounded-2xl">Cancel</button>
+                <button type="submit" class="bg-blue-900 text-white px-4 py-2 rounded-2xl">Move</button>
             </div>
         </form>
     </div>
@@ -267,8 +251,8 @@
                             <td class="border border-blue-500 p-2 text-center whitespace-nowrap">{{ student.semester }}</td>
                             <td class="border border-blue-500 p-2 text-center whitespace-nowrap">
                                 <div class="flex items-center justify-center space-x-3">
-                                    <button onclick="openEditModal('{{ student.student_id }}', '{{ student.first_name }}', '{{ student.middle_initial }}', '{{ student.last_name }}', '{{ student.program }}', '{{ student.year_section }}', '{{ student.semester }}')"  class="text-gray-200 hover:text-blue-800">
-                                        <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                    <button onclick="openEditModal('{{ student.student_id }}', '{{ student.first_name }}', '{{ student.middle_initial }}', '{{ student.last_name }}')"  class="text-gray-200 hover:text-blue-800">
+                                        <svg class="w-6 h-6 text-white hover:text-blue-400 transition-all ease-in-out duration-150" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
                                             <path stroke="currentColor" stroke-linecap="square" stroke-linejoin="round" stroke-width="2" d="M7 19H5a1 1 0 0 1-1-1v-1a3 3 0 0 1 3-3h1m4-6a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm7.441 1.559a1.907 1.907 0 0 1 0 2.698l-6.069 6.069L10 19l.674-3.372 6.07-6.07a1.907 1.907 0 0 1 2.697 0Z"/>
                                           </svg>                                          
                                     </button>
@@ -469,9 +453,6 @@
         document.getElementById("edit-first-name").value = firstName;
         document.getElementById("edit-middle-initial").value = middleInitial;
         document.getElementById("edit-last-name").value = lastName;
-        document.getElementById("edit-program").value = program;
-        document.getElementById("edit-year-section").value = yearSection;
-        document.getElementById("edit-semester").value = semester;
 
         // Set form action dynamically
         document.getElementById("editStudentForm").action = `/Student/edit/${id}/`;

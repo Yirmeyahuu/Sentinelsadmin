@@ -725,9 +725,9 @@ def move_student(request):
             return redirect("student-list")
         student_data = student.to_dict()
         # Move to the selected collection
-        if destination == "continuing":
-            messages.info(request, "Student is already marked as Continuing.")
-            # Optionally, you could update a status field here if you want
+        if destination == "completed":
+            db.collection("Completed Students").document(student_id).set(student_data)
+            messages.info(request, "Student moved to Completed Students successfully.")
         elif destination == "dropout":
             db.collection("Drop-out Students").document(student_id).set(student_data)
             student_ref.delete()
