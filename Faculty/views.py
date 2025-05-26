@@ -155,6 +155,22 @@ def Faculty_home(request):
             )
             quick_students = [doc.to_dict() for doc in students_query.stream()]
 
+    # --- Quick Pending Students Table Logic ---
+    quick_pending_students = []
+    if faculty_data:
+        faculty_program = faculty_data.get('program')
+        faculty_year_section = faculty_data.get('year_section')
+        if faculty_program and faculty_year_section:
+            pending_ref = db.collection("Pending Students")
+            pending_query = (
+                pending_ref
+                .where("program", "==", faculty_program)
+                .where("year_section", "==", faculty_year_section)
+                .order_by("created_at", direction=firestore.Query.DESCENDING)
+                .limit(3)
+            )
+            quick_pending_students = [doc.to_dict() for doc in pending_query.stream()]
+
     return render(request, 'Home/faculty-home.html', {
         "faculty_data": faculty_data,
         "total_users": total_users,
@@ -166,7 +182,8 @@ def Faculty_home(request):
         "unseen_count": unseen_count,
         "current_month": current_date.strftime('%B'),
         "current_year": current_year,
-        "quick_students": quick_students,  # Pass to template for quick actions table
+        "quick_students": quick_students,
+        "quick_pending_students": quick_pending_students,
     })
 
 
@@ -287,14 +304,23 @@ def student_dashboard (request):
 @faculty_required
 def add_student(request):
     if request.method == "POST":
-        # Get form data and add to Firestore
+        # Get form data
         student_id = request.POST.get("student_id")
         first_name = request.POST.get("first_name")
         last_name = request.POST.get("last_name")
         middle_initial = request.POST.get("middle_initial")
-        program = request.POST.get("program")
-        year_section = request.POST.get("year_section")
-        semester = request.POST.get("semester")
+
+        # Get faculty's assigned program, year_section, and semester
+        faculty_id = request.user.username
+        users_ref = db.collection('Authorized Faculty')
+        query = users_ref.where('faculty_id', '==', faculty_id).limit(1).get()
+        faculty_data = None
+        if query:
+            faculty_doc = query[0]
+            faculty_data = faculty_doc.to_dict()
+        program = faculty_data.get("program")
+        year_section = faculty_data.get("year_section")
+        semester = faculty_data.get("semester")  # Make sure this exists in your faculty data
 
         db.collection("Registered_Students").document(student_id).set({
             "student_id": student_id,
@@ -683,10 +709,5 @@ def faculty_account(request):
     })
 
 def handle_image_upload(image):
-    """
-    Implement your image upload logic here
-    This could involve uploading to Firebase Storage or another storage solution
-    Return the URL of the uploaded image
-    """
     # Implement your image upload logic
     pass

@@ -14,7 +14,8 @@ def StudentRegister(request):
             "middle_initial": request.POST.get("middle_initial"),
             "program": request.POST.get("program"),
             "year_section": request.POST.get("year_section"),
-            "semester": request.POST.get("semester")
+            "semester": request.POST.get("semester"),
+            "created_at": firestore.SERVER_TIMESTAMP,
         }
 
         db.collection("Pending Students").document(student_data["student_id"]).set(student_data)
