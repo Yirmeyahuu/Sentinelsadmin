@@ -227,3 +227,26 @@ def activity_page(request):
 
     return render(request, "Activities/Superadmin_Activity_List.html",
                   {"activities_novice": activities_novice, "activities_junior": activities_junior, "activities_senior": activities_senior})
+
+@superadmin_required
+def student_status(request):
+    # Set the section you want to display
+    program = "Computer Science"
+    year_section = "3A"
+
+    # Fetch continuing students for this section
+    continuing_ref = db.collection("Registered_Students")
+    continuing_query = continuing_ref.where("program", "==", program).where("year_section", "==", year_section)
+    continuing_students = [{**doc.to_dict(), 'status': 'continuing', 'id': doc.id} for doc in continuing_query.stream()]
+
+    # Fetch dropout students for this section
+    dropout_ref = db.collection("Drop-out Students")
+    dropout_query = dropout_ref.where("program", "==", program).where("year_section", "==", year_section)
+    dropout_students = [{**doc.to_dict(), 'status': 'dropout', 'id': doc.id} for doc in dropout_query.stream()]
+
+    all_students = continuing_students + dropout_students
+
+    return render(request, "Faculty/student-status.html", {
+        "students": all_students,
+        "section_label": f"{program} - {year_section}",
+    })

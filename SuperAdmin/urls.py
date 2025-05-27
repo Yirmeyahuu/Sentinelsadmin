@@ -16,4 +16,5 @@ urlpatterns = [
     path("ArchivedFaculty/", views.Archived_faculty_list, name="Faculty-Archived"),
     path("restore/<str:faculty_id>/", views.restore_faculty, name="restore_faculty"),
     path("edit/<str:faculty_id>/", views.edit_faculty, name="edit_faculty"),    
+    path('student-status/', views.student_status, name='student-status'),
 ]
