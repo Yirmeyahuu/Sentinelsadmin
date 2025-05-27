@@ -35,7 +35,5 @@ urlpatterns = [
 
     path("move-student/", views.move_student, name="move_student"),
 
-    
-
 
 ]
