@@ -171,6 +171,11 @@ def Faculty_home(request):
             )
             quick_pending_students = [doc.to_dict() for doc in pending_query.stream()]
 
+    leaderboard_students = [
+    {'name': 'Alice Cruz', 'points': 120},
+    {'name': 'Bob Reyes', 'points': 110},
+    ]
+
     return render(request, 'Home/faculty-home.html', {
         "faculty_data": faculty_data,
         "total_users": total_users,
@@ -184,6 +189,7 @@ def Faculty_home(request):
         "current_year": current_year,
         "quick_students": quick_students,
         "quick_pending_students": quick_pending_students,
+        "leaderboard_students": leaderboard_students,
     })
 
 
