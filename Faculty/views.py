@@ -219,9 +219,31 @@ def student_list(request):
     all_students_docs = all_students_ref.stream()
     total_users = sum(1 for _ in all_students_docs)
     
-    # Get faculty's assigned program and year_section
+    # Get faculty's assigned program, year_section, and semester
     faculty_program = faculty_data.get('program')
     faculty_year_section = faculty_data.get('year_section')
+    faculty_semester = faculty_data.get('semester')
+
+    # 1. All students in the program
+    program_total = db.collection("Registered_Students").where("program", "==", faculty_program).stream()
+    program_total = sum(1 for _ in program_total)
+
+    # 2. Students in program, year_section, semester
+    section_query = db.collection("Registered_Students") \
+        .where("program", "==", faculty_program) \
+        .where("year_section", "==", faculty_year_section) \
+        .where("semester", "==", faculty_semester)
+    section_total = sum(1 for _ in section_query.stream())
+
+    # 3 & 4. Active/Inactive students in that group
+    active_count = 0
+    inactive_count = 0
+    for doc in section_query.stream():
+        data = doc.to_dict()
+        if data.get("is_active"):
+            active_count += 1
+        else:
+            inactive_count += 1
 
     student_ref = db.collection("Registered_Students")
     filters = []
@@ -260,7 +282,11 @@ def student_list(request):
         "year_section_options": year_section_options,
         "semester_options": semester_options,
         "total_users": total_users,
-        "notifications": notifications, 
+        "notifications": notifications,
+        "program_total": program_total,
+        "section_total": section_total,
+        "active_count": active_count,
+        "inactive_count": inactive_count,
     })
 
 

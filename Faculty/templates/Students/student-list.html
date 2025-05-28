@@ -6,7 +6,7 @@
 {% block content %}
 
 <!-- Archive Confirmation Modal -->
-<div id="archiveModal" class="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 hidden z-50">
+<div id="archiveModal" class="fixed inset-0 flex items-center justify-center bg-gray-900/70 hidden z-50">
     <div class="bg-white p-6 rounded-lg shadow-lg w-96">
         <h2 class="text-lg font-bold text-gray-900 mb-4">Archive Student</h2>
         <p class="text-gray-700 mb-6">Are you sure you want to archive this student? It will be temporarily stored in the archive.</p>
@@ -18,12 +18,12 @@
 </div>
 
 <!-- Add Student Modal -->
-<div id="modal" class="fixed inset-0 flex justify-center bg-gray-900/60 items-center hidden z-50">
+<div id="modal" class="fixed inset-0 flex justify-center items-center hidden z-50">
     <!-- Backdrop with blur effect -->
-    <div class="fixed inset-0 backdrop-blur-sm bg-gray-900/50"></div>
+    <div class="fixed inset-0 backdrop-blur-sm bg-gray-900/70"></div>
     
     <!-- Modal Content -->
-    <div class="bg-gray-100 border border-white p-12 rounded-3xl shadow-lg w-1/2 z-10">
+    <div class="bg-gray-100 border border-white p-12 rounded-tl-4xl rounded-br-4xl shadow-lg w-1/2 z-10">
         <h2 class="text-xl font-bold mb-4 text-blue-500">Add Student</h2>
         <div class="border-t border-blue-500 p-2 mt-auto"></div>
         <form id="studentForm" action="{% url 'add_student' %}" method="POST">
@@ -118,83 +118,96 @@
     </div>
 </div>
 
-<!-- Dashboard Cards -->
-<div class="flex flex-col items-center space-y-4">
-    <!-- Row 1 -->
-    <div class="flex space-x-4">
-        <!-- Total Students Card -->
-        <div class="relative bg-blue-500 shadow-lg rounded-2xl p-4 w-64 flex flex-col items-center overflow-hidden">
-            <div class="absolute inset-0 opacity-30">
-                <svg class="w-full h-full" viewBox="0 0 200 200">
-                    <path fill="none" stroke="#3B82F6" stroke-width="8" d="M10 50 Q100 0, 190 50 T 390 50" />
-                    <path fill="none" stroke="#FACC15" stroke-width="8" d="M10 150 Q100 200, 190 150 T 390 150" />
-                </svg>
-            </div>
-            <div class="absolute -top-4 -left-6 w-16 h-16 bg-blue-900 blur-2xl opacity-90 rounded-full"></div>
-            <div class="absolute bottom-0 right-2 w-20 h-20 bg-blue-700 blur-2xl opacity-90 rounded-full"></div>
-            <h2 class="text-lg font-semibold text-white mb-2 z-10">Total Students</h2>
-            <p class="text-3xl font-bold text-white z-10">{{ total_users }}</p>
+<!-- Student Progress Modal -->
+<div id="progressModal" class="fixed inset-0 flex items-center justify-center bg-gray-900/70 hidden z-50">
+    <div class="bg-white p-8 rounded-tl-4xl rounded-br-4xl shadow-lg w-full max-w-md relative">
+        <button onclick="closeProgressModal()" class="absolute top-2 right-2 text-gray-400 hover:text-blue-700 text-2xl">&times;</button>
+        <h2 class="text-xl font-bold mb-2 text-sky-700" id="progressStudentName"></h2>
+        <div class="mb-4">
+            <!-- Example progress content, replace with real data as needed -->
+            <p class="text-gray-700 mb-2">Novice Progress: <span class="font-bold text-sky-700">80%</span></p>
+            <p class="text-gray-700 mb-2">Junior Progress: <span class="font-bold text-sky-700">60%</span></p>
+            <p class="text-gray-700 mb-2">Senior Progress: <span class="font-bold text-sky-700">40%</span></p>
         </div>
-
-        <!-- Computer Science Card -->
-        <div class="relative bg-blue-400 shadow-lg rounded-2xl p-4 w-64 flex flex-col items-center overflow-hidden">
-            <div class="absolute inset-0 opacity-30">
-                <svg class="w-full h-full" viewBox="0 0 200 200">
-                    <path fill="none" stroke="#3B82F6" stroke-width="8" d="M10 50 Q100 0, 190 50 T 390 50" />
-                    <path fill="none" stroke="#FACC15" stroke-width="8" d="M10 150 Q100 200, 190 150 T 390 150" />
-                </svg>
-            </div>
-            <div class="absolute -top-4 -left-6 w-16 h-16 bg-blue-900 blur-2xl opacity-90 rounded-full"></div>
-            <div class="absolute bottom-0 right-2 w-20 h-20 bg-blue-700 blur-2xl opacity-90 rounded-full"></div>
-            <h2 class="text-lg font-semibold text-white mb-2 z-10">Computer Science</h2>
-            <div class="relative w-20 h-20">
-                <svg class="w-full h-full" viewBox="0 0 100 100">
-                    <circle cx="50" cy="50" r="40" stroke="#ffffff" stroke-width="10" fill="transparent"/>
-                    <circle id="progressCS" cx="50" cy="50" r="40" stroke="#3B82F6" stroke-width="10" fill="transparent"
-                            stroke-dasharray="251.2" stroke-dashoffset="251.2"
-                            stroke-linecap="round" />
-                </svg>
-                <div class="absolute inset-0 flex justify-center items-center text-lg font-bold text-white">
-                    <span id="progressTextCS">0%</span>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Information Technology Card -->
-        <div class="relative bg-green-400 shadow-lg rounded-2xl p-4 w-64 flex flex-col items-center overflow-hidden">
-            <div class="absolute inset-0 opacity-30">
-                <svg class="w-full h-full" viewBox="0 0 200 200">
-                    <path fill="none" stroke="#3B82F6" stroke-width="8" d="M10 50 Q100 0, 190 50 T 390 50" />
-                    <path fill="none" stroke="#FACC15" stroke-width="8" d="M10 150 Q100 200, 190 150 T 390 150" />
-                </svg>
-            </div>
-            <div class="absolute -top-4 -left-6 w-16 h-16 bg-green-200 blur-2xl opacity-90 rounded-full"></div>
-            <div class="absolute bottom-0 right-2 w-20 h-20 bg-green-100 blur-2xl opacity-90 rounded-full"></div>
-            <h2 class="text-lg font-semibold text-white mb-2 z-10">Information Technology</h2>
-            <div class="relative w-20 h-20">
-                <svg class="w-full h-full" viewBox="0 0 100 100">
-                    <circle cx="50" cy="50" r="40" stroke="#ffffff" stroke-width="10" fill="transparent"/>
-                    <circle id="progressIT" cx="50" cy="50" r="40" stroke="#22c55e" stroke-width="10" fill="transparent"
-                            stroke-dasharray="251.2" stroke-dashoffset="251.2"
-                            stroke-linecap="round" />
-                </svg>
-                <div class="absolute inset-0 flex justify-center items-center text-lg font-bold text-white">
-                    <span id="progressTextIT">0%</span>
-                </div>
-            </div>
-        </div>
+        <button id="viewAllBtn" class="bg-blue-700 text-white px-6 py-2 rounded-xl hover:bg-blue-800 transition w-full font-semibold">
+            View all
+        </button>
     </div>
 </div>
 
 
+<!-- Table -->
+<div class="flex flex-col items-start w-full pl-28 pr-16">
+    <!-- Dashboard Cards Row -->
+    <div class="flex justify-center gap-x-8 w-full mb-8">
+        <!-- 1. All Students in Program -->
+        <div class="relative bg-blue-600 shadow-xl rounded-tl-4xl rounded-br-4xl p-6 w-72 flex flex-col items-center overflow-hidden">
+            <div class="absolute inset-0 opacity-30">
+                <svg class="w-full h-full" viewBox="0 0 200 200">
+                    <path fill="none" stroke="#3B82F6" stroke-width="8" d="M10 50 Q100 0, 190 50 T 390 50" />
+                    <path fill="none" stroke="#FACC15" stroke-width="8" d="M10 150 Q100 200, 190 150 T 390 150" />
+                </svg>
+            </div>
+            <div class="absolute -top-4 -left-6 w-16 h-16 bg-white blur-2xl opacity-90 rounded-full"></div>
+            <div class="absolute bottom-0 right-2 w-20 h-20 bg-sky-200 blur-2xl opacity-90 rounded-full"></div>
+            <h2 class="text-lg mt-2 mb-2 text-center font-semibold text-white mb-4 z-10">{{ faculty_data.program }}</h2>
+            <p class="text-4xl font-bold text-white z-10">{{ program_total }}</p>
+        </div>
 
-<!-- Main Content-->
-<div class="p-6 ml-20">
-    <div class="bg-blue-600 shadow-2xl rounded-2xl p-6">
+        <!-- 2. Students in Program, Year, Section, Semester -->
+        <div class="relative bg-sky-600 shadow-xl rounded-tl-4xl rounded-br-4xl p-6 w-72 flex flex-col items-center overflow-hidden">
+            <div class="absolute inset-0 opacity-30">
+                <svg class="w-full h-full" viewBox="0 0 200 200">
+                    <path fill="none" stroke="#D4F6FF" stroke-width="8" d="M10 50 Q100 0, 190 50 T 390 50" />
+                    <path fill="none" stroke="#C4E1F6" stroke-width="8" d="M10 150 Q100 200, 190 150 T 390 150" />
+                </svg>
+            </div>
+            <div class="absolute -top-4 -left-6 w-16 h-16 bg-white blur-2xl opacity-90 rounded-full"></div>
+            <div class="absolute bottom-0 right-2 w-20 h-20 bg-blue-700 blur-2xl opacity-90 rounded-full"></div>
+            <h2 class="text-lg font-semibold text-white text-center z-10">
+                {{ faculty_data.program }} {{ faculty_data.year_section }} — {{faculty_data.semester }}
+            </h2>
+            <p class="text-4xl font-bold text-white z-10">{{ section_total }}</p>
+        </div>
+
+        <!-- 3. Active Students -->
+        <div class="relative bg-green-500 shadow-xl rounded-tl-4xl rounded-br-4xl p-6 w-72 flex flex-col items-center overflow-hidden">
+            <div class="absolute inset-0 opacity-30">
+                <svg class="w-full h-full" viewBox="0 0 200 200">
+                    <path fill="none" stroke="#ECFAE5" stroke-width="8" d="M10 50 Q100 0, 190 50 T 390 50" />
+                    <path fill="none" stroke="#bbf7d0" stroke-width="8" d="M10 150 Q100 200, 190 150 T 390 150" />
+                </svg>
+            </div>
+            <div class="absolute -top-4 -left-6 w-16 h-16 bg-sky-200 blur-2xl opacity-90 rounded-full"></div>
+            <div class="absolute bottom-0 right-2 w-20 h-20 bg-green-100 blur-2xl opacity-90 rounded-full"></div>
+            <h2 class="text-lg mt-2 mb-2 text-center font-semibold text-white mb-4 z-10">Active Students</h2>
+            <p class="text-4xl font-bold text-white z-10">{{ active_count }}</p>
+        </div>
+
+        <!-- 4. Inactive Students -->
+        <div class="relative bg-red-500 shadow-xl rounded-tl-4xl rounded-br-4xl p-6 w-72 flex flex-col items-center overflow-hidden">
+            <div class="absolute inset-0 opacity-30">
+                <svg class="w-full h-full" viewBox="0 0 200 200">
+                    <path fill="none" stroke="#6b7280" stroke-width="8" d="M10 50 Q100 0, 190 50 T 390 50" />
+                    <path fill="none" stroke="#d1d5db" stroke-width="8" d="M10 150 Q100 200, 190 150 T 390 150" />
+                </svg>
+            </div>
+            <div class="absolute -top-4 -left-6 w-16 h-16 bg-white blur-2xl opacity-90 rounded-full"></div>
+            <div class="absolute bottom-0 right-2 w-20 h-20 bg-gray-300 blur-2xl opacity-90 rounded-full"></div>
+            <h2 class="text-lg mt-2 mb-2 text-center font-semibold text-white mb-4 z-10">Inactive Students</h2>
+            <p class="text-4xl font-bold text-white z-10">{{ inactive_count }}</p>
+        </div>
+    </div>
+
+
+
+    <!-- Main Content (Student Table) -->
+    <div class="bg-blue-600 shadow-2xl rounded-tl-4xl rounded-br-4xl p-6 w-full">
         <div class="flex justify-between items-center mb-4">
             <h2 class="text-xl font-bold text-white">
                 Registered Students - {{ faculty_data.program }} {{ faculty_data.year_section }}
             </h2>
+            <!-- ...filters and search bar... -->
             <div class="flex flex-wrap items-center gap-4">
                 <!-- Only Semester Filter -->
                 <form method="get" class="flex flex-wrap items-center gap-2">
@@ -227,9 +240,9 @@
                 <button class="bg-blue-800 text-white ms-2 px-6 py-2 shadow-lg rounded-2xl cursor-pointer hover:bg-blue-700 transition duration-200" onclick="openModal()">Add +</button>
             </div>
         </div>
-
         <!-- Student Table -->
         <div class="overflow-hidden rounded-2xl shadow-xl w-full ">
+            <!-- ...table code... -->
             <table class="w-full border-separate border-spacing-0 rounded-lg">
                 <thead>
                     <tr class="bg-blue-400 text-white">
@@ -243,7 +256,8 @@
                 </thead>
                 <tbody id="studentTableBody">
                     {% for student in students %}
-                        <tr class="studentRow text-white">
+                        <tr class="studentRow text-white hover:bg-blue-700 cursor-pointer transition"
+                            onclick="openProgressModal('{{ student.student_id }}', '{{ student.first_name }}', '{{ student.middle_initial }}', '{{ student.last_name }}')">
                             <td class="border border-blue-500 p-2 text-center whitespace-nowrap">{{ student.student_id }}</td>
                             <td class="border border-blue-500 pl-14 pr-2 text-left whitespace-nowrap">{{ student.first_name }} {{ student.middle_initial }} {{ student.last_name }}</td>
                             <td class="border border-blue-500 p-2 text-center whitespace-nowrap">{{ student.program }}</td>
@@ -494,7 +508,19 @@
     function closeMoveModal() {
         document.getElementById('moveModal').classList.add('hidden');
     }
-    </script>
+</script>
 
-
+<script>
+    function openProgressModal(studentId, firstName, middleInitial, lastName) {
+        document.getElementById('progressModal').classList.remove('hidden');
+        document.getElementById('progressStudentName').textContent = `${firstName} ${middleInitial} ${lastName} - Progress`;
+        // Set the "View all" button to redirect to the dashboard for this student
+        document.getElementById('viewAllBtn').onclick = function() {
+            window.location.href = `/student-dashboard/?student_id=${studentId}`;
+        };
+    }
+    function closeProgressModal() {
+        document.getElementById('progressModal').classList.add('hidden');
+    }
+</script>
 {% endblock %}

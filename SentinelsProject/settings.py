@@ -20,10 +20,12 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 #firestore-database
-cred = credentials.Certificate("C:/Users/ASUS/Desktop/Super_Admin/sentinels-a61ff-firebase-adminsdk-fbsvc-35c84e60a7.json")
+cred = credentials.Certificate("/Users/jeremiahpantaras/Documents/sentinels-project/sentinels-a61ff-firebase-adminsdk-fbsvc-aaf9572a3f.json")
 firebase_admin.initialize_app(cred)
 db = firestore.client()
 # Application definition
+
+
 
 AUTHENTICATION_BACKENDS = [
     'Login.auth_backend.FirestoreBackend',  # Custom backend for Faculty
@@ -43,14 +45,13 @@ INSTALLED_APPS = [
     'SuperAdmin',
     'Student',
     
-    
     'tailwind',
     'theme',
 ]
 
 TAILWIND_APP_NAME = 'theme'
 
-NPM_BIN_PATH = "C:/Program Files/nodejs/npm.cmd"
+NPM_BIN_PATH = "/usr/local/bin/npm"
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
