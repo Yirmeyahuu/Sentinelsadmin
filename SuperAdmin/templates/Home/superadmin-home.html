@@ -4,106 +4,223 @@
 <title>{% block title %}SENTINELS{% endblock %}</title>
 
 {% block content %}
-<div class="p-6 flex justify-center">
-    <div class="bg-blue-900 shadow-lg rounded-3xl p-6 max-w-4xl w-full">
 
-        <!-- Image Slider -->
-        <div x-data="slider" x-init="init()" class="relative rounded-lg overflow-hidden z-10">
-            <div class="w-full h-96 relative">
-                <template x-for="(image, index) in images" :key="index">
-                    <img x-show="activeSlide === index"
-                        :src="image"
-                        class="w-full h-full object-cover transition-opacity duration-700 opacity-0"
-                        :class="activeSlide === index ? 'opacity-100' : ''">
-                </template>
+<div class="p-0 pb-6 px-6 flex justify-center">
+    <div class="w-full max-w-8xl flex space-x-6 mx-auto">
+        <div class="flex-1 flex flex-col items-center">
+            <div class="flex flex-col items-center w-[1200px]">
+                <!-- Dashboard Cards Row -->
+                <div class="flex space-x-6 w-full">
+                    <!-- Total Students -->
+                    <div class="relative bg-blue-600 shadow-xl rounded-tl-4xl rounded-br-4xl p-6 w-72 flex flex-col items-center overflow-hidden">
+                        <div class="absolute inset-0 opacity-30">
+                            <svg class="w-full h-full" viewBox="0 0 200 200">
+                                <path fill="none" stroke="#1C82AD" stroke-width="8" d="M10 50 Q100 0, 190 50 T 390 50" />
+                                <path fill="none" stroke="#F3F3E0" stroke-width="8" d="M10 150 Q100 200, 190 150 T 390 150" />
+                            </svg>
+                        </div>
+                        <div class="absolute -top-4 -left-6 w-16 h-16 bg-sky-300 blur-2xl opacity-90 rounded-full"></div>
+                        <div class="absolute bottom-0 right-2 w-20 h-20 bg-sky-300 blur-2xl opacity-90 rounded-full"></div>
+                        <h2 class="text-xl font-semibold text-white mb-4 mt-2 z-10">Total Students</h2>
+                        <p class="text-4xl font-bold text-white z-10">{{ total_students }}</p>
+                    </div>
+                    <!-- Total Faculty -->
+                    <div class="relative bg-sky-500 shadow-xl rounded-tl-4xl rounded-br-4xl p-6 w-72 flex flex-col items-center overflow-hidden">
+                        <div class="absolute inset-0 opacity-30">
+                            <svg class="w-full h-full" viewBox="0 0 200 200">
+                                <path fill="none" stroke="#D4F6FF" stroke-width="8" d="M10 50 Q100 0, 190 50 T 390 50" />
+                                <path fill="none" stroke="#C4E1F6" stroke-width="8" d="M10 150 Q100 200, 190 150 T 390 150" />
+                            </svg>
+                        </div>
+                        <div class="absolute -top-4 -left-6 w-16 h-16 bg-blue-900 blur-2xl opacity-90 rounded-full"></div>
+                        <div class="absolute bottom-0 right-2 w-20 h-20 bg-blue-700 blur-2xl opacity-90 rounded-full"></div>
+                        <h2 class="text-xl font-semibold text-white mb-4 mt-2 z-10">Total Faculty</h2>
+                        <p class="text-4xl font-bold text-white z-10">{{ total_faculty }}</p>
+                    </div>
+                    <!-- Computer Science Students -->
+                    <div class="relative bg-orange-500 shadow-xl rounded-tl-4xl rounded-br-4xl p-6 w-72 flex flex-col items-center overflow-hidden">
+                        <div class="absolute inset-0 opacity-30">
+                            <svg class="w-full h-full" viewBox="0 0 200 200">
+                                <path fill="none" stroke="#F2F9FF" stroke-width="8" d="M10 50 Q100 0, 190 50 T 390 50" />
+                                <path fill="none" stroke="#A1E3F9" stroke-width="8" d="M10 150 Q100 200, 190 150 T 390 150" />
+                            </svg>
+                        </div>
+                        <div class="absolute -top-4 -left-6 w-16 h-16 bg-yellow-100 blur-2xl opacity-90 rounded-full"></div>
+                        <div class="absolute bottom-0 right-2 w-20 h-20 bg-yellow-100 blur-2xl opacity-90 rounded-full"></div>
+                        <h2 class="text-lg font-semibold text-center text-white z-10">Computer Science Students</h2>
+                        <p class="text-4xl font-bold text-white z-10">{{ cs_students }}</p>
+                    </div>
+                    <!-- Information Technology Students -->
+                    <div class="relative bg-red-600 shadow-xl rounded-tl-4xl rounded-br-4xl p-6 w-72 flex flex-col items-center overflow-hidden">
+                        <div class="absolute inset-0 opacity-30">
+                            <svg class="w-full h-full" viewBox="0 0 200 200">
+                                <path fill="none" stroke="#F2F9FF" stroke-width="8" d="M10 50 Q100 0, 190 50 T 390 50" />
+                                <path fill="none" stroke="#A1E3F9" stroke-width="8" d="M10 150 Q100 200, 190 150 T 390 150" />
+                            </svg>
+                        </div>
+                        <div class="absolute -top-4 -left-6 w-16 h-16 bg-purple-700 blur-2xl opacity-90 rounded-full"></div>
+                        <div class="absolute bottom-0 right-2 w-20 h-20 bg-purple-700 blur-2xl opacity-90 rounded-full"></div>
+                        <h2 class="text-lg font-semibold text-center     text-white z-10">Information Technology Students</h2>
+                        <p class="text-4xl font-bold text-white z-10">{{ it_students }}</p>
+                    </div>
+                </div>
+                <!-- Add more cards as needed (e.g., per program, per year, etc.) -->
+
+                 <!-- Students by Tier & Program Line Chart -->
+                <div class="bg-sky-600 rounded-tl-4xl rounded-br-4xl shadow-xl p-6 w-full mt-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-bold text-white">Activity Progress | <span id="programLabel">Programs</span></h3>
+                        <div class="relative">
+                            <button id="programMenuBtn" class="bg-sky-100 text-sm p-2 text-sky-900 rounded-lg shadow hover:bg-sky-200 focus:outline-none flex items-center space-x-2">
+                                <span id="programMenuBtnText">All Programs</span>
+                                <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </button>
+                            <div id="programMenu" class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 hidden z-10">
+                                <button class="block w-full text-left px-4 py-2 hover:bg-sky-100" onclick="changeProgram('All')">All Programs</button>
+                                <button class="block w-full text-left px-4 py-2 hover:bg-sky-100" onclick="changeProgram('Computer Science')">Computer Science</button>
+                                <button class="block w-full text-left px-4 py-2 hover:bg-sky-100" onclick="changeProgram('Information Technology')">Information Technology</button>
+                            </div>
+                        </div>
+                    </div>
+                    <canvas id="programLineChart" height="80"></canvas>
+                </div>
+
+                <!-- You can add tables or charts below, similar to faculty-home.html -->
+                <!-- Example: Recent Students, Recent Faculty, Activity Progress, etc. -->
             </div>
-        </div>
-
-
-        <!-- Text Below Slider -->
-        <div class="mt-6 text-white text-lg leading-relaxed text-justify  max-w-4xl">
-            <p>SENTINELS. A 2D role-playing game designed for students at STI West Negros University - College of Information and Communications Technology. This educational game helps learners understand cybersecurity fundamentals by immersing them in real-world scenarios based on course handouts. Players will explore topics such as cybersecurity roles and responsibilities, threats and vulnerabilities, and types of hackers while engaging in interactive challenges. The game offers three difficulty levels—Novice, Junior, and Senior—each featuring three tasks/activities and an intense boss battle to test their knowledge. Fun, engaging, and educational, this game makes learning cybersecurity an exciting adventure—play now and become a cybersecurity expert!</p>
         </div>
     </div>
 </div>
 
-<!-- About System Section -->
-<div class="p-24 mt-10 mb-10 flex justify-center">
-    <div class="max-w-6xl w-full">
-        <div class="mt-16 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
 
-            <!-- Card 1 -->
-            <div class="max-w-sm bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700">
-                <a href="#">
-                    <img class="rounded-t-lg" src="{% static 'assets/img/feature1.jpg' %}" alt="Feature 1" class="h-24 mx-auto rounded-lg">
-                </a>
-                <div class="p-5">
-                    <a href="#">
-                        <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Interactive Activities</h5>
-                    </a>
-                    <p class="mb-3 font-normal text-gray-700 dark:text-gray-400">Students can test their knowledge and skills through interactive tasks and quests.</p>
-                </div>
-            </div>
 
-            <!-- Card 2 -->
-            <div class="max-w-sm bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700">
-                <a href="#">
-                    <img class="rounded-t-lg" src="{% static 'assets/img/feature2.jpg' %}" alt="Feature 2" class="h-24 mx-auto rounded-lg">
-                </a>
-                <div class="p-5">
-                    <a href="#">
-                        <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Game Tutorial</h5>
-                    </a>
-                    <p class="mb-3 font-normal text-gray-700 dark:text-gray-400">There will be Game tutorials on how to play the game.</p>
-                </div>
-            </div>
-
-            <!-- Card 3 -->
-            <div class="max-w-sm bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700">
-                <a href="#">
-                    <img class="rounded-t-lg" src="{% static 'assets/img/feature3.jpg' %}" alt="Feature 3" class="h-24 mx-auto rounded-lg">
-                </a>
-                <div class="p-5">
-                    <a href="#">
-                        <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Student Progress Monitoring</h5>
-                    </a>
-                    <p class="mb-3 font-normal text-gray-700 dark:text-gray-400">Students are being monitored of their performance.</p>
-                </div>
-            </div>
-
-            <!-- Card 4 -->
-            <div class="max-w-sm bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700">
-                <a href="#">
-                    <img class="rounded-t-lg" src="{% static 'assets/img/feature1.jpg' %}" alt="Feature 4" class="h-24 mx-auto rounded-lg">
-                </a>
-                <div class="p-5">
-                    <a href="#">
-                        <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Student Progress Monitoring</h5>
-                    </a>
-                    <p class="mb-3 font-normal text-gray-700 dark:text-gray-400">Students are being monitored of their performance.</p>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Auto-Slide Script -->
 <script>
-    document.addEventListener('alpine:init', () => {
-        Alpine.data('slider', () => ({
-            activeSlide: 0,
-            images: [
-                `{% static 'assets/img/Photo1.png' %}`,
-                `{% static 'assets/img/Photo2.png' %}`,
-                `{% static 'assets/img/Photo3.png' %}`
-            ],
-            init() {
-                setInterval(() => {
-                    this.activeSlide = (this.activeSlide + 1) % this.images.length;
-                }, 3000);
-            }
-        }));
+const allLabels = ["Novice", "Junior", "Senior"];
+const csData = [12, 8, 5]; // Temporary data for Computer Science
+const itData = [10, 7, 9]; // Temporary data for Information Technology
+
+let chartInstance;
+
+document.addEventListener('DOMContentLoaded', function () {
+    // Dropdown menu logic
+    const btn = document.getElementById('programMenuBtn');
+    const menu = document.getElementById('programMenu');
+    btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        menu.classList.toggle('hidden');
     });
+    document.addEventListener('click', function() {
+        menu.classList.add('hidden');
+    });
+
+    const ctx = document.getElementById('programLineChart').getContext('2d');
+    chartInstance = new Chart(ctx, {
+        type: 'line',
+        data: getAllProgramData(),
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: true,
+                    labels: { color: '#fff' }
+                }
+            },
+            scales: {
+                x: {
+                    ticks: { color: '#fff' },
+                    grid: { color: 'rgba(255,255,255,0.2)' }
+                },
+                y: {
+                    beginAtZero: true,
+                    title: { display: true, text: 'Students', color: '#fff' },
+                    ticks: { color: '#fff' },
+                    grid: { color: 'rgba(255,255,255,0.2)' }
+                }
+            }
+        }
+    });
+});
+
+function getAllProgramData() {
+    return {
+        labels: allLabels,
+        datasets: [
+            {
+                label: 'Computer Science',
+                data: csData,
+                borderColor: '#f59e42',
+                backgroundColor: 'rgba(245, 158, 66, 0.15)',
+                tension: 0.4,
+                fill: true,
+                pointBackgroundColor: '#f59e42',
+                pointBorderColor: '#fff',
+                pointRadius: 6,
+                pointHoverRadius: 8,
+            },
+            {
+                label: 'Information Technology',
+                data: itData,
+                borderColor: '#ef4444',
+                backgroundColor: 'rgba(239, 68, 68, 0.15)',
+                tension: 0.4,
+                fill: true,
+                pointBackgroundColor: '#ef4444',
+                pointBorderColor: '#fff',
+                pointRadius: 6,
+                pointHoverRadius: 8,
+            }
+        ]
+    };
+}
+
+function changeProgram(program) {
+    document.getElementById('programLabel').textContent = program === 'All' ? 'All Programs' : program;
+    document.getElementById('programMenuBtnText').textContent = program === 'All' ? 'All Programs' : program;
+
+    if (program === 'All') {
+        chartInstance.data = getAllProgramData();
+    } else if (program === 'Computer Science') {
+        chartInstance.data = {
+            labels: allLabels,
+            datasets: [
+                {
+                    label: 'Computer Science',
+                    data: csData,
+                    borderColor: '#f59e42',
+                    backgroundColor: 'rgba(245, 158, 66, 0.15)',
+                    tension: 0.4,
+                    fill: true,
+                    pointBackgroundColor: '#f59e42',
+                    pointBorderColor: '#fff',
+                    pointRadius: 8,
+                    pointHoverRadius: 10,
+                }
+            ]
+        };
+    } else if (program === 'Information Technology') {
+        chartInstance.data = {
+            labels: allLabels,
+            datasets: [
+                {
+                    label: 'Information Technology',
+                    data: itData,
+                    borderColor: '#ef4444',
+                    backgroundColor: 'rgba(239, 68, 68, 0.15)',
+                    tension: 0.4,
+                    fill: true,
+                    pointBackgroundColor: '#ef4444',
+                    pointBorderColor: '#fff',
+                    pointRadius: 8,
+                    pointHoverRadius: 10,
+                }
+            ]
+        };
+    }
+    chartInstance.update();
+    document.getElementById('programMenu').classList.add('hidden');
+}
 </script>
 
 {% endblock %}

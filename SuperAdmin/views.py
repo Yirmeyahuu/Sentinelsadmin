@@ -20,7 +20,48 @@ db = firestore.client()
 
 @superadmin_required
 def Superadmin_Home(request):
-    return render(request, 'Home/superadmin-home.html')
+    db = firestore.client()
+
+    # Total students
+    students_ref = db.collection("Registered_Students")
+    students = students_ref.stream()
+    total_students = sum(1 for _ in students)
+
+    # Total faculty
+    faculty_ref = db.collection("Authorized Faculty")
+    faculty = faculty_ref.stream()
+    total_faculty = sum(1 for _ in faculty)
+
+    # Computer Science students
+    cs_students_ref = db.collection("Registered_Students").where("program", "==", "Computer Science")
+    cs_students = cs_students_ref.stream()
+    cs_students_count = sum(1 for _ in cs_students)
+
+    # Information Technology students
+    it_students_ref = db.collection("Registered_Students").where("program", "==", "Information Technology")
+    it_students = it_students_ref.stream()
+    it_students_count = sum(1 for _ in it_students)
+
+    tiers = ["Novice", "Junior", "Senior"]
+    programs = ["Computer Science", "Information Technology"]
+    tier_counts = {prog: [] for prog in programs}
+
+    for prog in programs:
+        for tier in tiers:
+            count = db.collection("Registered_Students") \
+                .where("program", "==", prog) \
+                .where("tier", "==", tier).stream()
+            tier_counts[prog].append(sum(1 for _ in count))
+
+    return render(request, 'Home/superadmin-home.html', {
+        "total_students": total_students,
+        "total_faculty": total_faculty,
+        "cs_students": cs_students_count,
+        "it_students": it_students_count,
+        "tier_labels": tiers,
+        "cs_tier_data": tier_counts["Computer Science"],
+        "it_tier_data": tier_counts["Information Technology"],
+    })
 
 @superadmin_required
 def Faculty_list(request):
