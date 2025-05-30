@@ -1,6 +1,5 @@
 {% load static %}
 {% load tailwind_tags %}
-<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -57,9 +56,14 @@
                 <ul class="space-y-2">
 
                     <li>
-                        <a href="{% url 'home-page' %}" class="flex items-center p-2 hover:bg-blue-700 rounded rounded-2xl cursor-pointer transition-all duration-500 ease-in-out
-                                                                {% if request.path == '/Faculty/homepage/' %} bg-blue-700 {% else %} hover:bg-blue-700 {% endif %} ">
-                            <svg viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5 mr-2 flex-shrink-0">
+                        <a
+                        data-page="/Faculty/homepage/"
+                        href="/Faculty/homepage/"
+                        hx-get="{% url 'home-page' %}" 
+                        hx-target="#mainContent" 
+                        hx-push-url="true"
+                        class="flex items-center p-2 hover:bg-blue-700 rounded rounded-2xl cursor-pointer transition-all duration-500 ease-in-out"> 
+                        <svg viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5 mr-2 flex-shrink-0">
                                 <path d="M11.47 3.841a.75.75 0 0 1 1.06 0l8.69 8.69a.75.75 0 1 0 1.06-1.061l-8.689-8.69a2.25 2.25 0 0 0-3.182 0l-8.69 8.69a.75.75 0 1 0 1.061 1.06l8.69-8.689Z" />
                                 <path d="m12 5.432 8.159 8.159c.03.03.06.058.091.086v6.198c0 1.035-.84 1.875-1.875 1.875H15a.75.75 0 0 1-.75-.75v-4.5a.75.75 0 0 0-.75-.75h-3a.75.75 0 0 0-.75.75V21a.75.75 0 0 1-.75.75H5.625a1.875 1.875 0 0 1-1.875-1.875v-6.198a2.29 2.29 0 0 0 .091-.086L12 5.432Z" />
                             </svg>
@@ -78,8 +82,13 @@
                     </li>
                     
                     <li>
-                        <a href="{% url 'activities-page'%}" class="flex items-center p-2 hover:bg-blue-700 rounded rounded-2xl cursor-pointer transition-all duration-300 ease-in-out
-                                                                {% if request.path == '/Faculty/Activity-list/' %} bg-blue-700 {% else %} hover:bg-blue-700 {% endif %}">
+                        <a
+                        data-page="/Faculty/Activity-list/"
+                        href="/Faculty/Activity-list/"
+                        hx-get="{% url 'activities-page' %}" 
+                        hx-target="#mainContent" 
+                        hx-push-url="true"
+                        class="flex items-center p-2 hover:bg-blue-700 rounded rounded-2xl cursor-pointer transition-all duration-300 ease-in-out">
                             <svg viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5 mr-2 flex-shrink-0">
                                 <path d="M18.375 2.25c-1.035 0-1.875.84-1.875 1.875v15.75c0 1.035.84 1.875 1.875 1.875h.75c1.035 0 1.875-.84 1.875-1.875V4.125c0-1.036-.84-1.875-1.875-1.875h-.75ZM9.75 8.625c0-1.036.84-1.875 1.875-1.875h.75c1.036 0 1.875.84 1.875 1.875v11.25c0 1.035-.84 1.875-1.875 1.875h-.75a1.875 1.875 0 0 1-1.875-1.875V8.625ZM3 13.125c0-1.036.84-1.875 1.875-1.875h.75c1.036 0 1.875.84 1.875 1.875v6.75c0 1.035-.84 1.875-1.875 1.875h-.75A1.875 1.875 0 0 1 3 19.875v-6.75Z" />
                             </svg>
@@ -102,7 +111,7 @@
                     <li x-data="{ open: false }" @mouseleave="expanded ? null : open = false">
                         <!-- Parent Menu -->
                         <a @click="expanded && (open = !open)" 
-                           class="flex items-center justify-between p-2 hover:bg-blue-700 rounded-2xl cursor-pointer transition-all duration-600 ease-in-out mb-2
+                           class="students-parent-menu flex items-center justify-between p-2 hover:bg-blue-700 rounded-2xl cursor-pointer transition-all duration-600 ease-in-out mb-2
                                   {% if request.path == '/Faculty/Student-list/' or request.path == '/Faculty/dashboard/' or request.path == '/Faculty/Verify-students/' %} bg-blue-700 {% else %} hover:bg-blue-700 {% endif %}">
                             <div class="flex items-center">
                                 <svg viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5 mr-2 flex-shrink-0">
@@ -145,10 +154,14 @@
                             x-transition:enter="transition ease-out duration-200 delay-75"
                             x-transition:enter-start="opacity-0 transform translate-y-4"
                             x-transition:enter-end="opacity-100 transform translate-y-0">
-                            <a href="{% url 'student-dashboard'%}" 
-                            class="flex items-center p-2 hover:bg-blue-800 rounded-2xl cursor-pointer transition-all duration-300 ease-in-out
-                            {% if request.path == '/student-dashboard/' %} bg-blue-700 {% endif %}">
-                                <span class="w-full">Dashboard</span>
+                            <a
+                            data-page="/Faculty/Student-progress/"
+                            href="/Faculty/Student-progress/"
+                            hx-get="{% url 'student-progress' %}" 
+                            hx-target="#mainContent" 
+                            hx-push-url="true" 
+                            class="students-parent-menu flex items-center p-2 hover:bg-blue-800 rounded-2xl cursor-pointer transition-all duration-300 ease-in-out">
+                                <span class="w-full">Student Progress</span>
                             </a>
                         </li>
 
@@ -157,10 +170,14 @@
                             x-transition:enter="transition ease-out duration-200 delay-150"
                             x-transition:enter-start="opacity-0 transform translate-y-4"
                             x-transition:enter-end="opacity-100 transform translate-y-0">
-                            <a href="{% url 'student-list'%}" 
-                            class="flex items-center p-2 hover:bg-blue-800 rounded-2xl cursor-pointer transition-all duration-300 ease-in-out
-                            {% if request.path == '/student-list/' %} bg-blue-700 {% endif %}">
-                                <span class="w-full">Enrolled Students</span>
+                            <a
+                            data-page="/Faculty/Student-list/"
+                            href="/Faculty/Student-list/"
+                            hx-get="{% url 'student-list' %}" 
+                            hx-target="#mainContent" 
+                            hx-push-url="true" 
+                            class="students-parent-menu flex items-center p-2 hover:bg-blue-800 rounded-2xl cursor-pointer transition-all duration-300 ease-in-out">
+                                <span class="w-full">Student List</span>
                             </a>
                         </li>
 
@@ -169,9 +186,13 @@
                             x-transition:enter="transition ease-out duration-200 delay-225"
                             x-transition:enter-start="opacity-0 transform translate-y-4"
                             x-transition:enter-end="opacity-100 transform translate-y-0">
-                            <a href="{% url 'verify-students'%}" 
-                            class="flex items-center p-2 hover:bg-blue-800 rounded-2xl cursor-pointer transition-all duration-300 ease-in-out
-                            {% if request.path == '/Verify-students/' %} bg-blue-700 {% endif %}">
+                            <a
+                            data-page="/Faculty/Verify-students/"
+                            href="/Faculty/Verify-students/"
+                            hx-get="{% url 'verify-students' %}" 
+                            hx-target="#mainContent" 
+                            hx-push-url="true" 
+                            class="students-parent-menu flex items-center p-2 hover:bg-blue-800 rounded-2xl cursor-pointer transition-all duration-300 ease-in-out">
                                 <span class="w-full">Pending Approval</span>
                             </a>
                         </li>
@@ -213,7 +234,13 @@
                     </p>
 
                     <li>
-                        <a href="{% url 'archive-page'%}" class="flex items-center p-2 hover:bg-blue-800 rounded rounded-2xl transition-all duration-300 ease-in-out {% if request.path == '/Faculty/Archived-Students/' %} bg-blue-700 {% else %} hover:bg-blue-700 {% endif %}">
+                        <a
+                        data-page="/Faculty/Archived-Students/"
+                        href="/Faculty/Archived-Students/"
+                        hx-get="{% url 'archive-page' %}" 
+                        hx-target="#mainContent" 
+                        hx-push-url="true"
+                        class="flex items-center p-2 hover:bg-blue-800 rounded rounded-2xl transition-all duration-300 ease-in-out {% if request.path == '/Faculty/Archived-Students/' %} bg-blue-700 {% else %} hover:bg-blue-700 {% endif %}">
                             <svg viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5 mr-2 flex-shrink-0">
                                 <path d="M3.375 3C2.339 3 1.5 3.84 1.5 4.875v.75c0 1.036.84 1.875 1.875 1.875h17.25c1.035 0 1.875-.84 1.875-1.875v-.75C22.5 3.839 21.66 3 20.625 3H3.375Z" />
                         <path fill-rule="evenodd" d="m3.087 9 .54 9.176A3 3 0 0 0 6.62 21h10.757a3 3 0 0 0 2.995-2.824L20.913 9H3.087ZM12 10.5a.75.75 0 0 1 .75.75v4.94l1.72-1.72a.75.75 0 1 1 1.06 1.06l-3 3a.75.75 0 0 1-1.06 0l-3-3a.75.75 0 1 1 1.06-1.06l1.72 1.72v-4.94a.75.75 0 0 1 .75-.75Z" clip-rule="evenodd" />
@@ -343,24 +370,24 @@
 
 
 
-                <!-- Content Wrapper -->
+        <!-- Content Wrapper -->
         <div class="flex flex-col flex-1">
             <!-- Page Content (Dynamic Content) -->
-            <main id="mainContent" class="p-6 mt-8">
-                {% block content %}
-                {% endblock %}
+            <main id="mainContent" class="p-6 mt-8 transition-opacity duration-500 opacity-100">
+                {% block content %}{% endblock %}
             </main>
             <footer class="w-full text-center py-4 text-gray-500 text-sm mt-auto">
                 &copy; {% now "Y" %}  Sentinels. All rights reserved.
             </footer>
         </div>
+
     </div>
 
     <!-- Add this just before the closing </body> tag in faculty-base.html -->
 
         <!-- Replace the existing notification modal with this -->
     <div id="notificationModal" class="fixed inset-0 flex items-center justify-center z-50 hidden">
-        <div class="fixed inset-0 bg-gray-900/50"></div>
+        <div class="fixed inset-0 backdrop-blur-sm bg-gray-900/50"></div>
         <!-- Added max-h-[80vh] for fixed height and overflow-y-auto for scrolling -->
         <div class="bg-blue-600 p-6 rounded-lg shadow-lg w-full max-w-4xl relative z-10 pointer-events-auto max-h-[60vh] flex flex-col">
             <!-- Header - Fixed at top -->
@@ -403,41 +430,260 @@
         </div>
     </div>
 
-    <script>
-        function openNotificationModal() {
-            const modal = document.getElementById("notificationModal");
-            modal.classList.remove("hidden");
+<script>
+    function openNotificationModal() {
+        const modal = document.getElementById("notificationModal");
+        modal.classList.remove("hidden");
             
-            // Add click event listener to the overlay
-            modal.addEventListener('click', function(e) {
-                // Check if the click was on the overlay (background) and not the modal content
-                if (e.target === modal || e.target.classList.contains('bg-gray-900/50')) {
-                    closeNotificationModal();
-                }
+        // Add click event listener to the overlay
+        modal.addEventListener('click', function(e) {
+            // Check if the click was on the overlay (background) and not the modal content
+            if (e.target === modal || e.target.classList.contains('bg-gray-900/50')) {
+                closeNotificationModal();
+            }
+        });
+    }
+
+    function closeNotificationModal() {
+        document.getElementById("notificationModal").classList.add("hidden");
+    }
+</script>
+
+
+<script>
+    function openLogoutModal() {
+        document.getElementById("logoutModal").classList.remove("hidden");
+        document.body.classList.add("overflow-hidden"); // Disable scrolling
+    }
+
+    function closeLogoutModal() {
+        document.getElementById("logoutModal").classList.add("hidden");
+        document.body.classList.remove("overflow-hidden"); // Re-enable scrolling
+    }
+
+    function logoutUser() {
+        document.getElementById("logoutForm").submit();
+    }
+</script>
+
+<!-- HTMX and Alpine.js scripts -->
+<script src="{% static 'assets/js/htmx.min.js' %}"></script>
+<script src="{% static 'assets/js/alpine.min.js' %}" defer></script>
+<script src="{% static 'assets/js/chart.min.js' %}"></script>
+<script src="{% static 'assets/js/neon-glow-plugin.js' %}"></script>
+<!-- sidebar no reload script-->
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        function setActiveSidebar() {
+            // Remove highlights from all sidebar links
+            document.querySelectorAll('aside [data-page]').forEach(link => {
+                link.classList.remove('bg-blue-700');
             });
+
+            // Highlight the current sub-link
+            const current = document.querySelector('aside [data-page="' + window.location.pathname + '"]');
+            if (current) {
+                current.classList.add('bg-blue-700');
+            }
+
+            // Highlight the Student parent menu if any sub-link is active
+            const studentPages = [
+                "/Faculty/Student-progress/",
+                "/Faculty/Student-list/",
+                "/Faculty/Verify-students/"
+            ];
+            const studentParent = document.querySelector('aside .students-parent-menu');
+            if (studentParent) {
+                if (studentPages.includes(window.location.pathname)) {
+                    studentParent.classList.add('bg-blue-700');
+                } else {
+                    studentParent.classList.remove('bg-blue-700');
+                }
+            }
         }
 
-        function closeNotificationModal() {
-            document.getElementById("notificationModal").classList.add("hidden");
-        }
-    </script>
+        setActiveSidebar();
+        document.body.addEventListener('htmx:pushedIntoHistory', setActiveSidebar);
+    });
+</script>
 
 
-    <script>
-        function openLogoutModal() {
-            document.getElementById("logoutModal").classList.remove("hidden");
-            document.body.classList.add("overflow-hidden"); // Disable scrolling
-        }
+<!-- Chart.js and Neon Glow Plugin -->
+<script>
+window.initFacultyHomeChart = function() {
+    const tierColors = {
+        Novice: { neonColor: '#0ff', neonFill: 'rgba(0,255,255,0.15)' },
+        Junior: { neonColor: '#ff00de', neonFill: 'rgba(255,0,222,0.15)' },
+        Senior: { neonColor: '#fff700', neonFill: 'rgba(255,247,0,0.15)' }
+    };
+    const tierData = {
+        Novice: { labels: ['Task 1', 'Task 2', 'Task 3', 'Boss Battle'], data: [15, 12, 10, 8] },
+        Junior: { labels: ['Task 1', 'Task 2', 'Task 3', 'Boss Battle'], data: [10, 9, 7, 5] },
+        Senior: { labels: ['Task 1', 'Task 2', 'Task 3', 'Boss Battle'], data: [7, 6, 4, 2] }
+    };
+    let currentTier = 'All';
+    let chartInstance;
 
-        function closeLogoutModal() {
-            document.getElementById("logoutModal").classList.add("hidden");
-            document.body.classList.remove("overflow-hidden"); // Re-enable scrolling
-        }
+    // Dropdown menu logic
+    const btn = document.getElementById('tierMenuBtn');
+    const menu = document.getElementById('tierMenu');
+    if (btn && menu) {
+        btn.onclick = function(e) {
+            e.stopPropagation();
+            menu.classList.toggle('hidden');
+        };
+        document.addEventListener('click', function() {
+            menu.classList.add('hidden');
+        });
+    }
 
-        function logoutUser() {
-            document.getElementById("logoutForm").submit();
+    function getAllTierDatasets() {
+        return [
+            {
+                label: 'Novice',
+                data: tierData.Novice.data,
+                borderColor: tierColors.Novice.neonColor,
+                backgroundColor: tierColors.Novice.neonFill,
+                tension: 0.4,
+                fill: true,
+                pointBackgroundColor: tierColors.Novice.neonColor,
+                pointBorderColor: '#fff',
+                pointRadius: 6,
+                pointHoverRadius: 8,
+            },
+            {
+                label: 'Junior',
+                data: tierData.Junior.data,
+                borderColor: tierColors.Junior.neonColor,
+                backgroundColor: tierColors.Junior.neonFill,
+                tension: 0.4,
+                fill: true,
+                pointBackgroundColor: tierColors.Junior.neonColor,
+                pointBorderColor: '#fff',
+                pointRadius: 6,
+                pointHoverRadius: 8,
+            },
+            {
+                label: 'Senior',
+                data: tierData.Senior.data,
+                borderColor: tierColors.Senior.neonColor,
+                backgroundColor: tierColors.Senior.neonFill,
+                tension: 0.4,
+                fill: true,
+                pointBackgroundColor: tierColors.Senior.neonColor,
+                pointBorderColor: '#fff',
+                pointRadius: 6,
+                pointHoverRadius: 8,
+            }
+        ];
+    }
+
+    function changeTier(tier) {
+        currentTier = tier;
+        document.getElementById('tierLabel').textContent = tier === 'All' ? 'All Tier' : tier;
+        document.getElementById('tierMenuBtnText').textContent = tier === 'All' ? 'All Tier' : tier;
+
+        if (tier === 'All') {
+            chartInstance.data.labels = tierData.Novice.labels;
+            chartInstance.data.datasets = getAllTierDatasets();
+            chartInstance.options.plugins.neonGlow.glowColor = undefined;
+        } else {
+            chartInstance.data.labels = tierData[tier].labels;
+            chartInstance.data.datasets = [{
+                label: 'Accomplished',
+                data: tierData[tier].data,
+                borderColor: tierColors[tier].neonColor,
+                backgroundColor: tierColors[tier].neonFill,
+                tension: 0.4,
+                fill: true,
+                pointBackgroundColor: tierColors[tier].neonColor,
+                pointBorderColor: '#fff',
+                pointRadius: 6,
+                pointHoverRadius: 8,
+            }];
+            chartInstance.options.plugins.neonGlow.glowColor = tierColors[tier].neonColor;
         }
-    </script>
+        chartInstance.update();
+        menu.classList.add('hidden');
+    }
+
+    // Chart.js setup
+    const ctxElem = document.getElementById('noviceLineChart');
+    if (ctxElem) {
+        const ctx = ctxElem.getContext('2d');
+        if (window.facultyHomeChartInstance) {
+            window.facultyHomeChartInstance.destroy();
+        }
+        chartInstance = window.facultyHomeChartInstance = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: tierData.Novice.labels,
+                datasets: getAllTierDatasets()
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: true,
+                        labels: { color: '#fff' }
+                    },
+                    neonGlow: {
+                        glowColor: undefined,
+                        glowBlur: 20
+                    }
+                },
+                scales: {
+                    x: {
+                        ticks: { color: '#fff' },
+                        grid: { color: 'rgba(255,255,255,0.2)' }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        title: { display: true, text: 'Students Accomplished', color: '#fff' },
+                        ticks: { color: '#fff' },
+                        grid: { color: 'rgba(255,255,255,0.2)' }
+                    }
+                }
+            }
+        });
+        // Expose changeTier globally for button onclicks
+        window.changeTier = changeTier;
+        changeTier(currentTier);
+    }
+};
+</script>
+
+<!-- Displays Charts in home content-->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        if (document.getElementById('noviceLineChart')) {
+            window.initFacultyHomeChart && window.initFacultyHomeChart();
+        }
+    });
+    document.body.addEventListener('htmx:afterSwap', function() {
+        if (document.getElementById('noviceLineChart')) {
+            window.initFacultyHomeChart && window.initFacultyHomeChart();
+        }
+    });
+</script>
+
+<!-- Animation of main content-->
+<script>
+    document.body.addEventListener('htmx:beforeSwap', function(evt) {
+        const main = document.getElementById('mainContent');
+        if (main && !main.classList.contains('opacity-0')) {
+            evt.detail.shouldSwap = false; // Prevent immediate swap
+            main.classList.add('opacity-0');
+            setTimeout(function() {
+                evt.detail.shouldSwap = true;
+                htmx.process(evt.target); // Retry the swap after fade-out
+                // Manually swap the content
+                evt.detail.swap();
+                setTimeout(() => main.classList.remove('opacity-0'), 10); // Fade in
+            }, 400); // Match your transition duration (400ms)
+        }
+    });
+</script>
 
 </body>
 </html>

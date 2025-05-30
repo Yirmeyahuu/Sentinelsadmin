@@ -176,7 +176,7 @@ def Faculty_home(request):
     {'name': 'Bob Reyes', 'points': 110},
     ]
 
-    return render(request, 'Home/faculty-home.html', {
+    context = {
         "faculty_data": faculty_data,
         "total_users": total_users,
         "cs_count": cs_count,
@@ -190,7 +190,14 @@ def Faculty_home(request):
         "quick_students": quick_students,
         "quick_pending_students": quick_pending_students,
         "leaderboard_students": leaderboard_students,
-    })
+    }
+
+    if request.headers.get('HX-Request'):
+        # HTMX request: return only the main content
+        return render(request, 'Home/contents/faculty-home-content.html', context)
+    else:
+        # Normal request: return the full page
+        return render(request, 'Home/faculty-home.html', context)
 
 
 @csrf_exempt  # If you use POST and CSRF token in the form, you can remove this decorator
@@ -275,7 +282,7 @@ def student_list(request):
         notif['id'] = doc.id
         notifications.append(notif)
 
-    return render(request, "Students/student-list.html", {
+    context ={
         "students": students,
         "faculty_data": faculty_data,
         "selected_semester": semester_filter or "all",
@@ -287,10 +294,19 @@ def student_list(request):
         "section_total": section_total,
         "active_count": active_count,
         "inactive_count": inactive_count,
-    })
+    }
 
 
-def student_dashboard (request):
+    if request.headers.get('HX-Request'):
+        # HTMX request: return only the main content
+        return render(request, 'Students/contents/student-list-content.html', context)
+    else:
+        # Normal request: return the full page
+        return render(request, 'Students/student-list.html', context)
+
+
+@faculty_required
+def student_progress(request):
     faculty_id = request.user.username
     users_ref = db.collection('Authorized Faculty')
     query = users_ref.where('faculty_id', '==', faculty_id).limit(1).get()
@@ -299,23 +315,43 @@ def student_dashboard (request):
         faculty_doc = query[0]
         faculty_data = faculty_doc.to_dict()
 
-    # Get assigned program and year_section
     faculty_program = faculty_data.get('program')
     faculty_year_section = faculty_data.get('year_section')
+    faculty_semester = faculty_data.get('semester')
 
-    # Count students in assigned program/year_section
-    students_ref = db.collection("Registered_Students")
-    students_query = students_ref.where("program", "==", faculty_program).where("year_section", "==", faculty_year_section)
-    students = list(students_query.stream())
-    total_students = len(students)
+    program_total = db.collection("Registered_Students").where("program", "==", faculty_program).stream()
+    program_total = sum(1 for _ in program_total)
 
-    # Count active and inactive users (assuming you have an 'is_active' field)
-    active_students = [s for s in students if s.to_dict().get('is_active')]
-    inactive_students = [s for s in students if not s.to_dict().get('is_active')]
-    active_count = len(active_students)
-    inactive_count = len(inactive_students)
+    section_query = db.collection("Registered_Students") \
+        .where("program", "==", faculty_program) \
+        .where("year_section", "==", faculty_year_section) \
+        .where("semester", "==", faculty_semester)
+    section_total = sum(1 for _ in section_query.stream())
 
-    # Fetch notifications from Firestore, newest first
+    # Count students who accomplished each tier
+    novice_count = 0
+    junior_count = 0
+    senior_count = 0
+
+    for doc in section_query.stream():
+        data = doc.to_dict()
+        # Example: Assume you have boolean fields like 'novice_accomplished', etc.
+        if data.get("novice_accomplished"):
+            novice_count += 1
+        if data.get("junior_accomplished"):
+            junior_count += 1
+        if data.get("senior_accomplished"):
+            senior_count += 1
+
+    active_count = 0
+    inactive_count = 0
+    for doc in section_query.stream():
+        data = doc.to_dict()
+        if data.get("is_active"):
+            active_count += 1
+        else:
+            inactive_count += 1
+
     notifications_ref = db.collection("Notifications").order_by("timestamp", direction=firestore.Query.DESCENDING)
     notifications = []
     for doc in notifications_ref.stream():
@@ -323,13 +359,22 @@ def student_dashboard (request):
         notif['id'] = doc.id
         notifications.append(notif)
 
-    return render(request, 'Students/students-dashboard.html', {
+    context = {
         "faculty_data": faculty_data,
         "notifications": notifications,
-        "total_students": total_students,
+        "program_total": program_total,
+        "section_total": section_total,
         "active_count": active_count,
-        "inactive_count": inactive_count
-    })
+        "inactive_count": inactive_count,
+        "novice_count": novice_count,
+        "junior_count": junior_count,
+        "senior_count": senior_count,
+    }
+
+    if request.headers.get('HX-Request'):
+        return render(request, 'Students/contents/students-progress-content.html', context)
+    else:
+        return render(request, 'Students/students-progress.html', context)
 
 
 
@@ -397,6 +442,8 @@ def edit_student(request, student_id):
     student_data = student.to_dict()
     return render(request, "Admin/EditStudent.html", {"student": student_data})
 
+
+
 def archive_student(request, student_id):
     """Move student member to 'archive' collection"""
     student_ref = db.collection("Registered_Students").document(student_id)
@@ -438,11 +485,18 @@ def archived_student_list(request):
         {**doc.to_dict(), "student_id": doc.id} for doc in docs
     ]  # Ensuring student_id is included
 
-    return render(request, "Students/students-archived.html", {
+    context = {
     "archived_students": archived_students,
     "faculty_data": faculty_data,
-    "notifications": notifications,  # Pass notifications to template
-    })  # Corrected context name
+    "notifications": notifications,
+    }
+
+    if request.headers.get('HX-Request'):
+        # HTMX request: return only the main content
+        return render(request, 'Students/contents/students-archived-content.html', context)
+    else:
+        # Normal request: return the full page
+        return render(request, 'Students/students-archived.html', context)
 
 def restore_student(request, student_id):
     """Restore student member from 'archive' collection"""
@@ -496,11 +550,18 @@ def Verify_Student(request):
 
     verify_students = [{**doc.to_dict(), "student_id": doc.id} for doc in docs]
 
-    return render(request, "Students/students-verify-list.html", {
+    context = {
         "verify_students": verify_students,
         "faculty_data": faculty_data,
         "notifications": notifications,  
-    })
+    }
+
+    if request.headers.get('HX-Request'):
+        # HTMX request: return only the main content
+        return render(request, 'Students/contents/students-verify-list-content.html', context)
+    else:
+        # Normal request: return the full page
+        return render(request, 'Students/students-verify-list.html', context)
 
 
 
@@ -637,14 +698,20 @@ def activity_page(request):
             messages.success(request, "Deadline set successfully!")
             return redirect('activities-page')
 
-    return render(request, "Activities/activities.html",
-                  {"activities_novice": activities_novice,
+    context = {"activities_novice": activities_novice,
                    "activities_junior": activities_junior,
                    "activities_senior": activities_senior,
                    "faculty_data": faculty_data,
                     "notifications": notifications,  # Pass notifications to template
                      "deadline_form": deadline_form,
-                   })  # Corrected context name
+                   } # Corrected context name
+
+    if request.headers.get('HX-Request'):
+        # HTMX request: return only the main content
+        return render(request, 'Activities/contents/activities-content.html', context)
+    else:
+        # Normal request: return the full page
+        return render(request, 'Activities/activities.html', context)
 
 
 @faculty_required
@@ -735,10 +802,17 @@ def faculty_account(request):
         if password_changed:
             show_logout_modal = True  # Show modal instead of logging out immediately
 
-    return render(request, 'Faculty/faculty-account.html', {
+    context = {
         'faculty_data': faculty_data,
         'show_logout_modal': show_logout_modal,
-    })
+    }
+
+    if request.headers.get('HX-Request'):
+        # HTMX request: return only the main content
+        return render(request, 'Faculty/contents/faculty-account-content.html', context)
+    else:
+        # Normal request: return the full page
+        return render(request, 'Faculty/faculty-account.html', context)
 
 def handle_image_upload(image):
     # Implement your image upload logic
@@ -772,3 +846,16 @@ def move_student(request):
             messages.error(request, "Invalid destination.")
             return redirect("student-list")
     return redirect("student-list")
+
+
+@faculty_required
+def novice_tier(request):
+    return render(request, 'Tier/Novice.html')
+
+@faculty_required
+def junior_tier(request):
+    return render(request, 'Tier/Junior.html')
+
+@faculty_required
+def senior_tier(request):
+    return render(request, 'Tier/Senior.html')

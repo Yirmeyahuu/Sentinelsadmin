@@ -1,0 +1,503 @@
+
+
+<!-- Archive Confirmation Modal -->
+ <div id="archiveModal" class="fixed inset-0 flex items-center justify-center bg-gray-900/70 hidden z-50">
+    <div class="bg-white p-6 rounded-lg shadow-lg w-96">
+        <h2 class="text-lg font-bold text-gray-900 mb-4">Archive Student</h2>
+        <p class="text-gray-700 mb-6">Are you sure you want to archive this student? It will be temporarily stored in the archive.</p>
+        <div class="flex justify-end space-x-4">
+            <button onclick="closeArchiveModal()" class="text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-gray-800 dark:hover:bg-gray-700 dark:focus:ring-gray-700 dark:border-gray-700">Cancel</button>
+            <a id="confirmArchiveBtn" href="#" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">Confirm</a>
+        </div>
+    </div>
+</div>
+
+<!-- Add Student Modal -->
+<div id="modal" class="fixed inset-0 flex justify-center items-center hidden z-50">
+    <!-- Backdrop with blur effect -->
+    <div class="fixed inset-0 backdrop-blur-sm bg-gray-900/70"></div>
+    
+    <!-- Modal Content -->
+    <div class="bg-gray-100 border border-white p-12 rounded-tl-4xl rounded-br-4xl shadow-lg w-1/2 z-10">
+        <h2 class="text-xl font-bold mb-4 text-blue-500">Add Student</h2>
+        <div class="border-t border-blue-500 p-2 mt-auto"></div>
+        <form id="studentForm" action="{% url 'add_student' %}" method="POST">
+            {% csrf_token %}
+            <div class="grid grid-cols-2 gap-4">
+                <!-- Student ID -->
+                <div>
+                    <label class="block text-sm font-bold mb-2 text-blue-500">Student ID <span> (e.g. 12-1234-56) </span></label>
+                    <input type="text" name="student_id" placeholder="Enter Student ID" class="w-full p-4 border border-gray-300 rounded-2xl" required>
+                </div>
+                <!-- First Name -->
+                <div>
+                    <label class="block text-sm font-bold mb-2 text-blue-500">First Name</label>
+                    <input type="text" name="first_name" placeholder="Enter First Name" class="w-full p-4 border border-gray-300 rounded-2xl" required>
+                </div>
+                <!-- Last Name -->
+                <div>
+                    <label class="block text-sm font-bold mb-2 text-blue-500">Last Name</label>
+                    <input type="text" name="last_name" placeholder="Enter Last Name" class="w-full p-4 border border-gray-300 rounded-2xl" required>
+                </div>
+                <!-- Middle Initial -->
+                <div>
+                    <label class="block text-sm font-bold mb-2 text-blue-500">Middle Initial</label>
+                    <input type="text" name="middle_initial" placeholder="Enter Middle Initial" class="w-full p-4 border border-gray-300 rounded-2xl">
+                </div>
+            </div>
+            <!-- Buttons -->
+            <div class="flex justify-end mt-6">
+                <button type="button" onclick="closeModal()" class="text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2">Cancel</button>
+                <button type="submit" class="text-white bg-blue-800 hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2">Add Student</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Edit Student Modal -->
+<div id="editStudentModal" class="fixed inset-0 flex justify-center bg-gray-900/60 items-center hidden z-50">
+    <!-- Backdrop with blur effect -->
+    <div class="fixed inset-0 backdrop-blur-sm bg-gray-900/50"></div>
+    <!-- Modal Content -->
+    <div class="bg-gray-100 border border-white p-12 rounded-3xl shadow-lg w-1/2 z-10">
+        <h2 class="text-xl font-bold mb-4 text-blue-500">Edit Student</h2>
+        <div class="border-t border-blue-500 p-2 mt-auto"></div>
+        <form id="editStudentForm" method="POST">
+            {% csrf_token %}
+            <input type="hidden" name="student_id" id="edit-student-id">
+            <div class="grid grid-cols-2 gap-4">
+                <!-- First Name -->
+                <div>
+                    <label class="block text-sm font-bold mb-2 text-blue-500">First Name</label>
+                    <input type="text" name="first_name" id="edit-first-name" class="w-full p-4 border border-gray-300 rounded-2xl" required>
+                </div>
+                <!-- Last Name -->
+                <div>
+                    <label class="block text-sm font-bold mb-2 text-blue-500">Last Name</label>
+                    <input type="text" name="last_name" id="edit-last-name" class="w-full p-4 border border-gray-300 rounded-2xl" required>
+                </div>
+                <!-- Middle Initial -->
+                <div>
+                    <label class="block text-sm font-bold mb-2 text-blue-500">Middle Initial</label>
+                    <input type="text" name="middle_initial" id="edit-middle-initial" class="w-full p-4 border border-gray-300 rounded-2xl">
+                </div>
+            </div>
+            <!-- Buttons -->
+            <div class="flex justify-end mt-6">
+                <button type="button" onclick="closeEditModal()" class="text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2">Cancel</button>
+                <button type="submit" class="text-white bg-blue-800 hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Move Student Modal -->
+<div id="moveModal" class="fixed inset-0 flex items-center justify-center bg-gray-900/80 hidden z-50">
+    <div class="bg-blue-700 p-6 rounded-lg shadow-lg w-96">
+        <h2 class="text-lg font-bold text-white mb-4">Move Student</h2>
+        <form id="moveStudentForm" method="POST" action="{% url 'move_student' %}">
+            {% csrf_token %}
+            <input type="hidden" name="student_id" id="move-student-id">
+            <label class="block mb-2 text-white">Move to:</label>
+            <select name="destination" id="move-destination" class="w-full p-2 border rounded mb-4 text-white" required>
+                <option value="" disabled selected>Select destination</option>
+                <option value="continuing">Completed Students</option>
+                <option value="dropout">Drop-out Students</option>
+                <option value="archive">Archive Students</option>
+            </select>
+            <div class="flex justify-end space-x-2">
+                <button type="button" onclick="closeMoveModal()" class="bg-gray-300 text-gray-700 px-4 py-2 rounded-2xl">Cancel</button>
+                <button type="submit" class="bg-blue-900 text-white px-4 py-2 rounded-2xl">Move</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Student Progress Modal -->
+<div id="progressModal" class="fixed inset-0 flex items-center justify-center bg-gray-900/70 hidden z-50">
+    <div class="bg-white p-8 rounded-tl-4xl rounded-br-4xl shadow-lg w-full max-w-md relative">
+        <button onclick="closeProgressModal()" class="absolute top-2 right-2 text-gray-400 hover:text-blue-700 text-2xl">&times;</button>
+        <h2 class="text-xl font-bold mb-2 text-sky-700" id="progressStudentName"></h2>
+        <div class="mb-4">
+            <!-- Example progress content, replace with real data as needed -->
+            <p class="text-gray-700 mb-2">Novice Progress: <span class="font-bold text-sky-700">80%</span></p>
+            <p class="text-gray-700 mb-2">Junior Progress: <span class="font-bold text-sky-700">60%</span></p>
+            <p class="text-gray-700 mb-2">Senior Progress: <span class="font-bold text-sky-700">40%</span></p>
+        </div>
+        <button id="viewAllBtn" class="bg-blue-700 text-white px-6 py-2 rounded-xl hover:bg-blue-800 transition w-full font-semibold">
+            View all
+        </button>
+    </div>
+</div>
+
+
+<!-- Table -->
+<div class="flex flex-col items-start w-full pl-28 pr-16">
+    <!-- Dashboard Cards Row -->
+    <div class="flex justify-center gap-x-8 w-full mb-8">
+        <!-- 1. All Students in Program -->
+        <div class="relative bg-blue-600 shadow-xl rounded-tl-4xl rounded-br-4xl p-6 w-72 flex flex-col items-center overflow-hidden">
+            <div class="absolute inset-0 opacity-30">
+                <svg class="w-full h-full" viewBox="0 0 200 200">
+                    <path fill="none" stroke="#3B82F6" stroke-width="8" d="M10 50 Q100 0, 190 50 T 390 50" />
+                    <path fill="none" stroke="#FACC15" stroke-width="8" d="M10 150 Q100 200, 190 150 T 390 150" />
+                </svg>
+            </div>
+            <div class="absolute -top-4 -left-6 w-16 h-16 bg-white blur-2xl opacity-90 rounded-full"></div>
+            <div class="absolute bottom-0 right-2 w-20 h-20 bg-sky-200 blur-2xl opacity-90 rounded-full"></div>
+            <h2 class="text-lg mt-2 mb-2 text-center font-semibold text-white mb-4 z-10">{{ faculty_data.program }}</h2>
+            <p class="text-4xl font-bold text-white z-10">{{ program_total }}</p>
+        </div>
+
+        <!-- 2. Students in Program, Year, Section, Semester -->
+        <div class="relative bg-sky-600 shadow-xl rounded-tl-4xl rounded-br-4xl p-6 w-72 flex flex-col items-center overflow-hidden">
+            <div class="absolute inset-0 opacity-30">
+                <svg class="w-full h-full" viewBox="0 0 200 200">
+                    <path fill="none" stroke="#D4F6FF" stroke-width="8" d="M10 50 Q100 0, 190 50 T 390 50" />
+                    <path fill="none" stroke="#C4E1F6" stroke-width="8" d="M10 150 Q100 200, 190 150 T 390 150" />
+                </svg>
+            </div>
+            <div class="absolute -top-4 -left-6 w-16 h-16 bg-white blur-2xl opacity-90 rounded-full"></div>
+            <div class="absolute bottom-0 right-2 w-20 h-20 bg-blue-700 blur-2xl opacity-90 rounded-full"></div>
+            <h2 class="text-lg font-semibold text-white text-center z-10">
+                {{ faculty_data.program }} {{ faculty_data.year_section }} — {{faculty_data.semester }}
+            </h2>
+            <p class="text-4xl font-bold text-white z-10">{{ section_total }}</p>
+        </div>
+
+        <!-- 3. Active Students -->
+        <div class="relative bg-green-500 shadow-xl rounded-tl-4xl rounded-br-4xl p-6 w-72 flex flex-col items-center overflow-hidden">
+            <div class="absolute inset-0 opacity-30">
+                <svg class="w-full h-full" viewBox="0 0 200 200">
+                    <path fill="none" stroke="#ECFAE5" stroke-width="8" d="M10 50 Q100 0, 190 50 T 390 50" />
+                    <path fill="none" stroke="#bbf7d0" stroke-width="8" d="M10 150 Q100 200, 190 150 T 390 150" />
+                </svg>
+            </div>
+            <div class="absolute -top-4 -left-6 w-16 h-16 bg-sky-200 blur-2xl opacity-90 rounded-full"></div>
+            <div class="absolute bottom-0 right-2 w-20 h-20 bg-green-100 blur-2xl opacity-90 rounded-full"></div>
+            <h2 class="text-lg mt-2 mb-2 text-center font-semibold text-white mb-4 z-10">Active Students</h2>
+            <p class="text-4xl font-bold text-white z-10">{{ active_count }}</p>
+        </div>
+
+        <!-- 4. Inactive Students -->
+        <div class="relative bg-red-500 shadow-xl rounded-tl-4xl rounded-br-4xl p-6 w-72 flex flex-col items-center overflow-hidden">
+            <div class="absolute inset-0 opacity-30">
+                <svg class="w-full h-full" viewBox="0 0 200 200">
+                    <path fill="none" stroke="#6b7280" stroke-width="8" d="M10 50 Q100 0, 190 50 T 390 50" />
+                    <path fill="none" stroke="#d1d5db" stroke-width="8" d="M10 150 Q100 200, 190 150 T 390 150" />
+                </svg>
+            </div>
+            <div class="absolute -top-4 -left-6 w-16 h-16 bg-white blur-2xl opacity-90 rounded-full"></div>
+            <div class="absolute bottom-0 right-2 w-20 h-20 bg-gray-300 blur-2xl opacity-90 rounded-full"></div>
+            <h2 class="text-lg mt-2 mb-2 text-center font-semibold text-white mb-4 z-10">Inactive Students</h2>
+            <p class="text-4xl font-bold text-white z-10">{{ inactive_count }}</p>
+        </div>
+    </div>
+
+
+
+    <!-- Main Content (Student Table) -->
+    <div class="bg-blue-600 shadow-2xl rounded-tl-4xl rounded-br-4xl p-6 w-full">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-bold text-white">
+                Registered Students - {{ faculty_data.program }} {{ faculty_data.year_section }}
+            </h2>
+            <!-- ...filters and search bar... -->
+            <div class="flex flex-wrap items-center gap-4">
+                <!-- Only Semester Filter -->
+                <form method="get" class="flex flex-wrap items-center gap-2">
+                    <select name="semester" onchange="this.form.submit()" class="p-2 text-sm font-medium text-blue-800 bg-white border border-blue-300 rounded-2xl">
+                        <option value="all" {% if selected_semester == "all" %}selected{% endif %}>All Semesters</option>
+                        {% for sem in semester_options %}
+                            <option value="{{ sem }}" {% if selected_semester == sem %}selected{% endif %}>{{ sem }}</option>
+                        {% endfor %}
+                    </select>
+                </form>
+                <!-- Search Bar -->
+                <form class="flex items-center max-w-sm mx-auto">
+                    <label for="simple-search" class="sr-only">Search</label>
+                    <div class="relative w-full">
+                        <div class="absolute inset-y-0 start-0 flex items-center ps-2 pointer-events-none">
+                            <svg viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 text-gray-500 dark:text-gray-400">
+                                <path fill-rule="evenodd" d="M12 6a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Zm-1.5 8a4 4 0 0 0-4 4 2 2 0 0 0 2 2h7a2 2 0 0 0 2-2 4 4 0 0 0-4-4h-3Zm6.82-3.096a5.51 5.51 0 0 0-2.797-6.293 3.5 3.5 0 1 1 2.796 6.292ZM19.5 18h.5a2 2 0 0 0 2-2 4 4 0 0 0-4-4h-1.1a5.503 5.503 0 0 1-.471.762A5.998 5.998 0 0 1 19.5 18ZM4 7.5a3.5 3.5 0 0 1 5.477-2.889 5.5 5.5 0 0 0-2.796 6.293A3.501 3.501 0 0 1 4 7.5ZM7.1 12H6a4 4 0 0 0-4 4 2 2 0 0 0 2 2h.5a5.998 5.998 0 0 1 3.071-5.238A5.505 5.505 0 0 1 7.1 12Z" clip-rule="evenodd"/>
+                            </svg>
+                        </div>
+                        <input type="text" id="searchBar" class="bg-white pl-10 border border-gray-300 text-gray-900 text-sm rounded-2xl block w-full ps-14 p-2" placeholder="Search Student..." required />
+                    </div>
+                    <button type="submit" class="p-3 text-sm ms-1 font-medium text-white bg-blue-800 rounded-2xl hover:bg-blue-700 focus:outline-none ">
+                        <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
+                        </svg>
+                        <span class="sr-only">Search</span>
+                    </button>
+                </form>
+                <!-- Add Button -->
+                <button class="bg-blue-800 text-white ms-2 px-6 py-2 shadow-lg rounded-2xl cursor-pointer hover:bg-blue-700 transition duration-200" onclick="openModal()">Add +</button>
+            </div>
+        </div>
+        <!-- Student Table -->
+        <div class="overflow-hidden rounded-2xl shadow-xl w-full ">
+            <!-- ...table code... -->
+            <table class="w-full border-separate border-spacing-0 rounded-lg">
+                <thead>
+                    <tr class="bg-blue-400 text-white">
+                        <th class="border border-blue-500 p-2">Student ID</th>
+                        <th class="border border-blue-500 p-2">Full Name</th>
+                        <th class="border border-blue-500 p-2">Program</th>
+                        <th class="border border-blue-500 p-2">Year & Section</th>
+                        <th class="border border-blue-500 p-2">Semester</th>
+                        <th class="border border-blue-500 p-2">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="studentTableBody">
+                    {% for student in students %}
+                        <tr class="studentRow text-white hover:bg-blue-700 cursor-pointer transition"
+                            onclick="openProgressModal('{{ student.student_id }}', '{{ student.first_name }}', '{{ student.middle_initial }}', '{{ student.last_name }}')">
+                            <td class="border border-blue-500 p-2 text-center whitespace-nowrap">{{ student.student_id }}</td>
+                            <td class="border border-blue-500 pl-14 pr-2 text-left whitespace-nowrap">{{ student.first_name }} {{ student.middle_initial }} {{ student.last_name }}</td>
+                            <td class="border border-blue-500 p-2 text-center whitespace-nowrap">{{ student.program }}</td>
+                            <td class="border border-blue-500 p-2 text-center whitespace-nowrap">{{ student.year_section }}</td>
+                            <td class="border border-blue-500 p-2 text-center whitespace-nowrap">{{ student.semester }}</td>
+                            <td class="border border-blue-500 p-2 text-center whitespace-nowrap">
+                                <div class="flex items-center justify-center space-x-3">
+                                    <button onclick="openEditModal('{{ student.student_id }}', '{{ student.first_name }}', '{{ student.middle_initial }}', '{{ student.last_name }}')"  class="text-gray-200 hover:text-blue-800">
+                                        <svg class="w-6 h-6 text-white hover:text-blue-400 transition-all ease-in-out duration-150" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                            <path stroke="currentColor" stroke-linecap="square" stroke-linejoin="round" stroke-width="2" d="M7 19H5a1 1 0 0 1-1-1v-1a3 3 0 0 1 3-3h1m4-6a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm7.441 1.559a1.907 1.907 0 0 1 0 2.698l-6.069 6.069L10 19l.674-3.372 6.07-6.07a1.907 1.907 0 0 1 2.697 0Z"/>
+                                          </svg>                                          
+                                    </button>
+                                    <!-- Move Button -->
+                                    <button type="button"
+                                    onclick="openMoveModal('{{ student.student_id }}')"
+                                    class="text-gray-200 hover:text-yellow-500">
+                                    <svg class="w-6 h-6 text-white hover:text-blue-400 transition-all ease-in-out duration-150 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 14v4.833A1.166 1.166 0 0 1 16.833 20H5.167A1.167 1.167 0 0 1 4 18.833V7.167A1.166 1.166 0 0 1 5.167 6h4.618m4.447-2H20v5.768m-7.889 2.121 7.778-7.778"/>
+                                      </svg>                                      
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center border border-gray-300 p-4">No users registered yet.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Add Student Success Notification -->
+<div id="successNotification" class="hidden p-4 mb-4 text-sm text-green-800 rounded-lg bg-green-50 dark:bg-gray-800 dark:text-green-400 fixed top-5 right-5 shadow-lg" role="alert">
+    <span class="font-medium">Success!</span> Student <span id="studentIdSpan"></span> has been added.
+</div>
+
+
+
+<!-- Added Student Notification-->
+<script>
+    function showSuccessNotification(studentId) {
+        // Set the student ID in the notification
+        document.getElementById("studentIdSpan").textContent = studentId;
+
+        // Show the notification
+        let notification = document.getElementById("successNotification");
+        notification.classList.remove("hidden");
+
+        // Hide after 3 seconds
+        setTimeout(() => {
+            notification.classList.add("hidden");
+        }, 3000);
+    }
+
+    // Modify the form submission to show the notification
+    document.getElementById("studentForm").addEventListener("submit", function(event) {
+        event.preventDefault(); // Prevent the form from submitting normally
+
+        // Get the student ID input value
+        let studentId = document.querySelector('input[name="student_id"]').value;
+
+        // Submit the form after showing the notification
+        showSuccessNotification(studentId);
+
+        // Allow the form to submit after a short delay
+        setTimeout(() => {
+            event.target.submit();
+        }, 10000);
+    });
+</script>
+
+
+<!-- Add Student Modal-->
+<script>
+    function openModal() { document.getElementById("modal").classList.remove("hidden"); }
+    function closeModal() { document.getElementById("modal").classList.add("hidden"); }
+</script>
+
+<!-- Add Student Field Validation -->
+<script>
+    function validateForm(event) {
+        event.preventDefault(); // Prevent default form submission
+
+        let form = document.getElementById("studentForm");
+        let formData = new FormData(form);
+
+        fetch("{% url 'add_student' %}", {
+            method: "POST",
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Add the new student to the table
+                let table = document.getElementById("studentTableBody"); // Update the correct ID
+                let newRow = document.createElement("tr");
+
+                newRow.innerHTML = `
+                    <td class="border border-blue-500 p-2 text-center whitespace-nowrap">${formData.get("student_id")}</td>
+                    <td class="border border-blue-500 p-2 text-center whitespace-nowrap">${formData.get("first_name")} ${formData.get("last_name")}</td>
+                    <td class="border border-blue-500 p-2 text-center whitespace-nowrap">${formData.get("program")}</td>
+                    <td class="border border-blue-500 p-2 text-center whitespace-nowrap">${formData.get("year_section")}</td>
+                    <td class="border border-blue-500 p-2 text-center whitespace-nowrap">${formData.get("semester")}</td>
+                    <td class="border border-blue-500 p-2 text-center whitespace-nowrap">
+                        <div class="flex items-center justify-center space-x-3">
+                                    <button class="text-blue-600 hover:text-blue-800">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="1.5" fill="currentColor" class="w-5 h-5">
+                                            <path d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-8.4 8.4a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32l8.4-8.4Z" />
+                                            <path d="M5.25 5.25a3 3 0 0 0-3 3v10.5a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3V13.5a.75.75 0 0 0-1.5 0v5.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5V8.25a1.5 1.5 0 0 1 1.5-1.5h5.25a.75.75 0 0 0 0-1.5H5.25Z" />
+                                        </svg>
+                                    </button>
+                                    <button class="text-green-600 hover:text-green-800">
+                                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="1.5" fill="currentColor" class="w-5 h-5">
+                                            <path d="M3.375 3C2.339 3 1.5 3.84 1.5 4.875v.75c0 1.036.84 1.875 1.875 1.875h17.25c1.035 0 1.875-.84 1.875-1.875v-.75C22.5 3.839 21.66 3 20.625 3H3.375Z" />
+                                            <path fill-rule="evenodd" d="m3.087 9 .54 9.176A3 3 0 0 0 6.62 21h10.757a3 3 0 0 0 2.995-2.824L20.913 9H3.087Zm6.133 2.845a.75.75 0 0 1 1.06 0l1.72 1.72 1.72-1.72a.75.75 0 1 1 1.06 1.06l-1.72 1.72 1.72 1.72a.75.75 0 1 1-1.06 1.06L12 15.685l-1.72 1.72a.75.75 0 1 1-1.06-1.06l1.72-1.72-1.72-1.72a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" />
+                                          </svg>
+                                    </button>
+                        </div>
+                    </td>
+                `;
+
+                table.appendChild(newRow);
+
+                // Show success notification
+                showNotification(`Student ${data.student_id} added successfully!`);
+
+                // Close the modal after a short delay
+                setTimeout(() => {
+                    closeModal();
+                }, 500);
+
+                // Clear form fields
+                form.reset();
+            }
+        })
+        .catch(error => console.error("Error:", error));
+    }
+
+    function showNotification(message) {
+        let notification = document.createElement("div");
+        notification.className = "p-4 mb-4 text-sm text-green-800 rounded-lg bg-green-50 fixed top-5 right-5 shadow-lg";
+        notification.innerHTML = `<span class="font-medium">Success!</span> ${message}`;
+
+        document.body.appendChild(notification);
+
+        setTimeout(() => {
+            notification.remove();
+        }, 6000); // Remove after 3 seconds
+    }
+
+    function closeModal() {
+        document.getElementById("modal").classList.add("hidden");
+    }
+</script>
+
+
+
+<!-- Search user suggestion-->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const searchBar = document.getElementById('searchBar');
+        const studentRows = document.querySelectorAll('#studentTableBody .studentRow');
+
+        searchBar.addEventListener('input', function () {
+            const searchTerm = searchBar.value.trim().toLowerCase();
+
+            studentRows.forEach(row => {
+                const studentName = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
+
+                if (studentName.includes(searchTerm)) {
+                    row.style.display = ''; // Show the row
+                } else {
+                    row.style.display = 'none'; // Hide the row
+                }
+            });
+        });
+    });
+</script>
+
+<!--Archive Confirmation Modal-->
+<script>
+    function openArchiveModal(url) {
+        document.getElementById("archiveModal").classList.remove("hidden");
+        document.getElementById("confirmArchiveBtn").setAttribute("href", url);
+    }
+
+    function closeArchiveModal() {
+        document.getElementById("archiveModal").classList.add("hidden");
+    }
+</script>
+
+<!--script for edit-modal-->
+<script>
+    function openModal() {
+        document.getElementById("modal").classList.remove("hidden");
+    }
+
+    function closeModal() {
+        document.getElementById("modal").classList.add("hidden");
+    }
+
+    function openEditModal(id, firstName, middleInitial, lastName, program, yearSection, semester) {
+        document.getElementById("edit-student-id").value = id;
+        document.getElementById("edit-first-name").value = firstName;
+        document.getElementById("edit-middle-initial").value = middleInitial;
+        document.getElementById("edit-last-name").value = lastName;
+
+        // Set form action dynamically
+        document.getElementById("editStudentForm").action = `/Student/edit/${id}/`;
+
+        // Show modal
+        document.getElementById("editStudentModal").classList.remove("hidden");
+    }
+
+    function closeEditModal() {
+        document.getElementById("editStudentModal").classList.add("hidden");
+    }
+</script>
+
+
+
+<!-- Move Modal-->
+<script>
+    function openMoveModal(studentId) {
+        document.getElementById('move-student-id').value = studentId;
+        document.getElementById('moveModal').classList.remove('hidden');
+    }
+    function closeMoveModal() {
+        document.getElementById('moveModal').classList.add('hidden');
+    }
+</script>
+
+<script>
+    function openProgressModal(studentId, firstName, middleInitial, lastName) {
+        document.getElementById('progressModal').classList.remove('hidden');
+        document.getElementById('progressStudentName').textContent = `${firstName} ${middleInitial} ${lastName} - Progress`;
+        // Set the "View all" button to redirect to the dashboard for this student
+        document.getElementById('viewAllBtn').onclick = function() {
+            window.location.href = `/student-dashboard/?student_id=${studentId}`;
+        };
+    }
+    function closeProgressModal() {
+        document.getElementById('progressModal').classList.add('hidden');
+    }
+</script>

@@ -1,0 +1,102 @@
+<!-- Student Table -->
+<div class="p-6 ml-20">
+    <div class="bg-blue-600 shadow-2xl rounded-2xl p-6">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-bold text-white">Pending Students Approval</h2>
+            <div class="flex flex-wrap items-center gap-4">
+                <!-- Search Form -->
+                <form class="flex items-center max-w-sm mx-auto">
+                    <label for="simple-search" class="sr-only">Search</label>
+                    <div class="relative w-full">
+                        <div class="absolute inset-y-0 start-0 flex items-center ps-2 pointer-events-none">
+                            <svg viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 text-gray-500 dark:text-gray-400">
+                                <path fill-rule="evenodd" d="M12 6a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Zm-1.5 8a4 4 0 0 0-4 4 2 2 0 0 0 2 2h7a2 2 0 0 0 2-2 4 4 0 0 0-4-4h-3Z" clip-rule="evenodd"/>
+                            </svg>
+                        </div>
+                        <input type="text" id="searchBar" class="bg-white pl-10 border border-gray-300 text-gray-900 text-sm rounded-2xl block w-full ps-14 p-2" placeholder="Search Student..." required />
+                    </div>
+                    <button type="submit" class="p-3 text-sm ms-1 font-medium text-white bg-blue-800 rounded-2xl hover:bg-blue-700 focus:outline-none">
+                        <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
+                        </svg>
+                        <span class="sr-only">Search</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Student Table -->
+        <div class="overflow-hidden rounded-2xl shadow-xl w-full">
+            <table class="w-full border-separate border-spacing-0 rounded-lg">
+                <thead>
+                    <tr class="bg-blue-400 text-white">
+                        <th class="border border-blue-500 p-2">Student ID</th>
+                        <th class="border border-blue-500 p-2">Full Name</th>
+                        <th class="border border-blue-500 p-2">Program</th>
+                        <th class="border border-blue-500 p-2">Year & Section</th>
+                        <th class="border border-blue-500 p-2">Semester</th>
+                        <th class="border border-blue-500 p-2">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="studentTableBody">
+                    {% for student in verify_students %}
+                        {% if student.student_id %}
+                        <tr class="studentRow text-white">
+                            <td class="border border-blue-500 p-2 text-center whitespace-nowrap">{{ student.student_id }}</td>
+                            <td class="border border-blue-500 p-2 text-center whitespace-nowrap">{{ student.first_name }} {{ student.middle_initial }} {{ student.last_name }}</td>
+                            <td class="border border-blue-500 p-2 text-center whitespace-nowrap">{{ student.program }}</td>
+                            <td class="border border-blue-500 p-2 text-center whitespace-nowrap">{{ student.year_section }}</td>
+                            <td class="border border-blue-500 p-2 text-center whitespace-nowrap">{{ student.semester }}</td>
+                            <td class="border border-blue-500 p-2 text-center whitespace-nowrap">
+                                <div class="flex items-center justify-center space-x-3">
+                                    <a href="{% url 'accept_student' student.student_id %}" 
+                                       onclick="return confirm('Are you sure you want to accept this student?')"
+                                       class="text-gray-200 hover:text-green-500 transition-colors duration-200">
+                                        <!-- SVG for check -->
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6">
+                                            <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm13.36-1.814a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25Z" clip-rule="evenodd" />
+                                        </svg>
+                                    </a>
+                                    <a href="{% url 'reject_student' student.student_id %}"
+                                       onclick="return confirm('Are you sure you want to reject this student?')"
+                                       class="text-gray-200 hover:text-red-500 transition-colors duration-200">
+                                        <!-- SVG for X -->
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6">
+                                            <path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25Zm-1.72 6.97a.75.75 0 1 0-1.06 1.06L10.94 12l-1.72 1.72a.75.75 0 1 0 1.06 1.06L12 13.06l1.72 1.72a.75.75 0 1 0 1.06-1.06L13.06 12l1.72-1.72a.75.75 0 1 0-1.06-1.06L12 10.94l-1.72-1.72Z" clip-rule="evenodd" />
+                                        </svg>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endif %}
+                    {% empty %}
+                        <tr class="bg-blue-500">
+                            <td colspan="6" class="text-center border border-blue-500 p-4 text-white">No pending students.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const searchBar = document.getElementById('searchBar');
+        const studentRows = document.querySelectorAll('#studentTableBody .studentRow');
+
+        searchBar.addEventListener('input', function () {
+            const searchTerm = searchBar.value.trim().toLowerCase();
+
+            studentRows.forEach(row => {
+                const studentName = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
+
+                if (studentName.includes(searchTerm)) {
+                    row.style.display = ''; // Show the row
+                } else {
+                    row.style.display = 'none'; // Hide the row
+                }
+            });
+        });
+    });
+</script>

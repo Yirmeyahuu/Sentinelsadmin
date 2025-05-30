@@ -1,0 +1,363 @@
+{% load static %}
+
+<div class="p-0 pb-6 px-6 flex justify-center">
+    <div class="w-full max-w-8xl flex space-x-6 mx-auto" style="margin-left: 110px; margin-right: 300px;">
+        <!-- Left side with dashboard cards and quick students table -->
+        <div class="flex-1 flex flex-col items-center">
+            <div class="flex flex-col space-y-6 items-center w-[864px]">
+                <!-- Dashboard Cards Row -->
+                <div class="flex space-x-6 w-full">
+                    <!-- Total Users -->
+                    <div class="relative bg-sky-400 shadow-xl rounded-tl-4xl rounded-br-4xl p-6 w-72 flex flex-col items-center overflow-hidden">
+                        <div class="absolute inset-0 opacity-30">
+                            <svg class="w-full h-full" viewBox="0 0 200 200">
+                                <path fill="none" stroke="#1C82AD" stroke-width="8" d="M10 50 Q100 0, 190 50 T 390 50" />
+                                <path fill="none" stroke="#F3F3E0" stroke-width="8" d="M10 150 Q100 200, 190 150 T 390 150" />
+                            </svg>
+                        </div>
+                        <div class="absolute -top-4 -left-6 w-16 h-16 bg-blue-900 blur-2xl opacity-90 rounded-full"></div>
+                        <div class="absolute bottom-0 right-2 w-20 h-20 bg-blue-700 blur-2xl opacity-90 rounded-full"></div>
+                        <h2 class="text-lg font-semibold text-white mb-4 z-10">Total Users</h2>
+                        <p class="text-4xl font-bold text-white z-10">{{ total_users }}</p>
+                    </div>
+                    <!-- Computer Science -->
+                    <div class="relative bg-blue-700 shadow-xl rounded-tl-4xl rounded-br-4xl p-6 w-72 flex flex-col items-center overflow-hidden">
+                        <div class="absolute inset-0 opacity-30">
+                            <svg class="w-full h-full" viewBox="0 0 200 200">
+                                <path fill="none" stroke="#D4F6FF" stroke-width="8" d="M10 50 Q100 0, 190 50 T 390 50" />
+                                <path fill="none" stroke="#C4E1F6" stroke-width="8" d="M10 150 Q100 200, 190 150 T 390 150" />
+                            </svg>
+                        </div>
+                        <div class="absolute -top-4 -left-6 w-16 h-16 bg-sky-400 blur-2xl opacity-90 rounded-full"></div>
+                        <div class="absolute bottom-0 right-2 w-20 h-20 bg-sky-500 blur-2xl opacity-90 rounded-full"></div>
+                        <h2 class="text-lg font-semibold text-white mb-4 z-10">Computer Science</h2>
+                        <p class="text-4xl font-bold text-white z-10">{{ cs_count }}</p>
+                    </div>
+                    <!-- Information Technology -->
+                    <div class="relative bg-sky-600 shadow-xl rounded-tl-4xl rounded-br-4xl p-6 w-72 flex flex-col items-center overflow-hidden">
+                        <div class="absolute inset-0 opacity-30">
+                            <svg class="w-full h-full" viewBox="0 0 200 200">
+                                <path fill="none" stroke="#F2F9FF" stroke-width="8" d="M10 50 Q100 0, 190 50 T 390 50" />
+                                <path fill="none" stroke="#A1E3F9" stroke-width="8" d="M10 150 Q100 200, 190 150 T 390 150" />
+                            </svg>
+                        </div>
+                        <div class="absolute -top-4 -left-6 w-16 h-16 bg-sky-300 blur-2xl opacity-90 rounded-full"></div>
+                        <div class="absolute bottom-0 right-1 w-20 h-20 bg-sky-300 blur-2xl opacity-90 rounded-full"></div>
+                        <h2 class="text-lg font-semibold text-white mb-4 z-10">Information Technology</h2>
+                        <p class="text-4xl font-bold text-white z-10">{{ it_count }}</p>
+                    </div>
+                </div>
+
+
+
+                <!-- Replace the two separate containers with this single row container -->
+                <div class="flex space-x-6 w-full mt-6">
+                    <!-- Quick Students Table Container -->
+                    <div class="bg-white rounded-tl-4xl rounded-br-4xl shadow-xl p-6 w-1/2">
+                        <!-- Quick Students Header -->
+                        <div class="flex justify-between items-center mb-4">
+                            <div class="flex items-center space-x-3">
+                                <h3 class="text-md font-bold text-sky-900">Recently Added Students</h3>
+                            </div>
+                            <a href="{% url 'student-list' %}" 
+                            class="flex items-center space-x-2 text-sm text-sky-900 hover:text-sky-500 transition-colors duration-200">
+                                <span>View All</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                </svg>
+                            </a>
+                        </div>
+                        <!-- Quick Students Table -->
+                        <div class="overflow-hidden rounded-tl-2xl rounded-br-2xl border border-sky-900">
+                            <table class="w-full">
+                                <thead>
+                                    <tr class="bg-sky-900/90">
+                                        <th class="w-40 px-6 py-4 text-left text-sm font-semibold text-white border-b border-r border-sky-900">Student ID</th>
+                                        <th class="w-64 px-6 py-4 text-left text-sm font-semibold text-white border-b border-r border-sky-900">Name</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-sky-900/40">
+                                    {% for student in quick_students %}
+                                    <tr class="group hover:bg-sky-800/50 transition-colors duration-200">
+                                        <td class="w-32 px-6 py-4 text-sm font-medium text-sky-900 border-r border-sky-900/40">{{ student.student_id }}</td>
+                                        <td class="w-32 px-6 py-4 text-sm font-medium text-sky-900 border-r border-sky-900/40">{{ student.first_name }} {{ student.middle_initial }} {{ student.last_name }}</td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="4" class="px-6 py-8 text-center text-blue-200">
+                                            <p class="text-sm">No students found</p>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Quick Pending Students Table Container -->
+                    <div class="bg-white rounded-tl-4xl rounded-br-4xl shadow-xl p-6 w-1/2">
+                        <!-- Quick Pending Students Header -->
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-md font-bold text-sky-900">Recent Pending Students</h3>
+                            <a href="{% url 'verify-students' %}" 
+                            class="flex items-center space-x-2 text-sm text-sky-900 hover:text-sky-500 transition-colors duration-200">
+                                <span>View All</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                </svg>
+                            </a>
+                        </div>
+                        <!-- Quick Pending Students Table -->
+                        <div class="overflow-hidden rounded-tl-2xl rounded-br-2xl border border-sky-900">
+                            <table class="w-full">
+                                <thead>
+                                    <tr class="bg-sky-900/90">
+                                        <th class="w-40 px-6 py-4 text-left text-sm font-semibold text-white border-b border-r border-sky-900">Student ID</th>
+                                        <th class="w-64 px-6 py-4 text-left text-sm font-semibold text-white border-b border-r border-sky-900">Name</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-sky-900/40">
+                                    {% for student in quick_pending_students %}
+                                    <tr class="group hover:bg-sky-800/50 transition-colors duration-200">
+                                        <td class="w-32 px-6 py-4 text-sm font-medium text-sky-900 border-r border-sky-900/40">{{ student.student_id }}</td>
+                                        <td class="w-32 px-6 py-4 text-sm font-medium text-sky-900 border-r border-sky-900/40">{{ student.first_name }} {{ student.middle_initial }} {{ student.last_name }}</td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="4" class="px-6 py-8 text-center text-blue-200">
+                                            <p class="text-sm">No pending students</p>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Activity Progress Section -->
+                <div class="bg-sky-600 rounded-tl-4xl rounded-br-4xl shadow-xl p-6 w-full mt-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-bold text-white">Activity Progress | <span id="tierLabel">All Tier</span></h3>                        <div class="relative">
+                            <button id="tierMenuBtn" class="bg-sky-100 text-sm p-2 text-sky-900 rounded-lg shadow hover:bg-sky-200 focus:outline-none flex items-center space-x-2">
+                                <span id="tierMenuBtnText">All Tier</span>
+                                <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </button>
+                            <div id="tierMenu" class="absolute right-0 mt-2 w-32 bg-white rounded-lg shadow-lg border border-gray-200 hidden z-10">
+                                <button class="block w-full text-left px-4 py-2 hover:bg-sky-100" onclick="changeTier('All')">All Tier</button>
+                                <button class="block w-full text-left px-4 py-2 hover:bg-sky-100" onclick="changeTier('Novice')">Novice</button>
+                                <button class="block w-full text-left px-4 py-2 hover:bg-sky-100" onclick="changeTier('Junior')">Junior</button>
+                                <button class="block w-full text-left px-4 py-2 hover:bg-sky-100" onclick="changeTier('Senior')">Senior</button>
+                            </div>
+                        </div>
+                    </div>
+                    <canvas id="noviceLineChart" height="80"></canvas>
+                </div>
+
+                <!-- Leaderboard Section -->
+                <div class="relative bg-sky-700 rounded-tl-4xl rounded-br-4xl shadow-2xl mt-6 p-6 w-full overflow-hidden">
+                    <!-- Blur Circles -->
+                    <div class="absolute -top-4 -left-6 w-16 h-16 bg-sky-400 blur-2xl opacity-90 rounded-full"></div>
+                    <div class="absolute bottom-0 right-2 w-20 h-20 bg-sky-500 blur-2xl opacity-90 rounded-full"></div>
+                    
+                    <div class="flex justify-between items-center mb-4 relative z-10">
+                        <h3 class="text-lg font-bold text-white mb-4 flex items-center">
+                            <div class="relative">
+                                <div class="absolute -inset-1 rounded-full"></div>
+                                <svg class="w-6 h-6 mr-2 text-yellow-400 relative" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M10 2l2.39 4.84 5.34.78-3.87 3.77.91 5.33L10 13.77l-4.77 2.51.91-5.33-3.87-3.77 5.34-.78L10 2z"/>
+                                </svg>
+                            </div>
+                            Student Leaderboard
+                        </h3>
+                    </div>
+
+                    <!-- Table -->
+                    <div class="relative z-10 bg-sky-800/50 rounded-xl backdrop-blur-sm">
+                        <table class="min-w-full divide-y divide-sky-600/50">
+                            <thead>
+                                <tr class="bg-sky-900/50">
+                                    <th class="px-4 py-3 text-left text-xs font-semibold text-sky-200 uppercase tracking-wider">Rank</th>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold text-sky-200 uppercase tracking-wider">Name</th>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold text-sky-200 uppercase tracking-wider">Points</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-sky-600/50">
+                                {% for student in leaderboard_students %}
+                                <tr class="hover:bg-sky-800/70 transition-colors duration-200">
+                                    <td class="px-4 py-3 whitespace-nowrap">
+                                        {% if forloop.counter == 1 %}
+                                        <span class="flex items-center">
+                                            <div class="relative">
+                                                <div class="absolute -inset-1 bg-yellow-400 blur opacity-70 rounded-full"></div>
+                                                <span class="relative text-yellow-400 font-bold">1st</span>
+                                            </div>
+                                        </span>
+                                        {% elif forloop.counter == 2 %}
+                                        <span class="text-gray-300 font-bold">2nd</span>
+                                        {% elif forloop.counter == 3 %}
+                                        <span class="text-amber-700 font-bold">3rd</span>
+                                        {% else %}
+                                        <span class="text-sky-100 font-medium">{{ forloop.counter }}th</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="px-4 py-3 whitespace-nowrap">
+                                        <span class="text-sky-100">{{ student.name }}</span>
+                                    </td>
+                                    <td class="px-4 py-3 whitespace-nowrap">
+                                        <span class="text-yellow-300 font-bold">{{ student.points }}</span>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="3" class="px-4 py-6 text-center text-sky-200">No leaderboard data available.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- View All Link -->
+                    <a href="#" class="relative z-10 flex items-center justify-center mt-8 mb-2 text-sm text-sky-300 hover:text-sky-100 transition-colors duration-200">
+                        <span>View All</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </a>
+                </div>
+
+
+
+                
+
+
+
+        <!-- Right Sticky Blue Container -->
+        <div class="fixed top-0 right-0 h-screen w-70 z-40">
+            <div class="bg-blue-700 rounded-l-2xl h-full flex flex-col items-center py-8 px-6 shadow-xl">
+                <!-- Profile Section -->
+                <div class="flex flex-col items-center mb-8 mt-4">
+                    <div class="w-28 h-28 rounded-full overflow-hidden border-4 border-white mb-4">
+                        <img src="{% static 'assets/img/Default Profile.jpg' %}" 
+                             alt="User Profile">
+                    </div>
+                    <h2 class="text-lg font-bold text-white mb-1 text-center">{{ faculty_data.first_name }} {{ faculty_data.middle_initial }} {{ faculty_data.last_name }}</h2>
+                    <p class="text-sm text-blue-100 text-center">CICT Faculty</p>
+                </div>
+                <!-- Calendar Section -->
+                <div class="bg-white rounded-2xl w-full p-4 mb-8 shadow">
+                    <div class="flex justify-between items-center mb-2">
+                        <h3 class="text-base font-semibold text-gray-800">January, 2025</h3>
+                        <button class="text-gray-600 hover:text-gray-800">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" 
+                                 stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="grid grid-cols-7 gap-1 text-center text-xs">
+                        <div class="text-gray-500">S</div>
+                        <div class="text-gray-500">M</div>
+                        <div class="text-gray-500">T</div>
+                        <div class="text-gray-500">W</div>
+                        <div class="text-gray-500">T</div>
+                        <div class="text-gray-500">F</div>
+                        <div class="text-gray-500">S</div>
+                        {% for day in calendar_days %}
+                        <div class="relative p-2 
+                            {% if day.today %}bg-blue-100 text-blue-600 font-bold
+                            {% elif day.has_deadline %}bg-orange-100 hover:bg-orange-200
+                            {% else %}hover:bg-gray-100{% endif %}
+                            rounded-full cursor-pointer
+                            {% if day.has_deadline %}calendar-deadline{% endif %}"
+                            {% if day.has_deadline %}
+                                onclick="openDeadlineInfoModal(
+                                    '{{ day.deadline_title|escapejs }}',
+                                    '{{ day.deadline_description|default:"No description"|escapejs }}',
+                                    '{{ day.deadline_date|escapejs }}',
+                                    '{{ day.deadline_time|escapejs }}'
+                                )"
+                            {% endif %}
+                        >
+                            {{ day.date }}
+                            {% if day.has_deadline %}
+                            <div class="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-orange-500 rounded-full"></div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <!-- Almost Due Section -->
+                <div class="bg-white rounded-2xl w-full p-4 shadow flex-1 flex flex-col">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-base font-semibold text-gray-800">Almost Due</h3>
+                        <a href="#" class="text-xs text-blue-600 hover:text-blue-800">View all</a>
+                    </div>
+                    <div class="space-y-3">
+                        {% for task in almost_due_tasks %}
+                        <div class="flex items-center">
+                            <div class="w-2 h-2 bg-{{ task.color }}-500 rounded-full mr-3"></div>
+                            <span class="text-sm text-gray-700">{{ task.name }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Deadline Info Modal -->
+<div id="deadlineInfoModal" class="fixed inset-0 z-50 hidden items-center justify-center">
+    <div class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm"></div>
+    <div class="relative bg-blue-700 rounded-2xl shadow-lg max-w-md w-full mx-8 p-8 z-10 text-white">
+        <button type="button" onclick="closeDeadlineInfoModal()" class="absolute top-3 right-3 text-white/70 hover:text-white text-2xl font-bold">&times;</button>
+        <h2 id="modalDeadlineTitle" class="text-2xl font-extrabold text-white mb-2"></h2>
+        <p id="modalDeadlineDescription" class="text-lg text-white mb-4"></p>
+        <div class="text-base font-semibold mb-2">
+            <span class="font-bold">Date:</span> <span id="modalDeadlineDate"></span>
+        </div>
+        <div class="text-base font-semibold mb-6">
+            <span class="font-bold">Time:</span> <span id="modalDeadlineTime"></span>
+        </div>
+        <div class="flex space-x-4">
+            <form method="post" action="{% url 'remove-deadline' %}">
+                {% csrf_token %}
+                <input type="hidden" id="removeDeadlineTitle" name="title">
+                <button type="submit" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg">Remove Deadline</button>
+            </form>
+            <button type="button" onclick="editDeadline()" class="bg-yellow-400 hover:bg-yellow-500 text-blue-900 font-bold py-2 px-4 rounded-lg">Edit</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openDeadlineInfoModal(title, description, date, time) {
+        document.getElementById('modalDeadlineTitle').textContent = title;
+        document.getElementById('modalDeadlineDescription').textContent = description;
+        document.getElementById('modalDeadlineDate').textContent = date;
+        document.getElementById('modalDeadlineTime').textContent = time;
+        document.getElementById('removeDeadlineTitle').value = title;
+        document.getElementById('deadlineInfoModal').classList.remove('hidden');
+        document.getElementById('deadlineInfoModal').classList.add('flex');
+    }
+    function closeDeadlineInfoModal() {
+        document.getElementById('deadlineInfoModal').classList.remove('flex');
+        document.getElementById('deadlineInfoModal').classList.add('hidden');
+    }
+    function editDeadline() {
+        // Implement your edit logic here (e.g., open the set deadline modal pre-filled)
+        alert('Edit deadline feature coming soon!');
+    }
+</script>
+
+<script>
+document.body.addEventListener('htmx:afterSwap', function() {
+    if (document.getElementById('noviceLineChart')) {
+        window.initFacultyHomeChart && window.initFacultyHomeChart();
+    }
+});
+</script>

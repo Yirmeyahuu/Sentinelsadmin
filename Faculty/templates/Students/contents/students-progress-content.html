@@ -1,0 +1,90 @@
+<div class="flex flex-col items-start w-full pl-28 pr-16">
+    <!-- Dashboard Cards Row -->
+    <div class="flex justify-center gap-x-8 w-full mb-8">
+        <!-- 1. All Students in Program -->
+        <div class="relative bg-blue-600 shadow-xl rounded-tl-4xl rounded-br-4xl p-6 w-72 flex flex-col items-center overflow-hidden">
+            <div class="absolute inset-0 opacity-30">
+                <svg class="w-full h-full" viewBox="0 0 200 200">
+                    <path fill="none" stroke="#3B82F6" stroke-width="8" d="M10 50 Q100 0, 190 50 T 390 50" />
+                    <path fill="none" stroke="#FACC15" stroke-width="8" d="M10 150 Q100 200, 190 150 T 390 150" />
+                </svg>
+            </div>
+            <div class="absolute -top-4 -left-6 w-16 h-16 bg-white blur-2xl opacity-90 rounded-full"></div>
+            <div class="absolute bottom-0 right-2 w-20 h-20 bg-sky-200 blur-2xl opacity-90 rounded-full"></div>
+            <h2 class="text-lg mt-2 mb-2 text-center font-semibold text-white mb-4 z-10">{{ faculty_data.program }}</h2>
+            <p class="text-4xl font-bold text-white z-10">{{ program_total }}</p>
+        </div>
+
+        <!-- 2. Students in Program, Year, Section, Semester -->
+        <div class="relative bg-sky-600 shadow-xl rounded-tl-4xl rounded-br-4xl p-6 w-72 flex flex-col items-center overflow-hidden">
+            <div class="absolute inset-0 opacity-30">
+                <svg class="w-full h-full" viewBox="0 0 200 200">
+                    <path fill="none" stroke="#D4F6FF" stroke-width="8" d="M10 50 Q100 0, 190 50 T 390 50" />
+                    <path fill="none" stroke="#C4E1F6" stroke-width="8" d="M10 150 Q100 200, 190 150 T 390 150" />
+                </svg>
+            </div>
+            <div class="absolute -top-4 -left-6 w-16 h-16 bg-white blur-2xl opacity-90 rounded-full"></div>
+            <div class="absolute bottom-0 right-2 w-20 h-20 bg-blue-700 blur-2xl opacity-90 rounded-full"></div>
+            <h2 class="text-lg font-semibold text-white text-center z-10">
+                {{ faculty_data.program }} {{ faculty_data.year_section }} — {{faculty_data.semester }}
+            </h2>
+            <p class="text-4xl font-bold text-white z-10">{{ section_total }}</p>
+        </div>
+
+        <!-- 3. Active Students -->
+        <div class="relative bg-green-500 shadow-xl rounded-tl-4xl rounded-br-4xl p-6 w-72 flex flex-col items-center overflow-hidden">
+            <div class="absolute inset-0 opacity-30">
+                <svg class="w-full h-full" viewBox="0 0 200 200">
+                    <path fill="none" stroke="#ECFAE5" stroke-width="8" d="M10 50 Q100 0, 190 50 T 390 50" />
+                    <path fill="none" stroke="#bbf7d0" stroke-width="8" d="M10 150 Q100 200, 190 150 T 390 150" />
+                </svg>
+            </div>
+            <div class="absolute -top-4 -left-6 w-16 h-16 bg-sky-200 blur-2xl opacity-90 rounded-full"></div>
+            <div class="absolute bottom-0 right-2 w-20 h-20 bg-green-100 blur-2xl opacity-90 rounded-full"></div>
+            <h2 class="text-lg mt-2 mb-2 text-center font-semibold text-white mb-4 z-10">Active Students</h2>
+            <p class="text-4xl font-bold text-white z-10">{{ active_count }}</p>
+        </div>
+
+        <!-- 4. Inactive Students -->
+        <div class="relative bg-red-500 shadow-xl rounded-tl-4xl rounded-br-4xl p-6 w-72 flex flex-col items-center overflow-hidden">
+            <div class="absolute inset-0 opacity-30">
+                <svg class="w-full h-full" viewBox="0 0 200 200">
+                    <path fill="none" stroke="#6b7280" stroke-width="8" d="M10 50 Q100 0, 190 50 T 390 50" />
+                    <path fill="none" stroke="#d1d5db" stroke-width="8" d="M10 150 Q100 200, 190 150 T 390 150" />
+                </svg>
+            </div>
+            <div class="absolute -top-4 -left-6 w-16 h-16 bg-white blur-2xl opacity-90 rounded-full"></div>
+            <div class="absolute bottom-0 right-2 w-20 h-20 bg-gray-300 blur-2xl opacity-90 rounded-full"></div>
+            <h2 class="text-lg mt-2 mb-2 text-center font-semibold text-white mb-4 z-10">Inactive Students</h2>
+            <p class="text-4xl font-bold text-white z-10">{{ inactive_count }}</p>
+        </div>
+    </div>
+
+    <!-- Tier Progress Section Wrapper -->
+    <div class="w-full mt-10 mb-12 px-8 py-6 bg-white/30 rounded-xl shadow-lg flex flex-col">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6 tracking-wide">Tier Progress</h2>
+        <div class="flex flex-wrap justify-center gap-4 w-full max-w-screen-xl mx-auto mb-8">
+            <!-- Novice Card -->
+            <a href="{% url 'novice-tier' %}" class="group relative bg-cyan-500 hover:bg-cyan-600 shadow-xl rounded-3xl p-8 w-96 flex flex-col items-center transition duration-300 ease-in-out cursor-pointer">
+                <span class="text-xl font-bold text-white mb-4">Novice</span>
+                <span class="text-6xl font-extrabold text-white mb-2 group-hover:scale-110 transition-transform">{{ novice_count }}</span>
+                <span class="text-white text-lg">Accomplished</span>
+            </a>
+            <!-- Junior Card -->
+            <a href="{% url 'junior-tier' %}" class="group relative bg-sky-500 hover:bg-sky-600 shadow-xl rounded-3xl p-8 w-96 flex flex-col items-center transition duration-300 ease-in-out cursor-pointer">
+                <span class="text-xl font-bold text-white mb-4">Junior</span>
+                <span class="text-6xl font-extrabold text-white mb-2 group-hover:scale-110 transition-transform">{{ junior_count }}</span>
+                <span class="text-white text-lg">Accomplished</span>
+            </a>
+            <!-- Senior Card -->
+            <a href="{% url 'senior-tier' %}" class="group relative bg-blue-400 hover:bg-blue-500 shadow-xl rounded-3xl p-8 w-96 flex flex-col items-center transition duration-300 ease-in-out cursor-pointer">
+                <span class="text-xl font-bold text-white mb-4">Senior</span>
+                <span class="text-6xl font-extrabold text-white mb-2 group-hover:scale-110 transition-transform">{{ senior_count }}</span>
+                <span class="text-white text-lg">Accomplished</span>
+            </a>
+        </div>
+        <!-- Add more related content here if needed -->
+    </div>
+
+</div>
+

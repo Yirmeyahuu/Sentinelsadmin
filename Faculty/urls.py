@@ -30,10 +30,13 @@ urlpatterns = [
     path("Activity-list/", views.activity_page, name='activities-page'),
     
     #URLS FOR STUDENT DASHBOARD
-    path("dashboard/", views.student_dashboard, name="student-dashboard"),
-
+    path('Student-progress/', views.student_progress, name='student-progress'),
 
     path("move-student/", views.move_student, name="move_student"),
+
+    path('Tier/Novice/', views.novice_tier, name='novice-tier'),
+    path('Tier/Junior/', views.junior_tier, name='junior-tier'),
+    path('Tier/Senior/', views.senior_tier, name='senior-tier'),
 
 
 ]
