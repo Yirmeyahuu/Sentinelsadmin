@@ -36,14 +36,14 @@
                class="bg-blue-600 text-white p-4 transition-all duration-700 ease-in-out fixed left-0 top-0 h-screen z-50 shadow-lg flex flex-col">
 
             <!-- Logo -->
-            <div class="relative flex items-center justify-center mb-6 h-10 w-full overflow-hidden">
-                <img src="{% static 'assets/img/Sentinels Logo Text Right.png' %}"
+            <div class="relative flex items-center justify-center mb-6 mt-2 h-18 w-full overflow-hidden">
+                <img src="{% static 'assets/img/Sentinels Logo 2.1 (1).png' %}"
                      alt="Full Logo"
-                     class="h-10 w-auto absolute transition-all duration-500 ease-in-out"
+                     class="h-26 w-auto absolute transition-all duration-500 ease-in-out"
                      :class="expanded ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0'">
-                <img src="{% static 'assets/img/Sentinels Logo.png' %}"
+                <img src="{% static 'assets/img/Sentinels Logo copy.png' %}"
                      alt="Icon Logo"
-                     class="h-10 w-auto absolute transition-all duration-500 ease-in-out"
+                     class="h-12 w-auto absolute transition-all duration-500 ease-in-out"
                      :class="expanded ? 'translate-x-full opacity-0' : 'translate-x-0 opacity-100'">
             </div>
 
@@ -57,28 +57,39 @@
                 <ul class="space-y-2">
 
                     <li>
-                        <a href="{% url 'Superadmin-homepage' %}" class="flex items-center p-2 hover:bg-blue-700 rounded-2xl cursor-pointer transition-all duration-500 ease-in-out
-                                                                            {% if request.path == '/' %} bg-blue-700 {% else %} hover:bg-blue-700 {% endif %} ">
-                            <svg viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5 mr-2 flex-shrink-0">
+                        <a
+                        data-page="/Superadmin/homepage/"
+                        href="/Superadmin/homepage/"
+                        hx-get="{% url 'Superadmin-homepage' %}" 
+                        hx-target="#mainContent" 
+                        hx-push-url="true"
+                        class="flex items-center p-2 hover:bg-blue-700 rounded rounded-2xl cursor-pointer transition-all duration-500 ease-in-out"> 
+                        <svg viewBox="0 0 24 24" fill="currentColor" class="h-6 w-6 mr-2 flex-shrink-0">
                                 <path d="M11.47 3.841a.75.75 0 0 1 1.06 0l8.69 8.69a.75.75 0 1 0 1.06-1.061l-8.689-8.69a2.25 2.25 0 0 0-3.182 0l-8.69 8.69a.75.75 0 1 0 1.061 1.06l8.69-8.689Z" />
                                 <path d="m12 5.432 8.159 8.159c.03.03.06.058.091.086v6.198c0 1.035-.84 1.875-1.875 1.875H15a.75.75 0 0 1-.75-.75v-4.5a.75.75 0 0 0-.75-.75h-3a.75.75 0 0 0-.75.75V21a.75.75 0 0 1-.75.75H5.625a1.875 1.875 0 0 1-1.875-1.875v-6.198a2.29 2.29 0 0 0 .091-.086L12 5.432Z" />
                             </svg>
                             <span
-                            x-show="expanded"
-                            x-transition:enter="transition-all duration-500 ease-in-out"
-                            x-transition:enter-start="opacity-0 -translate-x-4"
-                            x-transition:enter-end="opacity-100 translate-x-0"
-                            x-transition:leave="transition-all duration-300 ease-in-out"
-                            x-transition:leave-start="opacity-100 translate-x-0"
-                            x-transition:leave-end="opacity-0 -translate-x-4"
-                            class="w-full"
-                            > Home
+                                x-show="expanded"
+                                x-transition:enter="transition-all duration-500 ease-in-out"
+                                x-transition:enter-start="opacity-0 -translate-x-4"
+                                x-transition:enter-end="opacity-100 translate-x-0"
+                                x-transition:leave="transition-all duration-300 ease-in-out"
+                                x-transition:leave-start="opacity-100 translate-x-0"
+                                x-transition:leave-end="opacity-0 -translate-x-4"
+                                class="w-full"
+                                > Home
                             </span>
                         </a>
                     </li>
                     <li>
-                        <a href="{% url 'Superadmin_ActivityList' %}" class="flex items-center p-2 hover:bg-blue-700 rounded-2xl cursor-pointer transition-all duration-300 ease-in-out {% if request.path == '/activities/' %} bg-blue-700 {% else %} hover:bg-blue-700 {% endif %}">
-                            <svg viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5 mr-2 flex-shrink-0">
+                        <a
+                        data-page="/Superadmin/Activity-list/"
+                        href="/Superadmin/Activity-list/"
+                        hx-get="{% url 'Superadmin_ActivityList' %}" 
+                        hx-target="#mainContent" 
+                        hx-push-url="true"
+                        class="flex items-center p-2 hover:bg-blue-700 rounded-2xl cursor-pointer transition-all duration-300 ease-in-out">
+                            <svg viewBox="0 0 24 24" fill="currentColor" class="h-6 w-6 mr-2 flex-shrink-0">
                                 <path d="M18.375 2.25c-1.035 0-1.875.84-1.875 1.875v15.75c0 1.035.84 1.875 1.875 1.875h.75c1.035 0 1.875-.84 1.875-1.875V4.125c0-1.036-.84-1.875-1.875-1.875h-.75ZM9.75 8.625c0-1.036.84-1.875 1.875-1.875h.75c1.036 0 1.875.84 1.875 1.875v11.25c0 1.035-.84 1.875-1.875 1.875h-.75a1.875 1.875 0 0 1-1.875-1.875V8.625ZM3 13.125c0-1.036.84-1.875 1.875-1.875h.75c1.036 0 1.875.84 1.875 1.875v6.75c0 1.035-.84 1.875-1.875 1.875h-.75A1.875 1.875 0 0 1 3 19.875v-6.75Z" />
                             </svg>
                             <span
@@ -94,12 +105,18 @@
                             </span>
                         </a>
                     </li>
-                    <li>
-                        <a href="{% url 'FacultyList' %}" class="flex items-center p-2 hover:bg-blue-700 rounded-2xl cursor-pointer transition-all duration-300 ease-in-out mb-6 {% if request.path == '/Faculty/' %} bg-blue-700 {% else %} hover:bg-blue-700 {% endif %}">
-                            <svg viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5 mr-2 flex-shrink-0">
-                                <path fill-rule="evenodd" d="M12 6a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Zm-1.5 8a4 4 0 0 0-4 4 2 2 0 0 0 2 2h7a2 2 0 0 0 2-2 4 4 0 0 0-4-4h-3Zm6.82-3.096a5.51 5.51 0 0 0-2.797-6.293 3.5 3.5 0 1 1 2.796 6.292ZM19.5 18h.5a2 2 0 0 0 2-2 4 4 0 0 0-4-4h-1.1a5.503 5.503 0 0 1-.471.762A5.998 5.998 0 0 1 19.5 18ZM4 7.5a3.5 3.5 0 0 1 5.477-2.889 5.5 5.5 0 0 0-2.796 6.293A3.501 3.501 0 0 1 4 7.5ZM7.1 12H6a4 4 0 0 0-4 4 2 2 0 0 0 2 2h.5a5.998 5.998 0 0 1 3.071-5.238A5.505 5.505 0 0 1 7.1 12Z" clip-rule="evenodd"/>
-                            </svg>
-                            <span
+
+                    <!-- Faculty Menu -->
+                    <li x-data="{ open: false }" @mouseleave="expanded ? null : open = false">
+                        <!-- Faculty Parent Menu -->
+                        <a @click="expanded && (open = !open)" 
+                           class="faculty-parent-menu flex items-center justify-between p-2 hover:bg-blue-700 rounded-2xl cursor-pointer transition-all duration-600 ease-in-out mb-2">
+                            <div class="flex items-center">
+                                <svg viewBox="0 0 24 24" fill="currentColor" class="h-6 w-6 mr-2 flex-shrink-0">
+                                    <path d="M6 2c-1.10457 0-2 .89543-2 2v4c0 .55228.44772 1 1 1s1-.44772 1-1V4h12v7h-2c-.5523 0-1 .4477-1 1v2h-1c-.5523 0-1 .4477-1 1s.4477 1 1 1h5c.5523 0 1-.4477 1-1V3.85714C20 2.98529 19.3667 2 18.268 2H6Z"/>
+                                    <path d="M6 11.5C6 9.567 7.567 8 9.5 8S13 9.567 13 11.5 11.433 15 9.5 15 6 13.433 6 11.5ZM4 20c0-2.2091 1.79086-4 4-4h3c2.2091 0 4 1.7909 4 4 0 1.1046-.8954 2-2 2H6c-1.10457 0-2-.8954-2-2Z"/>
+                                </svg>
+                                <span
                                 x-show="expanded"
                                 x-transition:enter="transition-all duration-500 ease-in-out"
                                 x-transition:enter-start="opacity-0 -translate-x-4"
@@ -110,30 +127,8 @@
                                 class="w-full"
                                 > Faculty
                             </span>
-                        </a>
-                    </li>
-                    <!-- Students Dropdown Menu -->
-                    <li x-data="{ open: false }" @mouseleave="expanded ? null : open = false">
-                        <!-- Parent Menu -->
-                        <a @click="expanded && (open = !open)" 
-                           class="flex items-center justify-between p-2 hover:bg-blue-700 rounded-2xl cursor-pointer transition-all duration-600 ease-in-out mb-2
-                                  {% if request.path == '/student-list/' or request.path == '/student-status/' %} bg-blue-700 {% else %} hover:bg-blue-700 {% endif %}">
-                            <div class="flex items-center">
-                                <svg viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5 mr-2 flex-shrink-0">
-                                    <path fill-rule="evenodd" d="M12 6a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Zm-1.5 8a4 4 0 0 0-4 4 2 2 0 0 0 2 2h7a2 2 0 0 0 2-2 4 4 0 0 0-4-4h-3Zm6.82-3.096a5.51 5.51 0 0 0-2.797-6.293 3.5 3.5 0 1 1 2.796 6.292ZM19.5 18h.5a2 2 0 0 0 2-2 4 4 0 0 0-4-4h-1.1a5.503 5.503 0 0 1-.471.762A5.998 5.998 0 0 1 19.5 18ZM4 7.5a3.5 3.5 0 0 1 5.477-2.889 5.5 5.5 0 0 0-2.796 6.293A3.501 3.501 0 0 1 4 7.5ZM7.1 12H6a4 4 0 0 0-4 4 2 2 0 0 0 2 2h.5a5.998 5.998 0 0 1 3.071-5.238A5.505 5.505 0 0 1 7.1 12Z" clip-rule="evenodd"/>
-                                </svg>
-                                <span
-                                    x-show="expanded"
-                                    x-transition:enter="transition-all duration-500 ease-in-out"
-                                    x-transition:enter-start="opacity-0 -translate-x-4"
-                                    x-transition:enter-end="opacity-100 translate-x-0"
-                                    x-transition:leave="transition-all duration-300 ease-in-out"
-                                    x-transition:leave-start="opacity-100 translate-x-0"
-                                    x-transition:leave-end="opacity-0 -translate-x-4"
-                                    class="w-full"
-                                > Students
-                                </span>
                             </div>
+                    
                             <!-- Dropdown Icon -->
                             <svg x-show="expanded" 
                                  x-bind:class="{ 'rotate-180': open }" 
@@ -143,24 +138,124 @@
                                 <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 0 1 1.06-.02L10 10.69l3.71-3.5a.75.75 0 0 1 1.06 1.06l-4.24 4a.75.75 0 0 1-1.06 0l-4.24-4a.75.75 0 0 1-.02-1.06z" clip-rule="evenodd" />
                             </svg>
                         </a>
-                        <!-- Dropdown Items -->
-                        <ul x-show="expanded && open" 
-                            x-transition:enter="transition ease-out duration-500"
-                            x-transition:enter-start="transform opacity-0 -translate-y-4 scale-95"
-                            x-transition:enter-end="transform opacity-100 translate-y-0 scale-100"
-                            x-transition:leave="transition ease-in duration-1"
-                            x-transition:leave-start="transform opacity-100 translate-y-0 scale-100"
-                            x-transition:leave-end="opacity-0 -translate-y-4 scale-95"
-                            class="space-y-2 bg-blue-700 rounded-2xl shadow-lg p-2 border border-gray-300 origin-top">
                     
-                            <!-- Student Status -->
-                            <li>
-                                <a href="{% url 'student-status' %}" 
-                                   class="flex items-center p-2 hover:bg-blue-800 rounded-2xl cursor-pointer transition-all duration-300 ease-in-out
-                                   {% if request.path == '/student-status/' %} bg-blue-700 {% endif %}">
-                                    <span class="w-full">Student Status</span>
-                                </a>
-                            </li>
+                        <ul x-show="expanded && open" 
+                        x-transition:enter="transition ease-out duration-500"
+                        x-transition:enter-start="transform opacity-0 -translate-y-4 scale-95"
+                        x-transition:enter-end="transform opacity-100 translate-y-0 scale-100"
+                        x-transition:leave="transition ease-in duration-1"
+                        x-transition:leave-start="transform opacity-100 translate-y-0 scale-100"
+                        x-transition:leave-end="transform opacity-0 -translate-y-4 scale-95"
+                        class="space-y-2 bg-blue-700 rounded-2xl shadow-lg p-2 border border-gray-300 origin-top">
+
+                        <!-- Faculty List Submenu -->
+                        <li x-show="expanded && open"
+                            x-transition:enter="transition ease-out duration-200 delay-75"
+                            x-transition:enter-start="opacity-0 transform translate-y-4"
+                            x-transition:enter-end="opacity-100 transform translate-y-0">
+                            <a
+                            data-page="/Superadmin/Faculty-list/"
+                            href="/Superadmin/Faculty-list/"
+                            hx-get="{% url 'FacultyList' %}" 
+                            hx-target="#mainContent" 
+                            hx-push-url="true" 
+                            class="faculty-parent-menu flex items-center p-2 hover:bg-blue-800 rounded-2xl cursor-pointer transition-all duration-300 ease-in-out">
+                                <span class="w-full">Faculty List</span>
+                            </a>
+                        </li>
+
+                        <!-- Faculty Status Submenu -->
+                        <li x-show="expanded && open"
+                            x-transition:enter="transition ease-out duration-200 delay-150"
+                            x-transition:enter-start="opacity-0 transform translate-y-4"
+                            x-transition:enter-end="opacity-100 transform translate-y-0">
+                            <a
+                            data-page="/Superadmin/faculty-status/"
+                            href="/Superadmin/faculty-status/"
+                            hx-get="{% url 'faculty-status' %}" 
+                            hx-target="#mainContent"
+                            hx-push-url="true"
+                            class="faculty-parent-menu flex items-center p-2 hover:bg-blue-800 rounded-2xl cursor-pointer transition-all duration-300 ease-in-out">
+                                <span class="w-full">Faculty Status</span>
+                            </a>
+                        </li>
+
+                        </ul>
+                    </li>
+
+                    <!-- Replace the Student menu section -->
+                    <li x-data="{ open: false }" @mouseleave="expanded ? null : open = false">
+                        <!-- Parent Menu -->
+                        <a @click="expanded && (open = !open)" 
+                           class="students-parent-menu flex items-center justify-between p-2 hover:bg-blue-700 rounded-2xl cursor-pointer transition-all duration-600 ease-in-out mb-2">
+                            <div class="flex items-center">
+                                <svg viewBox="0 0 24 24" fill="currentColor" class="h-6 w-6 mr-2 flex-shrink-0">
+                                    <path d="M12.4472 2.10557c-.2815-.14076-.6129-.14076-.8944 0L5.90482 4.92956l.37762.11119c.01131.00333.02257.00687.03376.0106L12 6.94594l5.6808-1.89361.3927-.13363-5.6263-2.81313ZM5 10V6.74803l.70053.20628L7 7.38747V10c0 .5523-.44772 1-1 1s-1-.4477-1-1Zm3-1c0-.42413.06601-.83285.18832-1.21643l3.49538 1.16514c.2053.06842.4272.06842.6325 0l3.4955-1.16514C15.934 8.16715 16 8.57587 16 9c0 2.2091-1.7909 4-4 4-2.20914 0-4-1.7909-4-4Z"/>
+                                    <path d="M14.2996 13.2767c.2332-.2289.5636-.3294.8847-.2692C17.379 13.4191 19 15.4884 19 17.6488v2.1525c0 1.2289-1.0315 2.1428-2.2 2.1428H7.2c-1.16849 0-2.2-.9139-2.2-2.1428v-2.1525c0-2.1409 1.59079-4.1893 3.75163-4.6288.32214-.0655.65589.0315.89274.2595l2.34883 2.2606 2.3064-2.2634Z"/>
+                                </svg>
+                                <span
+                                x-show="expanded"
+                                x-transition:enter="transition-all duration-500 ease-in-out"
+                                x-transition:enter-start="opacity-0 -translate-x-4"
+                                x-transition:enter-end="opacity-100 translate-x-0"
+                                x-transition:leave="transition-all duration-300 ease-in-out"
+                                x-transition:leave-start="opacity-100 translate-x-0"
+                                x-transition:leave-end="opacity-0 -translate-x-4"
+                                class="w-full"
+                                > Students
+                            </span>
+                            </div>
+                    
+                            <!-- Dropdown Icon -->
+                            <svg x-show="expanded" 
+                                 x-bind:class="{ 'rotate-180': open }" 
+                                 class="w-4 h-4 transition-transform duration-300" 
+                                 fill="currentColor" 
+                                 viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 0 1 1.06-.02L10 10.69l3.71-3.5a.75.75 0 0 1 1.06 1.06l-4.24 4a.75.75 0 0 1-1.06 0l-4.24-4a.75.75 0 0 1-.02-1.06z" clip-rule="evenodd" />
+                            </svg>
+                        </a>
+                    
+                        <ul x-show="expanded && open" 
+                        x-transition:enter="transition ease-out duration-500"
+                        x-transition:enter-start="transform opacity-0 -translate-y-4 scale-95"
+                        x-transition:enter-end="transform opacity-100 translate-y-0 scale-100"
+                        x-transition:leave="transition ease-in duration-1"
+                        x-transition:leave-start="transform opacity-100 translate-y-0 scale-100"
+                        x-transition:leave-end="transform opacity-0 -translate-y-4 scale-95"
+                        class="space-y-2 bg-blue-700 rounded-2xl shadow-lg p-2 border border-gray-300 origin-top">
+
+                        <!-- Enrolled Students Item -->
+                        <li x-show="expanded && open"
+                            x-transition:enter="transition ease-out duration-200 delay-150"
+                            x-transition:enter-start="opacity-0 transform translate-y-4"
+                            x-transition:enter-end="opacity-100 transform translate-y-0">
+                            <a
+                            data-page="/Faculty/Student-list/"
+                            href="/Faculty/Student-list/"
+                            hx-get="{% url 'student-list' %}" 
+                            hx-target="#mainContent" 
+                            hx-push-url="true" 
+                            class="students-parent-menu flex items-center p-2 hover:bg-blue-800 rounded-2xl cursor-pointer transition-all duration-300 ease-in-out">
+                                <span class="w-full">Student List</span>
+                            </a>
+                        </li>
+
+                        <!-- Pending Approval Item -->
+                        <li x-show="expanded && open"
+                            x-transition:enter="transition ease-out duration-200 delay-225"
+                            x-transition:enter-start="opacity-0 transform translate-y-4"
+                            x-transition:enter-end="opacity-100 transform translate-y-0">
+                            <a
+                            data-page="/Faculty/Verify-students/"
+                            href="/Faculty/Verify-students/"
+                            hx-get="{% url 'verify-students' %}" 
+                            hx-target="#mainContent" 
+                            hx-push-url="true" 
+                            class="students-parent-menu flex items-center p-2 hover:bg-blue-800 rounded-2xl cursor-pointer transition-all duration-300 ease-in-out">
+                                <span class="w-full">Pending Approval</span>
+                            </a>
+                        </li>
                         </ul>
                     </li>
 
@@ -168,7 +263,7 @@
                     <li>
                         <a href="javascript:void(0);" onclick="openNotificationModal()" 
                            class="flex items-center p-2 hover:bg-blue-700 rounded-2xl cursor-pointer transition-all duration-300 ease-in-out relative">
-                            <svg viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5 mr-2 flex-shrink-0">
+                            <svg viewBox="0 0 24 24" fill="currentColor" class="h-6 w-6 mr-2 flex-shrink-0">
                                 <path d="M5.85 3.5a.75.75 0 0 0-1.117-1 9.719 9.719 0 0 0-2.348 4.876.75.75 0 0 0 1.479.248A8.219 8.219 0 0 1 5.85 3.5ZM19.267 2.5a.75.75 0 1 0-1.118 1 8.22 8.22 0 0 1 1.987 4.124.75.75 0 0 0 1.48-.248A9.72 9.72 0 0 0 19.266 2.5Z" />
                                 <path fill-rule="evenodd" d="M12 2.25A6.75 6.75 0 0 0 5.25 9v.75a8.217 8.217 0 0 1-2.119 5.52.75.75 0 0 0 .298 1.206c1.544.57 3.16.99 4.831 1.243a3.75 3.75 0 1 0 7.48 0 24.583 24.583 0 0 0 4.83-1.244.75.75 0 0 0 .298-1.205A8.217 8.217 0 0 1 18.75 9.75V9a6.75 6.75 0 0 0-6.75-6.75ZM12 15a2.25 2.25 0 0 0-2.25 2.25c0 .53.184 1.02.5 1.405a.75.75 0 0 1 .054-.014c.575-.061 1.154-.11 1.696-.146.54-.036 1.12-.085 1.696-.146a.75.75 0 0 1 .054.014 2.25 2.25 0 0 0-1.75-3.363Z" clip-rule="evenodd" />
                             </svg>
@@ -191,16 +286,22 @@
                     </li>   
 
 
-                    <p class="text-white font-bold uppercase transition-all transition-opacity duration-300 ease-in-out mb-6 mt-6"
-                        :class="expanded ? 'text-sm' : 'text-[10px]'">
-                        Settings
+                    <p class="text-white font-bold uppercase transition-all duration-600 ease-in-out mb-6"
+                    :class="expanded ? 'text-sm opacity-100' : 'text-[10px] opacity-80'">
+                     Settings
                     </p>
 
 
 
                     <li>
-                        <a href="{% url 'Faculty-Archived' %}" class="flex items-center p-2 hover:bg-blue-700 rounded-2xl cursor-pointer transition-all duration-300 ease-in-out {% if request.path == '/Faculty/archive/' %} bg-blue-700 {% else %} hover:bg-blue-700 {% endif %}">
-                            <svg viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5 mr-2 flex-shrink-0">
+                        <a
+                        data-page="/Superadmin/ArchivedFaculty/"
+                        href="/Superadmin/ArchivedFaculty/"
+                        hx-get="{% url 'Faculty-Archived' %}" 
+                        hx-target="#mainContent" 
+                        hx-push-url="true" 
+                        class="flex items-center p-2 hover:bg-blue-700 rounded-2xl cursor-pointer transition-all duration-300 ease-in-out {% if request.path == '/Faculty/archive/' %} bg-blue-700 {% else %} hover:bg-blue-700 {% endif %}">
+                            <svg viewBox="0 0 24 24" fill="currentColor" class="h-6 w-6 mr-2 flex-shrink-0">
                                 <path d="M3.375 3C2.339 3 1.5 3.84 1.5 4.875v.75c0 1.036.84 1.875 1.875 1.875h17.25c1.035 0 1.875-.84 1.875-1.875v-.75C22.5 3.839 21.66 3 20.625 3H3.375Z" />
                         <path fill-rule="evenodd" d="m3.087 9 .54 9.176A3 3 0 0 0 6.62 21h10.757a3 3 0 0 0 2.995-2.824L20.913 9H3.087ZM12 10.5a.75.75 0 0 1 .75.75v4.94l1.72-1.72a.75.75 0 1 1 1.06 1.06l-3 3a.75.75 0 0 1-1.06 0l-3-3a.75.75 0 1 1 1.06-1.06l1.72 1.72v-4.94a.75.75 0 0 1 .75-.75Z" clip-rule="evenodd" />
                             </svg>
@@ -220,7 +321,7 @@
                     <li>
                         <a href="#" onclick="openLogoutModal()"
                             class="flex items-center p-2 hover:bg-blue-700 rounded-2xl cursor-pointer transition-all duration-300 ease-in-out ">
-                            <svg viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5 mr-2 flex-shrink-0">
+                            <svg viewBox="0 0 24 24" fill="currentColor" class="h-6 w-6 mr-2 flex-shrink-0">
                                 <path fill-rule="evenodd" d="M16.5 3.75a1.5 1.5 0 0 1 1.5 1.5v13.5a1.5 1.5 0 0 1-1.5 1.5h-6a1.5 1.5 0 0 1-1.5-1.5V15a.75.75 0 0 0-1.5 0v3.75a3 3 0 0 0 3 3h6a3 3 0 0 0 3-3V5.25a3 3 0 0 0-3-3h-6a3 3 0 0 0-3 3V9A.75.75 0 1 0 9 9V5.25a1.5 1.5 0 0 1 1.5-1.5h6ZM5.78 8.47a.75.75 0 0 0-1.06 0l-3 3a.75.75 0 0 0 0 1.06l3 3a.75.75 0 0 0 1.06-1.06l-1.72-1.72H15a.75.75 0 0 0 0-1.5H4.06l1.72-1.72a.75.75 0 0 0 0-1.06Z" clip-rule="evenodd" />
                             </svg>
                             <span
@@ -243,13 +344,31 @@
 
                 </ul>
             </nav>
-
-            <!-- User Info & Profile Picture (Moved to Bottom) -->
+            <!-- User Info & Profile section -->
             <div class="border-t border-gray-300 p-2 mt-auto flex flex-col items-center w-full">
-                <img src="{% static 'assets/img/Default Profile.jpg' %}" alt="User Profile"
-                     class="h-10 w-10 rounded-full border border-gray-300 transition-all duration-300 ease-in-out"
-                     :class="expanded ? 'w-10 h-10' : 'w-8 h-8'">
-                <span x-show="expanded" class="text-white font-medium transition-all duration-300 ease-in-out text-center">System Administrator</span>
+                <!-- Profile Image Container -->
+                <div class="relative flex items-center justify-center h-12 w-120 overflow-hidden">
+                    <!-- Expanded Profile (Full info) -->
+                    <div class="absolute flex items-center space-x-3 transition-all duration-500 ease-in-out"
+                         :class="expanded ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0'">
+                        <img src="{% static 'assets/img/Default Profile.jpg' %}" 
+                             alt="User Profile"
+                             class="w-12 h-12 rounded-full border-4 border-white object-cover">
+                        <div class="flex flex-col">
+                            <span class="text-white font-bold text-sm">
+                                System Administrator
+                            </span>
+                        </div>
+                    </div>
+            
+                    <!-- Collapsed Profile (Only image) -->
+                    <div class="absolute transition-all duration-500 ease-in-out"
+                         :class="expanded ? 'translate-x-full opacity-0' : 'translate-x-0 opacity-100'">
+                        <img src="{% static 'assets/img/Default Profile.jpg' %}" 
+                             alt="User Profile"
+                             class="w-12 h-12 rounded-full border-4 border-white object-cover">
+                    </div>
+                </div>
             </div>
         </aside>
 
@@ -278,32 +397,255 @@
 
         <!-- Content Wrapper -->
         <div class="flex flex-col flex-1">
-
-            <!-- Page Content (Stays Static) -->
-            <main class="p-6 mt-16">
+            <!-- Page Content (Dynamic Content) -->
+            <main id="mainContent" class="p-6 mt-16">
                 {% block content %}{% endblock %}
             </main>
-
         </div>
     </div>
 
 </body>
 
-        <script>
-            function openLogoutModal() {
-                document.getElementById("logoutModal").classList.remove("hidden");
-                document.body.classList.add("overflow-hidden"); // Disable scrolling
+<script>
+    function openLogoutModal() {
+        document.getElementById("logoutModal").classList.remove("hidden");
+        document.body.classList.add("overflow-hidden"); // Disable scrolling
+    }
+
+    function closeLogoutModal() {
+        document.getElementById("logoutModal").classList.add("hidden");
+        document.body.classList.remove("overflow-hidden"); // Re-enable scrolling
+    }
+
+    function logoutUser() {
+        document.getElementById("logoutForm").submit();
+    }
+</script>
+
+<!-- HTMX and Alpine.js scripts -->
+<script src="{% static 'assets/js/htmx.min.js' %}"></script>
+<script src="{% static 'assets/js/alpine.min.js' %}" defer></script>
+<script src="{% static 'assets/js/chart.min.js' %}"></script>
+<script src="{% static 'assets/js/neon-glow-plugin.js' %}"></script>
+<!-- sidebar no reload script-->
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        function setActiveSidebar() {
+            // Remove highlights from all sidebar links
+            document.querySelectorAll('aside [data-page]').forEach(link => {
+                link.classList.remove('bg-blue-700');
+            });
+
+            // Highlight the current sub-link
+            const current = document.querySelector('aside [data-page="' + window.location.pathname + '"]');
+            if (current) {
+                current.classList.add('bg-blue-700');
             }
 
-            function closeLogoutModal() {
-                document.getElementById("logoutModal").classList.add("hidden");
-                document.body.classList.remove("overflow-hidden"); // Re-enable scrolling
+            // Highlight the Student parent menu if any sub-link is active
+            const studentPages = [
+                "/Faculty/Student-list/",
+                "/Faculty/Verify-students/"
+            ];
+            const facultyPages = [
+                "/Superadmin/Faculty-list/",
+                "/Superadmin/Faculty-status/",
+            ];
+            const studentParent = document.querySelector('aside .students-parent-menu');
+            if (studentParent) {
+                if (studentPages.includes(window.location.pathname)) {
+                    studentParent.classList.add('bg-blue-700');
+                } else {
+                    studentParent.classList.remove('bg-blue-700');
+                }
             }
-
-            function logoutUser() {
-                document.getElementById("logoutForm").submit();
+            const facultyParent = document.querySelector('aside .faculty-parent-menu');
+            if (facultyParent) {
+                if (facultyPages.includes(window.location.pathname)) {
+                    facultyParent.classList.add('bg-blue-700');
+                } else {
+                    facultyParent.classList.remove('bg-blue-700');
+                }
             }
-        </script>
+        }
+
+        setActiveSidebar();
+        document.body.addEventListener('htmx:pushedIntoHistory', setActiveSidebar);
+    });
+</script>
 
 
+<script>
+window.initSuperadminHomeChart = function() {
+    const chartElem = document.getElementById('programLineChart');
+    if (!chartElem) return;
+
+    const allLabels = ["Novice", "Junior", "Senior"];
+    const csData = [12, 8, 5]; // Replace with your dynamic data
+    const itData = [10, 7, 9]; // Replace with your dynamic data
+
+    // Destroy previous chart instance if exists
+    if (window.superadminChartInstance) {
+        window.superadminChartInstance.destroy();
+    }
+
+    const ctx = chartElem.getContext('2d');
+    window.superadminChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: allLabels,
+            datasets: [
+                {
+                    label: 'Computer Science',
+                    data: csData,
+                    borderColor: '#f59e42',
+                    backgroundColor: 'rgba(245, 158, 66, 0.15)',
+                    tension: 0.4,
+                    fill: true,
+                    pointBackgroundColor: '#f59e42',
+                    pointBorderColor: '#fff',
+                    pointRadius: 6,
+                    pointHoverRadius: 8,
+                },
+                {
+                    label: 'Information Technology',
+                    data: itData,
+                    borderColor: '#ef4444',
+                    backgroundColor: 'rgba(239, 68, 68, 0.15)',
+                    tension: 0.4,
+                    fill: true,
+                    pointBackgroundColor: '#ef4444',
+                    pointBorderColor: '#fff',
+                    pointRadius: 6,
+                    pointHoverRadius: 8,
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: true,
+                    labels: { color: '#fff' }
+                }
+            },
+            scales: {
+                x: {
+                    ticks: { color: '#fff' },
+                    grid: { color: 'rgba(255,255,255,0.2)' }
+                },
+                y: {
+                    beginAtZero: true,
+                    title: { display: true, text: 'Students', color: '#fff' },
+                    ticks: { color: '#fff' },
+                    grid: { color: 'rgba(255,255,255,0.2)' }
+                }
+            }
+        }
+    });
+
+    // Dropdown menu logic
+    const btn = document.getElementById('programMenuBtn');
+    const menu = document.getElementById('programMenu');
+    if (btn && menu) {
+        btn.onclick = function(e) {
+            e.stopPropagation();
+            menu.classList.toggle('hidden');
+        };
+        document.addEventListener('click', function() {
+            menu.classList.add('hidden');
+        });
+    }
+
+    window.changeProgram = function(program) {
+        document.getElementById('programLabel').textContent = program === 'All' ? 'All Programs' : program;
+        document.getElementById('programMenuBtnText').textContent = program === 'All' ? 'All Programs' : program;
+
+        if (program === 'All') {
+            window.superadminChartInstance.data = {
+                labels: allLabels,
+                datasets: [
+                    {
+                        label: 'Computer Science',
+                        data: csData,
+                        borderColor: '#f59e42',
+                        backgroundColor: 'rgba(245, 158, 66, 0.15)',
+                        tension: 0.4,
+                        fill: true,
+                        pointBackgroundColor: '#f59e42',
+                        pointBorderColor: '#fff',
+                        pointRadius: 6,
+                        pointHoverRadius: 8,
+                    },
+                    {
+                        label: 'Information Technology',
+                        data: itData,
+                        borderColor: '#ef4444',
+                        backgroundColor: 'rgba(239, 68, 68, 0.15)',
+                        tension: 0.4,
+                        fill: true,
+                        pointBackgroundColor: '#ef4444',
+                        pointBorderColor: '#fff',
+                        pointRadius: 6,
+                        pointHoverRadius: 8,
+                    }
+                ]
+            };
+        } else if (program === 'Computer Science') {
+            window.superadminChartInstance.data = {
+                labels: allLabels,
+                datasets: [
+                    {
+                        label: 'Computer Science',
+                        data: csData,
+                        borderColor: '#f59e42',
+                        backgroundColor: 'rgba(245, 158, 66, 0.15)',
+                        tension: 0.4,
+                        fill: true,
+                        pointBackgroundColor: '#f59e42',
+                        pointBorderColor: '#fff',
+                        pointRadius: 8,
+                        pointHoverRadius: 10,
+                    }
+                ]
+            };
+        } else if (program === 'Information Technology') {
+            window.superadminChartInstance.data = {
+                labels: allLabels,
+                datasets: [
+                    {
+                        label: 'Information Technology',
+                        data: itData,
+                        borderColor: '#ef4444',
+                        backgroundColor: 'rgba(239, 68, 68, 0.15)',
+                        tension: 0.4,
+                        fill: true,
+                        pointBackgroundColor: '#ef4444',
+                        pointBorderColor: '#fff',
+                        pointRadius: 8,
+                        pointHoverRadius: 10,
+                    }
+                ]
+            };
+        }
+        window.superadminChartInstance.update();
+        menu.classList.add('hidden');
+    };
+    // Set default program
+    window.changeProgram('All');
+};
+
+// Run on initial page load
+document.addEventListener('DOMContentLoaded', function() {
+    if (document.getElementById('programLineChart')) {
+        window.initSuperadminHomeChart();
+    }
+});
+// Run after HTMX swaps in new content
+document.body.addEventListener('htmx:afterSwap', function() {
+    if (document.getElementById('programLineChart')) {
+        window.initSuperadminHomeChart();
+    }
+});
+</script>
 </html>

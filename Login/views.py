@@ -4,11 +4,24 @@ from firebase_admin import credentials, firestore
 from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib.auth.decorators import login_required
 from Login.decorators import faculty_required, superadmin_required
+from django.http import HttpResponseRedirect
 
 db = firestore.client()
 # Initialize Firebase Admin SDK
 
 def Sentinels_login_view(request):
+    # If already logged in as superadmin or faculty
+    if request.user.is_authenticated and request.session.get('user_type') in ['superadmin', 'faculty']:
+        # Try to redirect to previous page if available
+        referer = request.META.get('HTTP_REFERER')
+        if referer and not referer.endswith('/'):
+            return HttpResponseRedirect(referer)
+        # Fallback to homepage
+        if request.session.get('user_type') == 'superadmin':
+            return redirect('Superadmin-homepage')
+        else:
+            return redirect('home-page')
+    
     if request.method == 'POST':
         username_or_id = request.POST.get('username_or_id')
         password = request.POST.get('password')

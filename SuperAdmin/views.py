@@ -53,7 +53,7 @@ def Superadmin_Home(request):
                 .where("tier", "==", tier).stream()
             tier_counts[prog].append(sum(1 for _ in count))
 
-    return render(request, 'Home/superadmin-home.html', {
+    context = {
         "total_students": total_students,
         "total_faculty": total_faculty,
         "cs_students": cs_students_count,
@@ -61,20 +61,36 @@ def Superadmin_Home(request):
         "tier_labels": tiers,
         "cs_tier_data": tier_counts["Computer Science"],
         "it_tier_data": tier_counts["Information Technology"],
-    })
+    }
+
+    if request.headers.get('HX-Request'):
+        # HTMX request: return only the main content
+        return render(request, 'Home/contents/superadmin-home-content.html', context)
+    else:
+        # Normal request: return the full page
+        return render(request, 'Home/superadmin-home.html', context)
 
 @superadmin_required
 def Faculty_list(request):
-    """Fetch all active faculty members"""
+
     faculty_ref = db.collection("Authorized Faculty")
     docs = faculty_ref.stream()
 
     faculties = [doc.to_dict() for doc in docs]
 
-    return render(request, "Faculty/faculty-list.html", {"faculties": faculties})
+    context = {
+        "faculties": faculties
+    }
+
+    if request.headers.get('HX-Request'):
+        # HTMX request: return only the main content
+        return render(request, 'Faculty/contents/faculty-list-content.html', context)
+    else:
+        # Normal request: return the full page
+        return render(request, 'Faculty/faculty-list.html', context)
 
 def add_faculty(request):
-    """Add a new faculty member to Firestore"""
+
     if request.method == "POST":
         faculty_data = {
             "faculty_id": request.POST.get("faculty_id"),
@@ -93,7 +109,7 @@ def add_faculty(request):
     return JsonResponse({"success": False})
 
 def edit_faculty(request, faculty_id):
-    """Update faculty member details in Firestore"""
+    
     faculty_ref = db.collection("Authorized Faculty").document(faculty_id)
     faculty = faculty_ref.get()
 
@@ -136,13 +152,23 @@ def archive_faculty(request, faculty_id):
 
 @superadmin_required
 def Archived_faculty_list(request):
-    """Fetch all archived faculty members"""
+    
     archive_ref = db.collection("Archived Faculty")
     docs = archive_ref.stream()
 
     archived_faculties = [doc.to_dict() for doc in docs]
 
-    return render(request, "Faculty/faculty-archived.html", {"archived_faculties": archived_faculties})
+    context = {
+        "archived_faculties": archived_faculties
+    }
+
+    if request.headers.get('HX-Request'):
+        # HTMX request: return only the main content
+        return render(request, 'Faculty/contents/faculty-archived-content.html', context)
+    else:
+        # Normal request: return the full page
+        return render(request, 'Faculty/faculty-archived.html', context)
+
 
 def restore_faculty(request, faculty_id):
     """Restore faculty member from 'archive' collection"""
@@ -266,8 +292,17 @@ def activity_page(request):
         },
     ]
 
-    return render(request, "Activities/Superadmin_Activity_List.html",
-                  {"activities_novice": activities_novice, "activities_junior": activities_junior, "activities_senior": activities_senior})
+    context = {
+        "activities_novice": activities_novice,
+        "activities_junior": activities_junior,
+        "activities_senior": activities_senior}
+    
+    if request.headers.get('HX-Request'):
+        # HTMX request: return only the main content
+        return render(request, 'Activities/contents/Superadmin-Activity-List-content.html', context)
+    else:
+        # Normal request: return the full page
+        return render(request, 'Activities/Superadmin-Activity-List.html', context)
 
 @superadmin_required
 def student_status(request):
@@ -287,7 +322,33 @@ def student_status(request):
 
     all_students = continuing_students + dropout_students
 
-    return render(request, "Faculty/student-status.html", {
+    context = {
         "students": all_students,
         "section_label": f"{program} - {year_section}",
-    })
+    }
+
+    if request.headers.get('HX-Request'):
+        # HTMX request: return only the main content
+        return render(request, 'Faculty/contents/student-status-content.html', context)
+    else:
+        # Normal request: return the full page
+        return render(request, 'Faculty/student-status.html', context)
+
+@superadmin_required
+def Faculty_status(request):
+    # Fetch all faculty members
+    faculty_ref = db.collection("Authorized Faculty")
+    faculty_docs = faculty_ref.stream()
+
+    faculties = [doc.to_dict() for doc in faculty_docs]
+
+    context = {
+        "faculties": faculties
+    }
+
+    if request.headers.get('HX-Request'):
+        # HTMX request: return only the main content
+        return render(request, 'Faculty/contents/faculty-status-content.html', context)
+    else:
+        # Normal request: return the full page
+        return render(request, 'Faculty/faculty-status.html', context)

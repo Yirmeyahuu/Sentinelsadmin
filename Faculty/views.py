@@ -10,7 +10,7 @@ from django.http import JsonResponse
 import json
 from .forms import ActivityDeadlineForm
 from django.views.decorators.csrf import csrf_exempt
-from Login.decorators import faculty_required, superadmin_required
+from Login.decorators import faculty_required
 
 
 
@@ -818,7 +818,6 @@ def handle_image_upload(image):
     # Implement your image upload logic
     pass
 
-
 @faculty_required
 def move_student(request):
     if request.method == "POST":
@@ -846,7 +845,6 @@ def move_student(request):
             messages.error(request, "Invalid destination.")
             return redirect("student-list")
     return redirect("student-list")
-
 
 @faculty_required
 def novice_tier(request):
