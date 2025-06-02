@@ -10,30 +10,26 @@ db = firestore.client()
 # Initialize Firebase Admin SDK
 
 def Sentinels_login_view(request):
-    # If already logged in as superadmin or faculty
-    if request.user.is_authenticated and request.session.get('user_type') in ['superadmin', 'faculty']:
-        # Try to redirect to previous page if available
-        referer = request.META.get('HTTP_REFERER')
-        if referer and not referer.endswith('/'):
-            return HttpResponseRedirect(referer)
-        # Fallback to homepage
-        if request.session.get('user_type') == 'superadmin':
+    # If user is already authenticated, redirect to their homepage
+    if request.user.is_authenticated:
+        user_type = request.session.get('user_type')
+        if user_type == 'superadmin':
             return redirect('Superadmin-homepage')
-        else:
+        elif user_type == 'faculty':
             return redirect('home-page')
-    
+
     if request.method == 'POST':
         username_or_id = request.POST.get('username_or_id')
         password = request.POST.get('password')
 
-        # 1. Try Django superuser authentication (Superadmin)
+        # Try Django superuser authentication (Superadmin)
         user = authenticate(request, username=username_or_id, password=password)
         if user is not None and user.is_superuser:
             login(request, user)
             request.session['user_type'] = 'superadmin'
             return redirect('Superadmin-homepage')
 
-        # 2. Try Faculty authentication (Firestore)
+        # Try Faculty authentication (Firestore)
         users_ref = db.collection('Authorized Faculty')
         query = users_ref.where('faculty_id', '==', username_or_id).limit(1).get()
         if query:
@@ -51,12 +47,12 @@ def Sentinels_login_view(request):
                 user.backend = 'Login.auth_backend.FirestoreBackend'
                 login(request, user)
                 return redirect('home-page')
-            else:
-                messages.error(request, "Incorrect password.")
-                return render(request, 'Login/sentinels-login.html', {'error_field': 'password'})
-        else:
-            messages.error(request, "User not found or not authorized.")
-            return render(request, 'Login/sentinels-login.html', {'error_field': 'username_or_id'})
+
+        # If login fails for any reason, show a generic error
+        return render(request, 'Login/sentinels-login.html', {
+            'general_error': 'Invalid credentials. Please try again.',
+            'entered_username': username_or_id
+        })
 
     return render(request, 'Login/sentinels-login.html')
 

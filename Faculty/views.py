@@ -565,7 +565,6 @@ def Verify_Student(request):
 
 
 
-
 #This is the activity page for the faculty
 def activity_page(request):
     faculty_id = request.user.username
@@ -829,9 +828,15 @@ def move_student(request):
             messages.error(request, "Student not found.")
             return redirect("student-list")
         student_data = student.to_dict()
-        # Move to the selected collection
-        if destination == "completed":
+
+        if destination == "authorized":
+            # Set status to Continuing, keep in Registered_Students
+            student_data["status"] = "Continuing"   
+            student_ref.set(student_data)
+            messages.success(request, "Student set as Continuing in Registered Students.")
+        elif destination == "completed":
             db.collection("Completed Students").document(student_id).set(student_data)
+            student_ref.delete()
             messages.info(request, "Student moved to Completed Students successfully.")
         elif destination == "dropout":
             db.collection("Drop-out Students").document(student_id).set(student_data)

@@ -15,8 +15,12 @@ urlpatterns = [
     path("archive/<str:faculty_id>/", views.archive_faculty, name="archive_faculty"),
     path("ArchivedFaculty/", views.Archived_faculty_list, name="Faculty-Archived"),
     path("restore/<str:faculty_id>/", views.restore_faculty, name="restore_faculty"),
-    path("edit/<str:faculty_id>/", views.edit_faculty, name="edit_faculty"),    
+    path('faculty/edit/<str:faculty_id>/', views.edit_faculty, name='edit_faculty'),
+    path('faculty/move/', views.move_faculty, name='move_faculty'),
     path('Faculty-status/', views.Faculty_status, name='faculty-status'),
 
+
     path('student-status/', views.student_status, name='student-status'),
+
+
 ]

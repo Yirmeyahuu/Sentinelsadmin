@@ -72,21 +72,31 @@ def Superadmin_Home(request):
 
 @superadmin_required
 def Faculty_list(request):
+    # Fetch all continuing faculty
+    continuing_ref = db.collection("Authorized Faculty")
+    continuing_docs = continuing_ref.stream()
+    continuing_faculties = [{**doc.to_dict(), 'status': 'Continuing'} for doc in continuing_docs]
 
-    faculty_ref = db.collection("Authorized Faculty")
-    docs = faculty_ref.stream()
+    # Fetch all deactivated faculty
+    deactivated_ref = db.collection("Deactivated Faculty")
+    deactivated_docs = deactivated_ref.stream()
+    deactivated_faculties = [{**doc.to_dict(), 'status': 'Deactivated'} for doc in deactivated_docs]
 
-    faculties = [doc.to_dict() for doc in docs]
+    # Fetch all completed faculty
+    completed_ref = db.collection("Completed Faculty")
+    completed_docs = completed_ref.stream()
+    completed_faculties = [{**doc.to_dict(), 'status': 'Completed'} for doc in completed_docs]
+
+    # Combine all
+    faculties = continuing_faculties + deactivated_faculties + completed_faculties
 
     context = {
         "faculties": faculties
     }
 
     if request.headers.get('HX-Request'):
-        # HTMX request: return only the main content
         return render(request, 'Faculty/contents/faculty-list-content.html', context)
     else:
-        # Normal request: return the full page
         return render(request, 'Faculty/faculty-list.html', context)
 
 def add_faculty(request):
@@ -336,19 +346,79 @@ def student_status(request):
 
 @superadmin_required
 def Faculty_status(request):
-    # Fetch all faculty members
-    faculty_ref = db.collection("Authorized Faculty")
-    faculty_docs = faculty_ref.stream()
+    # Fetch all continuing faculty
+    continuing_ref = db.collection("Authorized Faculty")
+    continuing_docs = continuing_ref.stream()
+    continuing_faculties = [{**doc.to_dict(), 'status': 'Continuing'} for doc in continuing_docs]
 
-    faculties = [doc.to_dict() for doc in faculty_docs]
+    # Fetch all deactivated faculty
+    deactivated_ref = db.collection("Deactivated Faculty")
+    deactivated_docs = deactivated_ref.stream()
+    deactivated_faculties = [{**doc.to_dict(), 'status': 'Deactivated'} for doc in deactivated_docs]
+
+    # Fetch all completed faculty
+    completed_ref = db.collection("Completed Faculty")
+    completed_docs = completed_ref.stream()
+    completed_faculties = [{**doc.to_dict(), 'status': 'Completed'} for doc in completed_docs]
+
+    # Combine all
+    all_faculties = continuing_faculties + deactivated_faculties + completed_faculties
 
     context = {
-        "faculties": faculties
+        "faculties": all_faculties
     }
 
     if request.headers.get('HX-Request'):
-        # HTMX request: return only the main content
         return render(request, 'Faculty/contents/faculty-status-content.html', context)
     else:
-        # Normal request: return the full page
         return render(request, 'Faculty/faculty-status.html', context)
+    
+@superadmin_required
+def move_faculty(request):
+    if request.method == "POST":
+        faculty_id = request.POST.get("faculty_id")
+        destination = request.POST.get("destination")
+
+        # Find the faculty in any of the three collections
+        collections = ["Authorized Faculty", "Deactivated Faculty", "Completed Faculty"]
+        faculty_data = None
+        source_collection = None
+        for collection in collections:
+            ref = db.collection(collection).document(faculty_id)
+            doc = ref.get()
+            if doc.exists:
+                faculty_data = doc.to_dict()
+                source_collection = collection
+                break
+
+        if not faculty_data:
+            messages.error(request, "Faculty not found.")
+            return redirect("FacultyList")
+
+        # Remove from source collection (except if moving to archive)
+        if destination != "archive" and source_collection:
+            db.collection(source_collection).document(faculty_id).delete()
+
+        # Move to the selected collection and update status
+        if destination == "authorized":
+            faculty_data["status"] = "Continuing"
+            db.collection("Authorized Faculty").document(faculty_id).set(faculty_data)
+            messages.success(request, "Faculty moved to Authorized Faculty successfully.")
+        elif destination == "completed":
+            faculty_data["status"] = "Completed"
+            db.collection("Completed Faculty").document(faculty_id).set(faculty_data)
+            messages.success(request, "Faculty moved to Completed Faculty successfully.")
+        elif destination == "deactivated":
+            faculty_data["status"] = "Deactivated"
+            db.collection("Deactivated Faculty").document(faculty_id).set(faculty_data)
+            messages.success(request, "Faculty moved to Deactivated Faculty successfully!")
+        elif destination == "archive":
+            db.collection("Archived Faculty").document(faculty_id).set(faculty_data)
+            # Remove from all other collections
+            if source_collection:
+                db.collection(source_collection).document(faculty_id).delete()
+            messages.success(request, "Faculty moved to Archived Faculty successfully!")
+        else:
+            messages.error(request, "Invalid destination.")
+            return redirect("FacultyList")
+    return redirect("FacultyList")

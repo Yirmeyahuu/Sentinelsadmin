@@ -1,135 +1,5 @@
 
 
-<!-- Archive Confirmation Modal -->
- <div id="archiveModal" class="fixed inset-0 flex items-center justify-center bg-gray-900/70 hidden z-50">
-    <div class="bg-white p-6 rounded-lg shadow-lg w-96">
-        <h2 class="text-lg font-bold text-gray-900 mb-4">Archive Student</h2>
-        <p class="text-gray-700 mb-6">Are you sure you want to archive this student? It will be temporarily stored in the archive.</p>
-        <div class="flex justify-end space-x-4">
-            <button onclick="closeArchiveModal()" class="text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-gray-800 dark:hover:bg-gray-700 dark:focus:ring-gray-700 dark:border-gray-700">Cancel</button>
-            <a id="confirmArchiveBtn" href="#" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">Confirm</a>
-        </div>
-    </div>
-</div>
-
-<!-- Add Student Modal -->
-<div id="modal" class="fixed inset-0 flex justify-center items-center hidden z-50">
-    <!-- Backdrop with blur effect -->
-    <div class="fixed inset-0 backdrop-blur-sm bg-gray-900/70"></div>
-    
-    <!-- Modal Content -->
-    <div class="bg-gray-100 border border-white p-12 rounded-tl-4xl rounded-br-4xl shadow-lg w-1/2 z-10">
-        <h2 class="text-xl font-bold mb-4 text-blue-500">Add Student</h2>
-        <div class="border-t border-blue-500 p-2 mt-auto"></div>
-        <form id="studentForm" action="{% url 'add_student' %}" method="POST">
-            {% csrf_token %}
-            <div class="grid grid-cols-2 gap-4">
-                <!-- Student ID -->
-                <div>
-                    <label class="block text-sm font-bold mb-2 text-blue-500">Student ID <span> (e.g. 12-1234-56) </span></label>
-                    <input type="text" name="student_id" placeholder="Enter Student ID" class="w-full p-4 border border-gray-300 rounded-2xl" required>
-                </div>
-                <!-- First Name -->
-                <div>
-                    <label class="block text-sm font-bold mb-2 text-blue-500">First Name</label>
-                    <input type="text" name="first_name" placeholder="Enter First Name" class="w-full p-4 border border-gray-300 rounded-2xl" required>
-                </div>
-                <!-- Last Name -->
-                <div>
-                    <label class="block text-sm font-bold mb-2 text-blue-500">Last Name</label>
-                    <input type="text" name="last_name" placeholder="Enter Last Name" class="w-full p-4 border border-gray-300 rounded-2xl" required>
-                </div>
-                <!-- Middle Initial -->
-                <div>
-                    <label class="block text-sm font-bold mb-2 text-blue-500">Middle Initial</label>
-                    <input type="text" name="middle_initial" placeholder="Enter Middle Initial" class="w-full p-4 border border-gray-300 rounded-2xl">
-                </div>
-            </div>
-            <!-- Buttons -->
-            <div class="flex justify-end mt-6">
-                <button type="button" onclick="closeModal()" class="text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2">Cancel</button>
-                <button type="submit" class="text-white bg-blue-800 hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2">Add Student</button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<!-- Edit Student Modal -->
-<div id="editStudentModal" class="fixed inset-0 flex justify-center bg-gray-900/60 items-center hidden z-50">
-    <!-- Backdrop with blur effect -->
-    <div class="fixed inset-0 backdrop-blur-sm bg-gray-900/50"></div>
-    <!-- Modal Content -->
-    <div class="bg-gray-100 border border-white p-12 rounded-3xl shadow-lg w-1/2 z-10">
-        <h2 class="text-xl font-bold mb-4 text-blue-500">Edit Student</h2>
-        <div class="border-t border-blue-500 p-2 mt-auto"></div>
-        <form id="editStudentForm" method="POST">
-            {% csrf_token %}
-            <input type="hidden" name="student_id" id="edit-student-id">
-            <div class="grid grid-cols-2 gap-4">
-                <!-- First Name -->
-                <div>
-                    <label class="block text-sm font-bold mb-2 text-blue-500">First Name</label>
-                    <input type="text" name="first_name" id="edit-first-name" class="w-full p-4 border border-gray-300 rounded-2xl" required>
-                </div>
-                <!-- Last Name -->
-                <div>
-                    <label class="block text-sm font-bold mb-2 text-blue-500">Last Name</label>
-                    <input type="text" name="last_name" id="edit-last-name" class="w-full p-4 border border-gray-300 rounded-2xl" required>
-                </div>
-                <!-- Middle Initial -->
-                <div>
-                    <label class="block text-sm font-bold mb-2 text-blue-500">Middle Initial</label>
-                    <input type="text" name="middle_initial" id="edit-middle-initial" class="w-full p-4 border border-gray-300 rounded-2xl">
-                </div>
-            </div>
-            <!-- Buttons -->
-            <div class="flex justify-end mt-6">
-                <button type="button" onclick="closeEditModal()" class="text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2">Cancel</button>
-                <button type="submit" class="text-white bg-blue-800 hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2">Save Changes</button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<!-- Move Student Modal -->
-<div id="moveModal" class="fixed inset-0 flex items-center justify-center bg-gray-900/80 hidden z-50">
-    <div class="bg-blue-700 p-6 rounded-lg shadow-lg w-96">
-        <h2 class="text-lg font-bold text-white mb-4">Move Student</h2>
-        <form id="moveStudentForm" method="POST" action="{% url 'move_student' %}">
-            {% csrf_token %}
-            <input type="hidden" name="student_id" id="move-student-id">
-            <label class="block mb-2 text-white">Move to:</label>
-            <select name="destination" id="move-destination" class="w-full p-2 border rounded mb-4 text-white" required>
-                <option value="" disabled selected>Select destination</option>
-                <option value="continuing">Completed Students</option>
-                <option value="dropout">Drop-out Students</option>
-                <option value="archive">Archive Students</option>
-            </select>
-            <div class="flex justify-end space-x-2">
-                <button type="button" onclick="closeMoveModal()" class="bg-gray-300 text-gray-700 px-4 py-2 rounded-2xl">Cancel</button>
-                <button type="submit" class="bg-blue-900 text-white px-4 py-2 rounded-2xl">Move</button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<!-- Student Progress Modal -->
-<div id="progressModal" class="fixed inset-0 flex items-center justify-center bg-gray-900/70 hidden z-50">
-    <div class="bg-white p-8 rounded-tl-4xl rounded-br-4xl shadow-lg w-full max-w-md relative">
-        <button onclick="closeProgressModal()" class="absolute top-2 right-2 text-gray-400 hover:text-blue-700 text-2xl">&times;</button>
-        <h2 class="text-xl font-bold mb-2 text-sky-700" id="progressStudentName"></h2>
-        <div class="mb-4">
-            <!-- Example progress content, replace with real data as needed -->
-            <p class="text-gray-700 mb-2">Novice Progress: <span class="font-bold text-sky-700">80%</span></p>
-            <p class="text-gray-700 mb-2">Junior Progress: <span class="font-bold text-sky-700">60%</span></p>
-            <p class="text-gray-700 mb-2">Senior Progress: <span class="font-bold text-sky-700">40%</span></p>
-        </div>
-        <button id="viewAllBtn" class="bg-blue-700 text-white px-6 py-2 rounded-xl hover:bg-blue-800 transition w-full font-semibold">
-            View all
-        </button>
-    </div>
-</div>
-
 
 <!-- Table -->
 <div class="flex flex-col items-start w-full pl-28 pr-16">
@@ -246,6 +116,7 @@
                         <th class="border border-blue-500 p-2">Program</th>
                         <th class="border border-blue-500 p-2">Year & Section</th>
                         <th class="border border-blue-500 p-2">Semester</th>
+                        <th class="border border-blue-500 p-2">Status</th>
                         <th class="border border-blue-500 p-2">Actions</th>
                     </tr>
                 </thead>
@@ -259,19 +130,30 @@
                             <td class="border border-blue-500 p-2 text-center whitespace-nowrap">{{ student.year_section }}</td>
                             <td class="border border-blue-500 p-2 text-center whitespace-nowrap">{{ student.semester }}</td>
                             <td class="border border-blue-500 p-2 text-center whitespace-nowrap">
+                                <span class="px-2 py-1 rounded-lg text-xs font-medium
+                                    {% if student.status == 'Drop-out' %}
+                                        bg-red-500/20 text-red-200
+                                    {% elif student.status == 'Completed' %}
+                                        bg-yellow-500/20 text-yellow-200
+                                    {% else %}
+                                        bg-green-500/20 text-green-200
+                                    {% endif %}">
+                                    {{ student.status|default:"Continuing" }}
+                                </span>
+                            </td>
+                            <td class="border border-blue-500 p-2 text-center whitespace-nowrap">
                                 <div class="flex items-center justify-center space-x-3">
-                                    <button onclick="openEditModal('{{ student.student_id }}', '{{ student.first_name }}', '{{ student.middle_initial }}', '{{ student.last_name }}')"  class="text-gray-200 hover:text-blue-800">
+                                    <button onclick="event.stopPropagation(); openEditModal('{{ student.student_id }}', '{{ student.first_name }}', '{{ student.middle_initial }}', '{{ student.last_name }}')" class="text-gray-200 hover:text-blue-800">
                                         <svg class="w-6 h-6 text-white hover:text-blue-400 transition-all ease-in-out duration-150" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
                                             <path stroke="currentColor" stroke-linecap="square" stroke-linejoin="round" stroke-width="2" d="M7 19H5a1 1 0 0 1-1-1v-1a3 3 0 0 1 3-3h1m4-6a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm7.441 1.559a1.907 1.907 0 0 1 0 2.698l-6.069 6.069L10 19l.674-3.372 6.07-6.07a1.907 1.907 0 0 1 2.697 0Z"/>
-                                          </svg>                                          
+                                        </svg> 
                                     </button>
-                                    <!-- Move Button -->
                                     <button type="button"
-                                    onclick="openMoveModal('{{ student.student_id }}')"
-                                    class="text-gray-200 hover:text-yellow-500">
-                                    <svg class="w-6 h-6 text-white hover:text-blue-400 transition-all ease-in-out duration-150 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 14v4.833A1.166 1.166 0 0 1 16.833 20H5.167A1.167 1.167 0 0 1 4 18.833V7.167A1.166 1.166 0 0 1 5.167 6h4.618m4.447-2H20v5.768m-7.889 2.121 7.778-7.778"/>
-                                      </svg>                                      
+                                        onclick="event.stopPropagation(); openMoveModal('{{ student.student_id }}')"
+                                        class="text-gray-200 hover:text-yellow-500">
+                                        <svg class="w-6 h-6 text-white hover:text-blue-400 transition-all ease-in-out duration-150 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 14v4.833A1.166 1.166 0 0 1 16.833 20H5.167A1.167 1.167 0 0 1 4 18.833V7.167A1.166 1.166 0 0 1 5.167 6h4.618m4.447-2H20v5.768m-7.889 2.121 7.778-7.778"/>
+                                        </svg> 
                                     </button>
                                 </div>
                             </td>
@@ -330,8 +212,14 @@
 
 <!-- Add Student Modal-->
 <script>
-    function openModal() { document.getElementById("modal").classList.remove("hidden"); }
-    function closeModal() { document.getElementById("modal").classList.add("hidden"); }
+function openModal() { 
+    document.getElementById("modal").classList.remove("hidden");
+    document.querySelector('aside').classList.add('blur'); // Add blur effect to sidebar
+}
+function closeModal() { 
+    document.getElementById("modal").classList.add("hidden"); 
+    document.querySelector('aside').classList.remove('blur'); // Remove blur effect from sidebar
+}
 </script>
 
 <!-- Add Student Field Validation -->
@@ -405,10 +293,6 @@
             notification.remove();
         }, 6000); // Remove after 3 seconds
     }
-
-    function closeModal() {
-        document.getElementById("modal").classList.add("hidden");
-    }
 </script>
 
 
@@ -440,38 +324,36 @@
     function openArchiveModal(url) {
         document.getElementById("archiveModal").classList.remove("hidden");
         document.getElementById("confirmArchiveBtn").setAttribute("href", url);
+        document.querySelector('aside').classList.add('blur');
     }
 
     function closeArchiveModal() {
         document.getElementById("archiveModal").classList.add("hidden");
+        document.querySelector('aside').classList.remove('blur');
     }
 </script>
 
-<!--script for edit-modal-->
+<!-- script for edit-modal-->
 <script>
-    function openModal() {
-        document.getElementById("modal").classList.remove("hidden");
-    }
-
-    function closeModal() {
-        document.getElementById("modal").classList.add("hidden");
-    }
-
     function openEditModal(id, firstName, middleInitial, lastName, program, yearSection, semester) {
         document.getElementById("edit-student-id").value = id;
         document.getElementById("edit-first-name").value = firstName;
         document.getElementById("edit-middle-initial").value = middleInitial;
         document.getElementById("edit-last-name").value = lastName;
-
+    
         // Set form action dynamically
         document.getElementById("editStudentForm").action = `/Student/edit/${id}/`;
-
+    
         // Show modal
         document.getElementById("editStudentModal").classList.remove("hidden");
+    
+        // Add blur to sidebar
+        document.querySelector('aside').classList.add('blur');
     }
 
     function closeEditModal() {
         document.getElementById("editStudentModal").classList.add("hidden");
+        document.querySelector('aside').classList.remove('blur');
     }
 </script>
 
@@ -482,9 +364,11 @@
     function openMoveModal(studentId) {
         document.getElementById('move-student-id').value = studentId;
         document.getElementById('moveModal').classList.remove('hidden');
+        document.querySelector('aside').classList.add('blur');
     }
     function closeMoveModal() {
         document.getElementById('moveModal').classList.add('hidden');
+        document.querySelector('aside').classList.remove('blur');
     }
 </script>
 
@@ -495,6 +379,8 @@
         // Set the "View all" button to redirect to the dashboard for this student
         document.getElementById('viewAllBtn').onclick = function() {
             window.location.href = `/student-dashboard/?student_id=${studentId}`;
+
+        
         };
     }
     function closeProgressModal() {

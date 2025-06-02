@@ -97,6 +97,9 @@
                             <path d="M6.75 12c0-.619.107-1.213.304-1.764l-3.1-3.1a11.25 11.25 0 0 0-2.63 4.31c-.12.362-.12.752 0 1.114 1.489 4.467 5.704 7.69 10.675 7.69 1.5 0 2.933-.294 4.242-.827l-2.477-2.477A5.25 5.25 0 0 1 6.75 12Z" />
                         </svg>
                     </button>
+                    {% if general_error %}
+                        <p class="text-red-600 text-xs mt-1">{{ general_error }}</p>
+                    {% endif %}
                 </div>
             
                 <button type="submit" class="w-full bg-blue-700 hover:bg-blue-500 text-white text-lg font-medium py-3 rounded-2xl transition duration-200">
@@ -107,36 +110,25 @@
     </div>
 
 
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const errorField = "{{ error_field|escapejs }}";  // Get the error field from the context
-    
-            if (errorField === "faculty_id") {
-                document.getElementById("faculty_id_error").classList.remove("hidden");
-            } else if (errorField === "password") {
-                document.getElementById("password_error").classList.remove("hidden");
-            }
-        });
-    </script>
-
-    <script>
-        document.getElementById('togglePassword').addEventListener('click', function (e) {
-            e.preventDefault(); // Prevent form submission
-            const passwordInput = document.getElementById('password');
-            const eyeOpen = document.getElementById('eyeOpen');
-            const eyeClosed = document.getElementById('eyeClosed');
-            
-            if (passwordInput.type === 'password') {
-                passwordInput.type = 'text';
-                eyeOpen.classList.add('hidden');
-                eyeClosed.classList.remove('hidden');
-            } else {
-                passwordInput.type = 'password';
-                eyeOpen.classList.remove('hidden');
-                eyeClosed.classList.add('hidden');
-            }
-        });
-    </script>
+<!-- Eye toggle for password -->
+<script>
+    document.getElementById('togglePassword').addEventListener('click', function (e) {
+        e.preventDefault(); // Prevent form submission
+        const passwordInput = document.getElementById('password');
+        const eyeOpen = document.getElementById('eyeOpen');
+        const eyeClosed = document.getElementById('eyeClosed');
+        
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            eyeOpen.classList.add('hidden');
+            eyeClosed.classList.remove('hidden');
+        } else {
+            passwordInput.type = 'password';
+            eyeOpen.classList.remove('hidden');
+            eyeClosed.classList.add('hidden');
+        }
+    });
+</script>
 
 </body>
 </html>
