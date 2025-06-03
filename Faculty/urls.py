@@ -7,7 +7,7 @@ urlpatterns = [
     path("homepage/", views.Faculty_home, name="home-page"),
     
     #URLS FOR STUDENT MANAGEMENT PAGE
-    path("Student-list/", views.student_list, name="student-list"),
+    path("Student-list/", views.student_list, name="faculty-student-list"),
     path("add/", views.add_student, name="add_student"),
     path("archive/<str:student_id>/", views.archive_student, name="archive_student"),
     path("Archived-Students/", views.archived_student_list, name="archive-page"),

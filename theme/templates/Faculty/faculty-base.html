@@ -41,6 +41,19 @@
 
 </head>
 
+<!-- Deadline Modal -->
+<div id="deadlineModal" class="fixed inset-0 z-50 hidden items-center justify-center">
+    <div class="fixed inset-0 bg-gray-900/70 backdrop-blur-sm"></div>
+    <div class="relative bg-sky-600 rounded-tl-4xl rounded-br-4xl shadow-lg max-w-2xl w-full mx-8 p-8 z-10">
+        <button type="button" onclick="closeDeadlineModal()" class="absolute top-3 right-3 text-white/70 hover:text-white text-2xl font-bold">&times;</button>
+        <form method="post" id="deadlineForm">
+            {% csrf_token %}
+            {{ deadline_form.as_p }}
+            <button type="submit" class="w-1/3 mx-auto block bg-sky-500 hover:bg-sky-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200">Set</button>
+        </form>
+    </div>
+</div>
+
 <!-- Archive Confirmation Modal -->
 <div id="archiveModal" class="fixed inset-0 flex items-center justify-center bg-gray-900/70 hidden z-50">
     <div class="bg-white p-6 rounded-lg shadow-lg w-96">
@@ -324,7 +337,7 @@
                             <a
                             data-page="/Faculty/Student-list/"
                             href="/Faculty/Student-list/"
-                            hx-get="{% url 'student-list' %}" 
+                            hx-get="{% url 'faculty-student-list' %}" 
                             hx-target="#mainContent" 
                             hx-push-url="true" 
                             class="students-parent-menu flex items-center p-2 hover:bg-blue-800 rounded-2xl cursor-pointer transition-all duration-300 ease-in-out">

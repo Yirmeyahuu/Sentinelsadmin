@@ -55,3 +55,4 @@ window.openLogoutModal = function() {
 window.closeLogoutModal = function() {
     document.getElementById('logoutModal').classList.add('hidden');
 };
+
