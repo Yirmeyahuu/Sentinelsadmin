@@ -5,6 +5,8 @@ from firebase_admin import credentials, firestore
 from django.http import JsonResponse
 from django.templatetags.static import static
 from Login.decorators import superadmin_required
+from .forms import ActivityDeadlineForm
+
 
 
 
@@ -195,124 +197,153 @@ def restore_faculty(request, faculty_id):
 
     return redirect("archive-page")
 
-@superadmin_required
+#This is the activity page for the faculty
 def activity_page(request):
+    faculty_id = request.user.username
+    users_ref = db.collection('Authorized Faculty')
+    query = users_ref.where('faculty_id', '==', faculty_id).limit(1).get()
+    faculty_data = None
+    deadline_form = ActivityDeadlineForm()
+
+
+    # Fetch notifications from Firestore, newest first
+    notifications_ref = db.collection("Notifications").order_by("timestamp", direction=firestore.Query.DESCENDING)
+    notifications = []
+    for doc in notifications_ref.stream():
+        notif = doc.to_dict()
+        notif['id'] = doc.id
+        notifications.append(notif)
+
+    if query:
+        faculty_doc = query[0]
+        faculty_data = faculty_doc.to_dict()
+
     activities_novice = [
         {
-            "title": "",
-            "subject": "",
-            "date": "",
+            "title": "Novice Task 1",
+            "description": "Short description of the task 1.",
+            "deadline": "",
             "progress": 0,  # percentage
-            "modules": 0,
-            "image": static("assets/img/Photo1.png"),  # Update with your actual image path
+            "image": static("assets/img/Photo1.png"),
         },
         {
-            "title": "",
-            "subject": "",
-            "date": "",
-            "progress": 0,
-            "modules": 0,
+            "title": "Novice Task 2",
+            "description": "Short description of the task 2.",
+            "deadline": "2023-10-15",
+            "progress": 0,  # percentage
             "image": static("assets/img/Photo2.png"),
         },
         {
-            "title": "",
-            "subject": "",
-            "date": "",
-            "progress": 0,
-            "modules": 0,
+            "title": "Novice Task 3",
+            "description": "Short description of the task 3.",
+            "deadline": "2023-10-15",
+            "progress": 0,  # percentage
             "image": static("assets/img/Photo3.png"),
         },
         {
-            "title": "",
-            "subject": "",
-            "date": "",
-            "progress": 0,
-            "modules": 0,
+            "title": "Novice Boss Battle",
+            "description": "Short description of the Boss Battle 1.",
+            "deadline": "2023-10-15",
+            "progress": 0,  # percentage
             "image": static("assets/img/Photo4.png"),
         },
     ]
 
     activities_junior = [
         {
-            "title": "",
-            "subject": "",
-            "date": "",
+            "title": "Junior Task 1",
+            "description": "Short description of the task 1.",
+            "deadline": "2023-10-15",
             "progress": 0,  # percentage
-            "modules": 0,
-            "image": static("assets/img/Photo2.png"),  # Update with your actual image path
+            "image": static("assets/img/Photo1.png"),
         },
         {
-            "title": "",
-            "subject": "",
-            "date": "",
-            "progress": 0,
-            "modules": 0,
+            "title": "Junior Task 2",
+            "description": "Short description of the task 2.",
+            "deadline": "2023-10-15",
+            "progress": 0,  # percentage
+            "image": static("assets/img/Photo2.png"),
+        },
+        {
+            "title": "Junior Task 3",
+            "description": "Short description of the task 3.",
+            "deadline": "2023-10-15",
+            "progress": 0,  # percentage
             "image": static("assets/img/Photo3.png"),
         },
         {
-            "title": "",
-            "subject": "",
-            "date": "",
-            "progress": 0,
-            "modules": 0,
+            "title": "Junior Boss Battle",
+            "description": "Short description of the Boss Battle 2.",
+            "deadline": "2023-10-15",
+            "progress": 0,  # percentage
             "image": static("assets/img/Photo4.png"),
-        },
-        {
-            "title": "",
-            "subject": "",
-            "date": "",
-            "progress": 0,
-            "modules": 0,
-            "image": static("assets/img/Photo1.png"),
         },
     ]
 
     activities_senior = [
         {
-            "title": "",
-            "subject": "",
-            "date": "",
+            "title": "Senior Task 1",
+            "description": "Short description of the task 1.",
+            "deadline": "2023-10-15",
             "progress": 0,  # percentage
-            "modules": 0,
-            "image": static("assets/img/Photo3.png"),  # Update with your actual image path
-        },
-        {
-            "title": "",
-            "subject": "",
-            "date": "",
-            "progress": 0,
-            "modules": 0,
-            "image": static("assets/img/Photo4.png"),
-        },
-        {
-            "title": "",
-            "subject": "",
-            "date": "",
-            "progress": 0,
-            "modules": 0,
             "image": static("assets/img/Photo1.png"),
         },
         {
-            "title": "",
-            "subject": "",
-            "date": "",
-            "progress": 0,
-            "modules": 0,
+            "title": "Senior Task 2",
+            "description": "Short description of the task 2.",
+            "deadline": "2023-10-15",
+            "progress": 0,  # percentage
             "image": static("assets/img/Photo2.png"),
+        },
+        {
+            "title": "Senior Task 3",
+            "description": "Short description of the task 3.",
+            "deadline": "2023-10-15",
+            "progress": 0,  # percentage
+            "image": static("assets/img/Photo3.png"),
+        },
+        {
+            "title": "Senior Boss Battle",
+            "description": "Short description of the Boss Battle 3.",
+            "deadline": "2023-10-15",
+            "progress": 0,  # percentage
+            "image": static("assets/img/Photo4.png"),
         },
     ]
 
-    context = {
-        "activities_novice": activities_novice,
-        "activities_junior": activities_junior,
-        "activities_senior": activities_senior}
-    
+    if request.method == "POST":
+        deadline_form = ActivityDeadlineForm(request.POST)
+        if deadline_form.is_valid():
+            data = deadline_form.cleaned_data
+            # Use the title as the document name (slugify for safety)
+            from django.utils.text import slugify
+            doc_name = slugify(data['title'])
+            db.collection('Activity Deadlines').document(doc_name).set({
+                'activity_id': data['activity_id'],
+                'title': data['title'],
+                'description': data['description'],
+                'date_of_deadline': str(data['date']),
+                'time_of_deadline': str(data['time']),
+                'created_at': firestore.SERVER_TIMESTAMP
+            })
+            messages.success(request, "Deadline set successfully!")
+            return redirect('activities-page')
+
+    context = {"activities_novice": activities_novice,
+                   "activities_junior": activities_junior,
+                   "activities_senior": activities_senior,
+                   "faculty_data": faculty_data,
+                    "notifications": notifications,
+                    "deadline_form": deadline_form,
+                    "show_sticky_container": False,
+                }
+
     if request.headers.get('HX-Request'):
         # HTMX request: return only the main content
-        return render(request, 'Activities/contents/Superadmin-Activity-List-content.html', context)
+        return render(request, 'Activities/contents/activities-content.html', context)
     else:
         # Normal request: return the full page
-        return render(request, 'Activities/Superadmin-Activity-List.html', context)
+        return render(request, 'Activities/activities.html', context)
 
 @superadmin_required
 def student_status(request):
