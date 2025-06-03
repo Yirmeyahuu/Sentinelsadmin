@@ -1,4 +1,3 @@
-// Sidebar active link highlighting for HTMX navigation
 
 document.addEventListener("DOMContentLoaded", function() {
     function setActiveSidebar() {

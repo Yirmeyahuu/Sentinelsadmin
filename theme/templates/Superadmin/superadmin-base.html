@@ -16,6 +16,21 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 
+    <!-- HTMX and Alpine.js scripts -->
+    <script src="{% static 'assets/js/htmx.min.js' %}"></script>
+    <script src="{% static 'assets/js/alpine.min.js' %}" defer></script>
+    <script src="{% static 'assets/js/chart.min.js' %}"></script>
+    <script src="{% static 'assets/js/neon-glow-plugin.js' %}"></script>
+
+    <!-- Script of external Javascript-->
+    <script src="{% static 'js/superadmin-base/open-modal.js' %}" defer></script>
+    <script src="{% static 'js/superadmin-base/sidebar.js' %}" defer></script>
+    <script src="{% static 'js/superadmin-base/charts.js' %}" defer></script>
+    <script src="{% static 'js/superadmin-base/content-animate.js' %}" defer></script>
+    
+
+
+
     <style>
         * {
             font-family: 'Poppins', sans-serif;
@@ -90,7 +105,7 @@
 <!-- Move Faculty Modal -->
 <div id="moveFacultyModal" class="fixed inset-0 z-50 flex items-center justify-center hidden">
     <!-- Backdrop -->
-    <div class="fixed inset-0 bg-gray-900/60"></div>
+    <div class="fixed inset-0 backdrop-blur-sm bg-gray-900/60"></div>
     <!-- Modal Content -->
     <div class="relative bg-white p-6 rounded-3xl shadow-lg w-96 z-10">
         <h2 class="text-lg font-bold text-blue-500 mb-4">Move Faculty</h2>
@@ -367,8 +382,8 @@
                             x-transition:enter-start="opacity-0 transform translate-y-4"
                             x-transition:enter-end="opacity-100 transform translate-y-0">
                             <a
-                            data-page="/Faculty/Student-list/"
-                            href="/Faculty/Student-list/"
+                            data-page="/Superadmin/student-list/"
+                            href="/Superadmin/student-list/"
                             hx-get="{% url 'student-list' %}" 
                             hx-target="#mainContent" 
                             hx-push-url="true" 
@@ -545,274 +560,5 @@
             </main>
         </div>
     </div>
-
-
-
-
-
-<script>
-    function openLogoutModal() {
-        document.getElementById("logoutModal").classList.remove("hidden");
-        document.body.classList.add("overflow-hidden"); // Disable scrolling
-    }
-
-    function closeLogoutModal() {
-        document.getElementById("logoutModal").classList.add("hidden");
-        document.body.classList.remove("overflow-hidden"); // Re-enable scrolling
-    }
-
-    function logoutUser() {
-        document.getElementById("logoutForm").submit();
-    }
-</script>
-
-<!-- HTMX and Alpine.js scripts -->
-<script src="{% static 'assets/js/htmx.min.js' %}"></script>
-<script src="{% static 'assets/js/alpine.min.js' %}" defer></script>
-<script src="{% static 'assets/js/chart.min.js' %}"></script>
-<script src="{% static 'assets/js/neon-glow-plugin.js' %}"></script>
-<!-- sidebar no reload script-->
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-        function setActiveSidebar() {
-            // Remove highlights from all sidebar links
-            document.querySelectorAll('aside [data-page]').forEach(link => {
-                link.classList.remove('bg-blue-700');
-            });
-
-            // Highlight the current sub-link
-            const current = document.querySelector('aside [data-page="' + window.location.pathname + '"]');
-            if (current) {
-                current.classList.add('bg-blue-700');
-            }
-
-            // Highlight the Student parent menu if any sub-link is active
-            const studentPages = [
-                "/Faculty/Student-list/",
-                "/Faculty/Verify-students/"
-            ];
-            const facultyPages = [
-                "/Superadmin/Faculty-list/",
-                "/Superadmin/Faculty-status/",
-            ];
-            const studentParent = document.querySelector('aside .students-parent-menu');
-            if (studentParent) {
-                if (studentPages.includes(window.location.pathname)) {
-                    studentParent.classList.add('bg-blue-700');
-                } else {
-                    studentParent.classList.remove('bg-blue-700');
-                }
-            }
-            const facultyParent = document.querySelector('aside .faculty-parent-menu');
-            if (facultyParent) {
-                if (facultyPages.includes(window.location.pathname)) {
-                    facultyParent.classList.add('bg-blue-700');
-                } else {
-                    facultyParent.classList.remove('bg-blue-700');
-                }
-            }
-        }
-
-        setActiveSidebar();
-        document.body.addEventListener('htmx:pushedIntoHistory', setActiveSidebar);
-    });
-</script>
-
-
-<script>
-window.initSuperadminHomeChart = function() {
-    const chartElem = document.getElementById('programLineChart');
-    if (!chartElem) return;
-
-    const allLabels = ["Novice", "Junior", "Senior"];
-    const csData = [12, 8, 5]; // Replace with your dynamic data
-    const itData = [10, 7, 9]; // Replace with your dynamic data
-
-    // Destroy previous chart instance if exists
-    if (window.superadminChartInstance) {
-        window.superadminChartInstance.destroy();
-    }
-
-    const ctx = chartElem.getContext('2d');
-    window.superadminChartInstance = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: allLabels,
-            datasets: [
-                {
-                    label: 'Computer Science',
-                    data: csData,
-                    borderColor: '#f59e42',
-                    backgroundColor: 'rgba(245, 158, 66, 0.15)',
-                    tension: 0.4,
-                    fill: true,
-                    pointBackgroundColor: '#f59e42',
-                    pointBorderColor: '#fff',
-                    pointRadius: 6,
-                    pointHoverRadius: 8,
-                },
-                {
-                    label: 'Information Technology',
-                    data: itData,
-                    borderColor: '#ef4444',
-                    backgroundColor: 'rgba(239, 68, 68, 0.15)',
-                    tension: 0.4,
-                    fill: true,
-                    pointBackgroundColor: '#ef4444',
-                    pointBorderColor: '#fff',
-                    pointRadius: 6,
-                    pointHoverRadius: 8,
-                }
-            ]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: {
-                    display: true,
-                    labels: { color: '#fff' }
-                }
-            },
-            scales: {
-                x: {
-                    ticks: { color: '#fff' },
-                    grid: { color: 'rgba(255,255,255,0.2)' }
-                },
-                y: {
-                    beginAtZero: true,
-                    title: { display: true, text: 'Students', color: '#fff' },
-                    ticks: { color: '#fff' },
-                    grid: { color: 'rgba(255,255,255,0.2)' }
-                }
-            }
-        }
-    });
-
-    // Dropdown menu logic
-    const btn = document.getElementById('programMenuBtn');
-    const menu = document.getElementById('programMenu');
-    if (btn && menu) {
-        btn.onclick = function(e) {
-            e.stopPropagation();
-            menu.classList.toggle('hidden');
-        };
-        document.addEventListener('click', function() {
-            menu.classList.add('hidden');
-        });
-    }
-
-    window.changeProgram = function(program) {
-        document.getElementById('programLabel').textContent = program === 'All' ? 'All Programs' : program;
-        document.getElementById('programMenuBtnText').textContent = program === 'All' ? 'All Programs' : program;
-
-        if (program === 'All') {
-            window.superadminChartInstance.data = {
-                labels: allLabels,
-                datasets: [
-                    {
-                        label: 'Computer Science',
-                        data: csData,
-                        borderColor: '#f59e42',
-                        backgroundColor: 'rgba(245, 158, 66, 0.15)',
-                        tension: 0.4,
-                        fill: true,
-                        pointBackgroundColor: '#f59e42',
-                        pointBorderColor: '#fff',
-                        pointRadius: 6,
-                        pointHoverRadius: 8,
-                    },
-                    {
-                        label: 'Information Technology',
-                        data: itData,
-                        borderColor: '#ef4444',
-                        backgroundColor: 'rgba(239, 68, 68, 0.15)',
-                        tension: 0.4,
-                        fill: true,
-                        pointBackgroundColor: '#ef4444',
-                        pointBorderColor: '#fff',
-                        pointRadius: 6,
-                        pointHoverRadius: 8,
-                    }
-                ]
-            };
-        } else if (program === 'Computer Science') {
-            window.superadminChartInstance.data = {
-                labels: allLabels,
-                datasets: [
-                    {
-                        label: 'Computer Science',
-                        data: csData,
-                        borderColor: '#f59e42',
-                        backgroundColor: 'rgba(245, 158, 66, 0.15)',
-                        tension: 0.4,
-                        fill: true,
-                        pointBackgroundColor: '#f59e42',
-                        pointBorderColor: '#fff',
-                        pointRadius: 8,
-                        pointHoverRadius: 10,
-                    }
-                ]
-            };
-        } else if (program === 'Information Technology') {
-            window.superadminChartInstance.data = {
-                labels: allLabels,
-                datasets: [
-                    {
-                        label: 'Information Technology',
-                        data: itData,
-                        borderColor: '#ef4444',
-                        backgroundColor: 'rgba(239, 68, 68, 0.15)',
-                        tension: 0.4,
-                        fill: true,
-                        pointBackgroundColor: '#ef4444',
-                        pointBorderColor: '#fff',
-                        pointRadius: 8,
-                        pointHoverRadius: 10,
-                    }
-                ]
-            };
-        }
-        window.superadminChartInstance.update();
-        menu.classList.add('hidden');
-    };
-    // Set default program
-    window.changeProgram('All');
-};
-
-// Run on initial page load
-document.addEventListener('DOMContentLoaded', function() {
-    if (document.getElementById('programLineChart')) {
-        window.initSuperadminHomeChart();
-    }
-});
-// Run after HTMX swaps in new content
-document.body.addEventListener('htmx:afterSwap', function() {
-    if (document.getElementById('programLineChart')) {
-        window.initSuperadminHomeChart();
-    }
-});
-</script>
-
-<script>
-    document.body.addEventListener('htmx:beforeSwap', function(evt) {
-        const main = document.getElementById('mainContent');
-        if (main) {
-            main.style.transition = '';
-            main.style.transform = 'translateX(-40px)';
-            main.style.opacity = 0;
-        }
-    });
-    document.body.addEventListener('htmx:afterSwap', function() {
-        const main = document.getElementById('mainContent');
-        if (main) {
-            main.style.transition = 'transform 0.5s cubic-bezier(0.4,0,0.2,1), opacity 0.5s cubic-bezier(0.4,0,0.2,1)';
-            setTimeout(() => {
-                main.style.transform = 'translateX(0)';
-                main.style.opacity = 1;
-            }, 10);
-        }
-    });
-</script>
-
 </body>
 </html>

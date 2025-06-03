@@ -214,9 +214,15 @@
 
 <!-- Add Faculty Modal-->
 <script>
-    function openModal() { document.getElementById("modal").classList.remove("hidden"); }
-    function closeModal() { document.getElementById("modal").classList.add("hidden"); }
-</script>
+    function openModal() { 
+        document.getElementById("modal").classList.remove("hidden");
+        document.querySelector('aside').classList.add('blur'); // Add blur effect to sidebar
+    }
+    function closeModal() { 
+        document.getElementById("modal").classList.add("hidden"); 
+        document.querySelector('aside').classList.remove('blur'); // Remove blur effect from sidebar
+    }
+    </script>
 
 <!-- Add Faculty Field Validation -->
 <script>
@@ -289,10 +295,6 @@
             notification.remove();
         }, 6000); // Remove after 3 seconds
     }
-
-    function closeModal() {
-        document.getElementById("modal").classList.add("hidden");
-    }
 </script>
 
 
@@ -342,16 +344,20 @@ function openEditFacultyModal(id, firstName, middleInitial, lastName, program, y
     document.getElementById("edit-faculty-semester").value = semester;
     document.getElementById("editFacultyForm").action = `/Faculty/edit/${id}/`;
     document.getElementById("editFacultyModal").classList.remove("hidden");
+    document.querySelector('aside').classList.add('blur');
 }
 function closeEditFacultyModal() {
     document.getElementById("editFacultyModal").classList.add("hidden");
+    document.querySelector('aside').classList.remove('blur');
 }
 
 function openMoveFacultyModal(facultyId) {
     document.getElementById('move-faculty-id').value = facultyId;
     document.getElementById('moveFacultyModal').classList.remove('hidden');
+    document.querySelector('aside').classList.add('blur');
 }
 function closeMoveFacultyModal() {
     document.getElementById('moveFacultyModal').classList.add('hidden');
+    document.querySelector('aside').classList.remove('blur');
 }
 </script>

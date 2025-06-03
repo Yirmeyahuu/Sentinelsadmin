@@ -422,3 +422,53 @@ def move_faculty(request):
             messages.error(request, "Invalid destination.")
             return redirect("FacultyList")
     return redirect("FacultyList")
+
+@superadmin_required
+def student_list(request):
+    # Get filter parameters
+    selected_program = request.GET.get('program', 'all')
+    selected_year_section = request.GET.get('year_section', 'all')
+    selected_semester = request.GET.get('semester', 'all')
+    
+    # Base query
+    students_ref = db.collection("Registered_Students")
+    
+    # Apply filters
+    if selected_program != 'all':
+        students_ref = students_ref.where("program", "==", selected_program)
+    
+    # Get all students before additional filtering
+    students = [doc.to_dict() for doc in students_ref.stream()]
+    
+    # Apply additional filters in Python (since Firestore can't do multiple where clauses with different fields)
+    if selected_year_section != 'all':
+        students = [s for s in students if s.get('year_section') == selected_year_section]
+    
+    if selected_semester != 'all':
+        students = [s for s in students if s.get('semester') == selected_semester]
+    
+    # Get unique year sections for the filter dropdown
+    year_sections = sorted(list(set(s.get('year_section') for s in students if s.get('year_section'))))
+    
+    # Count statistics
+    total_students = len(students)
+    cs_count = len([s for s in students if s.get('program') == 'Computer Science'])
+    it_count = len([s for s in students if s.get('program') == 'Information Technology'])
+    inactive_count = len([s for s in students if s.get('status') == 'Drop-out'])
+    
+    context = {
+        'students': students,
+        'total_students': total_students,
+        'cs_count': cs_count,
+        'it_count': it_count,
+        'inactive_count': inactive_count,
+        'selected_program': selected_program,
+        'selected_year_section': selected_year_section,
+        'selected_semester': selected_semester,
+        'year_sections': year_sections,
+    }
+    
+    if request.headers.get('HX-Request'):
+        return render(request, 'Students/contents/student-list-content.html', context)
+    else:
+        return render(request, 'Students/student-list.html', context)

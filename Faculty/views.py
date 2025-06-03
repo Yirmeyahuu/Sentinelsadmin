@@ -190,13 +190,12 @@ def Faculty_home(request):
         "quick_students": quick_students,
         "quick_pending_students": quick_pending_students,
         "leaderboard_students": leaderboard_students,
+        "show_sticky_container": True,
     }
 
     if request.headers.get('HX-Request'):
-        # HTMX request: return only the main content
         return render(request, 'Home/contents/faculty-home-content.html', context)
     else:
-        # Normal request: return the full page
         return render(request, 'Home/faculty-home.html', context)
 
 
@@ -294,6 +293,7 @@ def student_list(request):
         "section_total": section_total,
         "active_count": active_count,
         "inactive_count": inactive_count,
+        "show_sticky_container": False,
     }
 
 
@@ -369,6 +369,7 @@ def student_progress(request):
         "novice_count": novice_count,
         "junior_count": junior_count,
         "senior_count": senior_count,
+        "show_sticky_container": False,
     }
 
     if request.headers.get('HX-Request'):
@@ -489,6 +490,7 @@ def archived_student_list(request):
     "archived_students": archived_students,
     "faculty_data": faculty_data,
     "notifications": notifications,
+    "show_sticky_container": False,
     }
 
     if request.headers.get('HX-Request'):
@@ -553,7 +555,8 @@ def Verify_Student(request):
     context = {
         "verify_students": verify_students,
         "faculty_data": faculty_data,
-        "notifications": notifications,  
+        "notifications": notifications,
+        "show_sticky_container": False,
     }
 
     if request.headers.get('HX-Request'):
@@ -701,9 +704,10 @@ def activity_page(request):
                    "activities_junior": activities_junior,
                    "activities_senior": activities_senior,
                    "faculty_data": faculty_data,
-                    "notifications": notifications,  # Pass notifications to template
-                     "deadline_form": deadline_form,
-                   } # Corrected context name
+                    "notifications": notifications,
+                    "deadline_form": deadline_form,
+                    "show_sticky_container": False,
+                }
 
     if request.headers.get('HX-Request'):
         # HTMX request: return only the main content
@@ -804,6 +808,7 @@ def faculty_account(request):
     context = {
         'faculty_data': faculty_data,
         'show_logout_modal': show_logout_modal,
+        "show_sticky_container": False,
     }
 
     if request.headers.get('HX-Request'):
