@@ -5,7 +5,8 @@ from . import views
 urlpatterns = [
     path("homepage/", views.Superadmin_Home, name="Superadmin-homepage"),  # Fixed faculty page view
     
-    path("Activity-list/", views.activity_page, name='Superadmin_ActivityList'),
+    path("Activity-list/", views.Superadmin_activity_page, name='Superadmin_ActivityList'),
+    path('update-game-trigger/', views.update_game_trigger, name='update_game_trigger'),
     
     path("Faculty-list/", views.Faculty_list, name="FacultyList"),  # Fixed faculty page view #faculty-page
 

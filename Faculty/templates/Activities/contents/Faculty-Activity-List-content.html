@@ -69,20 +69,3 @@
         {% endfor %}
     </div>
 </div>
-
-
-<script>
-function openDeadlineModal(activityId, title, description) {
-    document.getElementById('id_activity_id').value = activityId;
-    document.getElementById('id_title').value = title;
-    document.getElementById('id_description').value = description;
-    document.getElementById('deadlineModal').classList.remove('hidden');
-    document.getElementById('deadlineModal').classList.add('flex');
-    document.querySelector('aside').classList.add('blur');
-}
-function closeDeadlineModal() {
-    document.getElementById('deadlineModal').classList.remove('flex');
-    document.getElementById('deadlineModal').classList.add('hidden');
-    document.querySelector('aside').classList.remove('blur');
-}
-</script>
