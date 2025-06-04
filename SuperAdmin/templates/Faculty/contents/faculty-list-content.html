@@ -3,63 +3,59 @@
 <div class="flex flex-col items-center space-y-4">
     <!-- Row 1: Dashboard Cards -->
     <div class="flex space-x-4">
-        <!-- Total Faculty Card -->
-        <div class="relative bg-blue-500 shadow-lg rounded-2xl p-4 w-64 flex flex-col items-center overflow-hidden">
-            <div class="absolute inset-0 opacity-30">
-                <svg class="w-full h-full" viewBox="0 0 200 200">
-                    <path fill="none" stroke="#3B82F6" stroke-width="8" d="M10 50 Q100 0, 190 50 T 390 50" />
-                    <path fill="none" stroke="#FACC15" stroke-width="8" d="M10 150 Q100 200, 190 150 T 390 150" />
-                </svg>
-            </div>
-            <div class="absolute -top-4 -left-6 w-16 h-16 bg-blue-900 blur-2xl opacity-90 rounded-full"></div>
-            <div class="absolute bottom-0 right-2 w-20 h-20 bg-blue-700 blur-2xl opacity-90 rounded-full"></div>
-            <h2 class="text-lg font-semibold text-white mb-2 z-10">Total Faculty</h2>
-            <p class="text-3xl font-bold text-white z-10">0</p>
-        </div>
-        <!-- Computer Science Faculty Card -->
-        <div class="relative bg-blue-400 shadow-lg rounded-2xl p-4 w-64 flex flex-col items-center overflow-hidden">
-            <div class="absolute inset-0 opacity-30">
-                <svg class="w-full h-full" viewBox="0 0 200 200">
-                    <path fill="none" stroke="#3B82F6" stroke-width="8" d="M10 50 Q100 0, 190 50 T 390 50" />
-                    <path fill="none" stroke="#FACC15" stroke-width="8" d="M10 150 Q100 200, 190 150 T 390 150" />
-                </svg>
-            </div>
-            <div class="absolute -top-4 -left-6 w-16 h-16 bg-blue-900 blur-2xl opacity-90 rounded-full"></div>
-            <div class="absolute bottom-0 right-2 w-20 h-20 bg-blue-700 blur-2xl opacity-90 rounded-full"></div>
-            <h2 class="text-lg font-semibold text-white mb-2 z-10">Computer Science</h2>
-            <div class="relative w-20 h-20">
-                <svg class="w-full h-full" viewBox="0 0 100 100">
-                    <circle cx="50" cy="50" r="40" stroke="#ffffff" stroke-width="10" fill="transparent"/>
-                    <circle id="progressCS" cx="50" cy="50" r="40" stroke="#3B82F6" stroke-width="10" fill="transparent"
-                            stroke-dasharray="251.2" stroke-dashoffset="251.2"
-                            stroke-linecap="round" />
-                </svg>
-                <div class="absolute inset-0 flex justify-center items-center text-lg font-bold text-white">
-                    <span id="progressTextCS">0%</span>
+        <!-- Dashboard Cards Row -->
+        <div class="flex space-x-6 w-full">
+            <!-- Total Students -->
+            <div class="relative bg-blue-600 shadow-xl rounded-tl-4xl rounded-br-4xl p-6 w-72 flex flex-col items-center overflow-hidden">
+                <div class="absolute inset-0 opacity-30">
+                    <svg class="w-full h-full" viewBox="0 0 200 200">
+                        <path fill="none" stroke="#1C82AD" stroke-width="8" d="M10 50 Q100 0, 190 50 T 390 50" />
+                        <path fill="none" stroke="#F3F3E0" stroke-width="8" d="M10 150 Q100 200, 190 150 T 390 150" />
+                    </svg>
                 </div>
+                <div class="absolute -top-4 -left-6 w-16 h-16 bg-sky-300 blur-2xl opacity-90 rounded-full"></div>
+                <div class="absolute bottom-0 right-2 w-20 h-20 bg-sky-300 blur-2xl opacity-90 rounded-full"></div>
+                <h2 class="text-xl font-semibold text-white mb-4 mt-2 z-10">Total Students</h2>
+                <p class="text-4xl font-bold text-white z-10">{{ total_students }}</p>
             </div>
-        </div>
-        <!-- Information Technology Faculty Card -->
-        <div class="relative bg-green-400 shadow-lg rounded-2xl p-4 w-64 flex flex-col items-center overflow-hidden">
-            <div class="absolute inset-0 opacity-30">
-                <svg class="w-full h-full" viewBox="0 0 200 200">
-                    <path fill="none" stroke="#3B82F6" stroke-width="8" d="M10 50 Q100 0, 190 50 T 390 50" />
-                    <path fill="none" stroke="#FACC15" stroke-width="8" d="M10 150 Q100 200, 190 150 T 390 150" />
-                </svg>
-            </div>
-            <div class="absolute -top-4 -left-6 w-16 h-16 bg-green-200 blur-2xl opacity-90 rounded-full"></div>
-            <div class="absolute bottom-0 right-2 w-20 h-20 bg-green-100 blur-2xl opacity-90 rounded-full"></div>
-            <h2 class="text-lg font-semibold text-white mb-2 z-10">Information Technology</h2>
-            <div class="relative w-20 h-20">
-                <svg class="w-full h-full" viewBox="0 0 100 100">
-                    <circle cx="50" cy="50" r="40" stroke="#ffffff" stroke-width="10" fill="transparent"/>
-                    <circle id="progressIT" cx="50" cy="50" r="40" stroke="#22c55e" stroke-width="10" fill="transparent"
-                            stroke-dasharray="251.2" stroke-dashoffset="251.2"
-                            stroke-linecap="round" />
-                </svg>
-                <div class="absolute inset-0 flex justify-center items-center text-lg font-bold text-white">
-                    <span id="progressTextIT">0%</span>
+            <!-- Total Faculty -->
+            <div class="relative bg-sky-500 shadow-xl rounded-tl-4xl rounded-br-4xl p-6 w-72 flex flex-col items-center overflow-hidden">
+                <div class="absolute inset-0 opacity-30">
+                    <svg class="w-full h-full" viewBox="0 0 200 200">
+                        <path fill="none" stroke="#D4F6FF" stroke-width="8" d="M10 50 Q100 0, 190 50 T 390 50" />
+                        <path fill="none" stroke="#C4E1F6" stroke-width="8" d="M10 150 Q100 200, 190 150 T 390 150" />
+                    </svg>
                 </div>
+                <div class="absolute -top-4 -left-6 w-16 h-16 bg-blue-900 blur-2xl opacity-90 rounded-full"></div>
+                <div class="absolute bottom-0 right-2 w-20 h-20 bg-blue-700 blur-2xl opacity-90 rounded-full"></div>
+                <h2 class="text-xl font-semibold text-white mb-4 mt-2 z-10">Total Faculty</h2>
+                <p class="text-4xl font-bold text-white z-10">{{ total_faculty }}</p>
+            </div>
+            <!-- Computer Science Students -->
+            <div class="relative bg-orange-500 shadow-xl rounded-tl-4xl rounded-br-4xl p-6 w-72 flex flex-col items-center overflow-hidden">
+                <div class="absolute inset-0 opacity-30">
+                    <svg class="w-full h-full" viewBox="0 0 200 200">
+                        <path fill="none" stroke="#F2F9FF" stroke-width="8" d="M10 50 Q100 0, 190 50 T 390 50" />
+                        <path fill="none" stroke="#A1E3F9" stroke-width="8" d="M10 150 Q100 200, 190 150 T 390 150" />
+                    </svg>
+                </div>
+                <div class="absolute -top-4 -left-6 w-16 h-16 bg-yellow-100 blur-2xl opacity-90 rounded-full"></div>
+                <div class="absolute bottom-0 right-2 w-20 h-20 bg-yellow-100 blur-2xl opacity-90 rounded-full"></div>
+                <h2 class="text-lg font-semibold text-center text-white z-10">Computer Science Students</h2>
+                <p class="text-4xl font-bold text-white z-10">{{ cs_students }}</p>
+            </div>
+            <!-- Information Technology Students -->
+            <div class="relative bg-red-600 shadow-xl rounded-tl-4xl rounded-br-4xl p-6 w-72 flex flex-col items-center overflow-hidden">
+                <div class="absolute inset-0 opacity-30">
+                    <svg class="w-full h-full" viewBox="0 0 200 200">
+                        <path fill="none" stroke="#F2F9FF" stroke-width="8" d="M10 50 Q100 0, 190 50 T 390 50" />
+                        <path fill="none" stroke="#A1E3F9" stroke-width="8" d="M10 150 Q100 200, 190 150 T 390 150" />
+                    </svg>
+                </div>
+                <div class="absolute -top-4 -left-6 w-16 h-16 bg-purple-700 blur-2xl opacity-90 rounded-full"></div>
+                <div class="absolute bottom-0 right-2 w-20 h-20 bg-purple-700 blur-2xl opacity-90 rounded-full"></div>
+                <h2 class="text-lg font-semibold text-center     text-white z-10">Information Technology Students</h2>
+                <p class="text-4xl font-bold text-white z-10">{{ it_students }}</p>
             </div>
         </div>
     </div>

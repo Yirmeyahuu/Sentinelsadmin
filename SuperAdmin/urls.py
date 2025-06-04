@@ -7,6 +7,8 @@ urlpatterns = [
     
     path("Activity-list/", views.Superadmin_activity_page, name='Superadmin_ActivityList'),
     path('update-game-trigger/', views.update_game_trigger, name='update_game_trigger'),
+    path('update-tier-lock/', views.update_tier_lock, name='update_tier_lock'),
+
     
     path("Faculty-list/", views.Faculty_list, name="FacultyList"),  # Fixed faculty page view #faculty-page
 
@@ -23,6 +25,4 @@ urlpatterns = [
 
     path('student-status/', views.student_status, name='student-status'),
     path('student-list/', views.student_list, name='student-list'),
-
-
 ]

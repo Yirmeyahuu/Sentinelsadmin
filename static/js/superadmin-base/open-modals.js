@@ -68,25 +68,6 @@ window.closeModal = function() {
 };
 
 
-// Set Game Trigger Modal
-window.setGameTrigger = function(tier, title, description) {
-    document.getElementById('setGameTriggerTier').value = tier;
-    document.getElementById('setGameTriggerTask').value = title;
-    document.getElementById('setGameTriggerTitle').value = title;
-    document.getElementById('setGameTriggerDescription').value = description;
-    document.getElementById('setGameTriggerModal').classList.remove('hidden');
-    document.body.classList.add('overflow-hidden');
-    const aside = document.querySelector('aside');
-    if (aside) aside.classList.add('blur');
-};
-
-window.closeSetGameTriggerModal = function() {
-    document.getElementById('setGameTriggerModal').classList.add('hidden');
-    document.body.classList.remove('overflow-hidden');
-    const aside = document.querySelector('aside');
-    if (aside) aside.classList.remove('blur');
-};
-
 // AJAX for Activate/Deactivate
 window.activateGameTrigger = function() {
     updateGameTriggerLock(false); // isLock = False (unlocked/active)
@@ -124,7 +105,7 @@ function updateGameTriggerLock(isLock) {
     });
 }
 
-// Helper to get CSRF token
+// Helper to get CSRF token of activity
 function getCookie(name) {
     let cookieValue = null;
     if (document.cookie && document.cookie !== '') {
@@ -139,3 +120,65 @@ function getCookie(name) {
     }
     return cookieValue;
 }
+
+window.setTierLock = function(tier, isLock) {
+    fetch('/Superadmin/update-tier-lock/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({
+            tier: tier,
+            isLock: isLock
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Animate cards for this tier
+            document.querySelectorAll(`[data-tier="${tier}"]`).forEach(card => {
+                if (isLock) {
+                    card.classList.add('bg-gray-700/70');
+                    if (!card.querySelector('.lock-overlay')) {
+                        const overlay = document.createElement('div');
+                        overlay.className = "lock-overlay absolute inset-0 bg-gray-700/70 bg-opacity-60 flex items-center justify-center z-10 pointer-events-none transition-all duration-300";
+                        overlay.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" class="w-16 h-16 text-gray-200 opacity-90" viewBox="0 0 24 24"><path fill="currentColor" d="M17 9V7c0-2.8-2.2-5-5-5S7 4.2 7 7v2c-1.7 0-3 1.3-3 3v7c0 1.7 1.3 3 3 3h10c1.7 0 3-1.3 3-3v-7c0-1.7-1.3-3-3-3zM9 7c0-1.7 1.3-3 3-3s3 1.3 3 3v2H9V7zm4 10c0 .6-.4 1-1 1s-1-.4-1-1v-3c0-.6.4-1 1-1s1 .4 1 1v3z"/></svg>`;
+                        card.appendChild(overlay);
+                    }
+                    const img = card.querySelector('img');
+                    if (img) img.classList.add('brightness-50');
+                    const content = card.querySelector('.p-4');
+                    if (content) content.classList.add('opacity-80');
+                } else {
+                    card.classList.remove('bg-gray-700/70');
+                    const overlay = card.querySelector('.lock-overlay');
+                    if (overlay) overlay.remove();
+                    const img = card.querySelector('img');
+                    if (img) img.classList.remove('brightness-50');
+                    const content = card.querySelector('.p-4');
+                    if (content) content.classList.remove('opacity-80');
+                }
+            });
+        } else {
+            alert('Failed to update tier lock.');
+        }
+    });
+};
+
+
+window.openActivityDetails = function(title, description) {
+    document.getElementById('activityDetailsTitle').textContent = title;
+    document.getElementById('activityDetailsDescription').textContent = description;
+    document.getElementById('ActivityDetails').classList.remove('hidden');
+    document.body.classList.add('overflow-hidden');
+    const aside = document.querySelector('aside');
+    if (aside) aside.classList.add('blur');
+};
+
+window.closeActivityDetails = function() {
+    document.getElementById('ActivityDetails').classList.add('hidden');
+    document.body.classList.remove('overflow-hidden');
+    const aside = document.querySelector('aside');
+    if (aside) aside.classList.remove('blur');
+};

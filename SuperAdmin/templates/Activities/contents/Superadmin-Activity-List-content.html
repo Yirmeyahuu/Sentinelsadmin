@@ -3,15 +3,20 @@
     <hr class="border-t-2 border-sky-500 my-4">
 
     <!-- Novice Section -->
-    <h2 class="text-2xl font-semibold mt-6 text-sky-700">Novice</h2>
+    <div class="flex items-center space-x-4 mt-6">
+        <h2 class="text-2xl font-semibold text-sky-700">Novice</h2>
+        <button type="button" onclick="setTierLock('Novice', false)" class="bg-blue-700 text-white px-6 py-2 rounded-xl hover:bg-blue-900 text-sm transition-ease-in-out duration-200">Activate</button>
+        <button type="button" onclick="setTierLock('Novice', true)" class="bg-red-700 text-white px-6 py-2 rounded-xl hover:bg-red-900 text-sm transition-ease-in-out duration-200">Deactivate</button>
+    </div>
     <hr class="mb-8 border-sky-500 my-4">
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {% for activity in activities_novice %}
-        <div class="relative bg-white shadow-xl rounded-tl-4xl rounded-br-4xl overflow-hidden border-2 border-gray-800/30 cursor-pointer transition-all duration-300
+        <div class="relative bg-white shadow-xl rounded-tl-4xl rounded-br-4xl overflow-hidden border-2 border-gray-800/30 transition-all duration-300 cursor-pointer hover:scale-[1.02]
             {% if activity.isLock %} bg-gray-700/70 {% else %} hover:shadow-2xl {% endif %}"
-            onclick="setGameTrigger('Novice', '{{ activity.title|escapejs }}', '{{ activity.description|escapejs }}')">
+            data-tier="Novice" data-title="{{ activity.title }}"
+            onclick="openActivityDetails(`{{ activity.title|escapejs }}`, `{{ activity.description|default:''|escapejs }}`)">
             {% if activity.isLock %}
-                <div class="absolute inset-0 bg-gray-700/70 bg-opacity-60 flex items-center justify-center z-10 pointer-events-none transition-all duration-300">
+                <div class="lock-overlay absolute inset-0 bg-gray-700/70 bg-opacity-60 flex items-center justify-center z-10 pointer-events-none transition-all duration-300">
                     <svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" class="w-16 h-16 text-gray-200 opacity-90" viewBox="0 0 24 24">
                         <path fill="currentColor" d="M17 9V7c0-2.8-2.2-5-5-5S7 4.2 7 7v2c-1.7 0-3 1.3-3 3v7c0 1.7 1.3 3 3 3h10c1.7 0 3-1.3 3-3v-7c0-1.7-1.3-3-3-3zM9 7c0-1.7 1.3-3 3-3s3 1.3 3 3v2H9V7zm4 10c0 .6-.4 1-1 1s-1-.4-1-1v-3c0-.6.4-1 1-1s1 .4 1 1v3z"/>
                     </svg>
@@ -34,15 +39,20 @@
     <hr class="border-t-2 border-sky-500 my-4 mt-12">
 
     <!-- Junior Section -->
-    <h2 class="text-2xl font-semibold mt-6 text-sky-700">Junior</h2>
-    <hr class="mb-8 border border-sky-500 my-4">
+    <div class="flex items-center space-x-4 mt-6">
+        <h2 class="text-2xl font-semibold text-sky-700">Junior</h2>
+        <button type="button" onclick="setTierLock('Junior', false)" class="bg-blue-700 text-white px-6 py-2 rounded-xl hover:bg-blue-900 text-sm transition-ease-in-out duration-200">Activate</button>
+        <button type="button" onclick="setTierLock('Junior', true)" class="bg-red-700 text-white px-6 py-2 rounded-xl hover:bg-red-900 text-sm transition-ease-in-out duration-200">Deactivate</button>
+    </div>
+    <hr class="mb-8 border-sky-500 my-4">
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {% for activity in activities_junior %}
-        <div class="relative bg-white shadow-xl rounded-tl-4xl rounded-br-4xl overflow-hidden border-2 border-gray-800/30 cursor-pointer transition-all duration-300
+        <div class="relative bg-white shadow-xl rounded-tl-4xl rounded-br-4xl overflow-hidden border-2 border-gray-800/30 transition-all duration-300 cursor-pointer hover:scale-[1.02]
             {% if activity.isLock %} bg-gray-700/70 {% else %} hover:shadow-2xl {% endif %}"
-            onclick="setGameTrigger('Junior', '{{ activity.title|escapejs }}', '{{ activity.description|escapejs }}')">
+            data-tier="Junior" data-title="{{ activity.title }}"
+            onclick="openActivityDetails(`{{ activity.title|escapejs }}`, `{{ activity.description|default:''|escapejs }}`)">
             {% if activity.isLock %}
-                <div class="absolute inset-0 bg-gray-700/70 bg-opacity-60 flex items-center justify-center z-10 pointer-events-none transition-all duration-300">
+                <div class="lock-overlay absolute inset-0 bg-gray-700/70 bg-opacity-60 flex items-center justify-center z-10 pointer-events-none transition-all duration-300">
                     <svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" class="w-16 h-16 text-gray-200 opacity-90" viewBox="0 0 24 24">
                         <path fill="currentColor" d="M17 9V7c0-2.8-2.2-5-5-5S7 4.2 7 7v2c-1.7 0-3 1.3-3 3v7c0 1.7 1.3 3 3 3h10c1.7 0 3-1.3 3-3v-7c0-1.7-1.3-3-3-3zM9 7c0-1.7 1.3-3 3-3s3 1.3 3 3v2H9V7zm4 10c0 .6-.4 1-1 1s-1-.4-1-1v-3c0-.6.4-1 1-1s1 .4 1 1v3z"/>
                     </svg>
@@ -65,15 +75,20 @@
     <hr class="border-t-2 border-sky-500 my-4 mt-12">
 
     <!-- Senior Section -->
-    <h2 class="text-2xl font-semibold mt-6 text-sky-700">Senior</h2>
-    <hr class="mb-8 border border-sky-500 my-4">
+    <div class="flex items-center space-x-4 mt-6">
+        <h2 class="text-2xl font-semibold text-sky-700">Senior</h2>
+        <button type="button" onclick="setTierLock('Senior', false)" class="bg-blue-700 text-white px-6 py-2 rounded-xl hover:bg-blue-900 text-sm transition-ease-in-out duration-200">Activate</button>
+        <button type="button" onclick="setTierLock('Senior', true)" class="bg-red-700 text-white px-6 py-2 rounded-xl hover:bg-red-900 text-sm transition-ease-in-out duration-200">Deactivate</button>
+    </div>
+    <hr class="mb-8 border-sky-500 my-4">
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {% for activity in activities_senior %}
-        <div class="relative bg-white shadow-xl rounded-tl-4xl rounded-br-4xl overflow-hidden border-2 border-gray-800/30 cursor-pointer transition-all duration-300
+        <div class="relative bg-white shadow-xl rounded-tl-4xl rounded-br-4xl overflow-hidden border-2 border-gray-800/30 transition-all duration-300 cursor-pointer hover:scale-[1.02]
             {% if activity.isLock %} bg-gray-700/70 {% else %} hover:shadow-2xl {% endif %}"
-            onclick="setGameTrigger('Senior', '{{ activity.title|escapejs }}', '{{ activity.description|escapejs }}')">
+            data-tier="Senior" data-title="{{ activity.title }}"
+            onclick="openActivityDetails(`{{ activity.title|escapejs }}`, `{{ activity.description|default:''|escapejs }}`)">
             {% if activity.isLock %}
-                <div class="absolute inset-0 bg-gray-700/70 bg-opacity-60 flex items-center justify-center z-10 pointer-events-none transition-all duration-300">
+                <div class="lock-overlay absolute inset-0 bg-gray-700/70 bg-opacity-60 flex items-center justify-center z-10 pointer-events-none transition-all duration-300">
                     <svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" class="w-16 h-16 text-gray-200 opacity-90" viewBox="0 0 24 24">
                         <path fill="currentColor" d="M17 9V7c0-2.8-2.2-5-5-5S7 4.2 7 7v2c-1.7 0-3 1.3-3 3v7c0 1.7 1.3 3 3 3h10c1.7 0 3-1.3 3-3v-7c0-1.7-1.3-3-3-3zM9 7c0-1.7 1.3-3 3-3s3 1.3 3 3v2H9V7zm4 10c0 .6-.4 1-1 1s-1-.4-1-1v-3c0-.6.4-1 1-1s1 .4 1 1v3z"/>
                     </svg>

@@ -3,18 +3,45 @@
     <hr class="border-t-2 border-sky-500 my-4">
 
     <!-- Novice Section -->
-    <h2 class="text-2xl font-semibold mt-6 text-sky-700">Novice</h2>
+    <div class="flex items-center space-x-4 mt-6">
+        <h2 class="text-2xl font-semibold text-sky-700">Novice</h2>
+        {% if activities_novice and activities_novice.0.isLock %}
+            <span class="inline-flex items-center px-3 py-1 rounded-full bg-red-100 text-red-700 text-sm font-semibold border border-red-300">
+                <svg class="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M18.364 5.636l-1.414 1.414A9 9 0 105.636 18.364l1.414-1.414"></path></svg>
+                Deactivated
+            </span>
+        {% else %}
+            <span class="inline-flex items-center px-3 py-1 rounded-full bg-green-100 text-green-700 text-sm font-semibold border border-green-300">
+                <svg class="w-4 h-4 mr-1 text-green-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
+                Activated
+            </span>
+        {% endif %}
+    </div>
     <hr class="mb-8 border-sky-500 my-4">
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {% for activity in activities_novice %}
-        <div class="bg-white shadow-xl rounded-tl-4xl rounded-br-4xl overflow-hidden border-2 border-gray-800/30 cursor-pointer"
-             onclick="openDeadlineModal('{{ activity.title|slugify }}', '{{ activity.title|escapejs }}', '{{ activity.description|escapejs }}')">
-            <img src="{{ activity.image }}" alt="Activity Image" class="w-full h-40 object-cover">
-            <div class="p-4 text-gray-800">
+        <div class="relative bg-white shadow-xl rounded-tl-4xl rounded-br-4xl overflow-hidden border-2 border-gray-800/30 transition-all duration-300
+            {% if activity.isLock %} bg-gray-700/70 cursor-not-allowed {% else %} cursor-pointer hover:scale-[1.02] hover:shadow-2xl {% endif %}"
+            data-tier="Novice" data-title="{{ activity.title }}"
+            {% if activity.isLock %}
+                onclick="facultyTierLockedAlert(event)"
+            {% else %}
+                onclick="openFacultyActivityDeadlineModal(`{{ activity.title|escapejs }}`, `{{ activity.description|default:''|escapejs }}`)"
+            {% endif %}
+        >
+            {% if activity.isLock %}
+                <div class="lock-overlay absolute inset-0 bg-gray-700/70 bg-opacity-60 flex items-center justify-center z-10 pointer-events-none transition-all duration-300">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" class="w-16 h-16 text-gray-200 opacity-90" viewBox="0 0 24 24">
+                        <path fill="currentColor" d="M17 9V7c0-2.8-2.2-5-5-5S7 4.2 7 7v2c-1.7 0-3 1.3-3 3v7c0 1.7 1.3 3 3 3h10c1.7 0 3-1.3 3-3v-7c0-1.7-1.3-3-3-3zM9 7c0-1.7 1.3-3 3-3s3 1.3 3 3v2H9V7zm4 10c0 .6-.4 1-1 1s-1-.4-1-1v-3c0-.6.4-1 1-1s1 .4 1 1v3z"/>
+                    </svg>
+                </div>
+            {% endif %}
+            <img src="{{ activity.image }}" alt="Activity Image" class="w-full h-40 object-cover {% if activity.isLock %}brightness-50{% endif %}">
+            <div class="p-4 text-gray-800 {% if activity.isLock %}opacity-80{% endif %}">
                 <h2 class="text-lg font-semibold">{{ activity.title }}</h2>
                 <p class="text-sm">{{ activity.subject }}</p>
                 <p class="text-xs mt-1">When: {{ activity.date }}</p>
-                <div class="flex items-center mt-3 text-xs text-gray-800">
+                <div class="flex items-center mt-3 text-xs">
                     <span class="bg-green-600 text-white px-2 py-1 rounded">{{ activity.progress }}% Resume</span>
                     <span class="ml-auto flex items-center">{{ activity.modules }} modules</span>
                 </div>
@@ -22,22 +49,47 @@
         </div>
         {% endfor %}
     </div>
-
-    <hr class="border-t-2 border-sky-500 my-4 mt-12">
 
     <!-- Junior Section -->
-    <h2 class="text-2xl font-semibold mt-6 text-sky-700">Junior</h2>
-    <hr class="mb-8 border border-sky-500 my-4">
+    <div class="flex items-center space-x-4 mt-6">
+        <h2 class="text-2xl font-semibold text-sky-700">Junior</h2>
+        {% if activities_junior and activities_junior.0.isLock %}
+            <span class="inline-flex items-center px-3 py-1 rounded-full bg-red-100 text-red-700 text-sm font-semibold border border-red-300">
+                <svg class="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M18.364 5.636l-1.414 1.414A9 9 0 105.636 18.364l1.414-1.414"></path></svg>
+                Deactivated
+            </span>
+        {% else %}
+            <span class="inline-flex items-center px-3 py-1 rounded-full bg-green-100 text-green-700 text-sm font-semibold border border-green-300">
+                <svg class="w-4 h-4 mr-1 text-green-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
+                Activated
+            </span>
+        {% endif %}
+    </div>
+    <hr class="mb-8 border-sky-500 my-4">
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {% for activity in activities_junior %}
-        <div class="bg-white shadow-lg rounded-tl-4xl rounded-br-4xl overflow-hidden border border-gray-800/30 cursor-pointer"
-             onclick="openDeadlineModal('{{ activity.title|slugify }}', '{{ activity.title|escapejs }}', '{{ activity.description|escapejs }}')">
-            <img src="{{ activity.image }}" alt="Activity Image" class="w-full h-40 object-cover">
-            <div class="p-4 text-gray-800">
+        <div class="relative bg-white shadow-xl rounded-tl-4xl rounded-br-4xl overflow-hidden border-2 border-gray-800/30 transition-all duration-300
+            {% if activity.isLock %} bg-gray-700/70 cursor-not-allowed {% else %} cursor-pointer hover:scale-[1.02] hover:shadow-2xl {% endif %}"
+            data-tier="Junior" data-title="{{ activity.title }}"
+            {% if activity.isLock %}
+                onclick="facultyTierLockedAlert(event)"
+            {% else %}
+                onclick="openFacultyActivityDeadlineModal(`{{ activity.title|escapejs }}`, `{{ activity.description|default:''|escapejs }}`)"
+            {% endif %}
+        >
+            {% if activity.isLock %}
+                <div class="lock-overlay absolute inset-0 bg-gray-700/70 bg-opacity-60 flex items-center justify-center z-10 pointer-events-none transition-all duration-300">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" class="w-16 h-16 text-gray-200 opacity-90" viewBox="0 0 24 24">
+                        <path fill="currentColor" d="M17 9V7c0-2.8-2.2-5-5-5S7 4.2 7 7v2c-1.7 0-3 1.3-3 3v7c0 1.7 1.3 3 3 3h10c1.7 0 3-1.3 3-3v-7c0-1.7-1.3-3-3-3zM9 7c0-1.7 1.3-3 3-3s3 1.3 3 3v2H9V7zm4 10c0 .6-.4 1-1 1s-1-.4-1-1v-3c0-.6.4-1 1-1s1 .4 1 1v3z"/>
+                    </svg>
+                </div>
+            {% endif %}
+            <img src="{{ activity.image }}" alt="Activity Image" class="w-full h-40 object-cover {% if activity.isLock %}brightness-50{% endif %}">
+            <div class="p-4 text-gray-800 {% if activity.isLock %}opacity-80{% endif %}">
                 <h2 class="text-lg font-semibold">{{ activity.title }}</h2>
                 <p class="text-sm">{{ activity.subject }}</p>
                 <p class="text-xs mt-1">When: {{ activity.date }}</p>
-                <div class="flex items-center mt-3 text-xs text-gray-800">
+                <div class="flex items-center mt-3 text-xs">
                     <span class="bg-green-600 text-white px-2 py-1 rounded">{{ activity.progress }}% Resume</span>
                     <span class="ml-auto flex items-center">{{ activity.modules }} modules</span>
                 </div>
@@ -46,21 +98,46 @@
         {% endfor %}
     </div>
 
-    <hr class="border-t-2 border-sky-500 my-4 mt-12">
-
     <!-- Senior Section -->
-    <h2 class="text-2xl font-semibold mt-6 text-sky-700">Senior</h2>
-    <hr class="mb-8 border border-sky-500 my-4">
+    <div class="flex items-center space-x-4 mt-6">
+        <h2 class="text-2xl font-semibold text-sky-700">Senior</h2>
+        {% if activities_senior and activities_senior.0.isLock %}
+            <span class="inline-flex items-center px-3 py-1 rounded-full bg-red-100 text-red-700 text-sm font-semibold border border-red-300">
+                <svg class="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M18.364 5.636l-1.414 1.414A9 9 0 105.636 18.364l1.414-1.414"></path></svg>
+                Deactivated
+            </span>
+        {% else %}
+            <span class="inline-flex items-center px-3 py-1 rounded-full bg-green-100 text-green-700 text-sm font-semibold border border-green-300">
+                <svg class="w-4 h-4 mr-1 text-green-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
+                Activated
+            </span>
+        {% endif %}
+    </div>
+    <hr class="mb-8 border-sky-500 my-4">
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {% for activity in activities_senior %}
-        <div class="bg-white shadow-lg rounded-tl-4xl rounded-br-4xl overflow-hidden border border-gray-800/30 cursor-pointer"
-             onclick="openDeadlineModal('{{ activity.title|slugify }}', '{{ activity.title|escapejs }}', '{{ activity.description|escapejs }}')">
-            <img src="{{ activity.image }}" alt="Activity Image" class="w-full h-40 object-cover">
-            <div class="p-4 text-gray-800">
+        <div class="relative bg-white shadow-xl rounded-tl-4xl rounded-br-4xl overflow-hidden border-2 border-gray-800/30 transition-all duration-300
+            {% if activity.isLock %} bg-gray-700/70 cursor-not-allowed {% else %} cursor-pointer hover:scale-[1.02] hover:shadow-2xl {% endif %}"
+            data-tier="Senior" data-title="{{ activity.title }}"
+            {% if activity.isLock %}
+                onclick="facultyTierLockedAlert(event)"
+            {% else %}
+                onclick="openFacultyActivityDeadlineModal(`{{ activity.title|escapejs }}`, `{{ activity.description|default:''|escapejs }}`)"
+            {% endif %}
+        >
+            {% if activity.isLock %}
+                <div class="lock-overlay absolute inset-0 bg-gray-700/70 bg-opacity-60 flex items-center justify-center z-10 pointer-events-none transition-all duration-300">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" class="w-16 h-16 text-gray-200 opacity-90" viewBox="0 0 24 24">
+                        <path fill="currentColor" d="M17 9V7c0-2.8-2.2-5-5-5S7 4.2 7 7v2c-1.7 0-3 1.3-3 3v7c0 1.7 1.3 3 3 3h10c1.7 0 3-1.3 3-3v-7c0-1.7-1.3-3-3-3zM9 7c0-1.7 1.3-3 3-3s3 1.3 3 3v2H9V7zm4 10c0 .6-.4 1-1 1s-1-.4-1-1v-3c0-.6.4-1 1-1s1 .4 1 1v3z"/>
+                    </svg>
+                </div>
+            {% endif %}
+            <img src="{{ activity.image }}" alt="Activity Image" class="w-full h-40 object-cover {% if activity.isLock %}brightness-50{% endif %}">
+            <div class="p-4 text-gray-800 {% if activity.isLock %}opacity-80{% endif %}">
                 <h2 class="text-lg font-semibold">{{ activity.title }}</h2>
                 <p class="text-sm">{{ activity.subject }}</p>
                 <p class="text-xs mt-1">When: {{ activity.date }}</p>
-                <div class="flex items-center mt-3 text-xs text-gray-800">
+                <div class="flex items-center mt-3 text-xs">
                     <span class="bg-green-600 text-white px-2 py-1 rounded">{{ activity.progress }}% Resume</span>
                     <span class="ml-auto flex items-center">{{ activity.modules }} modules</span>
                 </div>

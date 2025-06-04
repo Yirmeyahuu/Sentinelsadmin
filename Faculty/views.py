@@ -24,24 +24,28 @@ db = firestore.client()
 
 
 
+@csrf_exempt
+@faculty_required
 def saveActivityDeadline(request):
     if request.method == "POST":
         try:
             data = json.loads(request.body)
-            activity_id = data.get('activity_id')
+            faculty_id = request.user.username
             title = data.get('title')
             date = data.get('date')
             time = data.get('time')
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)})
 
-        db.collection('Activity Deadlines').add({
-            'activity_id': activity_id,
-            'title': title,
-            'deadline_date': date,
-            'deadline_time': time,
-            'created_at': firestore.SERVER_TIMESTAMP
-        })
+        # Use faculty_id as document ID, and activity title as field
+        db.collection('Activity Deadlines').document(faculty_id).set({
+            title: {
+                'title': title,
+                'deadline_date': date,
+                'deadline_time': time,
+                'created_at': firestore.SERVER_TIMESTAMP
+            }
+        }, merge=True)
         return JsonResponse({'status': 'success'})
     return JsonResponse({'status': 'error', 'message': 'Invalid request'})
 
@@ -569,53 +573,27 @@ def Verify_Student(request):
 
 
 #This is the activity page for the faculty
-def activity_page(request):
-    faculty_id = request.user.username
-    users_ref = db.collection('Authorized Faculty')
-    query = users_ref.where('faculty_id', '==', faculty_id).limit(1).get()
-    faculty_data = None
-    deadline_form = ActivityDeadlineForm()
-
-
-    # Fetch notifications from Firestore, newest first
-    notifications_ref = db.collection("Notifications").order_by("timestamp", direction=firestore.Query.DESCENDING)
-    notifications = []
-    for doc in notifications_ref.stream():
-        notif = doc.to_dict()
-        notif['id'] = doc.id
-        notifications.append(notif)
-
-    if query:
-        faculty_doc = query[0]
-        faculty_data = faculty_doc.to_dict()
+def Faculty_activity_page(request):
 
     activities_novice = [
         {
             "title": "Novice Task 1",
-            "description": "Short description of the task 1.",
-            "deadline": "",
-            "progress": 0,  # percentage
+            "description": "In this quest, the player begins their journey at CyberTech Academy, guided by their instructor, Katrina Salazar, who assigns their first task: researching the meaning of cybersecurity. As the player explores the library, a memory of their late father—a legendary cybersecurity expert—resurfaces, emphasizing the importance of understanding the people behind the systems. The quest unfolds through interactive NPC encounters, where the player answers questions to define cybersecurity, identify key career paths such as Security Architect and Ethical Hacker, and understand the anatomy of a cyber attack. Each correct response unlocks achievements and advances the story, immersing the player in a hands-on introduction to the world of cybersecurity.",
             "image": static("assets/img/Photo1.png"),
         },
         {
             "title": "Novice Task 2",
-            "description": "Short description of the task 2.",
-            "deadline": "2023-10-15",
-            "progress": 0,  # percentage
+            "description": "In this second quest, the player continues their training at CyberTech Academy, diving deeper into the realities of cybersecurity threats and vulnerabilities. A vivid flashback recalls a stormy night when the player's father swiftly neutralized a cyber threat, warning that the key to defense lies in identifying weak spots before attackers do. Now seated in the computer lab, the player begins researching risks that organizations face. Through a sequence of NPC-guided tasks, they must correctly identify internal threats like employees, recognize cybersecurity vulnerabilities such as card skimmers, and demonstrate understanding of core principles like the CIA Triad—particularly how confidentiality relies on encryption and hashing. Each correct answer grants achievements and brings the player closer to mastering the fundamentals of digital defense.",
             "image": static("assets/img/Photo2.png"),
         },
         {
             "title": "Novice Task 3",
-            "description": "Short description of the task 3.",
-            "deadline": "2023-10-15",
-            "progress": 0,  # percentage
+            "description": "In the third and final quest, the player is challenged to apply their growing knowledge of cybersecurity to real-world frameworks and strategies. A flashback to a simple but powerful lesson from their father—*People, Processes, Technology*—sets the stage for what lies ahead. Tasked with interviewing the right faculty members, the player must navigate the faculty office, identifying which professors hold the expertise needed to discuss security tactics, emerging technologies, and types of cybersecurity. Choosing the wrong person leads to rejection, while finding the right expert unlocks valuable insights. Returning to the classroom, the player answers reflection questions based on their interviews. With each correct response and interaction, achievements are earned, bringing them one step closer to becoming a well-rounded digital defender, just like their father envisioned.",
             "image": static("assets/img/Photo3.png"),
         },
         {
             "title": "Novice Boss Battle",
-            "description": "Short description of the Boss Battle 1.",
-            "deadline": "2023-10-15",
-            "progress": 0,  # percentage
+            "description": "In the Novice Boss Battle, the player faces their first major test as the academy's network is suddenly compromised. The school's AI assistant has been hijacked and transformed into *The Deceiver AI*, a malicious entity designed to challenge the player’s grasp of cybersecurity. As classroom screens fade to black and a chilling robotic voice taunts them, the player recalls their father’s warning about social engineering: that deception, not just intrusion, is a hacker’s greatest weapon. To stop the AI from spreading misinformation and damaging the academy's defenses, the player must correctly answer three tricky cybersecurity questions that blur the line between truth and lie. Success earns them the **“Defender of Knowledge”** achievement, while failure results in data corruption and a forced retry—proving that in cybersecurity, knowing the truth is the first line of defense.",
             "image": static("assets/img/Photo4.png"),
         },
     ]
@@ -623,30 +601,22 @@ def activity_page(request):
     activities_junior = [
         {
             "title": "Junior Task 1",
-            "description": "Short description of the task 1.",
-            "deadline": "2023-10-15",
-            "progress": 0,  # percentage
+            "description": "In Task 1, the player starts their internship in a cybersecurity office and is assigned to research the concept of a domain. A flashback with their father emphasizes the importance of organized systems in network security. The player uses their workstation to investigate and is later questioned by the CISO. If they correctly define a domain as a group of devices managed under the same rules, they are allowed to proceed. A wrong answer sends them back to research before moving to the **Incident Response Room** to study cryptography.",
             "image": static("assets/img/Photo1.png"),
         },
         {
             "title": "Junior Task 2",
-            "description": "Short description of the task 2.",
-            "deadline": "2023-10-15",
-            "progress": 0,  # percentage
+            "description": "In Task 2, the player enters the Incident Response Room to assist an employee named John with a suspicious encrypted email. A flashback from their father highlights the dual nature of encryption—protective but potentially dangerous. After analyzing the email using basic cipher clues, the player must choose the correct response: report the email and isolate the system. A correct choice earns praise and leads to a report to the CISO. The task ends with the player writing a policy to help others recognize phishing attempts.",
             "image": static("assets/img/Photo2.png"),
         },
         {
             "title": "Junior Task 3",
-            "description": "Short description of the task 3.",
-            "deadline": "2023-10-15",
-            "progress": 0,  # percentage
+            "description": "In Task 3, the player drafts a company security policy, reminded by their father that people are the strongest defense against cyber threats. They must choose the best policy to protect the company. The correct choice is to train employees to recognize and report phishing emails. Selecting this earns praise for promoting awareness. Wrong answers prompt a reminder that effective policies focus on education, not restrictions or risky behavior.",
             "image": static("assets/img/Photo3.png"),
         },
         {
             "title": "Junior Boss Battle",
-            "description": "Short description of the Boss Battle 2.",
-            "deadline": "2023-10-15",
-            "progress": 0,  # percentage
+            "description": "In the Junior Boss Battle, the player faces a crafty hacker disguised as an employee who uses social engineering tactics to steal data. The player must spot fake emails, false boss impersonations, and phishing login pages before time expires. Falling for any trick means restarting the fight. Success rewards the “Master of Awareness” achievement. A flashback reminds the player that the biggest threats often come disguised as harmless.",
             "image": static("assets/img/Photo4.png"),
         },
     ]
@@ -654,67 +624,61 @@ def activity_page(request):
     activities_senior = [
         {
             "title": "Senior Task 1",
-            "description": "Short description of the task 1.",
-            "deadline": "2023-10-15",
-            "progress": 0,  # percentage
+            "description": "Threat Landscape, the player is called to the Cyber Threat Intelligence Lab to analyze the company’s network for vulnerabilities. Guided by a flashback of their father’s advice, they must identify weak points before attackers do. The key challenge is recognizing that weak passwords on wireless access points are a major risk. Correct answers lead to praise and progression; wrong answers require retrying the analysis. This task emphasizes the importance of spotting real network threats early.",
             "image": static("assets/img/Photo1.png"),
         },
         {
             "title": "Senior Task 2",
-            "description": "Short description of the task 2.",
-            "deadline": "2023-10-15",
-            "progress": 0,  # percentage
+            "description": "Ontology of Malware, the player analyzes a malware report on the Malware Analysis Workstation to classify a new threat. Guided by a flashback from their father, they learn that malware can be deceptive as well as destructive. The player must identify ransomware—a type that encrypts files and demands payment—based on its behavior. Correct identification earns praise and progression; mistakes require retrying the classification. This task highlights the importance of recognizing malware types for effective cybersecurity responses.",
             "image": static("assets/img/Photo2.png"),
         },
         {
             "title": "Senior Task 3",
-            "description": "Short description of the task 3.",
-            "deadline": "2023-10-15",
-            "progress": 0,  # percentage
+            "description": "Risk Management & Incident Countermeasure, the player leads a simulated breach response after an alert shows unauthorized access and data theft. A flashback reminds them that quick action is crucial during an attack. The player must choose the best first steps—disconnecting the compromised system and blocking the attacker’s IP—to contain the threat. Correct choices earn praise and progress, while wrong ones prompt a retry. This task emphasizes swift and effective incident response in cybersecurity.",
             "image": static("assets/img/Photo3.png"),
         },
         {
             "title": "Senior Boss Battle",
-            "description": "Short description of the Boss Battle 3.",
-            "deadline": "2023-10-15",
-            "progress": 0,  # percentage
+            "description": "The player now faces an advanced AI-powered malware that adapts to every defense they deploy. The virus launches attacks like DDoS, ransomware, and privilege escalation, and the player must quickly select the correct countermeasure to stop each one. Acting too slowly or choosing wrong lets the virus mutate, making it harder to defeat. Success earns the “Cyber Guardian” achievement. A flashback reminds the player: threats evolve fast, so staying sharp and acting swiftly is key.",
             "image": static("assets/img/Photo4.png"),
         },
     ]
 
-    if request.method == "POST":
-        deadline_form = ActivityDeadlineForm(request.POST)
-        if deadline_form.is_valid():
-            data = deadline_form.cleaned_data
-            # Use the title as the document name (slugify for safety)
-            from django.utils.text import slugify
-            doc_name = slugify(data['title'])
-            db.collection('Activity Deadlines').document(doc_name).set({
-                'activity_id': data['activity_id'],
-                'title': data['title'],
-                'description': data['description'],
-                'date_of_deadline': str(data['date']),
-                'time_of_deadline': str(data['time']),
-                'created_at': firestore.SERVER_TIMESTAMP
-            })
-            messages.success(request, "Deadline set successfully!")
-            return redirect('activities-page')
+        # Fetch lock states from Game Triggers
+    
+    game_triggers_ref = db.collection("Game Triggers")
+    doc_map = {
+        'Novice': 'Novice State',
+        'Junior': 'Junior State',
+        'Senior': 'Senior State'
+    }
+    lock_states = {}
+    for tier, doc_name in doc_map.items():
+        doc = game_triggers_ref.document(doc_name).get()
+        if doc.exists:
+            lock_states[tier] = doc.to_dict().get(f"{tier} isLock", True)  # Default to locked
+        else:
+            lock_states[tier] = True
 
-    context = {"activities_novice": activities_novice,
-                   "activities_junior": activities_junior,
-                   "activities_senior": activities_senior,
-                   "faculty_data": faculty_data,
-                    "notifications": notifications,
-                    "deadline_form": deadline_form,
-                    "show_sticky_container": False,
-                }
+    # Add isLock to each activity based on the tier lock
+    for activity in activities_novice:
+        activity['isLock'] = lock_states['Novice']
+    for activity in activities_junior:
+        activity['isLock'] = lock_states['Junior']
+    for activity in activities_senior:
+        activity['isLock'] = lock_states['Senior']
+
+    context = {
+        "activities_novice": activities_novice,
+        "activities_junior": activities_junior,
+        "activities_senior": activities_senior,
+        "show_sticky_container": False,
+    }
 
     if request.headers.get('HX-Request'):
-        # HTMX request: return only the main content
-        return render(request, 'Activities/contents/activities-content.html', context)
+        return render(request, 'Activities/contents/Faculty-Activity-List-content.html', context)
     else:
-        # Normal request: return the full page
-        return render(request, 'Activities/activities.html', context)
+        return render(request, 'Activities/Faculty-Activity-List.html', context)
 
 
 @faculty_required

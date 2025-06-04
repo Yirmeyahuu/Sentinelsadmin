@@ -76,6 +76,27 @@ def Superadmin_Home(request):
 
 @superadmin_required
 def Faculty_list(request):
+
+    # Total students
+    students_ref = db.collection("Registered_Students")
+    students = students_ref.stream()
+    total_students = sum(1 for _ in students)
+
+    # Total faculty
+    faculty_ref = db.collection("Authorized Faculty")
+    faculty = faculty_ref.stream()
+    total_faculty = sum(1 for _ in faculty)
+
+    # Computer Science students
+    cs_students_ref = db.collection("Registered_Students").where("program", "==", "Computer Science")
+    cs_students = cs_students_ref.stream()
+    cs_students_count = sum(1 for _ in cs_students)
+
+    # Information Technology students
+    it_students_ref = db.collection("Registered_Students").where("program", "==", "Information Technology")
+    it_students = it_students_ref.stream()
+    it_students_count = sum(1 for _ in it_students)
+
     # Fetch all continuing faculty
     continuing_ref = db.collection("Authorized Faculty")
     continuing_docs = continuing_ref.stream()
@@ -96,6 +117,10 @@ def Faculty_list(request):
 
     context = {
         "faculties": faculties
+        ,"total_students": total_students
+        ,"total_faculty": total_faculty
+        ,"cs_students": cs_students_count
+        ,"it_students": it_students_count
     }
 
     if request.headers.get('HX-Request'):
@@ -282,34 +307,28 @@ def Superadmin_activity_page(request):
     for tier, doc_name in doc_map.items():
         doc = game_triggers_ref.document(doc_name).get()
         if doc.exists:
-            lock_states[tier] = doc.to_dict()
+            lock_states[tier] = doc.to_dict().get(f"{tier} isLock", True)  # Default to locked
         else:
-            lock_states[tier] = {}
+            lock_states[tier] = True
 
-    # Helper to get lock state for a task
-    def get_islock(tier, title):
-        key = f"{title} isLock"
-        return lock_states.get(tier, {}).get(key, True)  # Default to True (locked)
-
-    # Add isLock to each activity
+    # Add isLock to each activity based on the tier lock
     for activity in activities_novice:
-        activity['isLock'] = get_islock('Novice', activity['title'])
+        activity['isLock'] = lock_states['Novice']
     for activity in activities_junior:
-        activity['isLock'] = get_islock('Junior', activity['title'])
+        activity['isLock'] = lock_states['Junior']
     for activity in activities_senior:
-        activity['isLock'] = get_islock('Senior', activity['title'])
+        activity['isLock'] = lock_states['Senior']
 
-    context = {"activities_novice": activities_novice,
-                "activities_junior": activities_junior,
-                "activities_senior": activities_senior,
-                "show_sticky_container": False,
-                }
+    context = {
+        "activities_novice": activities_novice,
+        "activities_junior": activities_junior,
+        "activities_senior": activities_senior,
+        "show_sticky_container": False,
+    }
 
     if request.headers.get('HX-Request'):
-        # HTMX request: return only the main content
         return render(request, 'Activities/contents/Superadmin-Activity-List-content.html', context)
     else:
-        # Normal request: return the full page
         return render(request, 'Activities/Superadmin-Activity-List.html', context)
 
 @superadmin_required
@@ -472,7 +491,6 @@ def student_list(request):
         return render(request, 'Students/student-list.html', context)
     
 
-
 @superadmin_required
 @csrf_exempt
 def update_game_trigger(request):
@@ -496,5 +514,33 @@ def update_game_trigger(request):
         db.collection("Game Triggers").document(doc_name).set(
             {key_name: isLock}, merge=True
         )
+        return JsonResponse({'success': True})
+    return JsonResponse({'success': False, 'error': 'Invalid request'})
+
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
+import json
+
+@superadmin_required
+@csrf_exempt
+def update_tier_lock(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        tier = data.get('tier')
+        isLock = data.get('isLock')
+
+        doc_map = {
+            'Novice': 'Novice State',
+            'Junior': 'Junior State',
+            'Senior': 'Senior State'
+        }
+        doc_name = doc_map.get(tier)
+        if not doc_name:
+            return JsonResponse({'success': False, 'error': 'Invalid tier'})
+
+        # Set only one key per tier
+        update_data = {f"{tier} isLock": isLock}
+
+        db.collection("Game Triggers").document(doc_name).set(update_data, merge=True)
         return JsonResponse({'success': True})
     return JsonResponse({'success': False, 'error': 'Invalid request'})
