@@ -32,14 +32,15 @@ def saveActivityDeadline(request):
             data = json.loads(request.body)
             faculty_id = request.user.username
             title = data.get('title')
+            tier = data.get('tier')
             date = data.get('date')
             time = data.get('time')
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)})
 
-        # Use faculty_id as document ID, and activity title as field
         db.collection('Activity Deadlines').document(faculty_id).set({
             title: {
+                'tier': tier,
                 'title': title,
                 'deadline_date': date,
                 'deadline_time': time,
@@ -87,34 +88,34 @@ def Faculty_home(request):
     unseen_count = sum(1 for notif in notifications if not notif.get('seen', False))
 
     # Get activity deadlines from Firestore
-    deadlines_ref = db.collection('Activity Deadlines').stream()
+    deadlines_doc = db.collection('Activity Deadlines').document(faculty_id).get()
     activity_deadlines = {}
     almost_due_tasks = []
-    
+
     from datetime import datetime, timedelta
     current_date = datetime.now()
-    
-    for deadline in deadlines_ref:
-        deadline_data = deadline.to_dict()
-        deadline_date = datetime.strptime(deadline_data['date_of_deadline'], '%Y-%m-%d')
-        day = deadline_date.day
-        activity_deadlines[day] = {
-            'title': deadline_data['title'],
-            'description': deadline_data.get('description', ''),
-            'date_of_deadline': deadline_data['date_of_deadline'],
-            'time_of_deadline': deadline_data['time_of_deadline'],
-        }
-        
-        # Check if deadline is within next 7 days for "Almost Due" section
-        if current_date <= deadline_date <= (current_date + timedelta(days=7)):
-            color = 'red' if deadline_date <= (current_date + timedelta(days=2)) else \
-                   'yellow' if deadline_date <= (current_date + timedelta(days=4)) else 'green'
-            
-            almost_due_tasks.append({
-                'name': deadline_data['title'],
-                'color': color,
-                'deadline': deadline_date.strftime('%Y-%m-%d')
-            })
+
+    if deadlines_doc.exists:
+        deadlines_data = deadlines_doc.to_dict()
+        for key, deadline_data in deadlines_data.items():
+            deadline_date = datetime.strptime(deadline_data['deadline_date'], '%Y-%m-%d')
+            day = deadline_date.day
+            activity_deadlines[day] = {
+                'title': deadline_data['title'],
+                'tier': deadline_data.get('tier', ''),
+                'description': deadline_data.get('description', ''),
+                'date_of_deadline': deadline_data['deadline_date'],
+                'time_of_deadline': deadline_data['deadline_time'],
+            }
+            # Almost Due: within next 7 days
+            if current_date <= deadline_date <= (current_date + timedelta(days=7)):
+                color = 'red' if deadline_date <= (current_date + timedelta(days=2)) else \
+                       'yellow' if deadline_date <= (current_date + timedelta(days=4)) else 'green'
+                almost_due_tasks.append({
+                    'name': f"{deadline_data['tier']}: {deadline_data['title']}",
+                    'color': color,
+                    'deadline': deadline_date.strftime('%Y-%m-%d')
+                })
 
     # Sort almost due tasks by deadline
     almost_due_tasks.sort(key=lambda x: x['deadline'])
@@ -123,7 +124,6 @@ def Faculty_home(request):
     import calendar
     current_year = current_date.year
     current_month = current_date.month
-    
     cal = calendar.monthcalendar(current_year, current_month)
     calendar_days = []
     for week in cal:
@@ -135,11 +135,13 @@ def Faculty_home(request):
                     'has_deadline': day in activity_deadlines,
                 }
                 if day in activity_deadlines:
+                    deadline = activity_deadlines[day]
                     day_data.update({
-                        'deadline_title': activity_deadlines[day]['title'],
-                        'deadline_description': activity_deadlines[day].get('description', ''),
-                        'deadline_date': activity_deadlines[day]['date_of_deadline'],
-                        'deadline_time': activity_deadlines[day]['time_of_deadline'],
+                        'deadline_title': deadline['title'],
+                        'deadline_tier': deadline['tier'],
+                        'deadline_description': deadline.get('description', ''),
+                        'deadline_date': deadline['date_of_deadline'],
+                        'deadline_time': deadline['time_of_deadline'],
                     })
                 calendar_days.append(day_data)
 
@@ -574,6 +576,16 @@ def Verify_Student(request):
 
 #This is the activity page for the faculty
 def Faculty_activity_page(request):
+    faculty_id = request.user.username
+
+    # Get faculty data
+    users_ref = db.collection('Authorized Faculty')
+    query = users_ref.where('faculty_id', '==', faculty_id).limit(1).get()
+    faculty_data = None
+    if query:
+        faculty_doc = query[0]
+        faculty_data = faculty_doc.to_dict()
+
 
     activities_novice = [
         {
@@ -669,6 +681,7 @@ def Faculty_activity_page(request):
         activity['isLock'] = lock_states['Senior']
 
     context = {
+        "faculty_data": faculty_data,
         "activities_novice": activities_novice,
         "activities_junior": activities_junior,
         "activities_senior": activities_senior,
@@ -831,3 +844,4 @@ def junior_tier(request):
 @faculty_required
 def senior_tier(request):
     return render(request, 'Tier/Senior.html')
+

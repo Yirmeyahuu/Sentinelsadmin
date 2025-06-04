@@ -5,6 +5,8 @@ from . import views
 urlpatterns = [
     #URLS FOR FACULTY HOME PAGE
     path("homepage/", views.Faculty_home, name="home-page"),
+    # path('sticky-container/', views.sticky_container_partial, name='sticky_container_partial'),
+
     
     #URLS FOR STUDENT MANAGEMENT PAGE
     path("Student-list/", views.student_list, name="faculty-student-list"),

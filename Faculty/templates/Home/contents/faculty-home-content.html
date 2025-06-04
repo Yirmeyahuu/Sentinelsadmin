@@ -1,14 +1,14 @@
 {% load static %}
 
-<div class="p-0 pb-6 px-6 flex justify-center">
-    <div class="w-full max-w-8xl flex space-x-6 mx-auto" style="margin-left: 110px; margin-right: 300px;">
-        <!-- Left side with dashboard cards and quick students table -->
-        <div class="flex-1 flex flex-col items-center">
-            <div class="flex flex-col space-y-6 items-center w-[864px]">
+<div class="p-0 pb-6 px-2 md:px-6 flex justify-center">
+    <div class="w-full max-w-[1700px] flex flex-row gap-4 md:gap-6 min-w-0" style="margin-left: 114px;">
+        <!-- Left side: dashboard cards and tables -->
+        <div class="flex-[2_2_0%] min-w-0 flex flex-col items-center">
+            <div class="flex flex-col space-y-6 items-center w-full max-w-6xl min-w-0">
                 <!-- Dashboard Cards Row -->
-                <div class="flex space-x-6 w-full">
+                <div class="flex flex-wrap gap-4 w-full min-w-0">
                     <!-- Total Users -->
-                    <div class="relative bg-sky-400 shadow-xl rounded-tl-4xl rounded-br-4xl p-6 w-72 flex flex-col items-center overflow-hidden">
+                    <div class="relative bg-sky-400 shadow-xl rounded-tl-4xl rounded-br-4xl p-6 flex-1 min-w-[220px] max-w-sm flex flex-col items-center overflow-hidden">
                         <div class="absolute inset-0 opacity-30">
                             <svg class="w-full h-full" viewBox="0 0 200 200">
                                 <path fill="none" stroke="#1C82AD" stroke-width="8" d="M10 50 Q100 0, 190 50 T 390 50" />
@@ -21,7 +21,7 @@
                         <p class="text-4xl font-bold text-white z-10">{{ total_users }}</p>
                     </div>
                     <!-- Computer Science -->
-                    <div class="relative bg-blue-700 shadow-xl rounded-tl-4xl rounded-br-4xl p-6 w-72 flex flex-col items-center overflow-hidden">
+                    <div class="relative bg-blue-700 shadow-xl rounded-tl-4xl rounded-br-4xl p-6 flex-1 min-w-[220px] max-w-sm flex flex-col items-center overflow-hidden">
                         <div class="absolute inset-0 opacity-30">
                             <svg class="w-full h-full" viewBox="0 0 200 200">
                                 <path fill="none" stroke="#D4F6FF" stroke-width="8" d="M10 50 Q100 0, 190 50 T 390 50" />
@@ -34,7 +34,7 @@
                         <p class="text-4xl font-bold text-white z-10">{{ cs_count }}</p>
                     </div>
                     <!-- Information Technology -->
-                    <div class="relative bg-sky-600 shadow-xl rounded-tl-4xl rounded-br-4xl p-6 w-72 flex flex-col items-center overflow-hidden">
+                    <div class="relative bg-sky-600 shadow-xl rounded-tl-4xl rounded-br-4xl p-6 flex-1 min-w-[220px] max-w-sm flex flex-col items-center overflow-hidden">
                         <div class="absolute inset-0 opacity-30">
                             <svg class="w-full h-full" viewBox="0 0 200 200">
                                 <path fill="none" stroke="#F2F9FF" stroke-width="8" d="M10 50 Q100 0, 190 50 T 390 50" />
@@ -48,26 +48,21 @@
                     </div>
                 </div>
 
-
-
-                <!-- Replace the two separate containers with this single row container -->
-                <div class="flex space-x-6 w-full mt-6">
-                    <!-- Quick Students Table Container -->
-                    <div class="bg-white rounded-tl-4xl rounded-br-4xl shadow-xl p-6 w-1/2">
-                        <!-- Quick Students Header -->
+                <!-- Quick Students & Pending Students Tables -->
+                <div class="flex flex-col md:flex-row gap-4 w-full mt-6 min-w-0">
+                    <!-- Recently Added Students -->
+                    <div class="bg-white rounded-tl-4xl rounded-br-4xl shadow-xl p-6 flex-1 min-w-[260px]">
                         <div class="flex justify-between items-center mb-4">
                             <div class="flex items-center space-x-3">
                                 <h3 class="text-md font-bold text-sky-900">Recently Added Students</h3>
                             </div>
-                            <a href="{% url 'faculty-student-list' %}" 
-                            class="flex items-center space-x-2 text-sm text-sky-900 hover:text-sky-500 transition-colors duration-200">
+                            <a href="{% url 'faculty-student-list' %}" class="flex items-center space-x-2 text-sm text-sky-900 hover:text-sky-500 transition-colors duration-200">
                                 <span>View All</span>
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                                 </svg>
                             </a>
                         </div>
-                        <!-- Quick Students Table -->
                         <div class="overflow-hidden rounded-tl-2xl rounded-br-2xl border border-sky-900">
                             <table class="w-full">
                                 <thead>
@@ -93,21 +88,17 @@
                             </table>
                         </div>
                     </div>
-
-                    <!-- Quick Pending Students Table Container -->
-                    <div class="bg-white rounded-tl-4xl rounded-br-4xl shadow-xl p-6 w-1/2">
-                        <!-- Quick Pending Students Header -->
+                    <!-- Recent Pending Students -->
+                    <div class="bg-white rounded-tl-4xl rounded-br-4xl shadow-xl p-6 flex-1 min-w-[260px]">
                         <div class="flex justify-between items-center mb-4">
                             <h3 class="text-md font-bold text-sky-900">Recent Pending Students</h3>
-                            <a href="{% url 'verify-students' %}" 
-                            class="flex items-center space-x-2 text-sm text-sky-900 hover:text-sky-500 transition-colors duration-200">
+                            <a href="{% url 'verify-students' %}" class="flex items-center space-x-2 text-sm text-sky-900 hover:text-sky-500 transition-colors duration-200">
                                 <span>View All</span>
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                                 </svg>
                             </a>
                         </div>
-                        <!-- Quick Pending Students Table -->
                         <div class="overflow-hidden rounded-tl-2xl rounded-br-2xl border border-sky-900">
                             <table class="w-full">
                                 <thead>
@@ -136,9 +127,10 @@
                 </div>
 
                 <!-- Activity Progress Section -->
-                <div class="bg-sky-600 rounded-tl-4xl rounded-br-4xl shadow-xl p-6 w-full mt-6">
+                <div class="bg-sky-600 rounded-tl-4xl rounded-br-4xl shadow-xl p-6 w-full mt-6 min-w-0">
                     <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-lg font-bold text-white">Activity Progress | <span id="tierLabel">All Tier</span></h3>                        <div class="relative">
+                        <h3 class="text-lg font-bold text-white">Activity Progress | <span id="tierLabel">All Tier</span></h3>
+                        <div class="relative">
                             <button id="tierMenuBtn" class="bg-sky-100 text-sm p-2 text-sky-900 rounded-lg shadow hover:bg-sky-200 focus:outline-none flex items-center space-x-2">
                                 <span id="tierMenuBtnText">All Tier</span>
                                 <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -157,11 +149,9 @@
                 </div>
 
                 <!-- Leaderboard Section -->
-                <div class="relative bg-sky-700 rounded-tl-4xl rounded-br-4xl shadow-2xl mt-6 p-6 w-full overflow-hidden">
-                    <!-- Blur Circles -->
+                <div class="relative bg-sky-700 rounded-tl-4xl rounded-br-4xl shadow-2xl mt-6 p-6 w-full min-w-0 overflow-hidden">
                     <div class="absolute -top-4 -left-6 w-16 h-16 bg-sky-400 blur-2xl opacity-90 rounded-full"></div>
                     <div class="absolute bottom-0 right-2 w-20 h-20 bg-sky-500 blur-2xl opacity-90 rounded-full"></div>
-                    
                     <div class="flex justify-between items-center mb-4 relative z-10">
                         <h3 class="text-lg font-bold text-white mb-4 flex items-center">
                             <div class="relative">
@@ -173,8 +163,6 @@
                             Student Leaderboard
                         </h3>
                     </div>
-
-                    <!-- Table -->
                     <div class="relative z-10 bg-sky-800/50 rounded-xl backdrop-blur-sm">
                         <table class="min-w-full divide-y divide-sky-600/50">
                             <thead>
@@ -218,8 +206,6 @@
                             </tbody>
                         </table>
                     </div>
-
-                    <!-- View All Link -->
                     <a href="#" class="relative z-10 flex items-center justify-center mt-8 mb-2 text-sm text-sky-300 hover:text-sky-100 transition-colors duration-200">
                         <span>View All</span>
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -227,52 +213,84 @@
                         </svg>
                     </a>
                 </div>
+            </div>
+        </div>
+         <!-- Right side: Blue Faculty Info/Calendar Container -->
+        <div class="flex flex-col items-end flex-shrink-0 w-full max-w-[18rem] min-w-[220px] h-full">
+            <div class="relative bg-blue-600 rounded-tr-4xl rounded-bl-4xl rounded-br-3xl shadow-xl p-5 flex flex-col items-center w-full mb-8 h-[800px] min-h-[700px]">
+            <!-- Profile Section -->
+                <div class="flex flex-col items-center mb-8 mt-4">
+                    <div class="w-20 h-20 rounded-full overflow-hidden border-4 border-white mb-4">
+                        <img src="{% static 'assets/img/Default Profile.jpg' %}" alt="User Profile">
+                    </div>
+                    <h2 class="text-lg font-bold text-white mb-1 text-center">
+                        {{ faculty_data.first_name }} {{ faculty_data.middle_initial }} {{ faculty_data.last_name }}
+                    </h2>
+                    <p class="text-sm text-blue-100 text-center">CICT Faculty</p>
+                </div>
+                <!-- Calendar Section -->
+                <div class="bg-white rounded-2xl w-full p-2.5 mb-8 shadow">
+                    <div class="flex justify-between items-center mb-2">
+                        <h3 id="calendarMonthLabel" class="text-base font-semibold text-gray-800"></h3>
+                        <button class="text-gray-600 hover:text-gray-800">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" 
+                                 stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="grid grid-cols-7 gap-1 text-center text-xs">
+                        <div class="text-gray-500">S</div>
+                        <div class="text-gray-500">M</div>
+                        <div class="text-gray-500">T</div>
+                        <div class="text-gray-500">W</div>
+                        <div class="text-gray-500">T</div>
+                        <div class="text-gray-500">F</div>
+                        <div class="text-gray-500">S</div>
+                        {% for day in calendar_days %}
+                        <div class="relative p-2 
+                            {% if day.today %}bg-blue-100 text-blue-600 font-bold
+                            {% elif day.has_deadline %}bg-orange-100 hover:bg-orange-200
+                            {% else %}hover:bg-gray-100{% endif %}
+                            rounded-full cursor-pointer
+                            {% if day.has_deadline %}calendar-deadline{% endif %}"
+                            {% if day.has_deadline %}
+                                onclick="openDeadlineInfoModal(
+                                    '{{ day.deadline_title|escapejs }}',
+                                    '{{ day.deadline_description|default:"No description"|escapejs }}',
+                                    '{{ day.deadline_date|escapejs }}',
+                                    '{{ day.deadline_time|escapejs }}'
+                                )"
+                            {% endif %}
+                        >
+                            {{ day.date }}
+                            {% if day.has_deadline %}
+                            <div class="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-orange-500 rounded-full"></div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <!-- Almost Due Section -->
+                <div class="bg-white rounded-2xl w-full p-2.5 shadow flex-1 flex flex-col">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-base font-semibold text-gray-800">Almost Due</h3>
+                        <a href="#" class="text-xs text-blue-600 hover:text-blue-800">View all</a>
+                    </div>
+                    <div class="space-y-3">
+                        {% for task in almost_due_tasks %}
+                        <div class="flex items-center">
+                            <div class="w-2 h-2 bg-{{ task.color }}-500 rounded-full mr-3"></div>
+                            <span class="text-sm text-gray-700">{{ task.name }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
-
-<!-- Deadline Info Modal -->
-<div id="deadlineInfoModal" class="fixed inset-0 z-50 hidden items-center justify-center">
-    <div class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm"></div>
-    <div class="relative bg-blue-700 rounded-2xl shadow-lg max-w-md w-full mx-8 p-8 z-10 text-white">
-        <button type="button" onclick="closeDeadlineInfoModal()" class="absolute top-3 right-3 text-white/70 hover:text-white text-2xl font-bold">&times;</button>
-        <h2 id="modalDeadlineTitle" class="text-2xl font-extrabold text-white mb-2"></h2>
-        <p id="modalDeadlineDescription" class="text-lg text-white mb-4"></p>
-        <div class="text-base font-semibold mb-2">
-            <span class="font-bold">Date:</span> <span id="modalDeadlineDate"></span>
-        </div>
-        <div class="text-base font-semibold mb-6">
-            <span class="font-bold">Time:</span> <span id="modalDeadlineTime"></span>
-        </div>
-        <div class="flex space-x-4">
-            <form method="post" action="{% url 'remove-deadline' %}">
-                {% csrf_token %}
-                <input type="hidden" id="removeDeadlineTitle" name="title">
-                <button type="submit" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg">Remove Deadline</button>
-            </form>
-            <button type="button" onclick="editDeadline()" class="bg-yellow-400 hover:bg-yellow-500 text-blue-900 font-bold py-2 px-4 rounded-lg">Edit</button>
-        </div>
-    </div>
-</div>
-
-<script>
-    function openDeadlineInfoModal(title, description, date, time) {
-        document.getElementById('modalDeadlineTitle').textContent = title;
-        document.getElementById('modalDeadlineDescription').textContent = description;
-        document.getElementById('modalDeadlineDate').textContent = date;
-        document.getElementById('modalDeadlineTime').textContent = time;
-        document.getElementById('removeDeadlineTitle').value = title;
-        document.getElementById('deadlineInfoModal').classList.remove('hidden');
-        document.getElementById('deadlineInfoModal').classList.add('flex');
-    }
-    function closeDeadlineInfoModal() {
-        document.getElementById('deadlineInfoModal').classList.remove('flex');
-        document.getElementById('deadlineInfoModal').classList.add('hidden');
-    }
-    function editDeadline() {
-        // Implement your edit logic here (e.g., open the set deadline modal pre-filled)
-        alert('Edit deadline feature coming soon!');
-    }
-</script>
 
 <script>
 document.body.addEventListener('htmx:afterSwap', function() {
@@ -280,4 +298,19 @@ document.body.addEventListener('htmx:afterSwap', function() {
         window.initFacultyHomeChart && window.initFacultyHomeChart();
     }
 });
+</script>
+
+<script>
+        // Add this to your script section or a separate JS file
+    document.addEventListener('DOMContentLoaded', function() {
+        const monthNames = [
+            "January", "February", "March", "April", "May", "June",
+            "July", "August", "September", "October", "November", "December"
+        ];
+        const now = new Date();
+        const label = document.getElementById('calendarMonthLabel');
+        if (label) {
+            label.textContent = `${monthNames[now.getMonth()]}, ${now.getFullYear()}`;
+        }
+    });
 </script>

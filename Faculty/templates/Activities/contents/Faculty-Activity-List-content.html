@@ -26,7 +26,10 @@
             {% if activity.isLock %}
                 onclick="facultyTierLockedAlert(event)"
             {% else %}
-                onclick="openFacultyActivityDeadlineModal(`{{ activity.title|escapejs }}`, `{{ activity.description|default:''|escapejs }}`)"
+            onclick="openFacultyActivityDeadlineModal(
+                `{{ activity.title|escapejs }}`,
+                `{{ activity.description|default:''|escapejs }}`,
+                `{{ activity.tier|default:'Novice' }}`)"
             {% endif %}
         >
             {% if activity.isLock %}

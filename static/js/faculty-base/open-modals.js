@@ -62,15 +62,17 @@ window.facultyTierLockedAlert = function(event) {
     alert("Tier is locked. Contact Super Administrator.");
 };
 
-window.openFacultyActivityDeadlineModal = function(title, description) {
+window.openFacultyActivityDeadlineModal = function(title, description, tier) {
     document.getElementById('facultyActivityDeadlineTitle').textContent = title;
     document.getElementById('facultyActivityDeadlineDescription').textContent = description;
     document.getElementById('facultyActivityDeadlineModal').classList.remove('hidden');
     document.body.classList.add('overflow-hidden');
     const aside = document.querySelector('aside');
     if (aside) aside.classList.add('blur');
-    // Store title for submission
-    document.getElementById('facultyDeadlineForm').dataset.title = title;
+    // Store title and tier for submission
+    const form = document.getElementById('facultyDeadlineForm');
+    form.dataset.title = title;
+    form.dataset.tier = tier;
 };
 
 window.closeFacultyActivityDeadlineModal = function() {
@@ -97,9 +99,10 @@ window.submitFacultyDeadline = function(event) {
     event.preventDefault();
     const form = document.getElementById('facultyDeadlineForm');
     const title = form.dataset.title;
+    const tier = form.dataset.tier;
     const date = document.getElementById('facultyDeadlineDate').value;
-    const time24 = document.getElementById('facultyDeadlineTime').value; // "13:45"
-    const time12 = convertTo12Hour(time24); // "01:45 PM"
+    const time24 = document.getElementById('facultyDeadlineTime').value;
+    const time12 = convertTo12Hour(time24);
 
     fetch('/Faculty/save-activity-deadline/', {
         method: 'POST',
@@ -109,8 +112,9 @@ window.submitFacultyDeadline = function(event) {
         },
         body: JSON.stringify({
             title: title,
+            tier: tier,
             date: date,
-            time: time12 // Send as 12-hour format
+            time: time12
         })
     })
     .then(response => response.json())
@@ -118,6 +122,7 @@ window.submitFacultyDeadline = function(event) {
         if (data.status === 'success') {
             alert('Deadline set!');
             closeFacultyActivityDeadlineModal();
+            location.reload(); // Reload to update calendar
         } else {
             alert('Failed to set deadline.');
         }
