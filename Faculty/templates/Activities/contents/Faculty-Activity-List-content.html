@@ -43,10 +43,27 @@
             <div class="p-4 text-gray-800 {% if activity.isLock %}opacity-80{% endif %}">
                 <h2 class="text-lg font-semibold">{{ activity.title }}</h2>
                 <p class="text-sm">{{ activity.subject }}</p>
-                <p class="text-xs mt-1">When: {{ activity.date }}</p>
+                {# DEADLINE LINE: #}
+                <p class="text-xs mt-1">
+                     {# DEADLINE LINE: #}
+                    {% if activity.deadline_date %}
+                        <span class="inline-flex items-center px-3 py-1 rounded-full bg-green-100 text-green-700 text-xs font-semibold border border-green-300 mt-1">
+                            <svg class="w-4 h-4 mr-1 text-green-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            Deadline: {{ activity.deadline_date }}
+                        </span>
+                    {% else %}
+                        <span class="inline-flex items-center px-3 py-1 rounded-full bg-red-100 text-gray-500 text-xs font-semibold border border-gray-300 mt-1">
+                            <svg class="w-4 h-4 mr-1 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 5.636l-1.414 1.414A9 9 0 105.636 18.364l1.414-1.414"></path>
+                            </svg>
+                            Deadline not set.
+                        </span>
+                    {% endif %}
+                </p>
                 <div class="flex items-center mt-3 text-xs">
                     <span class="bg-green-600 text-white px-2 py-1 rounded">{{ activity.progress }}% Resume</span>
-                    <span class="ml-auto flex items-center">{{ activity.modules }} modules</span>
                 </div>
             </div>
         </div>
@@ -91,10 +108,27 @@
             <div class="p-4 text-gray-800 {% if activity.isLock %}opacity-80{% endif %}">
                 <h2 class="text-lg font-semibold">{{ activity.title }}</h2>
                 <p class="text-sm">{{ activity.subject }}</p>
-                <p class="text-xs mt-1">When: {{ activity.date }}</p>
+                {# DEADLINE LINE: #}
+                <p class="text-xs mt-1">
+                    {# DEADLINE LINE: #}
+                   {% if activity.deadline_date %}
+                       <span class="inline-flex items-center px-3 py-1 rounded-full bg-green-100 text-green-700 text-xs font-semibold border border-green-300 mt-1">
+                           <svg class="w-4 h-4 mr-1 text-green-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                               <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
+                           </svg>
+                           Deadline: {{ activity.deadline_date }}
+                       </span>
+                   {% else %}
+                       <span class="inline-flex items-center px-3 py-1 rounded-full bg-red-100 text-gray-500 text-xs font-semibold border border-gray-300 mt-1">
+                           <svg class="w-4 h-4 mr-1 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                               <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 5.636l-1.414 1.414A9 9 0 105.636 18.364l1.414-1.414"></path>
+                           </svg>
+                           Deadline not set.
+                       </span>
+                   {% endif %}
+               </p>
                 <div class="flex items-center mt-3 text-xs">
                     <span class="bg-green-600 text-white px-2 py-1 rounded">{{ activity.progress }}% Resume</span>
-                    <span class="ml-auto flex items-center">{{ activity.modules }} modules</span>
                 </div>
             </div>
         </div>
@@ -139,10 +173,27 @@
             <div class="p-4 text-gray-800 {% if activity.isLock %}opacity-80{% endif %}">
                 <h2 class="text-lg font-semibold">{{ activity.title }}</h2>
                 <p class="text-sm">{{ activity.subject }}</p>
-                <p class="text-xs mt-1">When: {{ activity.date }}</p>
+                {# DEADLINE LINE: #}
+                <p class="text-xs mt-1">
+                    {# DEADLINE LINE: #}
+                   {% if activity.deadline_date %}
+                       <span class="inline-flex items-center px-3 py-1 rounded-full bg-green-100 text-green-700 text-xs font-semibold border border-green-300 mt-1">
+                           <svg class="w-4 h-4 mr-1 text-green-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                               <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
+                           </svg>
+                           Deadline: {{ activity.deadline_date }}
+                       </span>
+                   {% else %}
+                       <span class="inline-flex items-center px-3 py-1 rounded-full bg-red-100 text-gray-500 text-xs font-semibold border border-gray-300 mt-1">
+                           <svg class="w-4 h-4 mr-1 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                               <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 5.636l-1.414 1.414A9 9 0 105.636 18.364l1.414-1.414"></path>
+                           </svg>
+                           Deadline not set.
+                       </span>
+                   {% endif %}
+               </p>
                 <div class="flex items-center mt-3 text-xs">
                     <span class="bg-green-600 text-white px-2 py-1 rounded">{{ activity.progress }}% Resume</span>
-                    <span class="ml-auto flex items-center">{{ activity.modules }} modules</span>
                 </div>
             </div>
         </div>

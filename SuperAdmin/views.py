@@ -517,9 +517,6 @@ def update_game_trigger(request):
         return JsonResponse({'success': True})
     return JsonResponse({'success': False, 'error': 'Invalid request'})
 
-from django.views.decorators.csrf import csrf_exempt
-from django.http import JsonResponse
-import json
 
 @superadmin_required
 @csrf_exempt

@@ -671,14 +671,25 @@ def Faculty_activity_page(request):
             lock_states[tier] = doc.to_dict().get(f"{tier} isLock", True)  # Default to locked
         else:
             lock_states[tier] = True
-
-    # Add isLock to each activity based on the tier lock
+    
+    # Get activity deadlines from Firestore
+    deadlines_doc = db.collection('Activity Deadlines').document(faculty_id).get()
+    activity_deadlines = {}
+    if deadlines_doc.exists:
+        deadlines_data = deadlines_doc.to_dict()
+        for key, deadline_data in deadlines_data.items():
+            activity_deadlines[deadline_data['title']] = deadline_data['deadline_date']
+    
+    # Add isLock and deadline_date to each activity
     for activity in activities_novice:
         activity['isLock'] = lock_states['Novice']
+        activity['deadline_date'] = activity_deadlines.get(activity['title'])
     for activity in activities_junior:
         activity['isLock'] = lock_states['Junior']
+        activity['deadline_date'] = activity_deadlines.get(activity['title'])
     for activity in activities_senior:
         activity['isLock'] = lock_states['Senior']
+        activity['deadline_date'] = activity_deadlines.get(activity['title'])
 
     context = {
         "faculty_data": faculty_data,
