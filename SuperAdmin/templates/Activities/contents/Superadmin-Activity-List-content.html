@@ -5,8 +5,14 @@
     <!-- Novice Section -->
     <div class="flex items-center space-x-4 mt-6">
         <h2 class="text-2xl font-semibold text-sky-700">Novice</h2>
-        <button type="button" onclick="setTierLock('Novice', false)" class="bg-blue-700 text-white px-6 py-2 rounded-xl hover:bg-blue-900 text-sm transition-ease-in-out duration-200">Activate</button>
-        <button type="button" onclick="setTierLock('Novice', true)" class="bg-red-700 text-white px-6 py-2 rounded-xl hover:bg-red-900 text-sm transition-ease-in-out duration-200">Deactivate</button>
+        <button
+            id="tierLockBtn-Novice"
+            type="button"
+            class="{% if novice_is_locked %}bg-green-700 hover:bg-green-900{% else %}bg-red-700 hover:bg-red-900{% endif %} text-white px-6 py-2 rounded-xl text-sm transition-ease-in-out duration-300 cursor-pointer"
+            onclick="toggleTierLock('Novice')"
+            data-locked="{{ novice_is_locked|yesno:'true,false' }}">
+            {% if novice_is_locked %}Activate{% else %}Deactivate{% endif %}
+        </button>
     </div>
     <hr class="mb-8 border-sky-500 my-4">
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
@@ -41,8 +47,14 @@
     <!-- Junior Section -->
     <div class="flex items-center space-x-4 mt-6">
         <h2 class="text-2xl font-semibold text-sky-700">Junior</h2>
-        <button type="button" onclick="setTierLock('Junior', false)" class="bg-blue-700 text-white px-6 py-2 rounded-xl hover:bg-blue-900 text-sm transition-ease-in-out duration-200">Activate</button>
-        <button type="button" onclick="setTierLock('Junior', true)" class="bg-red-700 text-white px-6 py-2 rounded-xl hover:bg-red-900 text-sm transition-ease-in-out duration-200">Deactivate</button>
+        <button
+            id="tierLockBtn-Junior"
+            type="button"
+            class="{% if junior_is_locked %}bg-green-700 hover:bg-green-900{% else %}bg-red-700 hover:bg-red-900{% endif %} text-white px-6 py-2 rounded-xl text-sm transition-ease-in-out duration-300 cursor-pointer"
+            onclick="toggleTierLock('Junior')"
+            data-locked="{{ junior_is_locked|yesno:'true,false' }}">
+            {% if junior_is_locked %}Activate{% else %}Deactivate{% endif %}
+        </button>
     </div>
     <hr class="mb-8 border-sky-500 my-4">
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
@@ -77,8 +89,14 @@
     <!-- Senior Section -->
     <div class="flex items-center space-x-4 mt-6">
         <h2 class="text-2xl font-semibold text-sky-700">Senior</h2>
-        <button type="button" onclick="setTierLock('Senior', false)" class="bg-blue-700 text-white px-6 py-2 rounded-xl hover:bg-blue-900 text-sm transition-ease-in-out duration-200">Activate</button>
-        <button type="button" onclick="setTierLock('Senior', true)" class="bg-red-700 text-white px-6 py-2 rounded-xl hover:bg-red-900 text-sm transition-ease-in-out duration-200">Deactivate</button>
+        <button
+        id="tierLockBtn-Senior"
+        type="button"
+        class="{% if senior_is_locked %}bg-green-700 hover:bg-green-900{% else %}bg-red-700 hover:bg-red-900{% endif %} text-white px-6 py-2 rounded-xl text-sm transition-ease-in-out duration-300 cursor-pointer"
+        onclick="toggleTierLock('Senior')"
+        data-locked="{{ senior_is_locked|yesno:'true,false' }}">
+        {% if senior_is_locked %}Activate{% else %}Deactivate{% endif %}
+    </button>
     </div>
     <hr class="mb-8 border-sky-500 my-4">
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">

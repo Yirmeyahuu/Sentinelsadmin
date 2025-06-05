@@ -9,6 +9,7 @@ urlpatterns = [
     path('update-game-trigger/', views.update_game_trigger, name='update_game_trigger'),
     path('update-tier-lock/', views.update_tier_lock, name='update_tier_lock'),
 
+
     
     path("Faculty-list/", views.Faculty_list, name="FacultyList"),  # Fixed faculty page view #faculty-page
 

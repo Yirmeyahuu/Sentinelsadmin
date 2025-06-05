@@ -323,6 +323,9 @@ def Superadmin_activity_page(request):
         "activities_novice": activities_novice,
         "activities_junior": activities_junior,
         "activities_senior": activities_senior,
+        "novice_is_locked": lock_states['Novice'],
+        "junior_is_locked": lock_states['Junior'],
+        "senior_is_locked": lock_states['Senior'],
         "show_sticky_container": False,
     }
 
@@ -541,3 +544,4 @@ def update_tier_lock(request):
         db.collection("Game Triggers").document(doc_name).set(update_data, merge=True)
         return JsonResponse({'success': True})
     return JsonResponse({'success': False, 'error': 'Invalid request'})
+
