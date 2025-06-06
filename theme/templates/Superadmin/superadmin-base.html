@@ -197,6 +197,33 @@
     </div>
 </div>
 
+<!-- Move Student Modal -->
+<div id="moveStudentModal" class="fixed inset-0 z-50 flex items-center justify-center hidden">
+    <!-- Backdrop -->
+    <div class="fixed inset-0 backdrop-blur-sm bg-gray-900/60"></div>
+    <!-- Modal Content -->
+    <div class="relative bg-white p-6 rounded-3xl shadow-lg w-96 z-10">
+        <h2 class="text-lg font-bold text-blue-500 mb-4">Move Student</h2>
+        <form id="moveStudentForm" method="POST" action="{% url 'move_student' %}">
+            {% csrf_token %}
+            <input type="hidden" name="student_id" id="move-student-id">
+            <label class="block mb-2 text-blue-500">Move to:</label>
+            <select name="destination" id="move-student-destination" class="w-full p-2 border rounded-2xl mb-4 text-blue-500" required>
+                <option value="" disabled selected>Select destination</option>
+                <option value="registered">Registered Students</option>
+                <option value="completed">Completed Students</option>
+                <option value="dropout">Drop-out Students</option>
+                <option value="archive">Archive Student</option>
+            </select>
+            <div class="flex justify-end space-x-2">
+                <button type="button" onclick="closeMoveStudentModal()" class="bg-gray-300 text-gray-700 px-4 py-2 rounded-2xl">Cancel</button>
+                <button type="submit" class="bg-blue-900 text-white px-4 py-2 rounded-2xl">Move</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
 <!-- Add Faculty Modal -->
 <div id="modal" class="fixed inset-0 flex justify-center items-center hidden z-50">
     <!-- Backdrop with blur effect -->
@@ -398,6 +425,34 @@
                                 <span class="w-full">Faculty List</span>
                             </a>
                         </li>
+                        <li x-show="expanded && open"
+                            x-transition:enter="transition ease-out duration-200 delay-75"
+                            x-transition:enter-start="opacity-0 transform translate-y-4"
+                            x-transition:enter-end="opacity-100 transform translate-y-0">
+                            <a
+                            data-page="/Superadmin/Faculty-status/"
+                            href="/Superadmin/Faculty-status/"
+                            hx-get="{% url 'Faculty_status' %}" 
+                            hx-target="#mainContent" 
+                            hx-push-url="true" 
+                            class="faculty-parent-menu flex items-center p-2 hover:bg-blue-800 rounded-2xl cursor-pointer transition-all duration-300 ease-in-out">
+                                <span class="w-full">Faculty Status</span>
+                            </a>
+                        </li>
+                        <li x-show="expanded && open"
+                            x-transition:enter="transition ease-out duration-200 delay-75"
+                            x-transition:enter-start="opacity-0 transform translate-y-4"
+                            x-transition:enter-end="opacity-100 transform translate-y-0">
+                            <a
+                            data-page="/Superadmin/Faculty-Archived/"
+                            href="/Superadmin/Faculty-Archived/"
+                            hx-get="{% url 'Faculty_Archived' %}" 
+                            hx-target="#mainContent" 
+                            hx-push-url="true" 
+                            class="faculty-parent-menu flex items-center p-2 hover:bg-blue-800 rounded-2xl cursor-pointer transition-all duration-300 ease-in-out">
+                                <span class="w-full">Archived Faculty</span>
+                            </a>
+                        </li>
 
                         </ul>
                     </li>
@@ -459,19 +514,33 @@
                             </a>
                         </li>
 
-                        <!-- Pending Approval Item -->
+                        <!-- Student -->
                         <li x-show="expanded && open"
                             x-transition:enter="transition ease-out duration-200 delay-225"
                             x-transition:enter-start="opacity-0 transform translate-y-4"
                             x-transition:enter-end="opacity-100 transform translate-y-0">
                             <a
-                            data-page="/Faculty/Verify-students/"
-                            href="/Faculty/Verify-students/"
-                            hx-get="{% url 'verify-students' %}" 
+                            data-page="/Superadmin/Student-status/"
+                            href="/Superadmin/Student-status/"
+                            hx-get="{% url 'superadmin-student-status' %}" 
                             hx-target="#mainContent" 
                             hx-push-url="true" 
                             class="students-parent-menu flex items-center p-2 hover:bg-blue-800 rounded-2xl cursor-pointer transition-all duration-300 ease-in-out">
-                                <span class="w-full">Pending Approval</span>
+                                <span class="w-full">Student Status</span>
+                            </a>
+                        </li>
+                        <li x-show="expanded && open"
+                            x-transition:enter="transition ease-out duration-200 delay-225"
+                            x-transition:enter-start="opacity-0 transform translate-y-4"
+                            x-transition:enter-end="opacity-100 transform translate-y-0">
+                            <a
+                            data-page="/Superadmin/Student-Archived/"
+                            href="/Superadmin/Student-Archived/"
+                            hx-get="{% url 'superadmin_student_archived' %}" 
+                            hx-target="#mainContent" 
+                            hx-push-url="true" 
+                            class="students-parent-menu flex items-center p-2 hover:bg-blue-800 rounded-2xl cursor-pointer transition-all duration-300 ease-in-out">
+                                <span class="w-full">Archived Students</span>
                             </a>
                         </li>
                         </ul>
@@ -505,35 +574,9 @@
 
                     <p class="text-white font-bold uppercase transition-all duration-600 ease-in-out mb-6"
                     :class="expanded ? 'text-sm opacity-100' : 'text-[10px] opacity-80'">
-                     Settings
+                     Account
                     </p>
 
-
-
-                    <li>
-                        <a
-                        data-page="/Superadmin/ArchivedFaculty/"
-                        href="/Superadmin/ArchivedFaculty/"
-                        hx-get="{% url 'Faculty-Archived' %}" 
-                        hx-target="#mainContent" 
-                        hx-push-url="true" 
-                        class="flex items-center p-2 hover:bg-blue-700 rounded-2xl cursor-pointer transition-all duration-300 ease-in-out {% if request.path == '/Faculty/archive/' %} bg-blue-700 {% else %} hover:bg-blue-700 {% endif %}">
-                            <svg viewBox="0 0 24 24" fill="currentColor" class="h-7 w-7 mr-2 flex-shrink-0">
-                                <g fill="currentColor"><path fill-rule="evenodd" d="M2.545 8.73C2 9.8 2 11.2 2 14c0 2.8 0 4.2.545 5.27a5 5 0 0 0 2.185 2.185C5.8 22 7.2 22 10 22h4c2.8 0 4.2 0 5.27-.545a5 5 0 0 0 2.185-2.185C22 18.2 22 16.8 22 14c0-2.8 0-4.2-.545-5.27a5 5 0 0 0-2.185-2.185C18.2 6 16.8 6 14 6h-4c-2.8 0-4.2 0-5.27.545A5 5 0 0 0 2.545 8.73ZM15.06 12.5a.75.75 0 0 0-1.12-1l-3.011 3.374l-.87-.974a.75.75 0 0 0-1.118 1l1.428 1.6a.75.75 0 0 0 1.119 0l3.572-4Z" clip-rule="evenodd"/><path d="M20.535 3.464C19.07 2 16.713 2 11.999 2C7.285 2 4.93 2 3.464 3.464c-.758.758-1.123 1.754-1.3 3.192a6.5 6.5 0 0 1 1.884-1.448c.782-.398 1.619-.56 2.545-.635C7.488 4.5 8.59 4.5 9.936 4.5h4.126c1.347 0 2.448 0 3.343.073c.927.076 1.764.237 2.545.635a6.499 6.499 0 0 1 1.884 1.448c-.176-1.438-.542-2.434-1.3-3.192Z"/></g>
-                            </svg>
-                            <span
-                            x-show="expanded"
-                            x-transition:enter="transition-all duration-500 ease-in-out"
-                            x-transition:enter-start="opacity-0 -translate-x-4"
-                            x-transition:enter-end="opacity-100 translate-x-0"
-                            x-transition:leave="transition-all duration-300 ease-in-out"
-                            x-transition:leave-start="opacity-100 translate-x-0"
-                            x-transition:leave-end="opacity-0 -translate-x-4"
-                            class="w-full"
-                            > Archived
-                            </span>
-                        </a>
-                    </li>
                     <li>
                         <a href="#" onclick="openLogoutModal()"
                             class="flex items-center p-2 hover:bg-blue-700 rounded-2xl cursor-pointer transition-all duration-300 ease-in-out ">
@@ -592,7 +635,7 @@
         <!-- Content Wrapper -->
         <div class="flex flex-col flex-1">
             <!-- Page Content (Dynamic Content) -->
-            <main id="mainContent" class="p-6 mt-16">
+            <main id="mainContent" class="p-6 mt-8">
                 {% block content %}{% endblock %}
             </main>
         </div>

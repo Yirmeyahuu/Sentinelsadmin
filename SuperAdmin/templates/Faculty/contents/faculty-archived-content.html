@@ -24,6 +24,7 @@
             </div>
         </div>
 
+        <!-- Faculty Archive Table-->
         <div class="mt-4 overflow-hidden rounded-2xl border border-blue-500">
             <table class="w-full min-w-[800px] border-collapse border border-blue-500 ">
                 <thead>
@@ -38,28 +39,39 @@
                 </thead>
                 <tbody id="facultyTableBody">
                     {% for faculty in archived_faculties %}
-                        <tr class="facultytRow text-white">
-                            <td class="border border-gray-300 p-2 text-center whitespace-nowrap">{{ faculty.faculty_id}}</td>
-                            <td class="border border-gray-300 p-2 text-center whitespace-nowrap">
-                                {{ faculty.first_name }} {{ faculty.middle_initial}} {{ faculty.last_name }}
+                        <tr class="facultyRow text-blue-900 {% if forloop.counter0|divisibleby:2 %}bg-gray-100{% else %}bg-blue-100{% endif %}">
+                            <td class="border border-blue-500 p-2 text-center whitespace-nowrap">{{ faculty.faculty_id }}</td>
+                            <td class="border border-blue-500 p-2 text-center whitespace-nowrap">
+                                {{ faculty.first_name }} {{ faculty.middle_initial }} {{ faculty.last_name }}
                             </td>
                             <td class="border border-blue-500 p-2 text-center whitespace-nowrap">{{ faculty.program }}</td>
                             <td class="border border-blue-500 p-2 text-center whitespace-nowrap">{{ faculty.year_section }}</td>
                             <td class="border border-blue-500 p-2 text-center whitespace-nowrap">{{ faculty.semester }}</td>
-                            <td class="border border-blue-500 p-2">
-                                {% if faculty.faculty_id %}
-                                <a href="{% url 'restore_faculty' faculty.faculty_id %}" class="flex items-center justify-center space-x-3 text-white hover:text-green-600">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5 mr-2">
-                                        <path fill-rule="evenodd" d="M4.755 10.059a7.5 7.5 0 0 1 12.548-3.364l1.903 1.903h-3.183a.75.75 0 1 0 0 1.5h4.992a.75.75 0 0 0 .75-.75V4.356a.75.75 0 0 0-1.5 0v3.18l-1.9-1.9A9 9 0 0 0 3.306 9.67a.75.75 0 1 0 1.45.388Zm15.408 3.352a.75.75 0 0 0-.919.53 7.5 7.5 0 0 1-12.548 3.364l-1.902-1.903h3.183a.75.75 0 0 0 0-1.5H2.984a.75.75 0 0 0-.75.75v4.992a.75.75 0 0 0 1.5 0v-3.18l1.9 1.9a9 9 0 0 0 15.059-4.035.75.75 0 0 0-.53-.918Z" clip-rule="evenodd" />
-                                    </svg>
-                                    Restore
-                                </a>
-                                {% endif %}
+                            <td class="border border-blue-500 p-2 text-center">
+                                <div class="flex items-center justify-center space-x-3">
+                                    <!-- Move Modal Icon -->
+                                    <button onclick="openMoveFacultyModal('{{ faculty.faculty_id }}')" class="text-blue-900 hover:text-blue-400 transition-all" title="Move">
+                                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24">
+                                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                  d="M18 14v4.833A1.166 1.166 0 0 1 16.833 20H5.167A1.167 1.167 0 0 1 4 18.833V7.167A1.166 1.166 0 0 1 5.167 6h4.618m4.447-2H20v5.768m-7.889 2.121 7.778-7.778"/>
+                                        </svg>
+                                    </button>
+                                    <!-- Delete Icon -->
+                                    <form method="post" action="{% url 'delete_archived_faculty' faculty.faculty_id %}" style="display:inline;">
+                                        {% csrf_token %}
+                                        <button type="submit" class="text-red-700 hover:text-red-500 transition-all" title="Delete" onclick="return confirm('Delete this faculty permanently?');">
+                                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24">
+                                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                      d="M6 18L18 6M6 6l12 12"/>
+                                            </svg>
+                                        </button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                     {% empty %}
                         <tr>
-                            <td colspan="6" class="text-center border border-gray-300 p-4 text-white">No archived users yet.</td>
+                            <td colspan="6" class="text-center border border-blue-500 p-4 bg-gray-100 text-blue-500">No archived users yet.</td>
                         </tr>
                     {% endfor %}
                 </tbody>
@@ -68,25 +80,3 @@
         </div>
     </div>
 </div>
-
-<!-- Search user suggestion-->
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const searchBar = document.getElementById('searchBar');
-        const facultyRows = document.querySelectorAll('#facultyTableBody .facultyRow');
-
-        searchBar.addEventListener('input', function () {
-            const searchTerm = searchBar.value.trim().toLowerCase();
-
-            facultyRows.forEach(row => {
-                const facultyName = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
-
-                if (facultyName.includes(searchTerm)) {
-                    row.style.display = ''; // Show the row
-                } else {
-                    row.style.display = 'none'; // Hide the row
-                }
-            });
-        });
-    });
-</script>

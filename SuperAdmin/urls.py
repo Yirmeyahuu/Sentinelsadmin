@@ -16,14 +16,22 @@ urlpatterns = [
 
     
     path("add/", views.add_faculty, name="add_faculty"),  # Ensure this matches the form action URL
-    path("archive/<str:faculty_id>/", views.archive_faculty, name="archive_faculty"),
-    path("ArchivedFaculty/", views.Archived_faculty_list, name="Faculty-Archived"),
+    path("Faculty-Archived/", views.Archived_faculty_list, name="Faculty_Archived"),
+    path("archive/<str:faculty_id>/", views.Faculty_Archive, name="archive_faculty"),
+    path('archived-faculty/delete/<str:faculty_id>/', views.delete_archived_faculty, name='delete_archived_faculty'),
+
+    
     path("restore/<str:faculty_id>/", views.restore_faculty, name="restore_faculty"),
     path('faculty/edit/<str:faculty_id>/', views.edit_faculty, name='edit_faculty'),
     path('faculty/move/', views.move_faculty, name='move_faculty'),
-    path('Faculty-status/', views.Faculty_status, name='faculty-status'),
+    path('Faculty-status/', views.Faculty_Status, name='Faculty_status'),
 
 
-    path('student-status/', views.student_status, name='student-status'),
-    path('student-list/', views.student_list, name='student-list'),
+    path('Student-status/', views.Superadmin_Student_Status, name='superadmin-student-status'),
+    path('Student-list/', views.Superadmin_Student_List, name='student-list'),
+    path('student/move/', views.superadmin_move_student, name='move_student'),
+    path("Student-Archived/", views.Superadmin_Student_Archive, name="superadmin_student_archived"),
+    path('archived-student/delete/<str:student_id>/', views.delete_archived_student, name='delete_archived_student'),
+
+
 ]

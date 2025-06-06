@@ -7,7 +7,10 @@ from django.templatetags.static import static
 from Login.decorators import superadmin_required
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
+from django.views.decorators.http import require_POST
 import json
+from django.core.paginator import Paginator
+
 
 
 
@@ -76,51 +79,61 @@ def Superadmin_Home(request):
 
 @superadmin_required
 def Faculty_list(request):
-
-    # Total students
-    students_ref = db.collection("Registered_Students")
-    students = students_ref.stream()
-    total_students = sum(1 for _ in students)
-
-    # Total faculty
-    faculty_ref = db.collection("Authorized Faculty")
-    faculty = faculty_ref.stream()
-    total_faculty = sum(1 for _ in faculty)
-
-    # Computer Science students
-    cs_students_ref = db.collection("Registered_Students").where("program", "==", "Computer Science")
-    cs_students = cs_students_ref.stream()
-    cs_students_count = sum(1 for _ in cs_students)
-
-    # Information Technology students
-    it_students_ref = db.collection("Registered_Students").where("program", "==", "Information Technology")
-    it_students = it_students_ref.stream()
-    it_students_count = sum(1 for _ in it_students)
-
-    # Fetch all continuing faculty
+    # Fetch all continuing faculty (Authorized Faculty only)
     continuing_ref = db.collection("Authorized Faculty")
     continuing_docs = continuing_ref.stream()
     continuing_faculties = [{**doc.to_dict(), 'status': 'Continuing'} for doc in continuing_docs]
 
-    # Fetch all deactivated faculty
-    deactivated_ref = db.collection("Deactivated Faculty")
-    deactivated_docs = deactivated_ref.stream()
-    deactivated_faculties = [{**doc.to_dict(), 'status': 'Deactivated'} for doc in deactivated_docs]
+    search_query = request.GET.get('search', '').strip().lower()
 
-    # Fetch all completed faculty
-    completed_ref = db.collection("Completed Faculty")
-    completed_docs = completed_ref.stream()
-    completed_faculties = [{**doc.to_dict(), 'status': 'Completed'} for doc in completed_docs]
+    # Server-side search (only on continuing faculty)
+    if search_query:
+        faculties = [
+            f for f in continuing_faculties
+            if search_query in str(f.get('first_name', '')).lower()
+            or search_query in str(f.get('last_name', '')).lower()
+            or search_query in str(f.get('faculty_id', '')).lower()
+            or search_query in str(f.get('program', '')).lower()
+        ]
+    else:
+        faculties = continuing_faculties
 
-    # Combine all
-    faculties = continuing_faculties + deactivated_faculties + completed_faculties
+    faculties = sorted(
+        faculties,
+        key=lambda s: str(s.get('first_name', '')).lower()
+    )
+
+    # Pagination
+    page_number = request.GET.get('page', 1)
+    paginator = Paginator(faculties, 10)  # 10 faculty per page
+    page_obj = paginator.get_page(page_number)
+
+    # Dashboard counts (unchanged)
+    students_ref = db.collection("Registered_Students")
+    students = students_ref.stream()
+    total_students = sum(1 for _ in students)
+
+    faculty_ref = db.collection("Authorized Faculty")
+    faculty = faculty_ref.stream()
+    total_faculty = sum(1 for _ in faculty)
+
+    cs_students_ref = db.collection("Registered_Students").where("program", "==", "Computer Science")
+    cs_students = cs_students_ref.stream()
+    cs_students_count = sum(1 for _ in cs_students)
+
+    it_students_ref = db.collection("Registered_Students").where("program", "==", "Information Technology")
+    it_students = it_students_ref.stream()
+    it_students_count = sum(1 for _ in it_students)
 
     context = {
-        "faculties": faculties
-        ,"total_students": total_students
-        ,"total_faculty": total_faculty
-        ,"cs_students": cs_students_count
-        ,"it_students": it_students_count
+        "faculties": page_obj.object_list,
+        "total_students": total_students,
+        "total_faculty": total_faculty,
+        "cs_students": cs_students_count,
+        "it_students": it_students_count,
+        "search_query": request.GET.get('search', ''),
+        "page_obj": page_obj,
+        "paginator": paginator,
     }
 
     if request.headers.get('HX-Request'):
@@ -173,16 +186,29 @@ def edit_faculty(request, faculty_id):
     faculty_data = faculty.to_dict()
     return render(request, "Admin/EditFaculty.html", {"faculty": faculty_data})
 
+@superadmin_required
+@require_POST
+def delete_archived_faculty(request, faculty_id):
+    db.collection("Archived Faculty").document(faculty_id).delete()
+    messages.success(request, "Archived faculty deleted permanently.")
+    return redirect('Faculty-Archived')
 
-def archive_faculty(request, faculty_id):
-    """Move faculty member to 'archive' collection"""
+@superadmin_required
+@require_POST
+def delete_archived_student(request, student_id):
+    db.collection("Archived Students").document(student_id).delete()
+    messages.success(request, "Archived student deleted permanently.")
+    return redirect('superadmin_student_archived')
+
+@superadmin_required
+def Faculty_Archive(request, faculty_id):
+    """Move faculty member to 'Archived Faculty' collection"""
     faculty_ref = db.collection("Authorized Faculty").document(faculty_id)
     faculty = faculty_ref.get()
 
     if faculty.exists:
         db.collection("Archived Faculty").document(faculty_id).set(faculty.to_dict())
         faculty_ref.delete()
-
         messages.success(request, "Faculty member has been archived successfully!")
     else:
         messages.error(request, "Faculty member not found.")
@@ -190,11 +216,24 @@ def archive_faculty(request, faculty_id):
     return redirect("FacultyList")
 
 @superadmin_required
+def Superadmin_Student_Archive(request):
+    archive_ref = db.collection("Archived Students")
+    docs = archive_ref.stream()
+    archived_students = [doc.to_dict() for doc in docs]
+
+    context = {
+        "archived_students": archived_students
+    }
+
+    if request.headers.get('HX-Request'):
+        return render(request, 'Students/contents/superadmin-archived-students-content.html', context)
+    else:
+        return render(request, 'Students/superadmin-archived-students.html', context)
+
+@superadmin_required
 def Archived_faculty_list(request):
-    
     archive_ref = db.collection("Archived Faculty")
     docs = archive_ref.stream()
-
     archived_faculties = [doc.to_dict() for doc in docs]
 
     context = {
@@ -202,10 +241,8 @@ def Archived_faculty_list(request):
     }
 
     if request.headers.get('HX-Request'):
-        # HTMX request: return only the main content
         return render(request, 'Faculty/contents/faculty-archived-content.html', context)
     else:
-        # Normal request: return the full page
         return render(request, 'Faculty/faculty-archived.html', context)
 
 
@@ -335,64 +372,148 @@ def Superadmin_activity_page(request):
         return render(request, 'Activities/Superadmin-Activity-List.html', context)
 
 @superadmin_required
-def student_status(request):
-    # Set the section you want to display
-    program = "Computer Science"
-    year_section = "3A"
+def Superadmin_Student_Status(request):
+    status_filter = request.GET.get('status', 'all')
+    program_filter = request.GET.get('program', 'all')
+    year_section_filter = request.GET.get('year_section', 'all')
+    semester_filter = request.GET.get('semester', 'all')
+    school_year_filter = request.GET.get('school_year', 'all')
+    search_query = request.GET.get('search', '').strip().lower()
 
-    # Fetch continuing students for this section
-    continuing_ref = db.collection("Registered_Students")
-    continuing_query = continuing_ref.where("program", "==", program).where("year_section", "==", year_section)
-    continuing_students = [{**doc.to_dict(), 'status': 'continuing', 'id': doc.id} for doc in continuing_query.stream()]
+    # Helper to fetch and tag students from a collection
+    def fetch_students(collection, status_label):
+        docs = db.collection(collection).stream()
+        return [{**doc.to_dict(), 'status': status_label, 'id': doc.id} for doc in docs]
 
-    # Fetch dropout students for this section
-    dropout_ref = db.collection("Drop-out Students")
-    dropout_query = dropout_ref.where("program", "==", program).where("year_section", "==", year_section)
-    dropout_students = [{**doc.to_dict(), 'status': 'dropout', 'id': doc.id} for doc in dropout_query.stream()]
+    # Fetch students from all collections
+    students = []
+    if status_filter in ['all', 'continuing']:
+        students += fetch_students("Registered_Students", "Continuing")
+    if status_filter in ['all', 'completed']:
+        students += fetch_students("Completed Students", "Completed")
+    if status_filter in ['all', 'dropout']:
+        students += fetch_students("Drop-out Students", "Drop-out")
 
-    all_students = continuing_students + dropout_students
+    # Gather unique values for dropdowns
+    year_sections = sorted(set(s.get('year_section', '') for s in students if s.get('year_section')))
+    school_years = sorted(set(s.get('school_year', '') for s in students if s.get('school_year')), reverse=True)
+
+    # Apply filters
+    if program_filter != 'all':
+        students = [s for s in students if s.get('program') == program_filter]
+    if year_section_filter != 'all':
+        students = [s for s in students if s.get('year_section') == year_section_filter]
+    if semester_filter != 'all':
+        students = [s for s in students if s.get('semester') == semester_filter]
+    if school_year_filter != 'all':
+        students = [s for s in students if s.get('school_year') == school_year_filter]
+    if search_query:
+        students = [
+            s for s in students
+            if search_query in str(s.get('first_name', '')).lower()
+            or search_query in str(s.get('last_name', '')).lower()
+            or search_query in str(s.get('student_id', '')).lower()
+            or search_query in str(s.get('id', '')).lower()
+        ]
+
+    students = sorted(
+        students,
+        key=lambda s: str(s.get('first_name', '')).lower()
+    )
+
+    # Pagination
+    page_number = request.GET.get('page', 1)
+    paginator = Paginator(students, 12)
+    page_obj = paginator.get_page(page_number)
 
     context = {
-        "students": all_students,
-        "section_label": f"{program} - {year_section}",
+        "students": page_obj.object_list,
+        "status_filter": status_filter,
+        "program_filter": program_filter,
+        "year_section_filter": year_section_filter,
+        "semester_filter": semester_filter,
+        "school_year_filter": school_year_filter,
+        "year_sections": year_sections,
+        "school_years": school_years,
+        "search_query": request.GET.get('search', ''),
+        "page_obj": page_obj,
+        "paginator": paginator,
     }
 
     if request.headers.get('HX-Request'):
-        # HTMX request: return only the main content
-        return render(request, 'Faculty/contents/student-status-content.html', context)
+        return render(request, 'Students/contents/superadmin-student-status-content.html', context)
     else:
-        # Normal request: return the full page
-        return render(request, 'Faculty/student-status.html', context)
+        return render(request, 'Students/superadmin-student-status.html', context)
 
 @superadmin_required
-def Faculty_status(request):
-    # Fetch all continuing faculty
-    continuing_ref = db.collection("Authorized Faculty")
-    continuing_docs = continuing_ref.stream()
-    continuing_faculties = [{**doc.to_dict(), 'status': 'Continuing'} for doc in continuing_docs]
+def Faculty_Status(request):
+    status_filter = request.GET.get('status', 'all')
+    program_filter = request.GET.get('program', 'all')
+    year_section_filter = request.GET.get('year_section', 'all')
+    semester_filter = request.GET.get('semester', 'all')
+    search_query = request.GET.get('search', '').strip().lower()
 
-    # Fetch all deactivated faculty
-    deactivated_ref = db.collection("Deactivated Faculty")
-    deactivated_docs = deactivated_ref.stream()
-    deactivated_faculties = [{**doc.to_dict(), 'status': 'Deactivated'} for doc in deactivated_docs]
+    # Fetch all faculty from all collections
+    def fetch_faculties(collection, status_label):
+        docs = db.collection(collection).stream()
+        return [{**doc.to_dict(), 'status': status_label, 'id': doc.id} for doc in docs]
 
-    # Fetch all completed faculty
-    completed_ref = db.collection("Completed Faculty")
-    completed_docs = completed_ref.stream()
-    completed_faculties = [{**doc.to_dict(), 'status': 'Completed'} for doc in completed_docs]
+    faculties = []
+    if status_filter in ['all', 'Continuing']:
+        faculties += fetch_faculties("Authorized Faculty", "Continuing")
+    if status_filter in ['all', 'Deactivated']:
+        faculties += fetch_faculties("Deactivated Faculty", "Deactivated")
+    if status_filter in ['all', 'Completed']:
+        faculties += fetch_faculties("Completed Faculty", "Completed")
 
-    # Combine all
-    all_faculties = continuing_faculties + deactivated_faculties + completed_faculties
+    # Gather unique values for dropdowns
+    year_sections = sorted(set(f.get('year_section', '') for f in faculties if f.get('year_section')))
+    programs = sorted(set(f.get('program', '') for f in faculties if f.get('program')))
+    semesters = sorted(set(f.get('semester', '') for f in faculties if f.get('semester')))
+
+    # Apply filters
+    if program_filter != 'all':
+        faculties = [f for f in faculties if f.get('program') == program_filter]
+    if year_section_filter != 'all':
+        faculties = [f for f in faculties if f.get('year_section') == year_section_filter]
+    if semester_filter != 'all':
+        faculties = [f for f in faculties if f.get('semester') == semester_filter]
+    if search_query:
+        faculties = [
+            f for f in faculties
+            if search_query in str(f.get('first_name', '')).lower()
+            or search_query in str(f.get('last_name', '')).lower()
+            or search_query in str(f.get('faculty_id', '')).lower()
+            or search_query in str(f.get('program', '')).lower()
+        ]
+
+    # Sort alphabetically by first name
+    faculties = sorted(faculties, key=lambda f: str(f.get('first_name', '')).lower())
+
+    # Pagination
+    page_number = request.GET.get('page', 1)
+    paginator = Paginator(faculties, 12)
+    page_obj = paginator.get_page(page_number)
 
     context = {
-        "faculties": all_faculties
+        "faculties": page_obj.object_list,
+        "status_filter": status_filter,
+        "program_filter": program_filter,
+        "year_section_filter": year_section_filter,
+        "semester_filter": semester_filter,
+        "programs": programs,
+        "year_sections": year_sections,
+        "semesters": semesters,
+        "search_query": request.GET.get('search', ''),
+        "page_obj": page_obj,
+        "paginator": paginator,
     }
 
     if request.headers.get('HX-Request'):
         return render(request, 'Faculty/contents/faculty-status-content.html', context)
     else:
         return render(request, 'Faculty/faculty-status.html', context)
-    
+
 @superadmin_required
 def move_faculty(request):
     if request.method == "POST":
@@ -400,7 +521,7 @@ def move_faculty(request):
         destination = request.POST.get("destination")
 
         # Find the faculty in any of the three collections
-        collections = ["Authorized Faculty", "Deactivated Faculty", "Completed Faculty"]
+        collections = ["Authorized Faculty", "Deactivated Faculty", "Completed Faculty", "Archived Faculty"]
         faculty_data = None
         source_collection = None
         for collection in collections:
@@ -444,54 +565,68 @@ def move_faculty(request):
     return redirect("FacultyList")
 
 @superadmin_required
-def student_list(request):
+def Superadmin_Student_List(request):
     # Get filter parameters
     selected_program = request.GET.get('program', 'all')
     selected_year_section = request.GET.get('year_section', 'all')
     selected_semester = request.GET.get('semester', 'all')
+    search_query = request.GET.get('search', '').strip().lower()
     
-    # Base query
+    # Base query: all students
     students_ref = db.collection("Registered_Students")
-    
-    # Apply filters
     if selected_program != 'all':
         students_ref = students_ref.where("program", "==", selected_program)
-    
-    # Get all students before additional filtering
     students = [doc.to_dict() for doc in students_ref.stream()]
-    
-    # Apply additional filters in Python (since Firestore can't do multiple where clauses with different fields)
+
+    # Apply additional filters in Python
     if selected_year_section != 'all':
         students = [s for s in students if s.get('year_section') == selected_year_section]
-    
     if selected_semester != 'all':
         students = [s for s in students if s.get('semester') == selected_semester]
+    if search_query:
+        students = [
+            s for s in students
+            if search_query in str(s.get('first_name', '')).lower()
+            or search_query in str(s.get('last_name', '')).lower()
+            or search_query in str(s.get('student_id', '')).lower()
+            or search_query in str(s.get('id', '')).lower()
+        ]
     
-    # Get unique year sections for the filter dropdown
-    year_sections = sorted(list(set(s.get('year_section') for s in students if s.get('year_section'))))
+    # Pagination
+    page_number = request.GET.get('page', 1)
+    paginator = Paginator(students, 10)  # 10 students per page
+    page_obj = paginator.get_page(page_number)
     
-    # Count statistics
-    total_students = len(students)
-    cs_count = len([s for s in students if s.get('program') == 'Computer Science'])
-    it_count = len([s for s in students if s.get('program') == 'Information Technology'])
-    inactive_count = len([s for s in students if s.get('status') == 'Drop-out'])
-    
+    # For dashboard cards, always count ALL students (not just filtered)
+    all_students = [doc.to_dict() for doc in db.collection("Registered_Students").stream()]
+    total_students = len(all_students)
+    cs_count = len([s for s in all_students if s.get('program') == 'Computer Science'])
+    it_count = len([s for s in all_students if s.get('program') == 'Information Technology'])
+    active_count = 0  # Placeholder, update with your logic for active students
+
+    # For filter dropdowns
+    year_sections = sorted(list(set(s.get('year_section') for s in all_students if s.get('year_section'))))
+
     context = {
-        'students': students,
+        'students': page_obj.object_list,
         'total_students': total_students,
         'cs_count': cs_count,
         'it_count': it_count,
-        'inactive_count': inactive_count,
+        'active_count': active_count,
+        'inactive_count': len([s for s in all_students if s.get('status') == 'Drop-out']),
         'selected_program': selected_program,
         'selected_year_section': selected_year_section,
         'selected_semester': selected_semester,
         'year_sections': year_sections,
+        'search_query': request.GET.get('search', ''),
+        'page_obj': page_obj,
+        'paginator': paginator,
     }
     
     if request.headers.get('HX-Request'):
-        return render(request, 'Students/contents/student-list-content.html', context)
+        return render(request, 'Students/contents/superadmin-student-list-content.html', context)
     else:
-        return render(request, 'Students/student-list.html', context)
+        return render(request, 'Students/superadmin-student-list.html', context)
     
 
 @superadmin_required
@@ -545,3 +680,57 @@ def update_tier_lock(request):
         return JsonResponse({'success': True})
     return JsonResponse({'success': False, 'error': 'Invalid request'})
 
+@superadmin_required
+def superadmin_move_student(request):
+    if request.method == "POST":
+        student_id = request.POST.get("student_id")
+        destination = request.POST.get("destination")
+
+        # Search all collections for the student
+        collections = [
+            "Registered_Students",
+            "Completed Students",
+            "Drop-out Students",
+            "Archived Students"
+        ]
+        student_data = None
+        source_collection = None
+        for collection in collections:
+            ref = db.collection(collection).document(student_id)
+            doc = ref.get()
+            if doc.exists:
+                student_data = doc.to_dict()
+                source_collection = collection
+                break
+
+        if not student_data:
+            messages.error(request, "Student not found.")
+            return redirect("student-list")
+
+        # Remove from source collection (except if moving to Registered_Students)
+        if destination != "registered" and source_collection:
+            db.collection(source_collection).document(student_id).delete()
+
+        # Move to the selected collection and update status
+        if destination == "registered":
+            student_data["status"] = "Continuing"
+            db.collection("Registered_Students").document(student_id).set(student_data)
+            messages.success(request, "Student moved to Registered Students successfully.")
+        elif destination == "completed":
+            student_data["status"] = "Completed"
+            db.collection("Completed Students").document(student_id).set(student_data)
+            messages.success(request, "Student moved to Completed Students successfully.")
+        elif destination == "dropout":
+            student_data["status"] = "Drop-out"
+            db.collection("Drop-out Students").document(student_id).set(student_data)
+            messages.success(request, "Student moved to Drop-out Students successfully!")
+        elif destination == "archive":
+            db.collection("Archived Students").document(student_id).set(student_data)
+            # Remove from all other collections
+            if source_collection:
+                db.collection(source_collection).document(student_id).delete()
+            messages.success(request, "Student moved to Archived Students successfully!")
+        else:
+            messages.error(request, "Invalid destination.")
+            return redirect("student-list")
+    return redirect("student-list")

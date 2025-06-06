@@ -41,7 +41,8 @@ window.closeEditFacultyModal = function() {
 };
 
 // Move Faculty Modal
-window.openMoveFacultyModal = function() {
+window.openMoveFacultyModal = function(facultyId) {
+    document.getElementById("move-faculty-id").value = facultyId; // <-- Set the hidden input!
     document.getElementById("moveFacultyModal").classList.remove("hidden");
     document.body.classList.add("overflow-hidden");
     document.querySelector('aside').classList.add('blur');
@@ -49,6 +50,20 @@ window.openMoveFacultyModal = function() {
 
 window.closeMoveFacultyModal = function() {
     document.getElementById("moveFacultyModal").classList.add("hidden");
+    document.body.classList.remove("overflow-hidden");
+    document.querySelector('aside').classList.remove('blur');
+};
+
+// Move Student Modal
+window.openMoveStudentModal = function(studentId) {
+    document.getElementById("move-student-id").value = studentId;
+    document.getElementById("moveStudentModal").classList.remove("hidden");
+    document.body.classList.add("overflow-hidden");
+    document.querySelector('aside').classList.add('blur');
+};
+
+window.closeMoveStudentModal = function() {
+    document.getElementById("moveStudentModal").classList.add("hidden");
     document.body.classList.remove("overflow-hidden");
     document.querySelector('aside').classList.remove('blur');
 };

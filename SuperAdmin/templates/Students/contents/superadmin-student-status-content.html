@@ -1,56 +1,73 @@
-<div class="p-6 ml-20">
-    <div class="bg-blue-600 shadow-2xl rounded-2xl p-6 w-full">
+<div class="ml-16 px-6">
+    <!-- Main Content (Student Status Table) -->
+    <div class="bg-blue-600 shadow-2xl rounded-tl-4xl rounded-br-4xl p-6 w-full">
         <h2 class="text-xl font-bold text-white mb-4 flex items-center gap-2">
-            Faculty Status
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 16 16" class="inline-block ml-2 text-green-400">
-                <path fill="currentColor" fill-rule="evenodd" d="M15.941 7.033a8 8 0 0 1-14.784 5.112a.75.75 0 1 1 1.283-.778a6.5 6.5 0 1 0 8.922-8.93a.75.75 0 0 1 .776-1.284a8 8 0 0 1 3.803 5.88ZM9 1a1 1 0 1 1-2 0a1 1 0 0 1 2 0ZM2.804 5a1 1 0 1 0-1.732-1a1 1 0 0 0 1.732 1ZM1 7a1 1 0 1 1 0 2a1 1 0 0 1 0-2Zm4-4.196a1 1 0 1 0-1-1.732a1 1 0 0 0 1 1.732Z" clip-rule="evenodd"/>
+            Student Status
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" class="inline-block ml-2 text-sky-300">
+                <path fill="currentColor" fill-rule="evenodd" d="M7.317 3.769a42.502 42.502 0 0 1 9.366 0c1.827.204 3.302 1.642 3.516 3.48c.37 3.156.37 6.346 0 9.503c-.215 1.836-1.69 3.275-3.516 3.48a42.5 42.5 0 0 1-9.366 0c-1.827-.205-3.302-1.644-3.516-3.48a40.903 40.903 0 0 1 0-9.504c.214-1.837 1.69-3.275 3.516-3.48ZM13 7.999A1 1 0 1 1 11 8a1 1 0 0 1 2 0Zm-1 2.75a.75.75 0 0 1 .75.75v5a.75.75 0 1 1-1.5 0v-5a.75.75 0 0 1 .75-.75Z" clip-rule="evenodd"/>
             </svg>
+            
         </h2>
         <div class="flex justify-between items-center mb-4">
             <div class="flex flex-wrap items-center gap-4">
+                <!-- Status & Other Filters -->
                 <form method="get" class="flex flex-wrap items-center gap-2">
                     <label class="font-semibold text-sm text-white">Status:</label>
                     <select name="status" class="p-1 text-sm font-medium text-blue-800 bg-white border border-blue-300 rounded-xl" onchange="this.form.submit()">
                         <option value="all" {% if status_filter == 'all' %}selected{% endif %}>All</option>
-                        <option value="Continuing" {% if status_filter == 'Continuing' %}selected{% endif %}>Continuing</option>
-                        <option value="Deactivated" {% if status_filter == 'Deactivated' %}selected{% endif %}>Deactivated</option>
-                        <option value="Completed" {% if status_filter == 'Completed' %}selected{% endif %}>Completed</option>
+                        <option value="continuing" {% if status_filter == 'continuing' %}selected{% endif %}>Continuing</option>
+                        <option value="completed" {% if status_filter == 'completed' %}selected{% endif %}>Completed</option>
+                        <option value="dropout" {% if status_filter == 'dropout' %}selected{% endif %}>Drop-out</option>
                     </select>
+                
                     <label class="font-semibold text-sm text-white">Program:</label>
                     <select name="program" class="p-1 text-sm font-medium text-blue-800 bg-white border border-blue-300 rounded-xl" onchange="this.form.submit()">
                         <option value="all" {% if program_filter == 'all' %}selected{% endif %}>All</option>
-                        {% for prog in programs %}
-                            <option value="{{ prog }}" {% if program_filter == prog %}selected{% endif %}>{{ prog }}</option>
-                        {% endfor %}
+                        <option value="Computer Science" {% if program_filter == 'Computer Science' %}selected{% endif %}>Computer Science</option>
+                        <option value="Information Technology" {% if program_filter == 'Information Technology' %}selected{% endif %}>Information Technology</option>
                     </select>
+                
                     <label class="font-semibold text-sm text-white">Year & Section:</label>
-                    <select name="year_section" class="p-1 text-sm font-medium text-blue-800 bg-white border border-blue-300 rounded-xl" onchange="this.form.submit()">
+                    <select name="year_section" class="p-2 text-sm font-medium text-blue-800 bg-white border border-blue-300 rounded-xl" onchange="this.form.submit()">
                         <option value="all" {% if year_section_filter == 'all' %}selected{% endif %}>All</option>
                         {% for ys in year_sections %}
                             <option value="{{ ys }}" {% if year_section_filter == ys %}selected{% endif %}>{{ ys }}</option>
                         {% endfor %}
                     </select>
+                
                     <label class="font-semibold text-sm text-white">Semester:</label>
                     <select name="semester" class="p-1 text-sm font-medium text-blue-800 bg-white border border-blue-300 rounded-xl" onchange="this.form.submit()">
                         <option value="all" {% if semester_filter == 'all' %}selected{% endif %}>All</option>
-                        {% for sem in semesters %}
-                            <option value="{{ sem }}" {% if semester_filter == sem %}selected{% endif %}>{{ sem }}</option>
+                        <option value="1st Semester" {% if semester_filter == '1st Semester' %}selected{% endif %}>1st Semester</option>
+                        <option value="2nd Semester" {% if semester_filter == '2nd Semester' %}selected{% endif %}>2nd Semester</option>
+                    </select>
+                
+                    <label class="font-semibold text-sm text-white">School Year:</label>
+                    <select name="school_year" class="p-1 text-sm font-medium text-blue-800 bg-white border border-blue-300 rounded-xl" onchange="this.form.submit()">
+                        <option value="all" {% if school_year_filter == 'all' %}selected{% endif %}>All</option>
+                        {% for sy in school_years %}
+                            <option value="{{ sy }}" {% if school_year_filter == sy %}selected{% endif %}>{{ sy }}</option>
                         {% endfor %}
                     </select>
+                
                     <input type="hidden" name="search" value="{{ search_query }}">
                 </form>
-                <form method="get" class="flex items-center max-w-sm mx-auto">
+                <form method="get" class="flex items-center max-w-sm mx-auto" id="studentSearchForm">
                     <input type="hidden" name="status" value="{{ status_filter }}">
-                    <input type="hidden" name="program" value="{{ program_filter }}">
-                    <input type="hidden" name="year_section" value="{{ year_section_filter }}">
-                    <input type="hidden" name="semester" value="{{ semester_filter }}">
                     <div class="relative w-full">
                         <div class="absolute inset-y-0 start-0 flex items-center ps-2 pointer-events-none">
-                            <svg viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 text-gray-500">
-                                <path d="M10 18a7.952 7.952 0 0 0 4.897-1.688l4.396 4.396 1.414-1.414-4.396-4.396A7.952 7.952 0 0 0 18 10c0-4.411-3.589-8-8-8s-8 3.589-8 8 3.589 8 8 8zm0-14c3.309 0 6 2.691 6 6s-2.691 6-6 6-6-2.691-6-6 2.691-6 6-6z"/>
+                            <svg viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 text-gray-500 dark:text-gray-400">
+                                <path fill-rule="evenodd" d="M12 6a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Zm-1.5 8a4 4 0 0 0-4 4 2 2 0 0 0 2 2h7a2 2 0 0 0 2-2 4 4 0 0 0-4-4h-3Zm6.82-3.096a5.51 5.51 0 0 0-2.797-6.293 3.5 3.5 0 1 1 2.796 6.292ZM19.5 18h.5a2 2 0 0 0 2-2 4 4 0 0 0-4-4h-1.1a5.503 5.503 0 0 1-.471.762A5.998 5.998 0 0 1 19.5 18ZM4 7.5a3.5 3.5 0 0 1 5.477-2.889 5.5 5.5 0 0 0-2.796 6.293A3.501 3.501 0 0 1 4 7.5ZM7.1 12H6a4 4 0 0 0-4 4 2 2 0 0 0 2 2h.5a5.998 5.998 0 0 1 3.071-5.238A5.505 5.505 0 0 1 7.1 12Z" clip-rule="evenodd"/>
                             </svg>
                         </div>
-                        <input type="text" name="search" value="{{ search_query }}" class="bg-white pl-10 border border-gray-300 text-gray-900 text-sm rounded-2xl block w-full ps-14 p-2" placeholder="Search Faculty...">
+                        <input
+                            type="text"
+                            id="searchBar"
+                            name="search"
+                            value="{{ search_query }}"
+                            class="bg-white pl-10 border border-gray-300 text-gray-900 text-sm rounded-2xl block w-full ps-14 p-2"
+                            placeholder="Search Student..."
+                        />
                     </div>
                     <button type="submit" class="p-3 text-sm ms-1 font-medium text-white bg-blue-800 rounded-2xl hover:bg-blue-700 focus:outline-none">
                         <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
@@ -61,11 +78,14 @@
                 </form>
             </div>
         </div>
+
+
+        <!-- Student Status Table -->
         <div class="overflow-hidden rounded-2xl shadow-xl w-full bg-gray-100">
             <table class="w-full border-separate border-spacing-0 rounded-lg">
                 <thead>
                     <tr class="bg-blue-400 text-white">
-                        <th class="border border-blue-500 p-2">Faculty ID</th>
+                        <th class="border border-blue-500 p-2">Student ID</th>
                         <th class="border border-blue-500 p-2">Full Name</th>
                         <th class="border border-blue-500 p-2">Program</th>
                         <th class="border border-blue-500 p-2">Year & Section</th>
@@ -74,43 +94,49 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for faculty in faculties %}
+                    {% for student in students %}
                     <tr class="text-blue-900 hover:bg-blue-200 transition text-md {% if forloop.counter0|divisibleby:2 %}bg-gray-100{% else %}bg-blue-100{% endif %}">
-                        <td class="border border-blue-500 p-2 text-center">{{ faculty.faculty_id }}</td>
-                        <td class="border border-blue-500 p-2 pl-1 text-left">
-                            {{ faculty.first_name }} {{ faculty.middle_initial }} {{ faculty.last_name }}
+                        <td class="border border-blue-500 p-2 text-center">{{ student.student_id|default:student.id }}</td>
+                        <td class="border border-blue-500 p-2 pl-8 text-left">
+                            {{ student.first_name }} {{ student.last_name }}
                         </td>
-                        <td class="border border-blue-500 p-2 text-center">{{ faculty.program }}</td>
-                        <td class="border border-blue-500 p-2 text-center">{{ faculty.year_section }}</td>
-                        <td class="border border-blue-500 p-2 text-center">{{ faculty.semester }}</td>
+                        <td class="border border-blue-500 p-2 text-center">{{ student.program }}</td>
+                        <td class="border border-blue-500 p-2 text-center">{{ student.year_section }}</td>
+                        <td class="border border-blue-500 p-2 text-center">{{ student.semester }}</td>
                         <td class="border border-blue-500 p-2 text-center">
                             <span class="px-2 py-1 rounded-lg text-xs font-medium
-                                {% if faculty.status == 'Deactivated' %}
+                                {% if student.status == 'Drop-out' or student.status == 'dropout' %}
                                     bg-red-500/20 text-red-700
-                                {% elif faculty.status == 'Completed' %}
+                                {% elif student.status == 'Completed' or student.status == 'completed' %}
                                     bg-yellow-500/20 text-yellow-700
                                 {% else %}
                                     bg-green-500/20 text-green-700
                                 {% endif %}">
-                                {{ faculty.status }}
+                                {{ student.status|title }}
                             </span>
                         </td>
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="6" class="text-center border border-blue-500 p-4 text-blue-500">
-                            No faculty found.
+                        <td colspan="5" class="text-center border border-blue-500 p-4 text-blue-500">
+                            No Student found.
                         </td>
                     </tr>
                     {% endfor %}
+                    <tr id="noResultsRow" style="display: none;">
+                        <td colspan="5" class="text-center border border-blue-500 p-4 text-blue-500">
+                            No Student found.
+                        </td>
+                    </tr>
                 </tbody>
             </table>
         </div>
-        <!-- Pagination Controls (copy from student status page if needed) -->
+
+        <!-- Pagination Controls -->
         <div class="flex justify-center mt-6">
             <nav class="flex items-center gap-1 text-sm" aria-label="Pagination">
                 {% if page_obj.has_previous %}
-                    <a href="?page={{ page_obj.previous_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if program_filter %}&program={{ program_filter }}{% endif %}{% if year_section_filter %}&year_section={{ year_section_filter }}{% endif %}{% if semester_filter %}&semester={{ semester_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}"
+                    <a href="?page={{ page_obj.previous_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}"
                        class="flex items-center px-3 py-1.5 bg-gray-100 text-blue-400 hover:text-white hover:bg-blue-500 rounded-full transition-colors duration-200">
                         <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
@@ -125,20 +151,22 @@
                         Prev
                     </span>
                 {% endif %}
+        
                 <div class="flex items-center gap-1">
                     {% for num in paginator.page_range %}
                         {% if page_obj.number == num %}
                             <span class="px-3 py-1.5 bg-blue-400 text-white font-md rounded-full">{{ num }}</span>
                         {% else %}
-                            <a href="?page={{ num }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if program_filter %}&program={{ program_filter }}{% endif %}{% if year_section_filter %}&year_section={{ year_section_filter }}{% endif %}{% if semester_filter %}&semester={{ semester_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}"
+                            <a href="?page={{ num }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}"
                                class="px-3 py-1.5 text-blue-400 bg-gray-100 hover:bg-blue-400 hover:text-gray-100 rounded-full transition-colors duration-200">
                                {{ num }}
                             </a>
                         {% endif %}
                     {% endfor %}
                 </div>
+        
                 {% if page_obj.has_next %}
-                    <a href="?page={{ page_obj.next_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if program_filter %}&program={{ program_filter }}{% endif %}{% if year_section_filter %}&year_section={{ year_section_filter }}{% endif %}{% if semester_filter %}&semester={{ semester_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}"
+                    <a href="?page={{ page_obj.next_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}"
                        class="flex items-center bg-gray-100 px-3 py-1.5 text-blue-400 hover:text-white hover:bg-blue-400 rounded-full transition-colors duration-200">
                         Next
                         <svg class="w-5 h-5 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -155,5 +183,7 @@
                 {% endif %}
             </nav>
         </div>
+
+        
     </div>
 </div>

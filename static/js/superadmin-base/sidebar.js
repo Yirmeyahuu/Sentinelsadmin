@@ -15,11 +15,14 @@ document.addEventListener("DOMContentLoaded", function() {
         // Highlight the Student parent menu if any sub-link is active
         const studentPages = [
             "/Faculty/Verify-students/",
-            "/Superadmin/student-list/"
+            "/Superadmin/Student-list/",
+            "/Superadmin/Student-status/",
+            "/Superadmin/Student-Archived/"
         ];
         const facultyPages = [
             "/Superadmin/Faculty-list/",
             "/Superadmin/Faculty-status/",
+            "/Superadmin/Faculty-Archived/"
             
         ];
         const studentParent = document.querySelector('aside .students-parent-menu');

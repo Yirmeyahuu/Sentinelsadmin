@@ -1,211 +1,185 @@
 
-<!-- Main Content (Faculty Dashboard & Table) -->
-<div class="flex flex-col items-center space-y-4">
-    <!-- Row 1: Dashboard Cards -->
-    <div class="flex space-x-4">
-        <!-- Dashboard Cards Row -->
-        <div class="flex space-x-6 w-full">
-            <!-- Total Students -->
-            <div class="relative bg-blue-600 shadow-xl rounded-tl-4xl rounded-br-4xl p-6 w-72 flex flex-col items-center overflow-hidden">
-                <div class="absolute inset-0 opacity-30">
-                    <svg class="w-full h-full" viewBox="0 0 200 200">
-                        <path fill="none" stroke="#1C82AD" stroke-width="8" d="M10 50 Q100 0, 190 50 T 390 50" />
-                        <path fill="none" stroke="#F3F3E0" stroke-width="8" d="M10 150 Q100 200, 190 150 T 390 150" />
-                    </svg>
-                </div>
-                <div class="absolute -top-4 -left-6 w-16 h-16 bg-sky-300 blur-2xl opacity-90 rounded-full"></div>
-                <div class="absolute bottom-0 right-2 w-20 h-20 bg-sky-300 blur-2xl opacity-90 rounded-full"></div>
-                <h2 class="text-xl font-semibold text-white mb-4 mt-2 z-10">Total Students</h2>
-                <p class="text-4xl font-bold text-white z-10">{{ total_students }}</p>
-            </div>
-            <!-- Total Faculty -->
-            <div class="relative bg-sky-500 shadow-xl rounded-tl-4xl rounded-br-4xl p-6 w-72 flex flex-col items-center overflow-hidden">
-                <div class="absolute inset-0 opacity-30">
-                    <svg class="w-full h-full" viewBox="0 0 200 200">
-                        <path fill="none" stroke="#D4F6FF" stroke-width="8" d="M10 50 Q100 0, 190 50 T 390 50" />
-                        <path fill="none" stroke="#C4E1F6" stroke-width="8" d="M10 150 Q100 200, 190 150 T 390 150" />
-                    </svg>
-                </div>
-                <div class="absolute -top-4 -left-6 w-16 h-16 bg-blue-900 blur-2xl opacity-90 rounded-full"></div>
-                <div class="absolute bottom-0 right-2 w-20 h-20 bg-blue-700 blur-2xl opacity-90 rounded-full"></div>
-                <h2 class="text-xl font-semibold text-white mb-4 mt-2 z-10">Total Faculty</h2>
-                <p class="text-4xl font-bold text-white z-10">{{ total_faculty }}</p>
-            </div>
-            <!-- Computer Science Students -->
-            <div class="relative bg-orange-500 shadow-xl rounded-tl-4xl rounded-br-4xl p-6 w-72 flex flex-col items-center overflow-hidden">
-                <div class="absolute inset-0 opacity-30">
-                    <svg class="w-full h-full" viewBox="0 0 200 200">
-                        <path fill="none" stroke="#F2F9FF" stroke-width="8" d="M10 50 Q100 0, 190 50 T 390 50" />
-                        <path fill="none" stroke="#A1E3F9" stroke-width="8" d="M10 150 Q100 200, 190 150 T 390 150" />
-                    </svg>
-                </div>
-                <div class="absolute -top-4 -left-6 w-16 h-16 bg-yellow-100 blur-2xl opacity-90 rounded-full"></div>
-                <div class="absolute bottom-0 right-2 w-20 h-20 bg-yellow-100 blur-2xl opacity-90 rounded-full"></div>
-                <h2 class="text-lg font-semibold text-center text-white z-10">Computer Science Students</h2>
-                <p class="text-4xl font-bold text-white z-10">{{ cs_students }}</p>
-            </div>
-            <!-- Information Technology Students -->
-            <div class="relative bg-red-600 shadow-xl rounded-tl-4xl rounded-br-4xl p-6 w-72 flex flex-col items-center overflow-hidden">
-                <div class="absolute inset-0 opacity-30">
-                    <svg class="w-full h-full" viewBox="0 0 200 200">
-                        <path fill="none" stroke="#F2F9FF" stroke-width="8" d="M10 50 Q100 0, 190 50 T 390 50" />
-                        <path fill="none" stroke="#A1E3F9" stroke-width="8" d="M10 150 Q100 200, 190 150 T 390 150" />
-                    </svg>
-                </div>
-                <div class="absolute -top-4 -left-6 w-16 h-16 bg-purple-700 blur-2xl opacity-90 rounded-full"></div>
-                <div class="absolute bottom-0 right-2 w-20 h-20 bg-purple-700 blur-2xl opacity-90 rounded-full"></div>
-                <h2 class="text-lg font-semibold text-center     text-white z-10">Information Technology Students</h2>
-                <p class="text-4xl font-bold text-white z-10">{{ it_students }}</p>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Main Content: Faculty Table -->
-<div class="p-6 ml-20">
-    <div class="bg-blue-600 shadow-2xl rounded-2xl p-6">
-        <div class="flex justify-between items-center mb-4">
-            <h2 class="text-xl font-bold text-white">
-                Registered Faculty
-            </h2>
-            <div class="flex flex-wrap items-center gap-4">
-                <!-- Search Bar -->
-                <form class="flex items-center max-w-sm mx-auto">
-                    <label for="simple-search" class="sr-only">Search</label>
-                    <div class="relative w-full">
-                        <div class="absolute inset-y-0 start-0 flex items-center ps-2 pointer-events-none">
-                            <svg viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 text-gray-500 dark:text-gray-400">
-                                <path fill-rule="evenodd" d="M12 6a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Zm-1.5 8a4 4 0 0 0-4 4 2 2 0 0 0 2 2h7a2 2 0 0 0 2-2 4 4 0 0 0-4-4h-3Zm6.82-3.096a5.51 5.51 0 0 0-2.797-6.293 3.5 3.5 0 1 1 2.796 6.292ZM19.5 18h.5a2 2 0 0 0 2-2 4 4 0 0 0-4-4h-1.1a5.503 5.503 0 0 1-.471.762A5.998 5.998 0 0 1 19.5 18ZM4 7.5a3.5 3.5 0 0 1 5.477-2.889 5.5 5.5 0 0 0-2.796 6.293A3.501 3.501 0 0 1 4 7.5ZM7.1 12H6a4 4 0 0 0-4 4 2 2 0 0 0 2 2h.5a5.998 5.998 0 0 1 3.071-5.238A5.505 5.505 0 0 1 7.1 12Z" clip-rule="evenodd"/>
-                            </svg>
-                        </div>
-                        <input type="text" id="searchBar" class="bg-white pl-10 border border-gray-300 text-gray-900 text-sm rounded-2xl block w-full ps-14 p-2" placeholder="Search Faculty..." required />
-                    </div>
-                    <button type="submit" class="p-3 text-sm ms-1 font-medium text-white bg-blue-800 rounded-2xl hover:bg-blue-700 focus:outline-none ">
-                        <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
-                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
+<!-- Main Container -->
+<div class="flex flex-col min-h-screen ml-16">
+    <!-- Dashboard Cards Container -->
+    <div class="px-6 mb-8">
+        <div class="max-w-[calc(100%-80px)] mx-auto">
+            <!-- Dashboard Cards Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Total Students Card -->
+                <div class="relative bg-blue-600 shadow-xl rounded-tl-4xl rounded-br-4xl p-6 flex flex-col items-center overflow-hidden">
+                    <div class="absolute inset-0 opacity-30">
+                        <svg class="w-full h-full" viewBox="0 0 200 200">
+                            <path fill="none" stroke="#1C82AD" stroke-width="8" d="M10 50 Q100 0, 190 50 T 390 50" />
+                            <path fill="none" stroke="#F3F3E0" stroke-width="8" d="M10 150 Q100 200, 190 150 T 390 150" />
                         </svg>
-                        <span class="sr-only">Search</span>
-                    </button>
-                </form>
-                <!-- Add Button -->
-                <button class="bg-blue-800 text-white ms-2 px-6 py-2 shadow-lg rounded-2xl cursor-pointer hover:bg-blue-700 transition duration-200" onclick="openModal()">Add +</button>
+                    </div>
+                    <div class="absolute -top-4 -left-6 w-16 h-16 bg-sky-300 blur-2xl opacity-90 rounded-full"></div>
+                    <div class="absolute bottom-0 right-2 w-20 h-20 bg-sky-300 blur-2xl opacity-90 rounded-full"></div>
+                    <h2 class="text-xl font-semibold text-white mb-4 mt-2 z-10">Total Students</h2>
+                    <p class="text-4xl font-bold text-white z-10">{{ total_students }}</p>
+                </div>
+
+                <!-- Total Faculty Card -->
+                <div class="relative bg-sky-500 shadow-xl rounded-tl-4xl rounded-br-4xl p-6 flex flex-col items-center overflow-hidden">
+                    <div class="absolute inset-0 opacity-30">
+                        <svg class="w-full h-full" viewBox="0 0 200 200">
+                            <path fill="none" stroke="#1C82AD" stroke-width="8" d="M10 50 Q100 0, 190 50 T 390 50" />
+                            <path fill="none" stroke="#F3F3E0" stroke-width="8" d="M10 150 Q100 200, 190 150 T 390 150" />
+                        </svg>
+                    </div>
+                    <div class="absolute -top-4 -left-6 w-16 h-16 bg-sky-300 blur-2xl opacity-90 rounded-full"></div>
+                    <div class="absolute bottom-0 right-2 w-20 h-20 bg-sky-300 blur-2xl opacity-90 rounded-full"></div>
+                    <h2 class="text-xl font-semibold text-white mb-4 mt-2 z-10">Total Faculty</h2>
+                    <p class="text-4xl font-bold text-white z-10">{{ total_faculty }}</p>
+                </div>
+
+                <!-- Computer Science Students Card -->
+                <div class="relative bg-orange-500 shadow-xl rounded-tl-4xl rounded-br-4xl p-6 flex flex-col items-center overflow-hidden">
+                    <div class="absolute inset-0 opacity-30">
+                        <svg class="w-full h-full" viewBox="0 0 200 200">
+                            <path fill="none" stroke="#1C82AD" stroke-width="8" d="M10 50 Q100 0, 190 50 T 390 50" />
+                            <path fill="none" stroke="#F3F3E0" stroke-width="8" d="M10 150 Q100 200, 190 150 T 390 150" />
+                        </svg>
+                    </div>
+                    <div class="absolute -top-4 -left-6 w-16 h-16 bg-sky-300 blur-2xl opacity-90 rounded-full"></div>
+                    <div class="absolute bottom-0 right-2 w-20 h-20 bg-sky-300 blur-2xl opacity-90 rounded-full"></div>
+                    <h2 class="text-lg font-semibold text-center text-white z-10">Computer Science Students</h2>
+                    <p class="text-4xl font-bold text-white z-10">{{ cs_students }}</p>
+                </div>
+
+                <!-- Information Technology Students Card -->
+                <div class="relative bg-red-600 shadow-xl rounded-tl-4xl rounded-br-4xl p-6 flex flex-col items-center overflow-hidden">
+                    <div class="absolute inset-0 opacity-30">
+                        <svg class="w-full h-full" viewBox="0 0 200 200">
+                            <path fill="none" stroke="#1C82AD" stroke-width="8" d="M10 50 Q100 0, 190 50 T 390 50" />
+                            <path fill="none" stroke="#F3F3E0" stroke-width="8" d="M10 150 Q100 200, 190 150 T 390 150" />
+                        </svg>
+                    </div>
+                    <div class="absolute -top-4 -left-6 w-16 h-16 bg-sky-300 blur-2xl opacity-90 rounded-full"></div>
+                    <div class="absolute bottom-0 right-2 w-20 h-20 bg-sky-300 blur-2xl opacity-90 rounded-full"></div>
+                    <h2 class="text-lg font-semibold text-center text-white z-10">Information Technology Students</h2>
+                    <p class="text-4xl font-bold text-white z-10">{{ it_students }}</p>
+                </div>
             </div>
         </div>
+    </div>
 
-        <!-- Faculty Table -->
-        <div class="overflow-hidden rounded-2xl shadow-xl w-full ">
-            <table class="w-full border-separate border-spacing-0 rounded-lg">
-                <thead>
-                    <tr class="bg-blue-400 text-white">
-                        <th class="border border-blue-500 p-2">Faculty ID</th>
-                        <th class="border border-blue-500 p-2">Full Name</th>
-                        <th class="border border-blue-500 p-2">Program</th>
-                        <th class="border border-blue-500 p-2">Year & Section</th>
-                        <th class="border border-blue-500 p-2">Semester</th>
-                        <th class="border border-blue-500 p-2">Status</th> 
-                        <th class="border border-blue-500 p-2">Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="facultyTableBody">
-                    {% for faculty in faculties %}
-                        <tr class="facultyRow text-white">
-                            <td class="border border-blue-500 p-2 text-center whitespace-nowrap">{{ faculty.faculty_id }}</td>
-                            <td class="border border-blue-500 p-2 text-center whitespace-nowrap">{{ faculty.first_name }} {{ faculty.middle_initial }} {{ faculty.last_name }}</td>
-                            <td class="border border-blue-500 p-2 text-center whitespace-nowrap">{{ faculty.program }}</td>
-                            <td class="border border-blue-500 p-2 text-center whitespace-nowrap">{{ faculty.year_section }}</td>
-                            <td class="border border-blue-500 p-2 text-center whitespace-nowrap">{{ faculty.semester }}</td>
-                            <td class="border border-blue-500 p-2 text-center whitespace-nowrap">
-                                <span class="px-2 py-1 rounded-lg text-xs font-medium
-                                    {% if faculty.status == 'Deactivated' %}
-                                        bg-red-500/20 text-red-200
-                                    {% elif faculty.status == 'Completed' %}
-                                        bg-yellow-500/20 text-yellow-200
-                                    {% else %}
-                                        bg-green-500/20 text-green-200
-                                    {% endif %}">
-                                    {{ faculty.status }}
-                                </span>
-                            </td>
-                            <td class="border border-blue-500 p-2 text-center whitespace-nowrap">
-                                <div class="flex items-center justify-center space-x-3">
-                                    <!-- Edit Button -->
-                                    <button onclick="openEditFacultyModal(
-                                        '{{ faculty.faculty_id }}',
-                                        '{{ faculty.first_name }}',
-                                        '{{ faculty.middle_initial }}',
-                                        '{{ faculty.last_name }}',
-                                        '{{ faculty.program }}',
-                                        '{{ faculty.year_section }}',
-                                        '{{ faculty.semester }}'
-                                    )" class="text-blue-600 hover:text-blue-800">
-                                    <svg class="w-6 h-6 text-white hover:text-blue-400 transition-all ease-in-out duration-150" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                                        <path stroke="currentColor" stroke-linecap="square" stroke-linejoin="round" stroke-width="2" d="M7 19H5a1 1 0 0 1-1-1v-1a3 3 0 0 1 3-3h1m4-6a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm7.441 1.559a1.907 1.907 0 0 1 0 2.698l-6.069 6.069L10 19l.674-3.372 6.07-6.07a1.907 1.907 0 0 1 2.697 0Z"/>
+    <!-- Faculty Table Container -->
+    <div class="px-6">
+        <div class="max-w-[calc(100%-80px)] mx-auto">
+            <div class="bg-blue-600 shadow-2xl rounded-2xl p-6">
+                <!-- Table Header -->
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-bold text-white">Registered Faculty</h2>
+                    
+                    <!-- Search and Add Controls -->
+                    <div class="flex flex-wrap items-center gap-4">
+                        <!-- Search Bar -->
+                        <form method="get" class="flex items-center max-w-sm mx-auto">
+                            <div class="relative w-full">
+                                <div class="absolute inset-y-0 start-0 flex items-center ps-2 pointer-events-none">
+                                    <svg viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 text-gray-500 dark:text-gray-400">
+                                        <path fill-rule="evenodd" d="M12 6a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Zm-1.5 8a4 4 0 0 0-4 4 2 2 0 0 0 2 2h7a2 2 0 0 0 2-2 4 4 0 0 0-4-4h-3Zm6.82-3.096a5.51 5.51 0 0 0-2.797-6.293 3.5 3.5 0 1 1 2.796 6.292ZM19.5 18h.5a2 2 0 0 0 2-2 4 4 0 0 0-4-4h-1.1a5.503 5.503 0 0 1-.471.762A5.998 5.998 0 0 1 19.5 18ZM4 7.5a3.5 3.5 0 0 1 5.477-2.889 5.5 5.5 0 0 0-2.796 6.293A3.501 3.501 0 0 1 4 7.5ZM7.1 12H6a4 4 0 0 0-4 4 2 2 0 0 0 2 2h.5a5.998 5.998 0 0 1 3.071-5.238A5.505 5.505 0 0 1 7.1 12Z" clip-rule="evenodd"/>
                                     </svg>
-                                    </button>
-                                    <!-- Move Button -->
-                                    <button type="button"
-                                        onclick="openMoveFacultyModal('{{ faculty.faculty_id }}')"
-                                        class="text-yellow-500 hover:text-yellow-700">
-                                        <svg class="w-6 h-6 text-white hover:text-blue-400 transition-all ease-in-out duration-150 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 14v4.833A1.166 1.166 0 0 1 16.833 20H5.167A1.167 1.167 0 0 1 4 18.833V7.167A1.166 1.166 0 0 1 5.167 6h4.618m4.447-2H20v5.768m-7.889 2.121 7.778-7.778"/>
-                                        </svg> 
-                                    </button>
                                 </div>
-                            </td>
-                        </tr>
-                    {% empty %}
-                        <tr>
-                            <td colspan="6" class="text-center border border-gray-300 p-4">No users registered yet.</td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+                                <input
+                                    type="text"
+                                    name="search"
+                                    value="{{ search_query }}"
+                                    class="bg-white pl-10 border border-gray-300 text-gray-900 text-sm rounded-2xl block w-full ps-14 p-2"
+                                    placeholder="Search Faculty..."
+                                />
+                            </div>
+                            <button type="submit" class="p-3 text-sm ms-1 font-medium text-white bg-blue-800 rounded-2xl hover:bg-blue-700 focus:outline-none">
+                                <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
+                                </svg>
+                                <span class="sr-only">Search</span>
+                            </button>
+                        </form>
+                        <!-- Add Button -->
+                        <button class="bg-blue-800 text-white px-6 py-2 shadow-lg rounded-2xl hover:bg-blue-700 transition duration-200" 
+                                onclick="openModal()">
+                            Add +
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Faculty Table -->
+                <div class="overflow-hidden rounded-2xl shadow-xl w-full">
+                    <table class="w-full border-separate border-spacing-0 rounded-lg">
+                        <thead>
+                            <tr class="bg-blue-400 text-white">
+                                <th class="border border-blue-500 p-2">Faculty ID</th>
+                                <th class="border border-blue-500 p-2">Full Name</th>
+                                <th class="border border-blue-500 p-2">Program</th>
+                                <th class="border border-blue-500 p-2">Year & Section</th>
+                                <th class="border border-blue-500 p-2">Semester</th>
+                                <th class="border border-blue-500 p-2">Status</th> 
+                                <th class="border border-blue-500 p-2">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="facultyTableBody">
+                            {% for faculty in faculties %}
+                                <tr class="facultyRow text-blue-900 hover:bg-blue-200 transition text-md {% if forloop.counter0|divisibleby:2 %}bg-gray-100{% else %}bg-blue-100{% endif %}">
+                                    <td class="border border-blue-500 p-2 text-center whitespace-nowrap">{{ faculty.faculty_id }}</td>
+                                    <td class="border border-blue-500 p-2 text-center whitespace-nowrap">{{ faculty.first_name }} {{ faculty.middle_initial }} {{ faculty.last_name }}</td>
+                                    <td class="border border-blue-500 p-2 text-center whitespace-nowrap">{{ faculty.program }}</td>
+                                    <td class="border border-blue-500 p-2 text-center whitespace-nowrap">{{ faculty.year_section }}</td>
+                                    <td class="border border-blue-500 p-2 text-center whitespace-nowrap">{{ faculty.semester }}</td>
+                                    <td class="border border-blue-500 p-2 text-center whitespace-nowrap">
+                                        <span class="px-2 py-1 rounded-lg text-xs font-medium
+                                            {% if faculty.status == 'Deactivated' %}
+                                                bg-red-500/20 text-red-700
+                                            {% elif faculty.status == 'Completed' %}
+                                                bg-yellow-500/20 text-yellow-700
+                                            {% else %}
+                                                bg-green-500/20 text-green-700
+                                            {% endif %}">
+                                            {{ faculty.status }}
+                                        </span>
+                                    </td>
+                                    <td class="border border-blue-500 p-2 text-center whitespace-nowrap">
+                                        <div class="flex items-center justify-center space-x-3">
+                                            <!-- Edit Button -->
+                                            <button onclick="openEditFacultyModal(
+                                                '{{ faculty.faculty_id }}',
+                                                '{{ faculty.first_name }}',
+                                                '{{ faculty.middle_initial }}',
+                                                '{{ faculty.last_name }}',
+                                                '{{ faculty.program }}',
+                                                '{{ faculty.year_section }}',
+                                                '{{ faculty.semester }}'
+                                            )" class="text-blue-900 hover:text-blue-400 transition-all">
+                                                <svg class="w-6 h-6" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                                    <path stroke="currentColor" stroke-linecap="square" stroke-linejoin="round" stroke-width="2" d="M7 19H5a1 1 0 0 1-1-1v-1a3 3 0 0 1 3-3h1m4-6a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm7.441 1.559a1.907 1.907 0 0 1 0 2.698l-6.069 6.069L10 19l.674-3.372 6.07-6.07a1.907 1.907 0 0 1 2.697 0Z"/>
+                                                </svg>
+                                            </button>
+                                            <!-- Move Button -->
+                                            <button type="button"
+                                                onclick="openMoveFacultyModal('{{ faculty.faculty_id }}')"
+                                                class="text-blue-900 hover:text-blue-400 transition-all">
+                                                <svg class="w-6 h-6" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 14v4.833A1.166 1.166 0 0 1 16.833 20H5.167A1.167 1.167 0 0 1 4 18.833V7.167A1.166 1.166 0 0 1 5.167 6h4.618m4.447-2H20v5.768m-7.889 2.121 7.778-7.778"/>
+                                                </svg> 
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="7" class="text-center border border-gray-300 bg-gray-100 p-4 text-blue-500">No Faculty found.</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
-<!-- Add Faculty Success Notification -->
-<div id="successNotification" class="hidden p-4 mb-4 text-sm text-green-800 rounded-lg bg-green-50 dark:bg-gray-800 dark:text-green-400 fixed top-5 right-5 shadow-lg" role="alert">
-    <span class="font-medium">Success!</span> Faculty <span id="facultyIdSpan"></span> has been added.
-</div>
-
-
-
-
-
-
-<!-- Added Faculty Notification-->
-<script>
-    function showSuccessNotification(facultyId) {
-        // Set the faculty ID in the notification
-        document.getElementById("facultyIdSpan").textContent = facultyId;
-
-        // Show the notification
-        let notification = document.getElementById("successNotification");
-        notification.classList.remove("hidden");
-
-        // Hide after 3 seconds
-        setTimeout(() => {
-            notification.classList.add("hidden");
-        }, 3000);
-    }
-
-    // Modify the form submission to show the notification
-    document.getElementById("facultyForm").addEventListener("submit", function(event) {
-        event.preventDefault(); // Prevent the form from submitting normally
-
-        // Get the faculty ID input value
-        let facultyId = document.querySelector('input[name="faculty_id"]').value;
-
-        // Submit the form after showing the notification
-        showSuccessNotification(facultyId);
-
-        // Allow the form to submit after a short delay
-        setTimeout(() => {
-            event.target.submit();
-        }, 10000);
-    });
-</script>
 
 
 <!-- Add Faculty Modal-->
@@ -291,69 +265,4 @@
             notification.remove();
         }, 6000); // Remove after 3 seconds
     }
-</script>
-
-
-
-<!-- Search user suggestion-->
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const searchBar = document.getElementById('searchBar');
-        const facultyRows = document.querySelectorAll('#facultyTableBody .facultyRow');
-
-        searchBar.addEventListener('input', function () {
-            const searchTerm = searchBar.value.trim().toLowerCase();
-
-            facultyRows.forEach(row => {
-                const facultyName = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
-
-                if (facultyName.includes(searchTerm)) {
-                    row.style.display = ''; // Show the row
-                } else {
-                    row.style.display = 'none'; // Hide the row
-                }
-            });
-        });
-    });
-</script>
-
-<!--Archive Confirmation Modal-->
-<script>
-    function openArchiveModal(url) {
-        document.getElementById("archiveModal").classList.remove("hidden");
-        document.getElementById("confirmArchiveBtn").setAttribute("href", url);
-    }
-
-    function closeArchiveModal() {
-        document.getElementById("archiveModal").classList.add("hidden");
-    }
-</script>
-
-<script>
-function openEditFacultyModal(id, firstName, middleInitial, lastName, program, yearSection, semester) {
-    document.getElementById("edit-faculty-id").value = id;
-    document.getElementById("edit-faculty-first-name").value = firstName;
-    document.getElementById("edit-faculty-middle-initial").value = middleInitial;
-    document.getElementById("edit-faculty-last-name").value = lastName;
-    document.getElementById("edit-faculty-program").value = program;
-    document.getElementById("edit-faculty-year-section").value = yearSection;
-    document.getElementById("edit-faculty-semester").value = semester;
-    document.getElementById("editFacultyForm").action = `/Faculty/edit/${id}/`;
-    document.getElementById("editFacultyModal").classList.remove("hidden");
-    document.querySelector('aside').classList.add('blur');
-}
-function closeEditFacultyModal() {
-    document.getElementById("editFacultyModal").classList.add("hidden");
-    document.querySelector('aside').classList.remove('blur');
-}
-
-function openMoveFacultyModal(facultyId) {
-    document.getElementById('move-faculty-id').value = facultyId;
-    document.getElementById('moveFacultyModal').classList.remove('hidden');
-    document.querySelector('aside').classList.add('blur');
-}
-function closeMoveFacultyModal() {
-    document.getElementById('moveFacultyModal').classList.add('hidden');
-    document.querySelector('aside').classList.remove('blur');
-}
 </script>

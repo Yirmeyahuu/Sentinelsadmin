@@ -2,7 +2,7 @@
 <div class="flex flex-col items-start w-full pl-28 pr-16">
     <!-- Dashboard Cards Row -->
     <div class="flex justify-center gap-x-8 w-full mb-8">
-        <!-- 1. All Students -->
+        <!-- 1. Total Students -->
         <div class="relative bg-blue-600 shadow-xl rounded-tl-4xl rounded-br-4xl p-6 w-72 flex flex-col items-center overflow-hidden">
             <div class="absolute inset-0 opacity-30">
                 <svg class="w-full h-full" viewBox="0 0 200 200">
@@ -13,7 +13,7 @@
             <h2 class="text-lg mt-2 mb-2 text-center font-semibold text-white mb-4 z-10">Total Students</h2>
             <p class="text-4xl font-bold text-white z-10">{{ total_students }}</p>
         </div>
-
+    
         <!-- 2. Computer Science Students -->
         <div class="relative bg-sky-600 shadow-xl rounded-tl-4xl rounded-br-4xl p-6 w-72 flex flex-col items-center overflow-hidden">
             <div class="absolute inset-0 opacity-30">
@@ -25,7 +25,7 @@
             <h2 class="text-lg font-semibold text-white text-center z-10">Computer Science</h2>
             <p class="text-4xl font-bold text-white z-10">{{ cs_count }}</p>
         </div>
-
+    
         <!-- 3. Information Technology Students -->
         <div class="relative bg-green-500 shadow-xl rounded-tl-4xl rounded-br-4xl p-6 w-72 flex flex-col items-center overflow-hidden">
             <div class="absolute inset-0 opacity-30">
@@ -37,8 +37,8 @@
             <h2 class="text-lg mt-2 mb-2 text-center font-semibold text-white mb-4 z-10">Information Technology</h2>
             <p class="text-4xl font-bold text-white z-10">{{ it_count }}</p>
         </div>
-
-        <!-- 4. Inactive Students -->
+    
+        <!-- 4. Active Students -->
         <div class="relative bg-red-500 shadow-xl rounded-tl-4xl rounded-br-4xl p-6 w-72 flex flex-col items-center overflow-hidden">
             <div class="absolute inset-0 opacity-30">
                 <svg class="w-full h-full" viewBox="0 0 200 200">
@@ -46,8 +46,8 @@
                     <path fill="none" stroke="#d1d5db" stroke-width="8" d="M10 150 Q100 200, 190 150 T 390 150" />
                 </svg>
             </div>
-            <h2 class="text-lg mt-2 mb-2 text-center font-semibold text-white mb-4 z-10">Inactive Students</h2>
-            <p class="text-4xl font-bold text-white z-10">{{ inactive_count }}</p>
+            <h2 class="text-lg mt-2 mb-2 text-center font-semibold text-white mb-4 z-10">Active Students</h2>
+            <p class="text-4xl font-bold text-white z-10">{{ active_count }}</p>
         </div>
     </div>
 
@@ -81,14 +81,20 @@
                 </form>
 
                 <!-- Search Bar -->
-                <form class="flex items-center max-w-sm mx-auto">
+                <form method="get" class="flex items-center max-w-sm mx-auto">
                     <div class="relative w-full">
                         <div class="absolute inset-y-0 start-0 flex items-center ps-2 pointer-events-none">
                             <svg viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 text-gray-500 dark:text-gray-400">
                                 <path fill-rule="evenodd" d="M12 6a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Zm-1.5 8a4 4 0 0 0-4 4 2 2 0 0 0 2 2h7a2 2 0 0 0 2-2 4 4 0 0 0-4-4h-3Zm6.82-3.096a5.51 5.51 0 0 0-2.797-6.293 3.5 3.5 0 1 1 2.796 6.292ZM19.5 18h.5a2 2 0 0 0 2-2 4 4 0 0 0-4-4h-1.1a5.503 5.503 0 0 1-.471.762A5.998 5.998 0 0 1 19.5 18ZM4 7.5a3.5 3.5 0 0 1 5.477-2.889 5.5 5.5 0 0 0-2.796 6.293A3.501 3.501 0 0 1 4 7.5ZM7.1 12H6a4 4 0 0 0-4 4 2 2 0 0 0 2 2h.5a5.998 5.998 0 0 1 3.071-5.238A5.505 5.505 0 0 1 7.1 12Z" clip-rule="evenodd"/>
                             </svg>
                         </div>
-                        <input type="text" id="searchBar" class="bg-white pl-10 border border-gray-300 text-gray-900 text-sm rounded-2xl block w-full ps-14 p-2" placeholder="Search Student..." />
+                        <input
+                            type="text"
+                            name="search"
+                            value="{{ search_query }}"
+                            class="bg-white pl-10 border border-gray-300 text-gray-900 text-sm rounded-2xl block w-full ps-14 p-2"
+                            placeholder="Search Student..."
+                        />
                     </div>
                     <button type="submit" class="p-3 text-sm ms-1 font-medium text-white bg-blue-800 rounded-2xl hover:bg-blue-700 focus:outline-none">
                         <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
@@ -101,7 +107,7 @@
         </div>
 
         <!-- Student Table -->
-        <div class="overflow-hidden rounded-2xl shadow-xl w-full">
+        <div class="overflow-hidden rounded-2xl shadow-xl w-full bg-gray-100">
             <table class="w-full border-separate border-spacing-0 rounded-lg">
                 <thead>
                     <tr class="bg-blue-400 text-white">
@@ -116,7 +122,7 @@
                 </thead>
                 <tbody id="studentTableBody">
                     {% for student in students %}
-                    <tr class="studentRow text-white hover:bg-blue-700 cursor-pointer transition">
+                    <tr class="studentRow text-blue-900 hover:bg-blue-200 transition text-md {% if forloop.counter0|divisibleby:2 %}bg-gray-100{% else %}bg-blue-100{% endif %}">
                         <td class="border border-blue-500 p-2 text-center">{{ student.student_id }}</td>
                         <td class="border border-blue-500 pl-14 pr-2 text-left">
                             {{ student.first_name }} {{ student.middle_initial }} {{ student.last_name }}
@@ -127,26 +133,22 @@
                         <td class="border border-blue-500 p-2 text-center">
                             <span class="px-2 py-1 rounded-lg text-xs font-medium
                                 {% if student.status == 'Drop-out' %}
-                                    bg-red-500/20 text-red-200
+                                    bg-red-500/20 text-red-700
                                 {% elif student.status == 'Completed' %}
-                                    bg-yellow-500/20 text-yellow-200
+                                    bg-yellow-500/20 text-yellow-700
                                 {% else %}
-                                    bg-green-500/20 text-green-200
+                                    bg-green-500/20 text-green-700
                                 {% endif %}">
                                 {{ student.status|default:"Continuing" }}
                             </span>
                         </td>
                         <td class="border border-blue-500 p-2 text-center">
                             <div class="flex items-center justify-center space-x-3">
-                                <button onclick="event.stopPropagation(); openEditModal('{{ student.student_id }}')" 
-                                        class="text-white hover:text-blue-400 transition-all">
-                                    <svg class="w-6 h-6 text-white hover:text-blue-400 transition-all ease-in-out duration-150" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                                           <path stroke="currentColor" stroke-linecap="square" stroke-linejoin="round" stroke-width="2" d="M7 19H5a1 1 0 0 1-1-1v-1a3 3 0 0 1 3-3h1m4-6a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm7.441 1.559a1.907 1.907 0 0 1 0 2.698l-6.069 6.069L10 19l.674-3.372 6.07-6.07a1.907 1.907 0 0 1 2.697 0Z"/>
-                                    </svg> 
-                                </button>
+                                <!-- Only Move Button remains -->
                                 <button onclick="event.stopPropagation(); openMoveModal('{{ student.student_id }}')"
-                                        class="text-white hover:text-blue-400 transition-all">
-                                    <svg class="w-6 h-6 text-white hover:text-blue-400 transition-all ease-in-out duration-150 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                        class="text-blue-900 hover:text-blue-400 transition-all">
+                                    <!-- Move SVG -->
+                                    <svg class="w-6 h-6" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
                                         <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 14v4.833A1.166 1.166 0 0 1 16.833 20H5.167A1.167 1.167 0 0 1 4 18.833V7.167A1.166 1.166 0 0 1 5.167 6h4.618m4.447-2H20v5.768m-7.889 2.121 7.778-7.778"/>
                                     </svg> 
                                 </button>
@@ -155,14 +157,67 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="7" class="text-center border border-blue-500 p-4 text-white">
-                            No students found.
+                        <td colspan="7" class="text-center border border-blue-500 bg-gray-100 p-4 text-blue-500">
+                            No Student found.
                         </td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
+
+        <!-- Pagination Controls -->
+        <div class="flex justify-center mt-6">
+            <nav class="flex items-center gap-1 text-sm" aria-label="Pagination">
+                {% if page_obj.has_previous %}
+                    <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.program %}&program={{ request.GET.program }}{% endif %}{% if request.GET.year_section %}&year_section={{ request.GET.year_section }}{% endif %}{% if request.GET.semester %}&semester={{ request.GET.semester }}{% endif %}"
+                       class="flex items-center px-3 py-1.5 bg-gray-100 text-blue-400 hover:text-white hover:bg-blue-500 rounded-full transition-colors duration-200">
+                        <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                        </svg>
+                        Prev
+                    </a>
+                {% else %}
+                    <span class="flex items-center px-3 py-1.5 text-gray-400 bg-gray-100 rounded-full cursor-not-allowed">
+                        <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                        </svg>
+                        Prev
+                    </span>
+                {% endif %}
+        
+                <div class="flex items-center gap-1">
+                    {% for num in paginator.page_range %}
+                        {% if page_obj.number == num %}
+                            <span class="px-3 py-1.5 bg-blue-400 text-white font-medium rounded-full">{{ num }}</span>
+                        {% else %}
+                            <a href="?page={{ num }}{% if request.GET.program %}&program={{ request.GET.program }}{% endif %}{% if request.GET.year_section %}&year_section={{ request.GET.year_section }}{% endif %}{% if request.GET.semester %}&semester={{ request.GET.semester }}{% endif %}"
+                               class="px-3 py-1.5 text-blue-500 bg-gray-100 hover:bg-blue-400 hover:text-gray-100 rounded-full transition-colors duration-200">
+                               {{ num }}
+                            </a>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+        
+                {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}{% if request.GET.program %}&program={{ request.GET.program }}{% endif %}{% if request.GET.year_section %}&year_section={{ request.GET.year_section }}{% endif %}{% if request.GET.semester %}&semester={{ request.GET.semester }}{% endif %}"
+                       class="flex items-center px-3 py-1.5 bg-gray-100 text-blue-400 hover:text-white hover:bg-blue-500 rounded-full transition-colors duration-200">
+                        Next
+                        <svg class="w-5 h-5 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                        </svg>
+                    </a>
+                {% else %}
+                    <span class="flex items-center px-3 py-1.5 text-gray-400 bg-gray-100 rounded-full cursor-not-allowed">
+                        Next
+                        <svg class="w-5 h-5 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                        </svg>
+                    </span>
+                {% endif %}
+            </nav>
+        </div>
+
     </div>
 </div>
 
@@ -300,18 +355,18 @@ function closeModal() {
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const searchBar = document.getElementById('searchBar');
-        const studentRows = document.querySelectorAll('#studentTableBody .studentRow');
 
         searchBar.addEventListener('input', function () {
             const searchTerm = searchBar.value.trim().toLowerCase();
+            // Always select the latest rows
+            const studentRows = document.querySelectorAll('#studentTableBody .studentRow');
 
             studentRows.forEach(row => {
                 const studentName = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
-
                 if (studentName.includes(searchTerm)) {
-                    row.style.display = ''; // Show the row
+                    row.style.display = '';
                 } else {
-                    row.style.display = 'none'; // Hide the row
+                    row.style.display = 'none';
                 }
             });
         });
@@ -332,41 +387,17 @@ function closeModal() {
     }
 </script>
 
-<!-- script for edit-modal-->
-<script>
-    function openEditModal(id, firstName, middleInitial, lastName, program, yearSection, semester) {
-        document.getElementById("edit-student-id").value = id;
-        document.getElementById("edit-first-name").value = firstName;
-        document.getElementById("edit-middle-initial").value = middleInitial;
-        document.getElementById("edit-last-name").value = lastName;
-    
-        // Set form action dynamically
-        document.getElementById("editStudentForm").action = `/Student/edit/${id}/`;
-    
-        // Show modal
-        document.getElementById("editStudentModal").classList.remove("hidden");
-    
-        // Add blur to sidebar
-        document.querySelector('aside').classList.add('blur');
-    }
-
-    function closeEditModal() {
-        document.getElementById("editStudentModal").classList.add("hidden");
-        document.querySelector('aside').classList.remove('blur');
-    }
-</script>
-
-
 
 <!-- Move Modal-->
+
 <script>
     function openMoveModal(studentId) {
         document.getElementById('move-student-id').value = studentId;
-        document.getElementById('moveModal').classList.remove('hidden');
+        document.getElementById('moveStudentModal').classList.remove('hidden');
         document.querySelector('aside').classList.add('blur');
     }
-    function closeMoveModal() {
-        document.getElementById('moveModal').classList.add('hidden');
+    function closeMoveStudentModal() {
+        document.getElementById('moveStudentModal').classList.add('hidden');
         document.querySelector('aside').classList.remove('blur');
     }
 </script>
