@@ -16,7 +16,9 @@ document.addEventListener("DOMContentLoaded", function() {
         const studentPages = [
             "/Faculty/Student-progress/",
             "/Faculty/Student-list/",
-            "/Faculty/Verify-students/"
+            "/Faculty/Verify-students/",
+            "/Faculty/Student-status/",
+
         ];
         const studentParent = document.querySelector('aside .students-parent-menu');
         if (studentParent) {

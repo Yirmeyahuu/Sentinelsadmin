@@ -1,4 +1,7 @@
 {% load static %}
+<script>
+    document.title = "SENTINELS | Faculty Dashboard";
+</script>
 
 <div class="p-0 pb-6 px-2 md:px-6 flex justify-center">
     <div class="w-full max-w-[1700px] flex flex-row gap-4 md:gap-6 min-w-0" style="margin-left: 114px;">
@@ -145,6 +148,15 @@
                             </div>
                         </div>
                     </div>
+                    <script>
+                        window.noviceTaskCounts = {{ novice_task_counts|safe }};
+                        window.juniorTaskCounts = {{ junior_task_counts|safe }};
+                        window.seniorTaskCounts = {{ senior_task_counts|safe }};
+                        window.totalUsers = {{ total_users }};
+                    </script>
+                    <script>
+                        window.noviceTaskCounts = {{ novice_task_counts|safe }};
+                    </script>
                     <canvas id="noviceLineChart" height="80"></canvas>
                 </div>
 
@@ -291,26 +303,3 @@
         </div>
     </div>
 </div>
-
-<script>
-document.body.addEventListener('htmx:afterSwap', function() {
-    if (document.getElementById('noviceLineChart')) {
-        window.initFacultyHomeChart && window.initFacultyHomeChart();
-    }
-});
-</script>
-
-<script>
-        // Add this to your script section or a separate JS file
-    document.addEventListener('DOMContentLoaded', function() {
-        const monthNames = [
-            "January", "February", "March", "April", "May", "June",
-            "July", "August", "September", "October", "November", "December"
-        ];
-        const now = new Date();
-        const label = document.getElementById('calendarMonthLabel');
-        if (label) {
-            label.textContent = `${monthNames[now.getMonth()]}, ${now.getFullYear()}`;
-        }
-    });
-</script>

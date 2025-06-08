@@ -8,9 +8,10 @@ from django.views.decorators.http import require_POST
 from django.contrib.auth import logout
 from django.http import JsonResponse
 import json
-from .forms import ActivityDeadlineForm
+from .forms import ActivityDeadlineForm, AddStudentForm
 from django.views.decorators.csrf import csrf_exempt
 from Login.decorators import faculty_required
+from django.core.paginator import Paginator
 
 
 
@@ -177,10 +178,81 @@ def Faculty_home(request):
             )
             quick_pending_students = [doc.to_dict() for doc in pending_query.stream()]
 
-    leaderboard_students = [
-    {'name': 'Alice Cruz', 'points': 120},
-    {'name': 'Bob Reyes', 'points': 110},
+    # --- Novice Task Progress for Chart ---
+    novice_task_keys = [
+        "Novice_Task_1(Collect Books)",
+        "Novice_Task_2(Collect USB)",
+        "Novice_Task_3(QNA)",
+        "Novice_Task_4_(Defeat Rootkit)",
     ]
+
+    junior_task_keys = [
+        "Junior_Task_1(Collect Evidence)",
+        "Junior_Task_2(Decrypt USB)",
+        "Junior_Task_3(QNA)",
+        "Junior_Task_4_(Defeat Rootkit)",
+    ]
+    senior_task_keys = [
+        "Senior_Task_1(Scan Network)",
+        "Senior_Task_2(Analyze Traffic)",
+        "Senior_Task_3(QNA)",
+        "Senior_Task_4_(Defeat Rootkit)",
+    ]
+    novice_task_counts = [0, 0, 0, 0]
+    junior_task_counts = [0, 0, 0, 0]
+    senior_task_counts = [0, 0, 0, 0]
+    if faculty_data:
+        faculty_program = faculty_data.get('program')
+        faculty_year_section = faculty_data.get('year_section')
+        faculty_semester = faculty_data.get('semester')
+
+        students_query = db.collection("Registered_Students") \
+            .where("program", "==", faculty_program) \
+            .where("year_section", "==", faculty_year_section) \
+            .where("semester", "==", faculty_semester) \
+            .stream()
+
+        for doc in students_query:
+            student = doc.to_dict()
+            for idx, task_key in enumerate(novice_task_keys):
+                if isinstance(student.get(task_key), dict) and student.get(task_key):
+                    novice_task_counts[idx] += 1
+            for idx, task_key in enumerate(junior_task_keys):
+                if isinstance(student.get(task_key), dict) and student.get(task_key):
+                    junior_task_counts[idx] += 1
+            for idx, task_key in enumerate(senior_task_keys):
+                if isinstance(student.get(task_key), dict) and student.get(task_key):
+                    senior_task_counts[idx] += 1
+
+    # --- Leaderboard Logic ---
+    leaderboard_students = []
+    if faculty_data:
+        faculty_program = faculty_data.get('program')
+        faculty_year_section = faculty_data.get('year_section')
+        faculty_semester = faculty_data.get('semester')
+
+        students_query = db.collection("Registered_Students") \
+            .where("program", "==", faculty_program) \
+            .where("year_section", "==", faculty_year_section) \
+            .where("semester", "==", faculty_semester) \
+            .stream()
+
+        task_keys = novice_task_keys
+
+        for doc in students_query:
+            student = doc.to_dict()
+            total_points = 0
+            for task_key in task_keys:
+                task = student.get(task_key)
+                if task and isinstance(task, dict):
+                    total_points += int(task.get("points", 0))
+            if total_points > 0:
+                leaderboard_students.append({
+                    "name": f"{student.get('first_name', '')} {student.get('last_name', '')}",
+                    "points": total_points,
+                })
+
+        leaderboard_students = sorted(leaderboard_students, key=lambda x: x["points"], reverse=True)[:10]
 
     context = {
         "faculty_data": faculty_data,
@@ -196,7 +268,9 @@ def Faculty_home(request):
         "quick_students": quick_students,
         "quick_pending_students": quick_pending_students,
         "leaderboard_students": leaderboard_students,
-        "show_sticky_container": True,
+        "novice_task_counts": novice_task_counts,
+        "junior_task_counts": junior_task_counts,
+        "senior_task_counts": senior_task_counts,
     }
 
     if request.headers.get('HX-Request'):
@@ -205,7 +279,7 @@ def Faculty_home(request):
         return render(request, 'Home/faculty-home.html', context)
 
 
-@csrf_exempt  # If you use POST and CSRF token in the form, you can remove this decorator
+@csrf_exempt
 def remove_deadline(request):
     if request.method == "POST":
         title = request.POST.get('title')
@@ -217,7 +291,7 @@ def remove_deadline(request):
 
 @faculty_required
 def student_list(request):
-    # Add this block to fetch faculty_data
+    # Fetch faculty data
     faculty_id = request.user.username
     users_ref = db.collection('Authorized Faculty')
     query = users_ref.where('faculty_id', '==', faculty_id).limit(1).get()
@@ -264,20 +338,27 @@ def student_list(request):
     if faculty_year_section:
         filters.append(("year_section", "==", faculty_year_section))
 
-    # Optionally, allow further filtering by semester (if you want)
-    semester_filter = request.GET.get('semester')
-    if semester_filter and semester_filter != "all":
-        filters.append(("semester", "==", semester_filter))
-
     docs_query = student_ref
     for field, op, value in filters:
         docs_query = docs_query.where(field, op, value)
     docs = docs_query.stream()
     students = [{**doc.to_dict(), "student_id": doc.id} for doc in docs]
 
-    # Define your dropdown options
-    year_section_options = ["1A", "1B", "2A", "2B", "3A", "3B", "4A", "4B"]
-    semester_options = ["1st Semester", "2nd Semester"]
+    # --- Server-side search ---
+    search_query = request.GET.get('search', '').strip().lower()
+    if search_query:
+        students = [
+            s for s in students
+            if search_query in str(s.get('first_name', '')).lower()
+            or search_query in str(s.get('last_name', '')).lower()
+            or search_query in str(s.get('student_id', '')).lower()
+        ]
+
+    # Pagination
+    page_number = request.GET.get('page', 1)
+    paginator = Paginator(students, 8)  # 12 students per page
+    page_obj = paginator.get_page(page_number)
+
 
     # Fetch notifications from Firestore, newest first
     notifications_ref = db.collection("Notifications").order_by("timestamp", direction=firestore.Query.DESCENDING)
@@ -288,20 +369,20 @@ def student_list(request):
         notifications.append(notif)
 
     context ={
-        "students": students,
+        "students": page_obj.object_list,
         "faculty_data": faculty_data,
-        "selected_semester": semester_filter or "all",
-        "year_section_options": year_section_options,
-        "semester_options": semester_options,
         "total_users": total_users,
         "notifications": notifications,
         "program_total": program_total,
         "section_total": section_total,
         "active_count": active_count,
         "inactive_count": inactive_count,
+        "search_query": request.GET.get('search', ''),
         "show_sticky_container": False,
+        "page_obj": page_obj,
+        "paginator": paginator,
+        "request": request, 
     }
-
 
     if request.headers.get('HX-Request'):
         # HTMX request: return only the main content
@@ -332,6 +413,7 @@ def student_progress(request):
         .where("program", "==", faculty_program) \
         .where("year_section", "==", faculty_year_section) \
         .where("semester", "==", faculty_semester)
+
     section_total = sum(1 for _ in section_query.stream())
 
     # Count students who accomplished each tier
@@ -339,15 +421,17 @@ def student_progress(request):
     junior_count = 0
     senior_count = 0
 
+
+    task_keys = [
+        "Novice_Task_1(Collect Books)",
+        "Novice_Task_2(Collect USB)",
+        "Novice_Task_3(QNA)",
+        "Novice_Task_4_(Defeat Rootkit)",
+    ]
     for doc in section_query.stream():
         data = doc.to_dict()
-        # Example: Assume you have boolean fields like 'novice_accomplished', etc.
-        if data.get("novice_accomplished"):
+        if all(isinstance(data.get(task), dict) and data.get(task) for task in task_keys):
             novice_count += 1
-        if data.get("junior_accomplished"):
-            junior_count += 1
-        if data.get("senior_accomplished"):
-            senior_count += 1
 
     active_count = 0
     inactive_count = 0
@@ -388,37 +472,44 @@ def student_progress(request):
 @faculty_required
 def add_student(request):
     if request.method == "POST":
-        # Get form data
-        student_id = request.POST.get("student_id")
-        first_name = request.POST.get("first_name")
-        last_name = request.POST.get("last_name")
-        middle_initial = request.POST.get("middle_initial")
+        form = AddStudentForm(request.POST)
+        if form.is_valid():
+            student_id = form.cleaned_data["student_id"]
+            first_name = form.cleaned_data["first_name"]
+            last_name = form.cleaned_data["last_name"]
+            middle_initial = form.cleaned_data["middle_initial"]
 
-        # Get faculty's assigned program, year_section, and semester
-        faculty_id = request.user.username
-        users_ref = db.collection('Authorized Faculty')
-        query = users_ref.where('faculty_id', '==', faculty_id).limit(1).get()
-        faculty_data = None
-        if query:
-            faculty_doc = query[0]
-            faculty_data = faculty_doc.to_dict()
-        program = faculty_data.get("program")
-        year_section = faculty_data.get("year_section")
-        semester = faculty_data.get("semester")  # Make sure this exists in your faculty data
+            # Get faculty's assigned program, year_section, and semester
+            faculty_id = request.user.username
+            users_ref = db.collection('Authorized Faculty')
+            query = users_ref.where('faculty_id', '==', faculty_id).limit(1).get()
+            faculty_data = None
+            if query:
+                faculty_doc = query[0]
+                faculty_data = faculty_doc.to_dict()
+            program = faculty_data.get("program")
+            year_section = faculty_data.get("year_section")
+            semester = faculty_data.get("semester")
 
-        db.collection("Registered_Students").document(student_id).set({
-            "student_id": student_id,
-            "first_name": first_name,
-            "last_name": last_name,
-            "middle_initial": middle_initial,
-            "program": program,
-            "year_section": year_section,
-            "semester": semester,
-            "created_at": firestore.SERVER_TIMESTAMP,
-        })
-        messages.success(request, f"Student {student_id} added successfully!")
-        return redirect("student-list")
-    return redirect("student-list")
+            db.collection("Registered_Students").document(student_id).set({
+                "student_id": student_id,
+                "first_name": first_name,
+                "last_name": last_name,
+                "middle_initial": middle_initial,
+                "program": program,
+                "year_section": year_section,
+                "semester": semester,
+                "created_at": firestore.SERVER_TIMESTAMP,
+            })
+            messages.success(request, f"Student {student_id} added successfully!")
+            return redirect("faculty-student-list")
+        else:
+            context = {
+                "form": form,
+                "show_add_modal": True,
+            }
+            return render(request, "Students/contents/student-list-content.html", context)
+    return redirect("faculty-student-list")
 
 
 def edit_student(request, student_id):
@@ -451,75 +542,44 @@ def edit_student(request, student_id):
 
 
 
-def archive_student(request, student_id):
-    """Move student member to 'archive' collection"""
-    student_ref = db.collection("Registered_Students").document(student_id)
-    student = student_ref.get()
-    
 
-    if student.exists:
-        db.collection("Archived Students").document(student_id).set(student.to_dict())
-        student_ref.delete()
-
-        messages.success(request, "student member has been archived successfully!")
-    else:
-        messages.error(request, "student member not found.")
-
-    return redirect("student-list")
-
-def archived_student_list(request):
-    faculty_id = request.user.username
-    users_ref = db.collection('Authorized Faculty')
-    query = users_ref.where('faculty_id', '==', faculty_id).limit(1).get()
-    faculty_data = None
-    if query:
-        faculty_doc = query[0]
-        faculty_data = faculty_doc.to_dict()
-
-    """Fetch all archived student members"""
-    archive_ref = db.collection("Archived Students")
-    docs = archive_ref.stream()
-
-    # Fetch notifications from Firestore, newest first
-    notifications_ref = db.collection("Notifications").order_by("timestamp", direction=firestore.Query.DESCENDING)
-    notifications = []
-    for doc in notifications_ref.stream():
-        notif = doc.to_dict()
-        notif['id'] = doc.id
-        notifications.append(notif)
-
+@faculty_required
+def archived_students_list_page(request):
     archived_students = [
-        {**doc.to_dict(), "student_id": doc.id} for doc in docs
-    ]  # Ensuring student_id is included
-
+        {**doc.to_dict(), "student_id": doc.id}
+        for doc in db.collection("Archived Students").stream()
+    ]
     context = {
-    "archived_students": archived_students,
-    "faculty_data": faculty_data,
-    "notifications": notifications,
-    "show_sticky_container": False,
+        "archived_students": archived_students,
+        "search_query": request.GET.get('search', ''),
     }
-
+    # Only render content for HTMX requests, otherwise render full page
     if request.headers.get('HX-Request'):
-        # HTMX request: return only the main content
-        return render(request, 'Students/contents/students-archived-content.html', context)
+        return render(request, "Students/contents/students-archived-content.html", context)
     else:
-        # Normal request: return the full page
-        return render(request, 'Students/students-archived.html', context)
+        return render(request, "Students/students-archived.html", context)
 
-def restore_student(request, student_id):
-    """Restore student member from 'archive' collection"""
+def restore_student(request, student_id, destination="registered"):
     archive_ref = db.collection("Archived Students").document(student_id)
     student = archive_ref.get()
 
     if student.exists:
-        db.collection("Registered_Students").document(student_id).set(student.to_dict())
+        student_data = student.to_dict()
+        if destination == "registered":
+            student_data["status"] = "Continuing"
+            db.collection("Registered_Students").document(student_id).set(student_data)
+        elif destination == "completed":
+            student_data["status"] = "Completed"
+            db.collection("Completed Students").document(student_id).set(student_data)
+        elif destination == "dropout":
+            student_data["status"] = "Drop-out"
+            db.collection("Drop-out Students").document(student_id).set(student_data)
         archive_ref.delete()
-
-        messages.success(request, "student member has been restored successfully!")
+        messages.success(request, "Student has been restored successfully!")
     else:
-        messages.error(request, "student member not found in archive.")
+        messages.error(request, "Student not found in archive.")
 
-    return redirect("archive-page")
+    return redirect("archived_students_list")
 
 @faculty_required
 def Verify_Student(request):
@@ -558,10 +618,21 @@ def Verify_Student(request):
 
     verify_students = [{**doc.to_dict(), "student_id": doc.id} for doc in docs]
 
+    # --- Server-side search ---
+    search_query = request.GET.get('search', '').strip().lower()
+    if search_query:
+        verify_students = [
+            s for s in verify_students
+            if search_query in str(s.get('first_name', '')).lower()
+            or search_query in str(s.get('last_name', '')).lower()
+            or search_query in str(s.get('student_id', '')).lower()
+        ]
+
     context = {
         "verify_students": verify_students,
         "faculty_data": faculty_data,
         "notifications": notifications,
+        "search_query": request.GET.get('search', ''),
         "show_sticky_container": False,
     }
 
@@ -815,38 +886,132 @@ def move_student(request):
     if request.method == "POST":
         student_id = request.POST.get("student_id")
         destination = request.POST.get("destination")
-        student_ref = db.collection("Registered_Students").document(student_id)
-        student = student_ref.get()
-        if not student.exists:
-            messages.error(request, "Student not found.")
-            return redirect("student-list")
-        student_data = student.to_dict()
 
-        if destination == "authorized":
-            # Set status to Continuing, keep in Registered_Students
-            student_data["status"] = "Continuing"   
-            student_ref.set(student_data)
+        # Try to find the student in all possible collections
+        collections = [
+            "Registered_Students",
+            "Completed Students",
+            "Drop-out Students",
+            "Archived Students"
+        ]
+        student = None
+        student_data = None
+        found_collection = None
+
+        for collection in collections:
+            ref = db.collection(collection).document(student_id)
+            doc = ref.get()
+            if doc.exists:
+                student = ref
+                student_data = doc.to_dict()
+                found_collection = collection
+                break
+
+        if not student_data:
+            messages.error(request, "Student not found.")
+            return redirect("faculty-student-list")
+
+        if destination == "registered":
+            # Set status to Continuing, move to Registered_Students
+            student_data["status"] = "Continuing"
+            db.collection("Registered_Students").document(student_id).set(student_data)
+            # Remove from old collection if not already there
+            if found_collection != "Registered_Students":
+                student.delete()
             messages.success(request, "Student set as Continuing in Registered Students.")
         elif destination == "completed":
+            student_data["status"] = "Completed"
             db.collection("Completed Students").document(student_id).set(student_data)
-            student_ref.delete()
+            if found_collection != "Completed Students":
+                student.delete()
             messages.info(request, "Student moved to Completed Students successfully.")
         elif destination == "dropout":
+            student_data["status"] = "Drop-out"
             db.collection("Drop-out Students").document(student_id).set(student_data)
-            student_ref.delete()
+            if found_collection != "Drop-out Students":
+                student.delete()
             messages.success(request, "Student moved to Drop-out Students successfully!")
         elif destination == "archive":
+            student_data["status"] = "Archived"
             db.collection("Archived Students").document(student_id).set(student_data)
-            student_ref.delete()
+            if found_collection != "Archived Students":
+                student.delete()
             messages.success(request, "Student moved to Archived Students successfully!")
         else:
             messages.error(request, "Invalid destination.")
-            return redirect("student-list")
-    return redirect("student-list")
+            return redirect("faculty-student-list")
+    return redirect(request.META.get('HTTP_REFERER', 'faculty-student-list'))
 
 @faculty_required
 def novice_tier(request):
-    return render(request, 'Tier/Novice.html')
+    faculty_id = request.user.username
+    users_ref = db.collection('Authorized Faculty')
+    query = users_ref.where('faculty_id', '==', faculty_id).limit(1).get()
+    faculty_data = query[0].to_dict() if query else {}
+
+    faculty_program = faculty_data.get('program')
+    faculty_year_section = faculty_data.get('year_section')
+    faculty_semester = faculty_data.get('semester')
+
+    # Task map for filtering
+    task_map = {
+        "task1": "Novice_Task_1(Collect Books)",
+        "task2": "Novice_Task_2(Collect USB)",
+        "task3": "Novice_Task_3(QNA)",
+        "task4": "Novice_Task_4_(Defeat Rootkit)",
+    }
+    selected_task = request.GET.get("task", "task1")
+    selected_task_map = task_map.get(selected_task, "Novice_Task_1(Collect Books)")
+
+    students_query = db.collection("Registered_Students") \
+        .where("program", "==", faculty_program) \
+        .where("year_section", "==", faculty_year_section) \
+        .where("semester", "==", faculty_semester) \
+        .stream()
+
+    novice_students = []
+    leaderboard_students = []
+
+    for doc in students_query:
+        student = doc.to_dict()
+        # For progress table (filtered by selected task)
+        task_data = student.get(selected_task_map)
+        if task_data:
+            novice_students.append({
+                "student_id": student.get("student_id", doc.id),
+                "first_name": student.get("first_name", ""),
+                "last_name": student.get("last_name", ""),
+                "points": task_data.get("points", 0),
+                "total_time_completed": task_data.get("time_taken", ""),
+            })
+        # For leaderboard (sum all tasks)
+        total_points = 0
+        for task_key in task_map.values():
+            task = student.get(task_key)
+            if task and isinstance(task, dict):
+                total_points += int(task.get("points", 0))
+        if total_points > 0:
+            leaderboard_students.append({
+                "student_id": student.get("student_id", doc.id),
+                "first_name": student.get("first_name", ""),
+                "last_name": student.get("last_name", ""),
+                "points": total_points,
+            })
+
+    # Sort leaderboard by total points descending
+    novice_leaderboard = sorted(
+        leaderboard_students,
+        key=lambda x: x["points"],
+        reverse=True
+    )
+
+    context = {
+        "novice_students": novice_students,
+        "novice_leaderboard": novice_leaderboard,
+        "faculty_data": faculty_data,
+        "selected_task": selected_task,
+    }
+    return render(request, 'Tier/Novice.html', context)
 
 @faculty_required
 def junior_tier(request):
@@ -856,3 +1021,74 @@ def junior_tier(request):
 def senior_tier(request):
     return render(request, 'Tier/Senior.html')
 
+
+
+@faculty_required
+def faculty_student_status(request):
+    faculty_id = request.user.username
+    users_ref = db.collection('Authorized Faculty')
+    query = users_ref.where('faculty_id', '==', faculty_id).limit(1).get()
+    faculty_data = query[0].to_dict() if query else None
+
+    # Get faculty's assigned program, year_section, semester
+    faculty_program = faculty_data.get('program')
+    faculty_year_section = faculty_data.get('year_section')
+    faculty_semester = faculty_data.get('semester')
+
+    search_query = request.GET.get('search', '').strip().lower()
+    status_filter = request.GET.get('status', 'all').lower()
+
+    # Fetch Completed Students
+    completed_ref = db.collection("Completed Students")
+    completed_query = (
+        completed_ref
+        .where("program", "==", faculty_program)
+        .where("year_section", "==", faculty_year_section)
+        .where("semester", "==", faculty_semester)
+    )
+    completed_students = [{**doc.to_dict(), "student_id": doc.id, "status": "Completed"} for doc in completed_query.stream()]
+
+    # Fetch Drop-out Students
+    dropout_ref = db.collection("Drop-out Students")
+    dropout_query = (
+        dropout_ref
+        .where("program", "==", faculty_program)
+        .where("year_section", "==", faculty_year_section)
+        .where("semester", "==", faculty_semester)
+    )
+    dropout_students = [{**doc.to_dict(), "student_id": doc.id, "status": "Drop-out"} for doc in dropout_query.stream()]
+
+    # Combine and filter by status if needed
+    students = completed_students + dropout_students
+    if status_filter == "completed":
+        students = [s for s in students if s["status"].lower() == "completed"]
+    elif status_filter == "drop-out" or status_filter == "dropout":
+        students = [s for s in students if s["status"].lower() in ["drop-out", "dropout"]]
+
+    # Search
+    if search_query:
+        students = [
+            s for s in students
+            if search_query in str(s.get('first_name', '')).lower()
+            or search_query in str(s.get('last_name', '')).lower()
+            or search_query in str(s.get('student_id', '')).lower()
+        ]
+
+    # Pagination
+    page_number = request.GET.get('page', 1)
+    paginator = Paginator(students, 10)
+    page_obj = paginator.get_page(page_number)
+
+    context = {
+        "students": page_obj.object_list,
+        "faculty_data": faculty_data,
+        "status_filter": status_filter,
+        "search_query": request.GET.get('search', ''),
+        "page_obj": page_obj,
+        "paginator": paginator,
+        "request": request,
+    }
+    if request.headers.get('HX-Request'):
+        return render(request, 'Students/contents/student-status-content.html', context)
+    else:
+        return render(request, 'Students/student-status.html', context)

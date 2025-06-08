@@ -8,11 +8,13 @@ window.closeArchiveModal = function() {
 };
 
 // Add Student Modal
-window.openModal = function() {
+window.openStudentModal = function() {
     document.getElementById('modal').classList.remove('hidden');
+    document.querySelector('aside').classList.add('blur');
 };
-window.closeModal = function() {
+window.closeStudentModal = function() {
     document.getElementById('modal').classList.add('hidden');
+    document.querySelector('aside').classList.remove('blur');
 };
 
 // Edit Student Modal
@@ -24,11 +26,17 @@ window.closeEditModal = function() {
 };
 
 // Move Student Modal
-window.openMoveModal = function() {
-    document.getElementById('moveModal').classList.remove('hidden');
+window.openMoveStudentModal = function(studentId) {
+    document.getElementById("move-student-id").value = studentId;
+    document.getElementById("moveStudentModal").classList.remove("hidden");
+    document.body.classList.add("overflow-hidden");
+    document.querySelector('aside').classList.add('blur');
 };
-window.closeMoveModal = function() {
-    document.getElementById('moveModal').classList.add('hidden');
+
+window.closeMoveStudentModal = function() {
+    document.getElementById("moveStudentModal").classList.add("hidden");
+    document.body.classList.remove("overflow-hidden");
+    document.querySelector('aside').classList.remove('blur');
 };
 
 // Progress Modal

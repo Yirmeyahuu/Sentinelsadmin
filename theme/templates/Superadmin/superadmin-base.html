@@ -235,49 +235,85 @@
         <div class="border-t border-blue-500 p-2 mt-auto"></div>
         <form id="facultyForm" action="{% url 'add_faculty' %}" method="POST">
             {% csrf_token %}
+            {% if form.non_field_errors %}
+                <div class="text-red-500 text-sm mb-2">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
             <div class="grid grid-cols-2 gap-4">
                 <!-- Faculty ID -->
                 <div>
                     <label class="block text-sm font-bold mb-2 text-blue-500">Faculty ID <span class="text-red-500">*</span></label>
-                    <input type="text" name="faculty_id" placeholder="Enter Faculty ID" class="w-full p-4 border border-gray-300 rounded-2xl" required>
+                    <input type="text" name="faculty_id" placeholder="Enter Faculty ID"
+                           class="w-full p-4 border border-gray-300 rounded-2xl"
+                           required value="{{ form.faculty_id.value|default:'' }}">
+                    {% if form.faculty_id.errors %}
+                        <span class="text-red-500 text-xs">{{ form.faculty_id.errors.0 }}</span>
+                    {% endif %}
                 </div>
                 <!-- First Name -->
                 <div>
                     <label class="block text-sm font-bold mb-2 text-blue-500">First Name <span class="text-red-500">*</span></label>
-                    <input type="text" name="first_name" placeholder="Enter First Name" class="w-full p-4 border border-gray-300 rounded-2xl" required>
+                    <input type="text" name="first_name" placeholder="Enter First Name"
+                           class="w-full p-4 border border-gray-300 rounded-2xl"
+                           required value="{{ form.first_name.value|default:'' }}">
+                    {% if form.first_name.errors %}
+                        <span class="text-red-500 text-xs">{{ form.first_name.errors.0 }}</span>
+                    {% endif %}
                 </div>
                 <!-- Last Name -->
                 <div>
                     <label class="block text-sm font-bold mb-2 text-blue-500">Last Name <span class="text-red-500">*</span></label>
-                    <input type="text" name="last_name" placeholder="Enter Last Name" class="w-full p-4 border border-gray-300 rounded-2xl" required>
+                    <input type="text" name="last_name" placeholder="Enter Last Name"
+                           class="w-full p-4 border border-gray-300 rounded-2xl"
+                           required value="{{ form.last_name.value|default:'' }}">
+                    {% if form.last_name.errors %}
+                        <span class="text-red-500 text-xs">{{ form.last_name.errors.0 }}</span>
+                    {% endif %}
                 </div>
                 <!-- Middle Initial -->
                 <div>
                     <label class="block text-sm font-bold mb-2 text-blue-500">Middle Initial <span class="text-red-500">*</span></label>
-                    <input type="text" name="middle_initial" placeholder="Enter Middle Initial" class="w-full p-4 border border-gray-300 rounded-2xl">
+                    <input type="text" name="middle_initial" placeholder="Enter Middle Initial"
+                           class="w-full p-4 border border-gray-300 rounded-2xl"
+                           required value="{{ form.middle_initial.value|default:'' }}">
+                    {% if form.middle_initial.errors %}
+                        <span class="text-red-500 text-xs">{{ form.middle_initial.errors.0 }}</span>
+                    {% endif %}
                 </div>
                 <!-- Program -->
                 <div>
                     <label class="block text-sm font-bold mb-2 text-blue-500">Program <span class="text-red-500">*</span></label>
                     <select name="program" class="w-full p-4 border border-gray-300 rounded-2xl" required>
-                        <option value="" disabled selected>-Select Option-</option>
-                        <option value="Computer Science">Computer Science</option>
-                        <option value="Information Technology">Information Technology</option>
+                        <option value="" disabled {% if not form.program.value %}selected{% endif %}>-Select Option-</option>
+                        <option value="Computer Science" {% if form.program.value == "Computer Science" %}selected{% endif %}>Computer Science</option>
+                        <option value="Information Technology" {% if form.program.value == "Information Technology" %}selected{% endif %}>Information Technology</option>
                     </select>
+                    {% if form.program.errors %}
+                        <span class="text-red-500 text-xs">{{ form.program.errors.0 }}</span>
+                    {% endif %}
                 </div>
                 <!-- Year & Section -->
                 <div>
                     <label class="block text-sm font-bold mb-2 text-blue-500">Year & Section <span class="text-red-500">*</span><span>(e.g. 3A)</span></label>
-                    <input type="text" name="year_section" placeholder="Enter Year and Section" class="w-full p-4 border border-gray-300 rounded-2xl" required>
+                    <input type="text" name="year_section" placeholder="Enter Year and Section"
+                           class="w-full p-4 border border-gray-300 rounded-2xl"
+                           required value="{{ form.year_section.value|default:'' }}">
+                    {% if form.year_section.errors %}
+                        <span class="text-red-500 text-xs">{{ form.year_section.errors.0 }}</span>
+                    {% endif %}
                 </div>
                 <!-- Semester -->
                 <div>
                     <label class="block text-sm font-bold mb-2 text-blue-500">Semester <span class="text-red-500">*</span></label>
                     <select name="semester" class="w-full p-4 border border-gray-300 rounded-2xl" required>
-                        <option value="" disabled selected>-Select Option-</option>
-                        <option value="1st Semester">1st Semester</option>
-                        <option value="2nd Semester">2nd Semester</option>
+                        <option value="" disabled {% if not form.semester.value %}selected{% endif %}>-Select Option-</option>
+                        <option value="1st Semester" {% if form.semester.value == "1st Semester" %}selected{% endif %}>1st Semester</option>
+                        <option value="2nd Semester" {% if form.semester.value == "2nd Semester" %}selected{% endif %}>2nd Semester</option>
                     </select>
+                    {% if form.semester.errors %}
+                        <span class="text-red-500 text-xs">{{ form.semester.errors.0 }}</span>
+                    {% endif %}
                 </div>
             </div>
             <!-- Buttons -->
@@ -643,3 +679,11 @@
     </div>
 </body>
 </html>
+
+{% if show_add_modal %}
+<script>
+    window.addEventListener('DOMContentLoaded', function() {
+        openModal();
+    });
+</script>
+{% endif %}

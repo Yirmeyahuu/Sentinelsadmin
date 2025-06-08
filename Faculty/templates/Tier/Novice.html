@@ -1,8 +1,8 @@
 {% extends 'Faculty/faculty-base.html' %}
+{% load static %}
 
-<title>{% block title %}SENTINELS | Novice Tier{% endblock %}</title>
+{% block title %}SENTINELS | Novice Tier{% endblock %}
 
 {% block content %}
-{% load static %}
-{% include "Tier/contents/Novice-content.html" %}
+    {% include "Tier/contents/Novice-content.html" %}
 {% endblock %}

@@ -15,7 +15,7 @@ urlpatterns = [
 
 
     
-    path("add/", views.add_faculty, name="add_faculty"),  # Ensure this matches the form action URL
+    path("add/", views.add_faculty, name="add_faculty"),
     path("Faculty-Archived/", views.Archived_faculty_list, name="Faculty_Archived"),
     path("archive/<str:faculty_id>/", views.Faculty_Archive, name="archive_faculty"),
     path('archived-faculty/delete/<str:faculty_id>/', views.delete_archived_faculty, name='delete_archived_faculty'),

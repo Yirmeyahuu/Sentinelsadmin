@@ -10,32 +10,32 @@
                 <path fill="currentColor" fill-rule="evenodd" d="M15.941 7.033a8 8 0 0 1-14.784 5.112a.75.75 0 1 1 1.283-.778a6.5 6.5 0 1 0 8.922-8.93a.75.75 0 0 1 .776-1.284a8 8 0 0 1 3.803 5.88ZM9 1a1 1 0 1 1-2 0a1 1 0 0 1 2 0ZM2.804 5a1 1 0 1 0-1.732-1a1 1 0 0 0 1.732 1ZM1 7a1 1 0 1 1 0 2a1 1 0 0 1 0-2Zm4-4.196a1 1 0 1 0-1-1.732a1 1 0 0 0 1 1.732Z" clip-rule="evenodd"/>
             </svg>
         </h2>
-        <div class="flex justify-between items-center mb-4">
+        <div class="flex justify-center items-center mb-4">
             <div class="flex flex-wrap items-center gap-4">
                 <form method="get" class="flex flex-wrap items-center gap-2">
                     <label class="font-semibold text-sm text-white">Status:</label>
-                    <select name="status" class="p-1 text-sm font-medium text-blue-800 bg-white border border-blue-300 rounded-xl" onchange="this.form.submit()">
+                    <select name="status" class="p-0.5 text-xs font-medium text-blue-800 bg-white border border-blue-300 rounded-lg" onchange="this.form.submit()">
                         <option value="all" {% if status_filter == 'all' %}selected{% endif %}>All</option>
                         <option value="Continuing" {% if status_filter == 'Continuing' %}selected{% endif %}>Continuing</option>
                         <option value="Deactivated" {% if status_filter == 'Deactivated' %}selected{% endif %}>Deactivated</option>
                         <option value="Completed" {% if status_filter == 'Completed' %}selected{% endif %}>Completed</option>
                     </select>
                     <label class="font-semibold text-sm text-white">Program:</label>
-                    <select name="program" class="p-1 text-sm font-medium text-blue-800 bg-white border border-blue-300 rounded-xl" onchange="this.form.submit()">
+                    <select name="program" class="p-0.5 text-xs font-medium text-blue-800 bg-white border border-blue-300 rounded-lg" onchange="this.form.submit()">
                         <option value="all" {% if program_filter == 'all' %}selected{% endif %}>All</option>
                         {% for prog in programs %}
                             <option value="{{ prog }}" {% if program_filter == prog %}selected{% endif %}>{{ prog }}</option>
                         {% endfor %}
                     </select>
                     <label class="font-semibold text-sm text-white">Year & Section:</label>
-                    <select name="year_section" class="p-1 text-sm font-medium text-blue-800 bg-white border border-blue-300 rounded-xl" onchange="this.form.submit()">
+                    <select name="year_section" class="p-0.5 text-xs font-medium text-blue-800 bg-white border border-blue-300 rounded-lg" onchange="this.form.submit()">
                         <option value="all" {% if year_section_filter == 'all' %}selected{% endif %}>All</option>
                         {% for ys in year_sections %}
                             <option value="{{ ys }}" {% if year_section_filter == ys %}selected{% endif %}>{{ ys }}</option>
                         {% endfor %}
                     </select>
                     <label class="font-semibold text-sm text-white">Semester:</label>
-                    <select name="semester" class="p-1 text-sm font-medium text-blue-800 bg-white border border-blue-300 rounded-xl" onchange="this.form.submit()">
+                    <select name="semester" class="p-0.5 text-xs font-medium text-blue-800 bg-white border border-blue-300 rounded-lg" onchange="this.form.submit()">
                         <option value="all" {% if semester_filter == 'all' %}selected{% endif %}>All</option>
                         {% for sem in semesters %}
                             <option value="{{ sem }}" {% if semester_filter == sem %}selected{% endif %}>{{ sem }}</option>

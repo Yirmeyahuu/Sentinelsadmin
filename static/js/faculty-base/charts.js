@@ -6,10 +6,19 @@ window.initFacultyHomeChart = function() {
         Junior: { neonColor: '#ff00de', neonFill: 'rgba(255,0,222,0.15)' },
         Senior: { neonColor: '#fff700', neonFill: 'rgba(255,247,0,0.15)' }
     };
+
+    // Use dynamic data from Django for Novice
+    const noviceData = (window.noviceTaskCounts && Array.isArray(window.noviceTaskCounts))
+        ? window.noviceTaskCounts : [0, 0, 0, 0];
+    const juniorData = (window.juniorTaskCounts && Array.isArray(window.juniorTaskCounts))
+        ? window.juniorTaskCounts : [0, 0, 0, 0];
+    const seniorData = (window.seniorTaskCounts && Array.isArray(window.seniorTaskCounts))
+        ? window.seniorTaskCounts : [0, 0, 0, 0];
+    
     const tierData = {
-        Novice: { labels: ['Task 1', 'Task 2', 'Task 3', 'Boss Battle'], data: [15, 12, 10, 8] },
-        Junior: { labels: ['Task 1', 'Task 2', 'Task 3', 'Boss Battle'], data: [10, 9, 7, 5] },
-        Senior: { labels: ['Task 1', 'Task 2', 'Task 3', 'Boss Battle'], data: [7, 6, 4, 2] }
+        Novice: { labels: ['Task 1', 'Task 2', 'Task 3', 'Boss Battle'], data: noviceData },
+        Junior: { labels: ['Task 1', 'Task 2', 'Task 3', 'Boss Battle'], data: juniorData },
+        Senior: { labels: ['Task 1', 'Task 2', 'Task 3', 'Boss Battle'], data: seniorData }
     };
     let currentTier = 'All';
     let chartInstance;
@@ -130,7 +139,16 @@ window.initFacultyHomeChart = function() {
                     y: {
                         beginAtZero: true,
                         title: { display: true, text: 'Students Accomplished', color: '#fff' },
-                        ticks: { color: '#fff' },
+                        min: 0,
+                        max: typeof window.totalUsers === "number" ? window.totalUsers : undefined,
+                        ticks: {
+                            color: '#fff',
+                            stepSize: 1,
+                            precision: 0,
+                            callback: function(value) {
+                                return Number.isInteger(value) ? value : null;
+                            }
+                        },
                         grid: { color: 'rgba(255,255,255,0.2)' }
                     }
                 }

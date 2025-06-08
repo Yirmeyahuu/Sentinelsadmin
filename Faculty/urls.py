@@ -11,11 +11,11 @@ urlpatterns = [
     #URLS FOR STUDENT MANAGEMENT PAGE
     path("Student-list/", views.student_list, name="faculty-student-list"),
     path("add/", views.add_student, name="add_student"),
-    path("archive/<str:student_id>/", views.archive_student, name="archive_student"),
-    path("Archived-Students/", views.archived_student_list, name="archive-page"),
+    path("Archived-Students/", views.archived_students_list_page, name="archived_students_list"),
     path("restore/<str:student_id>/", views.restore_student, name="restore_student"),
     path('edit/<str:student_id>/', views.edit_student, name='edit_student'),
     path('Verify-students/', views.Verify_Student, name='verify-students'),
+    path('Student-status/', views.faculty_student_status, name='faculty-student-status'),
 
     path('accept-student/<str:student_id>/', views.accept_student, name='accept_student'),
     path('reject-student/<str:student_id>/', views.reject_student, name='reject_student'),
@@ -35,7 +35,7 @@ urlpatterns = [
     #URLS FOR STUDENT DASHBOARD
     path('Student-progress/', views.student_progress, name='student-progress'),
 
-    path("move-student/", views.move_student, name="move_student"),
+    path("move-student/", views.move_student, name="faculty_move_student"),
 
     path('Tier/Novice/', views.novice_tier, name='novice-tier'),
     path('Tier/Junior/', views.junior_tier, name='junior-tier'),

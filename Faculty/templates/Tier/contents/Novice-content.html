@@ -1,3 +1,8 @@
+{% load static %}
+<script>
+    document.title = "SENTINELS | Novice Tier";
+</script>
+
 <div class="w-full flex items-center justify-between mb-16 bg-blue-600 rounded-tr-xl rounded-br-xl text-white p-2">
     <div class="pl-28">
         <a href="{% url 'student-progress' %}" class="inline-flex items-center text-white hover:text-blue-900 font-semibold transition-colors duration-100">
@@ -15,6 +20,16 @@
     <!-- Left: Progress Table -->
     <div class="w-full lg:w-2/3 bg-blue-600 rounded-2xl text-white shadow-xl p-6">
         <h2 class="text-xl font-semibold mb-4">Novice Tier Progress</h2>
+        <!-- Filter Dropdown -->
+        <form method="get" class="mb-4">
+            <label class="font-semibold text-sm text-white">Filter by Task:</label>
+            <select name="task" class="ml-8 p-1 text-xs font-medium text-blue-800 bg-white border border-blue-300 rounded-lg" onchange="this.form.submit()">
+                <option value="task1" {% if selected_task == "task1" %}selected{% endif %}>Task 1</option>
+                <option value="task2" {% if selected_task == "task2" %}selected{% endif %}>Task 2</option>
+                <option value="task3" {% if selected_task == "task3" %}selected{% endif %}>Task 3</option>
+                <option value="task4" {% if selected_task == "task4" %}selected{% endif %}>Task 4</option>
+            </select>
+        </form>
         <table class="min-w-full">
             <thead>
                 <tr class="text-white">
@@ -26,7 +41,7 @@
             </thead>
             <tbody>
                 {% for student in novice_students %}
-                <tr>
+                <tr class="text-white">
                     <td class="py-3 px-4 border-b">{{ student.student_id }}</td>
                     <td class="py-3 px-4 border-b">{{ student.first_name }} {{ student.last_name }}</td>
                     <td class="py-3 px-4 border-b">{{ student.total_time_completed }}</td>
@@ -54,7 +69,7 @@
             </thead>
             <tbody>
                 {% for student in novice_leaderboard %}
-                <tr>
+                <tr class="text-white">
                     <td class="py-2 px-4 border-b">{{ forloop.counter }}</td>
                     <td class="py-2 px-4 border-b">{{ student.first_name }} {{ student.last_name }}</td>
                     <td class="py-2 px-4 border-b">{{ student.points }}</td>

@@ -1,8 +1,9 @@
-
-
+<script>
+    document.title = "SENTINELS | Student List";
+</script>
 
 <!-- Table -->
-<div class="flex flex-col items-start w-full pl-28 pr-16">
+<div class="ml-16 px-6">
     <!-- Dashboard Cards Row -->
     <div class="flex justify-center gap-x-8 w-full mb-8">
         <!-- 1. All Students in Program -->
@@ -64,50 +65,47 @@
         </div>
     </div>
 
-
-
     <!-- Main Content (Student Table) -->
     <div class="bg-blue-600 shadow-2xl rounded-tl-4xl rounded-br-4xl p-6 w-full">
         <div class="flex justify-between items-center mb-4">
             <h2 class="text-xl font-bold text-white">
                 Registered Students - {{ faculty_data.program }} {{ faculty_data.year_section }}
             </h2>
-            <!-- ...filters and search bar... -->
             <div class="flex flex-wrap items-center gap-4">
-                <!-- Only Semester Filter -->
-                <form method="get" class="flex flex-wrap items-center gap-2">
-                    <select name="semester" onchange="this.form.submit()" class="p-2 text-sm font-medium text-blue-800 bg-white border border-blue-300 rounded-2xl">
-                        <option value="all" {% if selected_semester == "all" %}selected{% endif %}>All Semesters</option>
-                        {% for sem in semester_options %}
-                            <option value="{{ sem }}" {% if selected_semester == sem %}selected{% endif %}>{{ sem }}</option>
-                        {% endfor %}
-                    </select>
-                </form>
                 <!-- Search Bar -->
-                <form class="flex items-center max-w-sm mx-auto">
-                    <label for="simple-search" class="sr-only">Search</label>
+                <form method="get" class="bg-gray-100 p-1 rounded-3xl flex items-center max-w-sm mx-auto">
                     <div class="relative w-full">
                         <div class="absolute inset-y-0 start-0 flex items-center ps-2 pointer-events-none">
                             <svg viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 text-gray-500 dark:text-gray-400">
                                 <path fill-rule="evenodd" d="M12 6a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Zm-1.5 8a4 4 0 0 0-4 4 2 2 0 0 0 2 2h7a2 2 0 0 0 2-2 4 4 0 0 0-4-4h-3Zm6.82-3.096a5.51 5.51 0 0 0-2.797-6.293 3.5 3.5 0 1 1 2.796 6.292ZM19.5 18h.5a2 2 0 0 0 2-2 4 4 0 0 0-4-4h-1.1a5.503 5.503 0 0 1-.471.762A5.998 5.998 0 0 1 19.5 18ZM4 7.5a3.5 3.5 0 0 1 5.477-2.889 5.5 5.5 0 0 0-2.796 6.293A3.501 3.501 0 0 1 4 7.5ZM7.1 12H6a4 4 0 0 0-4 4 2 2 0 0 0 2 2h.5a5.998 5.998 0 0 1 3.071-5.238A5.505 5.505 0 0 1 7.1 12Z" clip-rule="evenodd"/>
                             </svg>
                         </div>
-                        <input type="text" id="searchBar" class="bg-white pl-10 border border-gray-300 text-gray-900 text-sm rounded-2xl block w-full ps-14 p-2" placeholder="Search Student..." required />
+                        <input
+                            type="text"
+                            name="search"
+                            value="{{ search_query }}"
+                            class="bg-white pl-10 border border-gray-300 text-gray-900 text-sm rounded-2xl block w-full ps-14 p-2"
+                            placeholder="Search Student..."
+                        />
                     </div>
-                    <button type="submit" class="p-3 text-sm ms-1 font-medium text-white bg-blue-800 rounded-2xl hover:bg-blue-700 focus:outline-none ">
-                        <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
-                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
+                    <button type="submit" class="p-1.5 text-sm ms-1 font-medium text-blue-500 bg-gray-100 rounded-tr-2xl rounded-br-2xl rounded-tl-xl rounded-bl-xl hover:bg-blue-400 hover:text-gray-100 cursor-pointer duration-150">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" aria-hidden="true" fill="none" viewBox="0 0 24 24">
+                            <path fill="currentColor" d="M15.5 12c2.5 0 4.5 2 4.5 4.5c0 .88-.25 1.71-.69 2.4l3.08 3.1L21 23.39l-3.12-3.07c-.69.43-1.51.68-2.38.68c-2.5 0-4.5-2-4.5-4.5s2-4.5 4.5-4.5m0 2a2.5 2.5 0 0 0-2.5 2.5a2.5 2.5 0 0 0 2.5 2.5a2.5 2.5 0 0 0 2.5-2.5a2.5 2.5 0 0 0-2.5-2.5M10 4a4 4 0 0 1 4 4c0 .91-.31 1.75-.82 2.43c-.86.32-1.63.83-2.27 1.47L10 12a4 4 0 0 1-4-4a4 4 0 0 1 4-4M2 20v-2c0-2.12 3.31-3.86 7.5-4c-.32.78-.5 1.62-.5 2.5c0 1.29.38 2.5 1 3.5H2Z"/>
                         </svg>
                         <span class="sr-only">Search</span>
                     </button>
                 </form>
                 <!-- Add Button -->
-                <button class="bg-blue-800 text-white ms-2 px-6 py-2 shadow-lg rounded-2xl cursor-pointer hover:bg-blue-700 transition duration-200" onclick="openModal()">Add +</button>
+                <button class="bg-gray-100 font-bold text-sm text-blue-500 px-3 py-2 shadow-lg rounded-xl hover:bg-blue-400 hover:text-gray-100 transition duration-150 cursor-pointer" 
+                    onclick="openStudentModal()">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 472 384">
+                            <path fill="currentColor" d="M298.5 192q-35.5 0-60.5-25t-25-60.5T238 46t60.5-25T359 46t25 60.5t-25 60.5t-60.5 25zM107 149h64v43h-64v64H64v-64H0v-43h64V85h43v64zm191.5 86q31.5 0 69.5 9t69.5 29.5T469 320v43H128v-43q0-26 31.5-46.5T229 244t69.5-9z"/>
+                        </svg>
+                </button>
             </div>
         </div>
         <!-- Student Table -->
-        <div class="overflow-hidden rounded-2xl shadow-xl w-full ">
-            <!-- ...table code... -->
+        <div class="overflow-hidden rounded-2xl shadow-xl w-full bg-gray-100">
             <table class="w-full border-separate border-spacing-0 rounded-lg">
                 <thead>
                     <tr class="bg-blue-400 text-white">
@@ -122,242 +120,110 @@
                 </thead>
                 <tbody id="studentTableBody">
                     {% for student in students %}
-                        <tr class="studentRow text-white hover:bg-blue-700 cursor-pointer transition"
-                            onclick="openProgressModal('{{ student.student_id }}', '{{ student.first_name }}', '{{ student.middle_initial }}', '{{ student.last_name }}')">
-                            <td class="border border-blue-500 p-2 text-center whitespace-nowrap">{{ student.student_id }}</td>
-                            <td class="border border-blue-500 pl-14 pr-2 text-left whitespace-nowrap">{{ student.first_name }} {{ student.middle_initial }} {{ student.last_name }}</td>
-                            <td class="border border-blue-500 p-2 text-center whitespace-nowrap">{{ student.program }}</td>
-                            <td class="border border-blue-500 p-2 text-center whitespace-nowrap">{{ student.year_section }}</td>
-                            <td class="border border-blue-500 p-2 text-center whitespace-nowrap">{{ student.semester }}</td>
-                            <td class="border border-blue-500 p-2 text-center whitespace-nowrap">
-                                <span class="px-2 py-1 rounded-lg text-xs font-medium
-                                    {% if student.status == 'Drop-out' %}
-                                        bg-red-500/20 text-red-200
-                                    {% elif student.status == 'Completed' %}
-                                        bg-yellow-500/20 text-yellow-200
-                                    {% else %}
-                                        bg-green-500/20 text-green-200
-                                    {% endif %}">
-                                    {{ student.status|default:"Continuing" }}
-                                </span>
-                            </td>
-                            <td class="border border-blue-500 p-2 text-center whitespace-nowrap">
-                                <div class="flex items-center justify-center space-x-3">
-                                    <button onclick="event.stopPropagation(); openEditModal('{{ student.student_id }}', '{{ student.first_name }}', '{{ student.middle_initial }}', '{{ student.last_name }}')" class="text-gray-200 hover:text-blue-800">
-                                        <svg class="w-6 h-6 text-white hover:text-blue-400 transition-all ease-in-out duration-150" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                                            <path stroke="currentColor" stroke-linecap="square" stroke-linejoin="round" stroke-width="2" d="M7 19H5a1 1 0 0 1-1-1v-1a3 3 0 0 1 3-3h1m4-6a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm7.441 1.559a1.907 1.907 0 0 1 0 2.698l-6.069 6.069L10 19l.674-3.372 6.07-6.07a1.907 1.907 0 0 1 2.697 0Z"/>
-                                        </svg> 
-                                    </button>
-                                    <button type="button"
-                                        onclick="event.stopPropagation(); openMoveModal('{{ student.student_id }}')"
-                                        class="text-gray-200 hover:text-yellow-500">
-                                        <svg class="w-6 h-6 text-white hover:text-blue-400 transition-all ease-in-out duration-150 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 14v4.833A1.166 1.166 0 0 1 16.833 20H5.167A1.167 1.167 0 0 1 4 18.833V7.167A1.166 1.166 0 0 1 5.167 6h4.618m4.447-2H20v5.768m-7.889 2.121 7.778-7.778"/>
-                                        </svg> 
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
+                    <tr class="studentRow text-blue-900 hover:bg-blue-200 transition text-md {% if forloop.counter0|divisibleby:2 %}bg-gray-100{% else %}bg-blue-100{% endif %}">
+                        <td class="border border-blue-500 p-2 text-center">{{ student.student_id }}</td>
+                        <td class="border border-blue-500 pl-14 pr-2 text-left">
+                            {{ student.first_name }} {{ student.middle_initial }} {{ student.last_name }}
+                        </td>
+                        <td class="border border-blue-500 p-2 text-center">{{ student.program }}</td>
+                        <td class="border border-blue-500 p-2 text-center">{{ student.year_section }}</td>
+                        <td class="border border-blue-500 p-2 text-center">{{ student.semester }}</td>
+                        <td class="border border-blue-500 p-2 text-center">
+                            <span class="px-2 py-1 rounded-lg text-xs font-medium
+                                {% if student.status == 'Drop-out' %}
+                                    bg-red-500/20 text-red-700
+                                {% elif student.status == 'Completed' %}
+                                    bg-yellow-500/20 text-yellow-700
+                                {% else %}
+                                    bg-green-500/20 text-green-700
+                                {% endif %}">
+                                {{ student.status|default:"Continuing" }}
+                            </span>
+                        </td>
+                        <td class="border border-blue-500 p-2 text-center">
+                            <div class="flex items-center justify-center space-x-3">
+                                <!-- Move Button -->
+                                <button onclick="event.stopPropagation(); openMoveStudentModal('{{ student.student_id }}')"
+                                        class="text-blue-900 hover:text-blue-400 transition-all cursor-pointer">
+                                    <svg class="w-6 h-6" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 14v4.833A1.166 1.166 0 0 1 16.833 20H5.167A1.167 1.167 0 0 1 4 18.833V7.167A1.166 1.166 0 0 1 5.167 6h4.618m4.447-2H20v5.768m-7.889 2.121 7.778-7.778"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
                     {% empty %}
-                        <tr>
-                            <td colspan="6" class="text-center border border-gray-300 p-4">No users registered yet.</td>
-                        </tr>
+                    <tr>
+                        <td colspan="7" class="text-center border border-blue-500 bg-gray-100 p-4 text-blue-500">
+                            No Student found.
+                        </td>
+                    </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
+    
+        <!-- Pagination Controls -->
+        <div class="flex justify-center mt-6">
+            <nav class="flex items-center gap-1 text-sm" aria-label="Pagination">
+                {% if page_obj.has_previous %}
+                    <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}"
+                    class="flex items-center px-3 py-1.5 bg-gray-100 text-blue-400 hover:text-white hover:bg-blue-500 rounded-full transition-colors duration-200">
+                        <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                        </svg>
+                        Prev
+                    </a>
+                {% else %}
+                    <span class="flex items-center px-3 py-1.5 text-gray-400 bg-gray-100 rounded-full cursor-not-allowed">
+                        <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                        </svg>
+                        Prev
+                    </span>
+                {% endif %}
+    
+                <div class="flex items-center gap-1">
+                    {% for num in paginator.page_range %}
+                        {% if page_obj.number == num %}
+                            <span class="px-3 py-1.5 bg-blue-400 text-white font-medium rounded-full">{{ num }}</span>
+                        {% else %}
+                            <a href="?page={{ num }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}"
+                            class="px-3 py-1.5 text-blue-500 bg-gray-100 hover:bg-blue-400 hover:text-gray-100 rounded-full transition-colors duration-200">
+                            {{ num }}
+                            </a>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+    
+                {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}"
+                    class="flex items-center px-3 py-1.5 bg-gray-100 text-blue-400 hover:text-white hover:bg-blue-500 rounded-full transition-colors duration-200">
+                        Next
+                        <svg class="w-5 h-5 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                        </svg>
+                    </a>
+                {% else %}
+                    <span class="flex items-center px-3 py-1.5 text-gray-400 bg-gray-100 rounded-full cursor-not-allowed">
+                        Next
+                        <svg class="w-5 h-5 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                        </svg>
+                    </span>
+                {% endif %}
+            </nav>
+        </div>
     </div>
 </div>
 
-<!-- Add Student Success Notification -->
-<div id="successNotification" class="hidden p-4 mb-4 text-sm text-green-800 rounded-lg bg-green-50 dark:bg-gray-800 dark:text-green-400 fixed top-5 right-5 shadow-lg" role="alert">
-    <span class="font-medium">Success!</span> Student <span id="studentIdSpan"></span> has been added.
-</div>
-
-
-
-<!-- Added Student Notification-->
+{% if show_add_modal %}
 <script>
-    function showSuccessNotification(studentId) {
-        // Set the student ID in the notification
-        document.getElementById("studentIdSpan").textContent = studentId;
-
-        // Show the notification
-        let notification = document.getElementById("successNotification");
-        notification.classList.remove("hidden");
-
-        // Hide after 3 seconds
-        setTimeout(() => {
-            notification.classList.add("hidden");
-        }, 3000);
-    }
-
-    // Modify the form submission to show the notification
-    document.getElementById("studentForm").addEventListener("submit", function(event) {
-        event.preventDefault(); // Prevent the form from submitting normally
-
-        // Get the student ID input value
-        let studentId = document.querySelector('input[name="student_id"]').value;
-
-        // Submit the form after showing the notification
-        showSuccessNotification(studentId);
-
-        // Allow the form to submit after a short delay
-        setTimeout(() => {
-            event.target.submit();
-        }, 10000);
+    window.addEventListener('DOMContentLoaded', function() {
+        openStudentModal();
     });
 </script>
-
-
-<!-- Add Student Modal-->
-<script>
-function openModal() { 
-    document.getElementById("modal").classList.remove("hidden");
-    document.querySelector('aside').classList.add('blur'); // Add blur effect to sidebar
-}
-function closeModal() { 
-    document.getElementById("modal").classList.add("hidden"); 
-    document.querySelector('aside').classList.remove('blur'); // Remove blur effect from sidebar
-}
-</script>
-
-<!-- Add Student Field Validation -->
-<script>
-    function validateForm(event) {
-        event.preventDefault(); // Prevent default form submission
-
-        let form = document.getElementById("studentForm");
-        let formData = new FormData(form);
-
-        fetch("{% url 'add_student' %}", {
-            method: "POST",
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                // Add the new student to the table
-                let table = document.getElementById("studentTableBody"); // Update the correct ID
-                let newRow = document.createElement("tr");
-
-                newRow.innerHTML = `
-                    <td class="border border-blue-500 p-2 text-center whitespace-nowrap">${formData.get("student_id")}</td>
-                    <td class="border border-blue-500 p-2 text-center whitespace-nowrap">${formData.get("first_name")} ${formData.get("last_name")}</td>
-                    <td class="border border-blue-500 p-2 text-center whitespace-nowrap">${formData.get("program")}</td>
-                    <td class="border border-blue-500 p-2 text-center whitespace-nowrap">${formData.get("year_section")}</td>
-                    <td class="border border-blue-500 p-2 text-center whitespace-nowrap">${formData.get("semester")}</td>
-                    <td class="border border-blue-500 p-2 text-center whitespace-nowrap">
-                        <div class="flex items-center justify-center space-x-3">
-                                    <button class="text-blue-600 hover:text-blue-800">
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="1.5" fill="currentColor" class="w-5 h-5">
-                                            <path d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-8.4 8.4a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32l8.4-8.4Z" />
-                                            <path d="M5.25 5.25a3 3 0 0 0-3 3v10.5a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3V13.5a.75.75 0 0 0-1.5 0v5.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5V8.25a1.5 1.5 0 0 1 1.5-1.5h5.25a.75.75 0 0 0 0-1.5H5.25Z" />
-                                        </svg>
-                                    </button>
-                                    <button class="text-green-600 hover:text-green-800">
-                                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="1.5" fill="currentColor" class="w-5 h-5">
-                                            <path d="M3.375 3C2.339 3 1.5 3.84 1.5 4.875v.75c0 1.036.84 1.875 1.875 1.875h17.25c1.035 0 1.875-.84 1.875-1.875v-.75C22.5 3.839 21.66 3 20.625 3H3.375Z" />
-                                            <path fill-rule="evenodd" d="m3.087 9 .54 9.176A3 3 0 0 0 6.62 21h10.757a3 3 0 0 0 2.995-2.824L20.913 9H3.087Zm6.133 2.845a.75.75 0 0 1 1.06 0l1.72 1.72 1.72-1.72a.75.75 0 1 1 1.06 1.06l-1.72 1.72 1.72 1.72a.75.75 0 1 1-1.06 1.06L12 15.685l-1.72 1.72a.75.75 0 1 1-1.06-1.06l1.72-1.72-1.72-1.72a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" />
-                                          </svg>
-                                    </button>
-                        </div>
-                    </td>
-                `;
-
-                table.appendChild(newRow);
-
-                // Show success notification
-                showNotification(`Student ${data.student_id} added successfully!`);
-
-                // Close the modal after a short delay
-                setTimeout(() => {
-                    closeModal();
-                }, 500);
-
-                // Clear form fields
-                form.reset();
-            }
-        })
-        .catch(error => console.error("Error:", error));
-    }
-
-    function showNotification(message) {
-        let notification = document.createElement("div");
-        notification.className = "p-4 mb-4 text-sm text-green-800 rounded-lg bg-green-50 fixed top-5 right-5 shadow-lg";
-        notification.innerHTML = `<span class="font-medium">Success!</span> ${message}`;
-
-        document.body.appendChild(notification);
-
-        setTimeout(() => {
-            notification.remove();
-        }, 6000); // Remove after 3 seconds
-    }
-</script>
-
-
-
-<!-- Search user suggestion-->
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const searchBar = document.getElementById('searchBar');
-        const studentRows = document.querySelectorAll('#studentTableBody .studentRow');
-
-        searchBar.addEventListener('input', function () {
-            const searchTerm = searchBar.value.trim().toLowerCase();
-
-            studentRows.forEach(row => {
-                const studentName = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
-
-                if (studentName.includes(searchTerm)) {
-                    row.style.display = ''; // Show the row
-                } else {
-                    row.style.display = 'none'; // Hide the row
-                }
-            });
-        });
-    });
-</script>
-
-<!--Archive Confirmation Modal-->
-<script>
-    function openArchiveModal(url) {
-        document.getElementById("archiveModal").classList.remove("hidden");
-        document.getElementById("confirmArchiveBtn").setAttribute("href", url);
-        document.querySelector('aside').classList.add('blur');
-    }
-
-    function closeArchiveModal() {
-        document.getElementById("archiveModal").classList.add("hidden");
-        document.querySelector('aside').classList.remove('blur');
-    }
-</script>
-
-<!-- script for edit-modal-->
-<script>
-    function openEditModal(id, firstName, middleInitial, lastName, program, yearSection, semester) {
-        document.getElementById("edit-student-id").value = id;
-        document.getElementById("edit-first-name").value = firstName;
-        document.getElementById("edit-middle-initial").value = middleInitial;
-        document.getElementById("edit-last-name").value = lastName;
-    
-        // Set form action dynamically
-        document.getElementById("editStudentForm").action = `/Student/edit/${id}/`;
-    
-        // Show modal
-        document.getElementById("editStudentModal").classList.remove("hidden");
-    
-        // Add blur to sidebar
-        document.querySelector('aside').classList.add('blur');
-    }
-
-    function closeEditModal() {
-        document.getElementById("editStudentModal").classList.add("hidden");
-        document.querySelector('aside').classList.remove('blur');
-    }
-</script>
-
-
+{% endif %}
 
 <!-- Move Modal-->
 <script>
@@ -379,8 +245,6 @@ function closeModal() {
         // Set the "View all" button to redirect to the dashboard for this student
         document.getElementById('viewAllBtn').onclick = function() {
             window.location.href = `/student-dashboard/?student_id=${studentId}`;
-
-        
         };
     }
     function closeProgressModal() {

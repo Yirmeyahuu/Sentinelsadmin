@@ -8,8 +8,10 @@ from Login.decorators import superadmin_required
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from django.views.decorators.http import require_POST
-import json
+import json, datetime
 from django.core.paginator import Paginator
+from .forms import AddFacultyForm
+
 
 
 
@@ -141,24 +143,26 @@ def Faculty_list(request):
     else:
         return render(request, 'Faculty/faculty-list.html', context)
 
+@superadmin_required
 def add_faculty(request):
-
     if request.method == "POST":
-        faculty_data = {
-            "faculty_id": request.POST.get("faculty_id"),
-            "first_name": request.POST.get("first_name"),
-            "last_name": request.POST.get("last_name"),
-            "middle_initial": request.POST.get("middle_initial"),
-            "program": request.POST.get("program"),
-            "year_section": request.POST.get("year_section"),
-            "semester": request.POST.get("semester")
-        }
-
-        db.collection("Authorized Faculty").document(faculty_data["faculty_id"]).set(faculty_data)
-
-        return JsonResponse({"success": True, "faculty_id": faculty_data["faculty_id"]})
-
-    return JsonResponse({"success": False})
+        form = AddFacultyForm(request.POST)
+        if form.is_valid():
+            faculty_data = form.cleaned_data
+            db.collection("Authorized Faculty").document(faculty_data["faculty_id"]).set(faculty_data)
+            messages.success(request, "Faculty added successfully!")
+            return redirect("FacultyList")
+        else:
+            # Render the faculty list page with errors and open the modal
+            faculties = db.collection("Authorized Faculty").stream()
+            context = {
+                "faculties": [doc.to_dict() for doc in faculties],
+                "form": form,
+                "show_add_modal": True,
+            }
+            return render(request, 'Faculty/faculty-list.html', context)
+    else:
+        return redirect("FacultyList")
 
 def edit_faculty(request, faculty_id):
     
@@ -191,7 +195,7 @@ def edit_faculty(request, faculty_id):
 def delete_archived_faculty(request, faculty_id):
     db.collection("Archived Faculty").document(faculty_id).delete()
     messages.success(request, "Archived faculty deleted permanently.")
-    return redirect('Faculty-Archived')
+    return redirect('Faculty_Archived')
 
 @superadmin_required
 @require_POST
@@ -377,7 +381,6 @@ def Superadmin_Student_Status(request):
     program_filter = request.GET.get('program', 'all')
     year_section_filter = request.GET.get('year_section', 'all')
     semester_filter = request.GET.get('semester', 'all')
-    school_year_filter = request.GET.get('school_year', 'all')
     search_query = request.GET.get('search', '').strip().lower()
 
     # Helper to fetch and tag students from a collection
@@ -396,7 +399,6 @@ def Superadmin_Student_Status(request):
 
     # Gather unique values for dropdowns
     year_sections = sorted(set(s.get('year_section', '') for s in students if s.get('year_section')))
-    school_years = sorted(set(s.get('school_year', '') for s in students if s.get('school_year')), reverse=True)
 
     # Apply filters
     if program_filter != 'all':
@@ -405,8 +407,6 @@ def Superadmin_Student_Status(request):
         students = [s for s in students if s.get('year_section') == year_section_filter]
     if semester_filter != 'all':
         students = [s for s in students if s.get('semester') == semester_filter]
-    if school_year_filter != 'all':
-        students = [s for s in students if s.get('school_year') == school_year_filter]
     if search_query:
         students = [
             s for s in students
@@ -432,9 +432,7 @@ def Superadmin_Student_Status(request):
         "program_filter": program_filter,
         "year_section_filter": year_section_filter,
         "semester_filter": semester_filter,
-        "school_year_filter": school_year_filter,
         "year_sections": year_sections,
-        "school_years": school_years,
         "search_query": request.GET.get('search', ''),
         "page_obj": page_obj,
         "paginator": paginator,
@@ -707,8 +705,15 @@ def superadmin_move_student(request):
             messages.error(request, "Student not found.")
             return redirect("student-list")
 
-        # Remove from source collection (except if moving to Registered_Students)
-        if destination != "registered" and source_collection:
+        # Remove from source collection if moving to a different collection
+        dest_map = {
+            "registered": "Registered_Students",
+            "completed": "Completed Students",
+            "dropout": "Drop-out Students",
+            "archive": "Archived Students"
+        }
+        dest_collection = dest_map.get(destination)
+        if dest_collection and source_collection and source_collection != dest_collection:
             db.collection(source_collection).document(student_id).delete()
 
         # Move to the selected collection and update status
@@ -716,21 +721,21 @@ def superadmin_move_student(request):
             student_data["status"] = "Continuing"
             db.collection("Registered_Students").document(student_id).set(student_data)
             messages.success(request, "Student moved to Registered Students successfully.")
+            return redirect("student-list")
         elif destination == "completed":
             student_data["status"] = "Completed"
             db.collection("Completed Students").document(student_id).set(student_data)
             messages.success(request, "Student moved to Completed Students successfully.")
+            return redirect("superadmin-student-status")  # Update with your completed students page name if different
         elif destination == "dropout":
             student_data["status"] = "Drop-out"
             db.collection("Drop-out Students").document(student_id).set(student_data)
             messages.success(request, "Student moved to Drop-out Students successfully!")
+            return redirect("superadmin-student-status")  # Update with your drop-out students page name if different
         elif destination == "archive":
             db.collection("Archived Students").document(student_id).set(student_data)
-            # Remove from all other collections
-            if source_collection:
-                db.collection(source_collection).document(student_id).delete()
             messages.success(request, "Student moved to Archived Students successfully!")
+            return redirect("superadmin_student_archived")
         else:
             messages.error(request, "Invalid destination.")
             return redirect("student-list")
-    return redirect("student-list")
