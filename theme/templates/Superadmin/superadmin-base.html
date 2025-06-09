@@ -43,6 +43,21 @@
 
 <body class="min-h-screen bg-gradient-to-br from-[#E0EAFC] to-[#CFDEF3]">
 
+<!-- Global Notification-->
+{% if messages %}
+  {% for message in messages %}
+    <div id="django-message-{{ forloop.counter }}" class="p-4 mb-4 text-sm text-green-800 rounded-lg bg-green-50 fixed top-5 right-5 shadow-lg z-50">
+      <span class="font-medium">{{ message.tags|title }}!</span> {{ message }}
+    </div>
+    <script>
+      setTimeout(function() {
+        var msg = document.getElementById("django-message-{{ forloop.counter }}");
+        if (msg) msg.style.display = "none";
+      }, 5000);
+    </script>
+  {% endfor %}
+{% endif %}
+
 <!-- Activity Details Modal -->
 <div id="ActivityDetails" class="fixed inset-0 flex items-center justify-center z-50 hidden">
     <!-- Backdrop with gaming blur effect -->

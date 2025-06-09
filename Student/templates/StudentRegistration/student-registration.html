@@ -17,7 +17,7 @@
                 {% csrf_token %}
                 <!-- Student ID -->
                 <div class="relative">
-                    <label for="student_id" class="block text-sm font-medium text-gray-700">Student ID <span> (required) </span></label>
+                    <label for="student_id" class="block text-sm font-medium text-gray-700">Student ID <span class="text-red-600"> * </span></label>
                     <input type="text" id="student_id" name="student_id" required
                         class="w-full p-2 pl-10 border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500">
                     <span class="absolute left-3 top-7 text-blue-700">
@@ -25,11 +25,10 @@
                             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 9h3m-3 3h3m-3 3h3m-6 1c-.306-.613-.933-1-1.618-1H7.618c-.685 0-1.312.387-1.618 1M4 5h16a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Zm7 5a2 2 0 1 1-4 0 2 2 0 0 1 4 0Z"/>
                         </svg>                          
                     </span>
-                </div>
-
+ 
                 <!-- First Name -->
                 <div class="relative">
-                    <label for="first_name" class="block text-sm font-medium text-gray-700">First Name <span> (required) </span></label>
+                    <label for="first_name" class="block text-sm font-medium text-gray-700">First Name <span class="text-red-600"> * </span></label>
                     <input type="text" id="first_name" name="first_name" required
                         class="w-full p-2 pl-10 border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500">
                     <span class="absolute left-3 top-7 text-blue-700">
@@ -41,7 +40,7 @@
 
                 <!-- Last Name -->
                 <div class="relative">
-                    <label for="last_name" class="block text-sm font-medium text-gray-700">Last Name <span> (required) </span></label>
+                    <label for="last_name" class="block text-sm font-medium text-gray-700">Last Name <span class="text-red-600"> * </span></label>
                     <input type="text" id="last_name" name="last_name" required
                         class="w-full p-2 pl-10 border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500">
                     <span class="absolute left-3 top-7 text-blue-700">
@@ -53,7 +52,7 @@
 
                 <!-- Middle Initial -->
                 <div class="relative">
-                    <label for="middle_initial" class="block text-sm font-medium text-gray-700">Middle Initial <span> (optional) </span></label>
+                    <label for="middle_initial" class="block text-sm font-medium text-gray-700">Middle Initial <span class="text-red-600"> * </span></label>
                     <input type="text" id="middle_initial" name="middle_initial"
                         class="w-full p-2 pl-10 border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500">
                     <span class="absolute left-3 top-7 text-blue-700">
@@ -65,7 +64,7 @@
 
                 <!-- Program -->
                 <div class="relative">
-                    <label for="program" class="block text-sm font-medium text-gray-700">Program <span> (required) </span></label>
+                    <label for="program" class="block text-sm font-medium text-gray-700">Program <span class="text-red-600"> * </span></label>
                     <select id="program" name="program" required
                             class="w-full p-2 pl-10 border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500">
                         <option value="" disabled selected>-Select Option-</option>
@@ -81,7 +80,7 @@
 
                 <!-- Year and Section -->
                 <div class="relative">
-                    <label for="year_section" class="block text-sm font-medium text-gray-700">Year and Section <span> (e.g. 3A) </span></label>
+                    <label for="year_section" class="block text-sm font-medium text-gray-700">Year and Section <span class="text-red-600"> * </span> <span> (e.g. 3A) </span></label>
                     <input type="text" id="year_section" name="year_section" required
                         class="w-full p-2 pl-10 border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500">
                     <span class="absolute left-3 top-7 text-blue-600">
@@ -93,7 +92,7 @@
                 
                 <!-- Semester -->
                 <div class="relative">
-                    <label for="semester" class="block text-sm font-medium text-gray-700">Semester <span> (required) </span></label>
+                    <label for="semester" class="block text-sm font-medium text-gray-700">Semester <span class="text-red-600"> * </span></label>
                     <select id="semester" name="semester" required
                             class="w-full p-2 pl-10 border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500">
                         <option value="" disabled selected>-Select Option-</option>
@@ -106,13 +105,9 @@
                           </svg>                          
                     </span>
                 </div>
-                <!-- ...existing code... -->
-                <!-- Submit Button -->
-                <!-- ...existing form fields... -->
-                <!-- (keep all your form fields as is) -->
                 <!-- Submit Button -->
                 <button type="submit"
-                        class="w-full bg-blue-700 text-white py-4 px-4 rounded-2xl hover:bg-blue-800 transition duration-300">
+                        class="mt-8 w-full bg-blue-700 text-white py-4 px-4 rounded-2xl hover:bg-blue-800 transition duration-300">
                     Register
                 </button>
             </form>
