@@ -43,9 +43,7 @@ Together, they give Sentinels the best of both worlds: speed, scalability, and r
 
 ## 📊 Screenshots
 
-> _Coming soon!_  
-> Imagine a dashboard glowing with neon charts, a leaderboard full of rising stars, and a calendar that keeps everyone on track.
-
+![Sentinels Dashboard](screenshots/dashboard.png)
 ---
 
 ## 📝 License
