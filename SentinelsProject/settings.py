@@ -20,7 +20,7 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 #firestore-database
-cred = credentials.Certificate("/Users/jeremiahpantaras/Documents/sentinels-project/sentinels-a61ff-firebase-adminsdk-fbsvc-aaf9572a3f.json")
+#cred = credentials.Certificate("/Users/jeremiahpantaras/Documents/sentinels-project/sentinels-a61ff-firebase-adminsdk-fbsvc-aaf9572a3f")
 firebase_admin.initialize_app(cred)
 db = firestore.client()
 # Application definition
