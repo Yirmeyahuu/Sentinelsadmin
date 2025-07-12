@@ -540,9 +540,6 @@ def edit_student(request, student_id):
     student_data = student.to_dict()
     return render(request, "Admin/EditStudent.html", {"student": student_data})
 
-
-
-
 @faculty_required
 def archived_students_list_page(request):
     archived_students = [
@@ -887,7 +884,6 @@ def move_student(request):
         student_id = request.POST.get("student_id")
         destination = request.POST.get("destination")
 
-        # Try to find the student in all possible collections
         collections = [
             "Registered_Students",
             "Completed Students",
@@ -998,7 +994,7 @@ def novice_tier(request):
                 "points": total_points,
             })
 
-    # Sort leaderboard by total points descending
+    # Sort leaderboard by total points descending``
     novice_leaderboard = sorted(
         leaderboard_students,
         key=lambda x: x["points"],

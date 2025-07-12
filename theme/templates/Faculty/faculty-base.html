@@ -121,17 +121,17 @@
             <div class="grid grid-cols-2 gap-4">
                 <!-- First Name -->
                 <div>
-                    <label class="block text-sm font-bold mb-2 text-blue-500">First Name</label>
+                    <label class="block text-sm font-bold mb-2 text-blue-500">First Name <span class="text-red-500"> * </span></label>
                     <input type="text" name="first_name" id="edit-first-name" class="w-full p-4 border border-gray-300 rounded-2xl" required>
                 </div>
                 <!-- Last Name -->
                 <div>
-                    <label class="block text-sm font-bold mb-2 text-blue-500">Last Name</label>
+                    <label class="block text-sm font-bold mb-2 text-blue-500">Last Name <span class="text-red-500"> * </span></label>
                     <input type="text" name="last_name" id="edit-last-name" class="w-full p-4 border border-gray-300 rounded-2xl" required>
                 </div>
                 <!-- Middle Initial -->
                 <div>
-                    <label class="block text-sm font-bold mb-2 text-blue-500">Middle Initial</label>
+                    <label class="block text-sm font-bold mb-2 text-blue-500">Middle Initial <span class="text-red-500"> * </span></label>
                     <input type="text" name="middle_initial" id="edit-middle-initial" class="w-full p-4 border border-gray-300 rounded-2xl">
                 </div>
             </div>
@@ -334,7 +334,7 @@
                                 > Students
                             </span>
                             </div>
-                    
+
                             <!-- Dropdown Icon -->
                             <svg x-show="expanded" 
                                  x-bind:class="{ 'rotate-180': open }" 
