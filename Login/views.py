@@ -36,6 +36,7 @@ def Sentinels_login_view(request):
             faculty_doc = query[0]
             faculty_data = faculty_doc.to_dict()
             faculty_password = faculty_data.get('faculty_password')
+            password_updated = faculty_data.get('password_updated', False)
             if (faculty_password and password == faculty_password) or (not faculty_password and password == "welcomeadmin"):
                 request.session['user_type'] = 'faculty'
                 request.session['faculty_id'] = username_or_id
@@ -46,6 +47,12 @@ def Sentinels_login_view(request):
                     user.save()
                 user.backend = 'Login.auth_backend.FirestoreBackend'
                 login(request, user)
+
+                # Redirect to password change page if password is not updated
+                if not password_updated:
+                    return redirect('change_password')
+
+
                 return redirect('home-page')
 
         # If login fails for any reason, show a generic error
@@ -77,3 +84,23 @@ def superadmin_logout(request):
     else:
         # If accessed via GET, redirect to the home page or login page
         return redirect('sentinels_login')
+    
+def change_password_view(request):
+    """Allows faculty to change their password after first login."""
+    if request.method == 'POST':
+        new_password = request.POST.get('new_password')
+        faculty_id = request.session.get('faculty_id')
+
+        if faculty_id and new_password:
+            # Update Firestore with the new password
+            doc_ref = db.collection('Authorized Faculty').document(faculty_id)
+            doc_ref.update({
+                'faculty_password': new_password,
+                'password_updated': True
+            })
+
+            messages.success(request, "Password updated successfully. Successfully Login.")
+            
+            return redirect('home-page')
+
+    return render(request, 'Login/change-password.html')
