@@ -3,7 +3,7 @@
     document.title = "SENTINELS | Faculty Profile";
 </script>
 
-<div class="p-6 ml-20">
+<div class="p-6 pr-20 pl-20 ml-20">
     <div class="bg-white/70 shadow-lg rounded-tl-4xl rounded-br-4xl p-6">
         <a href="javascript:void(0);" onclick="history.back();" class="inline-flex items-center text-blue-500 hover:text-blue-600 font-semibold transition-colors duration-100">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -38,33 +38,33 @@
                 
                 <!-- Faculty ID (Read Only) -->
                 <div class="relative">
-                    <label class="block text-sm font-bold text-blue-500 mb-1">Faculty ID</label>
+                    <label class="block text-sm font-bold text-gray-500 mb-1">Faculty ID</label>
                     <input type="text" value="{{ faculty_data.faculty_id }}" readonly
-                        class="w-full p-3 bg-blue-500 text-white rounded-lg border border-white cursor-not-allowed">
+                        class="w-full p-3 pl-10 bg-gray-200/80 text-gray-500 rounded-lg cursor-default">
                 </div>
 
                 <!-- Program (Read Only) -->
                 <div class="relative">
-                    <label class="block text-sm font-bold text-blue-500 mb-1">Program</label>
+                    <label class="block text-sm font-bold text-gray-500 mb-1">Program</label>
                     <input type="text" value="{{ faculty_data.program }}" readonly
-                        class="w-full p-3 bg-blue-500 text-white rounded-lg border border-white cursor-not-allowed">
+                        class="w-full p-3 pl-10 bg-gray-200/80 text-gray-500 rounded-lg cursor-default">
                 </div>
 
                 <!-- Semester (Read Only) -->
                 <div class="relative">
-                    <label class="block text-sm font-bold text-blue-500 mb-1">Semester</label>
+                    <label class="block text-sm font-bold text-gray-500 mb-1">Semester</label>
                     <input type="text" value="{{ faculty_data.semester }}" readonly
-                        class="w-full p-3 bg-blue-500 text-white rounded-lg border border-white cursor-not-allowed">
+                        class="w-full p-3 pl-10 bg-gray-200/80 text-gray-500 rounded-lg cursor-default">
                 </div>
 
                 <!-- First Name -->
                 <div class="relative">
-                    <label class="block text-sm font-bold text-blue-500 mb-1">First Name</label>
+                    <label class="block text-sm font-bold text-gray-500 mb-1">First Name</label>
                     <div class="relative">
                         <input type="text" id="first_name" name="first_name" value="{{ faculty_data.first_name }}"
-                               class="w-full p-3 pl-10 bg-blue-500 text-white rounded-lg border border-blue-400 focus:outline-none focus:border-white"
+                               class="w-full p-3 pl-10 bg-gray-200/80 text-gray-500 rounded-lg cursor-default"
                                readonly>
-                        <span class="absolute right-3 top-3 text-white cursor-pointer" onclick="enableEdit('first_name')">
+                        <span class="absolute right-3 top-3 text-blue-500 cursor-pointer" onclick="enableEdit('first_name')">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                                 <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
                             </svg>
@@ -74,12 +74,12 @@
 
                 <!-- Last Name -->
                 <div class="relative">
-                    <label class="block text-sm font-bold text-blue-500 mb-1">Last Name</label>
+                    <label class="block text-sm font-bold text-gray-500 mb-1">Last Name</label>
                     <div class="relative">
                         <input type="text" id="last_name" name="last_name" value="{{ faculty_data.last_name }}"
-                               class="w-full p-3 pl-10 bg-blue-500 text-white rounded-lg border border-blue-400 focus:outline-none focus:border-white"
+                               class="w-full p-3 pl-10 bg-gray-200/80 text-gray-500 rounded-lg cursor-default"
                                readonly>
-                        <span class="absolute right-3 top-3 text-white cursor-pointer" onclick="enableEdit('last_name')">
+                        <span class="absolute right-3 top-3 text-blue-500 cursor-pointer" onclick="enableEdit('last_name')">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                                 <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
                             </svg>
@@ -89,12 +89,12 @@
 
                 <!-- Middle Initial -->
                 <div class="relative">
-                    <label class="block text-sm font-bold text-blue-500 mb-1">Middle Initial</label>
+                    <label class="block text-sm font-bold text-gray-500 mb-1">Middle Initial</label>
                     <div class="relative">
                         <input type="text" id="middle_initial" name="middle_initial" value="{{ faculty_data.middle_initial }}"
-                               class="w-full p-3 pl-10 bg-blue-500 text-white rounded-lg border border-blue-400 focus:outline-none focus:border-white"
+                               class="w-full p-3 pl-10 bg-gray-200/80 text-gray-500 rounded-lg cursor-default"
                                readonly>
-                        <span class="absolute right-3 top-3 text-white cursor-pointer" onclick="enableEdit('middle_initial')">
+                        <span class="absolute right-3 top-3 text-blue-500 cursor-pointer" onclick="enableEdit('middle_initial')">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                                 <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
                             </svg>
@@ -103,28 +103,28 @@
                 </div>
             </div>
 
-            <!-- Single Logout Modal (removed duplicate) -->
+            <!-- Logout Confirmation Modal -->
             <div id="logoutModal" class="fixed inset-0 flex items-center justify-center z-50 hidden">
                 <!-- Backdrop with blur effect -->
-                <div class="fixed inset-0 backdrop-blur-sm bg-gray-900/70" onclick="closeLogoutModal()"></div>
+                <div class="fixed inset-0 bg-gray-900/80"></div>
                 
                 <!-- Modal Content -->
-                <div class="bg-white p-8 rounded-lg shadow-xl w-96 text-center relative z-10">
-                    <h2 class="text-2xl font-bold text-gray-800 mb-4">Confirm Logout</h2>
-                    <p class="text-gray-600 mb-8 text-lg">Are you sure you want to logout?</p>
-                    
-                    <form id="logoutForm" method="POST" action="{% url 'faculty_logout' %}" class="space-y-4">
+                <div class="bg-white p-6 rounded-lg shadow-lg w-96 text-center relative z-10">
+                    <h2 class="text-lg font-bold text-gray-800 mb-4">Confirm Logout</h2>
+                    <p class="text-gray-600 mb-6">Are you sure you want to logout?</p>
+
+                    <!-- Logout Form (POST Request) -->
+                    <form id="logoutForm" method="POST" action="{% url 'faculty_logout' %}">
                         {% csrf_token %}
                         <div class="flex justify-center space-x-4">
-                            <!-- Styled like Save Changes button -->
-                            <button type="submit"
-                                class="bg-blue-500 text-white px-8 py-3 rounded-lg hover:bg-blue-600 cursor-pointer transition-all duration-200 font-semibold text-lg shadow-md hover:shadow-lg">
-                                Logout
-                            </button>
-                            <button type="button"
-                                onclick="closeLogoutModal()"
-                                class="bg-gray-200 text-gray-800 px-8 py-3 rounded-lg hover:bg-gray-300 cursor-pointer transition-all duration-200 font-semibold text-lg shadow-md hover:shadow-lg">
+                            <button type="button" 
+                                onclick="closeLogoutModal()" 
+                                class="text-white bg-red-500 hover:bg-red-600 focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-3me-2 mb-2">
                                 Cancel
+                            </button>
+                            <button type="submit" 
+                                class="text-white bg-blue-500 hover:bg-blue-600 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-3 me-2 mb-2">
+                                Logout
                             </button>
                         </div>
                     </form>
@@ -132,10 +132,10 @@
             </div>
 
             <!-- Submit Button -->
-            <div class="flex justify-end mt-6 space-x-4">
+            <div class="flex justify-end mt-12 space-x-4">
                 <button type="button" 
                     onclick="openLogoutModal()" 
-                    class="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 cursor-pointer transition-colors">
+                    class="bg-red-500 text-white px-6 py-2 rounded-lg hover:bg-red-600 cursor-pointer transition-colors">
                     Logout
                 </button>
                 <button type="submit" 

@@ -556,35 +556,6 @@
             </div>
         </aside>
 
-        <!-- Logout Confirmation Modal -->
-        <div id="logoutModal" class="fixed inset-0 flex items-center justify-center z-50 hidden">
-            <!-- Backdrop with blur effect -->
-            <div class="fixed inset-0 backdrop-blur-sm bg-gray-900/70"></div>
-            
-            <!-- Modal Content -->
-            <div class="bg-white p-6 rounded-lg shadow-lg w-96 text-center relative z-10">
-                <h2 class="text-lg font-bold text-gray-800 mb-4">Confirm Logout</h2>
-                <p class="text-gray-600 mb-6">Are you sure you want to logout?</p>
-
-                <!-- Logout Form (POST Request) -->
-                <form id="logoutForm" method="POST" action="{% url 'faculty_logout' %}">
-                    {% csrf_token %}
-                    <div class="flex justify-center space-x-4">
-                        <button type="submit" 
-                            class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">
-                            Logout
-                        </button>
-
-                        <button type="button" 
-                            onclick="closeLogoutModal()" 
-                            class="text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-gray-800 dark:hover:bg-gray-700 dark:focus:ring-gray-700 dark:border-gray-700">
-                            Cancel
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-
 
 
         <!-- Content Wrapper -->
@@ -601,8 +572,6 @@
         
 
     </div>
-
-    <!-- Add this just before the closing </body> tag in faculty-base.html -->
 
         <!-- Replace the existing notification modal with this -->
     <div id="notificationModal" class="fixed inset-0 flex items-center justify-center z-50 hidden">
