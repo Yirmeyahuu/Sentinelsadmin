@@ -2,6 +2,8 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 import firebase_admin
 from firebase_admin import credentials, firestore
+from django.contrib.auth.hashers import make_password
+from Faculty.models import Faculty, ArchivedFaculty
 from django.http import JsonResponse
 from django.templatetags.static import static
 from Login.decorators import superadmin_required
@@ -11,11 +13,6 @@ from django.views.decorators.http import require_POST
 import json, datetime
 from django.core.paginator import Paginator
 from .forms import AddFacultyForm
-
-
-
-
-
 
 
 
@@ -79,12 +76,19 @@ def Superadmin_Home(request):
         # Normal request: return the full page
         return render(request, 'Home/superadmin-home.html', context)
 
+
+
 @superadmin_required
 def Faculty_list(request):
-    # Fetch all continuing faculty (Authorized Faculty only)
-    continuing_ref = db.collection("Authorized Faculty")
-    continuing_docs = continuing_ref.stream()
-    continuing_faculties = [{**doc.to_dict(), 'status': 'Continuing'} for doc in continuing_docs]
+    # Fetch all continuing faculty from PostgreSQL
+    continuing_faculties = Faculty.objects.all().values(
+        'faculty_id', 'first_name', 'middle_initial', 'last_name',
+        'program', 'year_section', 'semester'
+    )
+    # Add status field for template compatibility
+    continuing_faculties = [
+        {**dict(faculty), 'status': 'Continuing'} for faculty in continuing_faculties
+    ]
 
     search_query = request.GET.get('search', '').strip().lower()
 
@@ -110,14 +114,12 @@ def Faculty_list(request):
     paginator = Paginator(faculties, 10)  # 10 faculty per page
     page_obj = paginator.get_page(page_number)
 
-    # Dashboard counts (unchanged)
+    # Dashboard counts (students still from Firestore)
     students_ref = db.collection("Registered_Students")
     students = students_ref.stream()
     total_students = sum(1 for _ in students)
 
-    faculty_ref = db.collection("Authorized Faculty")
-    faculty = faculty_ref.stream()
-    total_faculty = sum(1 for _ in faculty)
+    faculty_count = Faculty.objects.count()  # Now from PostgreSQL
 
     cs_students_ref = db.collection("Registered_Students").where("program", "==", "Computer Science")
     cs_students = cs_students_ref.stream()
@@ -130,7 +132,7 @@ def Faculty_list(request):
     context = {
         "faculties": page_obj.object_list,
         "total_students": total_students,
-        "total_faculty": total_faculty,
+        "total_faculty": faculty_count,
         "cs_students": cs_students_count,
         "it_students": it_students_count,
         "search_query": request.GET.get('search', ''),
@@ -149,14 +151,26 @@ def add_faculty(request):
         form = AddFacultyForm(request.POST)
         if form.is_valid():
             faculty_data = form.cleaned_data
-            db.collection("Authorized Faculty").document(faculty_data["faculty_id"]).set(faculty_data)
+            # Set a default password (hashed). You can change this logic as needed.
+            default_password = "welcomeadmin"
+            hashed_password = make_password(default_password)
+            Faculty.objects.create(
+                faculty_id=faculty_data["faculty_id"],
+                first_name=faculty_data["first_name"],
+                last_name=faculty_data["last_name"],
+                middle_initial=faculty_data["middle_initial"],
+                program=faculty_data["program"],
+                year_section=faculty_data["year_section"],
+                semester=faculty_data["semester"],
+                password=hashed_password,
+            )
             messages.success(request, "Faculty added successfully!")
             return redirect("FacultyList")
         else:
             # Render the faculty list page with errors and open the modal
-            faculties = db.collection("Authorized Faculty").stream()
+            faculties = Faculty.objects.all()
             context = {
-                "faculties": [doc.to_dict() for doc in faculties],
+                "faculties": faculties,
                 "form": form,
                 "show_add_modal": True,
             }
@@ -204,17 +218,27 @@ def delete_archived_student(request, student_id):
     messages.success(request, "Archived student deleted permanently.")
     return redirect('superadmin_student_archived')
 
+
 @superadmin_required
 def Faculty_Archive(request, faculty_id):
-    """Move faculty member to 'Archived Faculty' collection"""
-    faculty_ref = db.collection("Authorized Faculty").document(faculty_id)
-    faculty = faculty_ref.get()
-
-    if faculty.exists:
-        db.collection("Archived Faculty").document(faculty_id).set(faculty.to_dict())
-        faculty_ref.delete()
+    """Move faculty member to ArchivedFaculty table in PostgreSQL"""
+    try:
+        faculty = Faculty.objects.get(faculty_id=faculty_id)
+        # Create archived faculty record
+        ArchivedFaculty.objects.create(
+            faculty_id=faculty.faculty_id,
+            first_name=faculty.first_name,
+            last_name=faculty.last_name,
+            middle_initial=faculty.middle_initial,
+            program=faculty.program,
+            year_section=faculty.year_section,
+            semester=faculty.semester,
+            faculty_status='Archived'
+            # Add other fields as needed
+        )
+        faculty.delete()
         messages.success(request, "Faculty member has been archived successfully!")
-    else:
+    except Faculty.DoesNotExist:
         messages.error(request, "Faculty member not found.")
 
     return redirect("FacultyList")
@@ -234,11 +258,10 @@ def Superadmin_Student_Archive(request):
     else:
         return render(request, 'Students/superadmin-archived-students.html', context)
 
+
 @superadmin_required
 def Archived_faculty_list(request):
-    archive_ref = db.collection("Archived Faculty")
-    docs = archive_ref.stream()
-    archived_faculties = [doc.to_dict() for doc in docs]
+    archived_faculties = ArchivedFaculty.objects.all()
 
     context = {
         "archived_faculties": archived_faculties
@@ -250,17 +273,26 @@ def Archived_faculty_list(request):
         return render(request, 'Faculty/faculty-archived.html', context)
 
 
+
+@superadmin_required
 def restore_faculty(request, faculty_id):
-    """Restore faculty member from 'archive' collection"""
-    archive_ref = db.collection("Archived Faculty").document(faculty_id)
-    faculty = archive_ref.get()
-
-    if faculty.exists:
-        db.collection("Authorized Faculty").document(faculty_id).set(faculty.to_dict())
-        archive_ref.delete()
-
+    try:
+        archived_faculty = ArchivedFaculty.objects.get(faculty_id=faculty_id)
+        # Move to Faculty table
+        Faculty.objects.create(
+            faculty_id=archived_faculty.faculty_id,
+            first_name=archived_faculty.first_name,
+            last_name=archived_faculty.last_name,
+            middle_initial=archived_faculty.middle_initial,
+            program=archived_faculty.program,
+            year_section=archived_faculty.year_section,
+            semester=archived_faculty.semester,
+            password='',  # Set a default or handle as needed
+            faculty_status='Continuing'
+        )
+        archived_faculty.delete()
         messages.success(request, "Faculty member has been restored successfully!")
-    else:
+    except ArchivedFaculty.DoesNotExist:
         messages.error(request, "Faculty member not found in archive.")
 
     return redirect("archive-page")
@@ -443,6 +475,8 @@ def Superadmin_Student_Status(request):
     else:
         return render(request, 'Students/superadmin-student-status.html', context)
 
+
+
 @superadmin_required
 def Faculty_Status(request):
     status_filter = request.GET.get('status', 'all')
@@ -451,42 +485,41 @@ def Faculty_Status(request):
     semester_filter = request.GET.get('semester', 'all')
     search_query = request.GET.get('search', '').strip().lower()
 
-    # Fetch all faculty from all collections
-    def fetch_faculties(collection, status_label):
-        docs = db.collection(collection).stream()
-        return [{**doc.to_dict(), 'status': status_label, 'id': doc.id} for doc in docs]
+    # Fetch all faculty from PostgreSQL
+    faculties = Faculty.objects.all()
 
-    faculties = []
-    if status_filter in ['all', 'Continuing']:
-        faculties += fetch_faculties("Authorized Faculty", "Continuing")
-    if status_filter in ['all', 'Deactivated']:
-        faculties += fetch_faculties("Deactivated Faculty", "Deactivated")
-    if status_filter in ['all', 'Completed']:
-        faculties += fetch_faculties("Completed Faculty", "Completed")
+    # Apply status filter
+    if status_filter != 'all':
+        faculties = faculties.filter(faculty_status=status_filter)
+
+    # Apply program filter
+    if program_filter != 'all':
+        faculties = faculties.filter(program=program_filter)
+
+    # Apply year_section filter
+    if year_section_filter != 'all':
+        faculties = faculties.filter(year_section=year_section_filter)
+
+    # Apply semester filter
+    if semester_filter != 'all':
+        faculties = faculties.filter(semester=semester_filter)
+
+    # Apply search filter
+    if search_query:
+        faculties = faculties.filter(
+            models.Q(first_name__icontains=search_query) |
+            models.Q(last_name__icontains=search_query) |
+            models.Q(faculty_id__icontains=search_query) |
+            models.Q(program__icontains=search_query)
+        )
 
     # Gather unique values for dropdowns
-    year_sections = sorted(set(f.get('year_section', '') for f in faculties if f.get('year_section')))
-    programs = sorted(set(f.get('program', '') for f in faculties if f.get('program')))
-    semesters = sorted(set(f.get('semester', '') for f in faculties if f.get('semester')))
-
-    # Apply filters
-    if program_filter != 'all':
-        faculties = [f for f in faculties if f.get('program') == program_filter]
-    if year_section_filter != 'all':
-        faculties = [f for f in faculties if f.get('year_section') == year_section_filter]
-    if semester_filter != 'all':
-        faculties = [f for f in faculties if f.get('semester') == semester_filter]
-    if search_query:
-        faculties = [
-            f for f in faculties
-            if search_query in str(f.get('first_name', '')).lower()
-            or search_query in str(f.get('last_name', '')).lower()
-            or search_query in str(f.get('faculty_id', '')).lower()
-            or search_query in str(f.get('program', '')).lower()
-        ]
+    year_sections = sorted(set(faculties.values_list('year_section', flat=True)))
+    programs = sorted(set(faculties.values_list('program', flat=True)))
+    semesters = sorted(set(faculties.values_list('semester', flat=True)))
 
     # Sort alphabetically by first name
-    faculties = sorted(faculties, key=lambda f: str(f.get('first_name', '')).lower())
+    faculties = faculties.order_by('first_name')
 
     # Pagination
     page_number = request.GET.get('page', 1)

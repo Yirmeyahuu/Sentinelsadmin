@@ -28,7 +28,7 @@ db = firestore.client()
 
 
 AUTHENTICATION_BACKENDS = [
-    'Login.auth_backend.FirestoreBackend',  # Custom backend for Faculty
+    'Login.auth_backend.HybridFacultyBackend',
     'django.contrib.auth.backends.ModelBackend',
 ]
 
@@ -90,8 +90,12 @@ WSGI_APPLICATION = 'SentinelsProject.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'sentinels_db',
+        'USER': 'postgres',
+        'PASSWORD': '!Poypoy.mignon!01',
+        'HOST': 'localhost',
+        'PORT': '5432',
     }
 }
 
@@ -99,7 +103,7 @@ DATABASES = {
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
 
-AUTH_PASSWORD_VALIDATORS = [
+AUTH_PASSWORD_VALIDATORS = [ 
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
     },

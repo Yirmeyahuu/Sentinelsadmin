@@ -9,7 +9,8 @@ def faculty_required(view_func):
         elif request.user.is_authenticated:
             # Logged in but not faculty
             return render(request, 'Login/permission_denied.html')
-        return redirect('sentinels_login')
+        else:
+            return redirect('sentinels_login')
     return _wrapped_view
 
 def superadmin_required(view_func):

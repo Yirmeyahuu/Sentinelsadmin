@@ -10,7 +10,7 @@ db = firestore.client()
 # Initialize Firebase Admin SDK
 
 def Sentinels_login_view(request):
-    # If user is already authenticated, redirect to their homepage
+    # Redirect authenticated users to their respective homepages
     if request.user.is_authenticated:
         user_type = request.session.get('user_type')
         if user_type == 'superadmin':
@@ -22,36 +22,24 @@ def Sentinels_login_view(request):
         username_or_id = request.POST.get('username_or_id')
         password = request.POST.get('password')
 
-        # Try Django superuser authentication (Superadmin)
         user = authenticate(request, username=username_or_id, password=password)
-        if user is not None and user.is_superuser:
-            login(request, user)
-            request.session['user_type'] = 'superadmin'
-            return redirect('Superadmin-homepage')
-
-        # Try Faculty authentication (Firestore)
-        users_ref = db.collection('Authorized Faculty')
-        query = users_ref.where('faculty_id', '==', username_or_id).limit(1).get()
-        if query:
-            faculty_doc = query[0]
-            faculty_data = faculty_doc.to_dict()
-            faculty_password = faculty_data.get('faculty_password')
-            password_updated = faculty_data.get('password_updated', False)
-            if (faculty_password and password == faculty_password) or (not faculty_password and password == "welcomeadmin"):
+        if user is not None:
+            # Check if superadmin
+            if user.is_superuser:
+                login(request, user)
+                request.session['user_type'] = 'superadmin'
+                return redirect('Superadmin-homepage')
+            else:
+                # Faculty authenticated via HybridFacultyBackend
+                login(request, user)
                 request.session['user_type'] = 'faculty'
                 request.session['faculty_id'] = username_or_id
-                User = get_user_model()
-                user, created = User.objects.get_or_create(username=username_or_id)
-                if created:
-                    user.set_unusable_password()
-                    user.save()
-                user.backend = 'Login.auth_backend.FirestoreBackend'
-                login(request, user)
 
-                # Redirect to password change page if password is not updated
-                if not password_updated:
-                    return redirect('change_password')
-
+                # Optionally, redirect to password change page if needed
+                # (You can add a flag in your Faculty model or session if you want this logic)
+                # Example:
+                # if not user.profile.password_updated:
+                #     return redirect('change_password')
 
                 return redirect('home-page')
 
@@ -63,15 +51,16 @@ def Sentinels_login_view(request):
 
     return render(request, 'Login/sentinels-login.html')
 
+
 def Faculty_logout_view(request):
     """Logs out the faculty account and redirects to the login page."""
     if request.method == 'POST':  # Ensure logout is triggered via POST for security
-        # Clear the session
-        request.session.flush()
+        logout(request)  # Django logout
+        request.session.flush()  # Extra safety: clear session data
         messages.success(request, "You have been logged out successfully.")
-        return redirect('sentinels_login')  # Redirect to the faculty login page
+        return redirect('sentinels_login')
     else:
-        # If accessed via GET, redirect to the home page or login page
+        # If accessed via GET, redirect to the login page
         return redirect('sentinels_login')
 
 

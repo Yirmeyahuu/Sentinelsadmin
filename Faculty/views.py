@@ -13,6 +13,8 @@ from django.views.decorators.csrf import csrf_exempt
 from Login.decorators import faculty_required
 from django.core.paginator import Paginator
 
+from Faculty.models import Faculty
+
 
 
 
@@ -56,13 +58,20 @@ def saveActivityDeadline(request):
 def Faculty_home(request):
     faculty_id = request.user.username
 
-    # Get faculty data
-    users_ref = db.collection('Authorized Faculty')
-    query = users_ref.where('faculty_id', '==', faculty_id).limit(1).get()
-    faculty_data = None
-    if query:
-        faculty_doc = query[0]
-        faculty_data = faculty_doc.to_dict()
+    # Get faculty data from PostgreSQL
+    try:
+        faculty_obj = Faculty.objects.get(faculty_id=faculty_id)
+        faculty_data = {
+            "faculty_id": faculty_obj.faculty_id,
+            "first_name": faculty_obj.first_name,
+            "last_name": faculty_obj.last_name,
+            "middle_initial": faculty_obj.middle_initial,
+            "program": faculty_obj.program,
+            "year_section": faculty_obj.year_section,
+            "semester": faculty_obj.semester,
+        }
+    except Faculty.DoesNotExist:
+        faculty_data = None
 
     # Count total users
     students_ref = db.collection("Registered_Students")
@@ -835,9 +844,20 @@ def mark_all_notifications_read(request):
 @faculty_required
 def faculty_account(request):
     faculty_id = request.user.username
-    faculty_ref = db.collection('Authorized Faculty').document(faculty_id)
-    faculty_doc = faculty_ref.get()
-    faculty_data = faculty_doc.to_dict() if faculty_doc.exists else None
+    try:
+        faculty_obj = Faculty.objects.get(faculty_id=faculty_id)
+        faculty_data = {
+            "faculty_id": faculty_obj.faculty_id,
+            "first_name": faculty_obj.first_name,
+            "last_name": faculty_obj.last_name,
+            "middle_initial": faculty_obj.middle_initial,
+            "program": faculty_obj.program,
+            "year_section": faculty_obj.year_section,
+            "semester": faculty_obj.semester,
+            "profile_image": getattr(faculty_obj, "profile_image", None),  # If you have this field
+        }
+    except Faculty.DoesNotExist:
+        faculty_data = None
 
     show_logout_modal = False
 
