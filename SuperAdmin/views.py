@@ -13,6 +13,7 @@ from django.views.decorators.http import require_POST
 import json, datetime
 from django.core.paginator import Paginator
 from .forms import AddFacultyForm
+from django.db import transaction
 
 
 
@@ -545,54 +546,82 @@ def Faculty_Status(request):
     else:
         return render(request, 'Faculty/faculty-status.html', context)
 
+
 @superadmin_required
 def move_faculty(request):
     if request.method == "POST":
         faculty_id = request.POST.get("faculty_id")
         destination = request.POST.get("destination")
 
-        # Find the faculty in any of the three collections
-        collections = ["Authorized Faculty", "Deactivated Faculty", "Completed Faculty", "Archived Faculty"]
-        faculty_data = None
-        source_collection = None
-        for collection in collections:
-            ref = db.collection(collection).document(faculty_id)
-            doc = ref.get()
-            if doc.exists:
-                faculty_data = doc.to_dict()
-                source_collection = collection
-                break
+        # Try to find the faculty in all possible tables
+        faculty = Faculty.objects.filter(faculty_id=faculty_id).first()
+        archived_faculty = ArchivedFaculty.objects.filter(faculty_id=faculty_id).first()
 
-        if not faculty_data:
+        if not faculty and not archived_faculty:
             messages.error(request, "Faculty not found.")
             return redirect("FacultyList")
 
-        # Remove from source collection (except if moving to archive)
-        if destination != "archive" and source_collection:
-            db.collection(source_collection).document(faculty_id).delete()
+        # Move logic
+        try:
+            with transaction.atomic():
+                # Move to Authorized/Continuing
+                if destination == "authorized":
+                    if archived_faculty:
+                        Faculty.objects.create(
+                            faculty_id=archived_faculty.faculty_id,
+                            first_name=archived_faculty.first_name,
+                            last_name=archived_faculty.last_name,
+                            middle_initial=archived_faculty.middle_initial,
+                            program=archived_faculty.program,
+                            year_section=archived_faculty.year_section,
+                            semester=archived_faculty.semester,
+                            password='',  # Set as needed
+                            faculty_status='Continuing'
+                        )
+                        archived_faculty.delete()
+                        messages.success(request, "Faculty moved to Authorized Faculty successfully.")
+                    elif faculty:
+                        faculty.faculty_status = 'Continuing'
+                        faculty.save()
+                        messages.success(request, "Faculty is already in Authorized Faculty.")
+                # Move to Deactivated
+                elif destination == "deactivated":
+                    if faculty:
+                        faculty.faculty_status = 'Deactivated'
+                        faculty.save()
+                        messages.success(request, "Faculty moved to Deactivated Faculty successfully!")
+                    else:
+                        messages.error(request, "Faculty not found in active list.")
+                # Move to Completed
+                elif destination == "completed":
+                    if faculty:
+                        faculty.faculty_status = 'Completed'
+                        faculty.save()
+                        messages.success(request, "Faculty moved to Completed Faculty successfully.")
+                    else:
+                        messages.error(request, "Faculty not found in active list.")
+                # Move to Archive
+                elif destination == "archive":
+                    if faculty:
+                        ArchivedFaculty.objects.create(
+                            faculty_id=faculty.faculty_id,
+                            first_name=faculty.first_name,
+                            last_name=faculty.last_name,
+                            middle_initial=faculty.middle_initial,
+                            program=faculty.program,
+                            year_section=faculty.year_section,
+                            semester=faculty.semester,
+                            faculty_status='Archived'
+                        )
+                        faculty.delete()
+                        messages.success(request, "Faculty moved to Archived Faculty successfully!")
+                    else:
+                        messages.error(request, "Faculty not found in active list.")
+                else:
+                    messages.error(request, "Invalid destination.")
+        except Exception as e:
+            messages.error(request, f"Error moving faculty: {e}")
 
-        # Move to the selected collection and update status
-        if destination == "authorized":
-            faculty_data["status"] = "Continuing"
-            db.collection("Authorized Faculty").document(faculty_id).set(faculty_data)
-            messages.success(request, "Faculty moved to Authorized Faculty successfully.")
-        elif destination == "completed":
-            faculty_data["status"] = "Completed"
-            db.collection("Completed Faculty").document(faculty_id).set(faculty_data)
-            messages.success(request, "Faculty moved to Completed Faculty successfully.")
-        elif destination == "deactivated":
-            faculty_data["status"] = "Deactivated"
-            db.collection("Deactivated Faculty").document(faculty_id).set(faculty_data)
-            messages.success(request, "Faculty moved to Deactivated Faculty successfully!")
-        elif destination == "archive":
-            db.collection("Archived Faculty").document(faculty_id).set(faculty_data)
-            # Remove from all other collections
-            if source_collection:
-                db.collection(source_collection).document(faculty_id).delete()
-            messages.success(request, "Faculty moved to Archived Faculty successfully!")
-        else:
-            messages.error(request, "Invalid destination.")
-            return redirect("FacultyList")
     return redirect("FacultyList")
 
 @superadmin_required

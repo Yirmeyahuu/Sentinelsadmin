@@ -30,7 +30,6 @@ class ArchivedFaculty(models.Model):
     year_section = models.CharField(max_length=20)
     semester = models.CharField(max_length=20)
     faculty_status = models.CharField(max_length=20, default='Archived')
-    # Add other fields as needed
 
     def __str__(self):
         return f"{self.faculty_id} - {self.first_name} {self.last_name}"
