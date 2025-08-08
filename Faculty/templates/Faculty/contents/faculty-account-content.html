@@ -3,6 +3,21 @@
     document.title = "SENTINELS | Faculty Profile";
 </script>
 
+<!-- Global Notification-->
+{% if messages %}
+  {% for message in messages %}
+    <div id="django-message-{{ forloop.counter }}" class="p-4 mb-4 text-sm text-green-800 rounded-lg bg-green-50 fixed top-5 right-5 shadow-lg z-50">
+      <span class="font-medium">{{ message.tags|title }}!</span> {{ message }}
+    </div>
+    <script>
+      setTimeout(function() {
+        var msg = document.getElementById("django-message-{{ forloop.counter }}");
+        if (msg) msg.style.display = "none";
+      }, 5000);
+    </script>
+  {% endfor %}
+{% endif %}
+
 <div class="p-6 pr-20 pl-20 ml-20">
     <div class="bg-white/70 shadow-lg rounded-tl-4xl rounded-br-4xl p-6">
         <a href="javascript:void(0);" onclick="history.back();" class="inline-flex items-center text-blue-500 hover:text-blue-600 font-semibold transition-colors duration-100">
@@ -11,138 +26,166 @@
             </svg>
             Back
         </a>
-        <form method="POST" enctype="multipart/form-data" class="space-y-6">
+
+        <!-- Profile Image Section -->
+        <div class="flex flex-col items-center mb-8">
+            <div class="relative">
+                <div class="w-32 h-32 rounded-full overflow-hidden border-4 border-sky-500 shadow-lg">
+                    <img id="profilePreview" 
+                         src="{% if faculty_data.profile_image %}{{ faculty_data.profile_image }}{% else %}{% static 'assets/img/Default Profile.jpg' %}{% endif %}" 
+                         alt="Profile Picture"
+                         class="w-full h-full object-cover">
+                </div>
+                <label for="profileImage" class="absolute bottom-0 right-0 bg-blue-500 p-2 rounded-full cursor-pointer hover:bg-blue-600 transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                    </svg>
+                    <input type="file" id="profileImage" name="profile_image" class="hidden" accept="image/*" onchange="previewImage(this)">
+                </label>
+            </div>
+        </div>
+
+        <!-- Personal Information Section -->
+        <div class="grid md:grid-cols-2 gap-6">
+            <!-- Faculty ID (Read Only) -->
+            <div class="relative">
+                <label class="block text-sm font-bold text-gray-500 mb-1">Faculty ID</label>
+                <input type="text" value="{{ faculty_data.faculty_id }}" readonly
+                    class="w-full p-3 pl-10 bg-gray-200/80 text-gray-500 rounded-lg cursor-default">
+            </div>
+            <!-- Program (Read Only) -->
+            <div class="relative">
+                <label class="block text-sm font-bold text-gray-500 mb-1">Program</label>
+                <input type="text" value="{{ faculty_data.program }}" readonly
+                    class="w-full p-3 pl-10 bg-gray-200/80 text-gray-500 rounded-lg cursor-default">
+            </div>
+            <!-- Semester (Read Only) -->
+            <div class="relative">
+                <label class="block text-sm font-bold text-gray-500 mb-1">Semester</label>
+                <input type="text" value="{{ faculty_data.semester }}" readonly
+                    class="w-full p-3 pl-10 bg-gray-200/80 text-gray-500 rounded-lg cursor-default">
+            </div>
+            <!-- First Name -->
+            <div class="relative">
+                <label class="block text-sm font-bold text-gray-500 mb-1">First Name</label>
+                <div class="relative">
+                    <input type="text" id="first_name" name="first_name" value="{{ faculty_data.first_name }}"
+                           class="w-full p-3 pl-10 bg-gray-200/80 text-gray-500 rounded-lg cursor-default"
+                           readonly>
+                </div>
+            </div>
+            <!-- Last Name -->
+            <div class="relative">
+                <label class="block text-sm font-bold text-gray-500 mb-1">Last Name</label>
+                <div class="relative">
+                    <input type="text" id="last_name" name="last_name" value="{{ faculty_data.last_name }}"
+                           class="w-full p-3 pl-10 bg-gray-200/80 text-gray-500 rounded-lg cursor-default"
+                           readonly>
+                </div>
+            </div>
+            <!-- Middle Initial -->
+            <div class="relative">
+                <label class="block text-sm font-bold text-gray-500 mb-1">Middle Initial</label>
+                <div class="relative">
+                    <input type="text" id="middle_initial" name="middle_initial" value="{{ faculty_data.middle_initial }}"
+                           class="w-full p-3 pl-10 bg-gray-200/80 text-gray-500 rounded-lg cursor-default"
+                           readonly>
+                </div>
+            </div>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="flex justify-end mt-12 space-x-4">
+            <button type="button" 
+                onclick="openLogoutModal()" 
+                class="bg-red-500 text-white px-6 py-2 rounded-lg hover:bg-red-600 cursor-pointer transition-colors">
+                Logout
+            </button>
+            <button type="button" 
+                onclick="openEditProfileModal()"
+                class="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 cursor-pointer transition-colors">
+                Edit Profile
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Profile Modal -->
+<div id="editProfileModal" class="fixed inset-0 flex items-center justify-center z-50 hidden">
+    <!-- Backdrop without blur -->
+    <div class="fixed inset-0 bg-gray-900/80"></div>
+    <!-- Modal Content -->
+    <div class="bg-white p-8 rounded-2xl shadow-2xl w-[28rem] relative z-10 border border-gray-100">
+        <!-- Header -->
+        <div class="mb-6">
+            <h2 class="text-xl font-semibold text-gray-800">Edit Profile</h2>
+            <p class="text-gray-500 text-sm mt-1">Update your personal information</p>
+        </div>
+        <!-- Edit Profile Form -->
+        <form id="editProfileForm" method="POST" action="{% url 'edit_faculty_account' %}">
             {% csrf_token %}
-            
-            <!-- Profile Image Section -->
-            <div class="flex flex-col items-center mb-8">
-                <div class="relative">
-                    <div class="w-32 h-32 rounded-full overflow-hidden border-4 border-sky-500 shadow-lg">
-                        <img id="profilePreview" 
-                             src="{% if faculty_data.profile_image %}{{ faculty_data.profile_image }}{% else %}{% static 'assets/img/Default Profile.jpg' %}{% endif %}" 
-                             alt="Profile Picture"
-                             class="w-full h-full object-cover">
-                    </div>
-                    <label for="profileImage" class="absolute bottom-0 right-0 bg-blue-500 p-2 rounded-full cursor-pointer hover:bg-blue-600 transition">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" viewBox="0 0 20 20" fill="currentColor">
-                            <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                        </svg>
-                        <input type="file" id="profileImage" name="profile_image" class="hidden" accept="image/*" onchange="previewImage(this)">
-                    </label>
+            <!-- Form Fields -->
+            <div class="space-y-5">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+                    <input type="text" name="first_name" value="{{ faculty_data.first_name }}"
+                        class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 bg-white/50"
+                        placeholder="Enter your first name">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+                    <input type="text" name="last_name" value="{{ faculty_data.last_name }}"
+                        class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 bg-white/50"
+                        placeholder="Enter your last name">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Middle Initial</label>
+                    <input type="text" name="middle_initial" value="{{ faculty_data.middle_initial }}"
+                        class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 bg-white/50"
+                        placeholder="Enter your middle initial">
                 </div>
             </div>
-            
-
-            <!-- Personal Information Section -->
-            <div class="grid md:grid-cols-2 gap-6">
-                
-                <!-- Faculty ID (Read Only) -->
-                <div class="relative">
-                    <label class="block text-sm font-bold text-gray-500 mb-1">Faculty ID</label>
-                    <input type="text" value="{{ faculty_data.faculty_id }}" readonly
-                        class="w-full p-3 pl-10 bg-gray-200/80 text-gray-500 rounded-lg cursor-default">
-                </div>
-
-                <!-- Program (Read Only) -->
-                <div class="relative">
-                    <label class="block text-sm font-bold text-gray-500 mb-1">Program</label>
-                    <input type="text" value="{{ faculty_data.program }}" readonly
-                        class="w-full p-3 pl-10 bg-gray-200/80 text-gray-500 rounded-lg cursor-default">
-                </div>
-
-                <!-- Semester (Read Only) -->
-                <div class="relative">
-                    <label class="block text-sm font-bold text-gray-500 mb-1">Semester</label>
-                    <input type="text" value="{{ faculty_data.semester }}" readonly
-                        class="w-full p-3 pl-10 bg-gray-200/80 text-gray-500 rounded-lg cursor-default">
-                </div>
-
-                <!-- First Name -->
-                <div class="relative">
-                    <label class="block text-sm font-bold text-gray-500 mb-1">First Name</label>
-                    <div class="relative">
-                        <input type="text" id="first_name" name="first_name" value="{{ faculty_data.first_name }}"
-                               class="w-full p-3 pl-10 bg-gray-200/80 text-gray-500 rounded-lg cursor-default"
-                               readonly>
-                        <span class="absolute right-3 top-3 text-blue-500 cursor-pointer" onclick="enableEdit('first_name')">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                            </svg>
-                        </span>
-                    </div>
-                </div>
-
-                <!-- Last Name -->
-                <div class="relative">
-                    <label class="block text-sm font-bold text-gray-500 mb-1">Last Name</label>
-                    <div class="relative">
-                        <input type="text" id="last_name" name="last_name" value="{{ faculty_data.last_name }}"
-                               class="w-full p-3 pl-10 bg-gray-200/80 text-gray-500 rounded-lg cursor-default"
-                               readonly>
-                        <span class="absolute right-3 top-3 text-blue-500 cursor-pointer" onclick="enableEdit('last_name')">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                            </svg>
-                        </span>
-                    </div>
-                </div>
-
-                <!-- Middle Initial -->
-                <div class="relative">
-                    <label class="block text-sm font-bold text-gray-500 mb-1">Middle Initial</label>
-                    <div class="relative">
-                        <input type="text" id="middle_initial" name="middle_initial" value="{{ faculty_data.middle_initial }}"
-                               class="w-full p-3 pl-10 bg-gray-200/80 text-gray-500 rounded-lg cursor-default"
-                               readonly>
-                        <span class="absolute right-3 top-3 text-blue-500 cursor-pointer" onclick="enableEdit('middle_initial')">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                            </svg>
-                        </span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Logout Confirmation Modal -->
-            <div id="logoutModal" class="fixed inset-0 flex items-center justify-center z-50 hidden">
-                <!-- Backdrop with blur effect -->
-                <div class="fixed inset-0 bg-gray-900/80"></div>
-                
-                <!-- Modal Content -->
-                <div class="bg-white p-6 rounded-lg shadow-lg w-96 text-center relative z-10">
-                    <h2 class="text-lg font-bold text-gray-800 mb-4">Confirm Logout</h2>
-                    <p class="text-gray-600 mb-6">Are you sure you want to logout?</p>
-
-                    <!-- Logout Form (POST Request) -->
-                    <form id="logoutForm" method="POST" action="{% url 'faculty_logout' %}">
-                        {% csrf_token %}
-                        <div class="flex justify-center space-x-4">
-                            <button type="button" 
-                                onclick="closeLogoutModal()" 
-                                class="text-white bg-red-500 hover:bg-red-600 focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-3me-2 mb-2">
-                                Cancel
-                            </button>
-                            <button type="submit" 
-                                class="text-white bg-blue-500 hover:bg-blue-600 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-3 me-2 mb-2">
-                                Logout
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-
-            <!-- Submit Button -->
-            <div class="flex justify-end mt-12 space-x-4">
+            <!-- Action Buttons with enhanced hover effects -->
+            <div class="flex justify-end items-center space-x-3 mt-8 pt-6 border-t border-gray-100">
                 <button type="button" 
-                    onclick="openLogoutModal()" 
-                    class="bg-red-500 text-white px-6 py-2 rounded-lg hover:bg-red-600 cursor-pointer transition-colors">
-                    Logout
+                    onclick="closeEditProfileModal()"
+                    class="px-6 py-2.5 rounded-xl border border-gray-300 text-gray-600 hover:bg-gray-50 hover:border-gray-400 hover:shadow-sm focus:ring-2 focus:ring-gray-100 transition-all duration-200">
+                    Cancel
                 </button>
                 <button type="submit" 
-                    class="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 cursor-pointer transition-colors">
+                    class="px-6 py-2.5 rounded-xl bg-blue-500 text-white hover:bg-blue-600 hover:shadow-md focus:ring-2 focus:ring-blue-200 transition-all duration-200">
                     Save Changes
                 </button>
             </div>
+        </form>
+    </div>
+</div>
+
+<!-- Logout Confirmation Modal -->
+<div id="logoutModal" class="fixed inset-0 flex items-center justify-center z-50 hidden">
+    <!-- Backdrop with blur effect -->
+    <div class="fixed inset-0 bg-gray-900/80"></div>
+    <!-- Modal Content -->
+    <div class="bg-white p-6 rounded-lg shadow-lg w-96 text-center relative z-10">
+        <h2 class="text-lg font-bold text-gray-800 mb-4">Confirm Logout</h2>
+        <p class="text-gray-600 mb-6">Are you sure you want to logout?</p>
+        <!-- Logout Form (POST Request) -->
+        <form id="logoutForm" method="POST" action="{% url 'faculty_logout' %}">
+            {% csrf_token %}
+            <div class="flex justify-center space-x-4">
+                <button type="button" 
+                    onclick="closeLogoutModal()" 
+                    class="text-white bg-red-500 hover:bg-red-600 focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-3me-2 mb-2">
+                    Cancel
+                </button>
+                <button type="submit" 
+                    class="text-white bg-blue-500 hover:bg-blue-600 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-3 me-2 mb-2">
+                    Logout
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
 
 <script>
 function previewImage(input) {

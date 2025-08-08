@@ -25,6 +25,7 @@ urlpatterns = [
 
     # Add this to your urlpatterns
     path('account/', views.faculty_account, name='faculty-account'),
+    path('faculty/edit/', views.edit_faculty_account, name='edit_faculty_account'),
 
     path('remove-deadline/', views.remove_deadline, name='remove-deadline'),    
     

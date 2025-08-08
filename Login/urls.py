@@ -3,7 +3,7 @@ from . import views
 
 urlpatterns = [
     path('', views.Sentinels_login_view, name='sentinels_login'),
-    path('faculty-logout/', views.Faculty_logout_view, name='faculty_logout'),  # Add logout URL
+    path('faculty-logout/', views.Faculty_logout_view, name='faculty_logout'),
     path("superadminlogout/", views.superadmin_logout, name="superadmin_logout"),
     path('logout/', views.Faculty_logout_view, name='sentinels_logout'),
     path('change-password/', views.change_password_view, name='change_password'),

@@ -841,30 +841,9 @@ def faculty_account(request):
 
     show_logout_modal = False
 
-    if request.method == "POST":
-        updates = {
-            'first_name': request.POST.get('first_name'),
-            'last_name': request.POST.get('last_name'),
-            'middle_initial': request.POST.get('middle_initial'),
-        }
-        password_changed = False
-
-        # Only allow password creation if not set yet
-        if not faculty_data.get('faculty_password'):
-            faculty_password = request.POST.get('faculty_password')
-            if faculty_password:
-                updates['faculty_password'] = faculty_password
-                password_changed = True
-
-        faculty_ref.update(updates)
-
-        if password_changed:
-            show_logout_modal = True  # Show modal instead of logging out immediately
-
     context = {
         'faculty_data': faculty_data,
         'show_logout_modal': show_logout_modal,
-        "show_sticky_container": False,
     }
 
     if request.headers.get('HX-Request'):
@@ -873,6 +852,29 @@ def faculty_account(request):
     else:
         # Normal request: return the full page
         return render(request, 'Faculty/faculty-account.html', context)
+    
+@faculty_required
+def edit_faculty_account(request):
+    faculty_id = request.user.username
+    faculty_ref = db.collection('Authorized Faculty').document(faculty_id)
+    faculty_doc = faculty_ref.get()
+    faculty_data = faculty_doc.to_dict() if faculty_doc.exists else None
+
+    if request.method == "POST":
+        updates = {
+            'first_name': request.POST.get('first_name'),
+            'last_name': request.POST.get('last_name'),
+            'middle_initial': request.POST.get('middle_initial'),
+        }
+
+        try:
+            faculty_ref.update(updates)
+            messages.success(request, 'Profile updated successfully!')
+        except Exception as e:
+            messages.error(request, 'Failed to update profile. Please try again.')
+            print(f"Error updating profile: {e}")
+
+    return redirect("faculty-account")
 
 def handle_image_upload(image):
     # Implement your image upload logic
