@@ -92,14 +92,14 @@
                         <td class="border border-blue-500 p-2 text-center">{{ faculty.semester }}</td>
                         <td class="border border-blue-500 p-2 text-center">
                             <span class="px-2 py-1 rounded-lg text-xs font-medium
-                                {% if faculty.status == 'Deactivated' %}
+                                {% if faculty.faculty_status == 'Deactivated' %}
                                     bg-red-500/20 text-red-700
-                                {% elif faculty.status == 'Completed' %}
+                                {% elif faculty.faculty_status == 'Completed' %}
                                     bg-yellow-500/20 text-yellow-700
                                 {% else %}
                                     bg-green-500/20 text-green-700
                                 {% endif %}">
-                                {{ faculty.status }}
+                                {{ faculty.faculty_status }}
                             </span>
                         </td>
                         <td class="border border-blue-500 p-2 text-center">

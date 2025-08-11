@@ -36,3 +36,9 @@ class ArchivedFaculty(models.Model):
 
     class Meta:
         db_table = 'ArchivedFaculty'
+
+# class CompletedFaculty(models.Model):
+
+
+
+# class DeactivatedFaculty(models.Model):

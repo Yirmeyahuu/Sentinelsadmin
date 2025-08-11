@@ -77,12 +77,10 @@ def Superadmin_Home(request):
         # Normal request: return the full page
         return render(request, 'Home/superadmin-home.html', context)
 
-
-
 @superadmin_required
 def Faculty_list(request):
-    # Fetch all continuing faculty from PostgreSQL
-    continuing_faculties = Faculty.objects.all().values(
+    # Only fetch faculty with status 'Continuing'
+    continuing_faculties = Faculty.objects.filter(faculty_status='Continuing').values(
         'faculty_id', 'first_name', 'middle_initial', 'last_name',
         'program', 'year_section', 'semester'
     )
@@ -741,7 +739,7 @@ def update_tier_lock(request):
     return JsonResponse({'success': False, 'error': 'Invalid request'})
 
 @superadmin_required
-def superadmin_move_student(request):
+def superadmin_move_student(request):   
     if request.method == "POST":
         student_id = request.POST.get("student_id")
         destination = request.POST.get("destination")
