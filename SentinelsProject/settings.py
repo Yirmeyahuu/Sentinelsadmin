@@ -91,10 +91,10 @@ WSGI_APPLICATION = 'SentinelsProject.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'sentinels_db',
-        'USER': 'postgres',
-        'PASSWORD': '!Poypoy.mignon!01',
-        'HOST': 'localhost',
+        'NAME': 'sentinels',
+        'USER': 'sentinels_user',
+        'PASSWORD': 'TBtiLegwaMKDNKjEcfkeOyrUKhcHXEMk',
+        'HOST': 'dpg-d2csd2ggjchc739q67ag-a.singapore-postgres.render.com',
         'PORT': '5432',
     }
 }
