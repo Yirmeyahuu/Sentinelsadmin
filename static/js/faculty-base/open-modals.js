@@ -10,11 +10,9 @@ window.closeArchiveModal = function() {
 // Add Student Modal
 window.openStudentModal = function() {
     document.getElementById('modal').classList.remove('hidden');
-    document.querySelector('aside').classList.add('blur');
 };
 window.closeStudentModal = function() {
     document.getElementById('modal').classList.add('hidden');
-    document.querySelector('aside').classList.remove('blur');
 };
 
 // Edit Student Modal
@@ -30,13 +28,11 @@ window.openMoveStudentModal = function(studentId) {
     document.getElementById("move-student-id").value = studentId;
     document.getElementById("moveStudentModal").classList.remove("hidden");
     document.body.classList.add("overflow-hidden");
-    document.querySelector('aside').classList.add('blur');
 };
 
 window.closeMoveStudentModal = function() {
     document.getElementById("moveStudentModal").classList.add("hidden");
     document.body.classList.remove("overflow-hidden");
-    document.querySelector('aside').classList.remove('blur');
 };
 
 // Progress Modal
@@ -75,8 +71,6 @@ window.openFacultyActivityDeadlineModal = function(title, description, tier) {
     document.getElementById('facultyActivityDeadlineDescription').textContent = description;
     document.getElementById('facultyActivityDeadlineModal').classList.remove('hidden');
     document.body.classList.add('overflow-hidden');
-    const aside = document.querySelector('aside');
-    if (aside) aside.classList.add('blur');
     // Store title and tier for submission
     const form = document.getElementById('facultyDeadlineForm');
     form.dataset.title = title;
@@ -86,8 +80,6 @@ window.openFacultyActivityDeadlineModal = function(title, description, tier) {
 window.closeFacultyActivityDeadlineModal = function() {
     document.getElementById('facultyActivityDeadlineModal').classList.add('hidden');
     document.body.classList.remove('overflow-hidden');
-    const aside = document.querySelector('aside');
-    if (aside) aside.classList.remove('blur');
     // Reset form
     document.getElementById('facultyDeadlineForm').reset();
 };

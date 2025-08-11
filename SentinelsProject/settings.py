@@ -17,13 +17,16 @@ SECRET_KEY = 'django-insecure-ktfkhd0zkk(f8q_vzlivj(_xjx(gvu91t-%vl=6$ud+t2q$+o+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+
 ALLOWED_HOSTS = []
 
 #firestore-database
-cred = credentials.Certificate("C:/Users/ASUS/Desktop/Thesis/sentinels-a61ff-firebase-adminsdk-fbsvc-35c84e60a7.json")
+cred = credentials.Certificate("/Users/jeremiahpantaras/Documents/sentinels-project/sentinels-a61ff-firebase-adminsdk-fbsvc-aaf9572a3f.json")
 firebase_admin.initialize_app(cred)
 db = firestore.client()
 # Application definition
+# /Users/jeremiahpantaras/Documents/sentinels-project/sentinels-a61ff-firebase-adminsdk-fbsvc-aaf9572a3f.json
+# C:/Users/ASUS/Desktop/Thesis/sentinels-a61ff-firebase-adminsdk-fbsvc-35c84e60a7.json
 
 
 
@@ -52,7 +55,9 @@ INSTALLED_APPS = [
 
 TAILWIND_APP_NAME = 'theme'
 
-NPM_BIN_PATH = "C:/Program Files/nodejs/npm.cmd"
+NPM_BIN_PATH = "/usr/local/bin/npm"
+# C:/Program Files/nodejs/npm.cmd
+# /usr/local/bin/npm
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

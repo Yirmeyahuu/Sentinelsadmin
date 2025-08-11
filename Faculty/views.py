@@ -876,19 +876,14 @@ def faculty_account(request):
 @faculty_required
 def edit_faculty_account(request):
     faculty_id = request.user.username
-    # Query for the document where faculty_id matches in Firestore
-    users_ref = db.collection('Authorized Faculty')
-    query = users_ref.where('faculty_id', '==', faculty_id).limit(1).get()
-    faculty_ref = query[0].reference if query else None
 
-    if request.method == "POST" and faculty_ref:
+    if request.method == "POST":
         updates = {
             'first_name': request.POST.get('first_name'),
             'last_name': request.POST.get('last_name'),
             'middle_initial': request.POST.get('middle_initial'),
         }
         try:
-            # Update PostgreSQL
             Faculty.objects.filter(faculty_id=faculty_id).update(
                 first_name=updates['first_name'],
                 last_name=updates['last_name'],

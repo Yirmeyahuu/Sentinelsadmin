@@ -2,13 +2,11 @@
 window.openLogoutModal = function() {
     document.getElementById("logoutModal").classList.remove("hidden");
     document.body.classList.add("overflow-hidden");
-    document.querySelector('aside').classList.add('blur');
 };
 
 window.closeLogoutModal = function() {
     document.getElementById("logoutModal").classList.add("hidden");
     document.body.classList.remove("overflow-hidden");
-    document.querySelector('aside').classList.remove('blur');
 
 };
 
@@ -31,13 +29,11 @@ window.closeArchiveModal = function() {
 window.openEditFacultyModal = function() {
     document.getElementById("editFacultyModal").classList.remove("hidden");
     document.body.classList.add("overflow-hidden");
-    document.querySelector('aside').classList.add('blur');
 };
 
 window.closeEditFacultyModal = function() {
     document.getElementById("editFacultyModal").classList.add("hidden");
     document.body.classList.remove("overflow-hidden");
-    document.querySelector('aside').classList.remove('blur');
 };
 
 // Move Faculty Modal
@@ -45,13 +41,11 @@ window.openMoveFacultyModal = function(facultyId) {
     document.getElementById("move-faculty-id").value = facultyId; // <-- Set the hidden input!
     document.getElementById("moveFacultyModal").classList.remove("hidden");
     document.body.classList.add("overflow-hidden");
-    document.querySelector('aside').classList.add('blur');
 };
 
 window.closeMoveFacultyModal = function() {
     document.getElementById("moveFacultyModal").classList.add("hidden");
     document.body.classList.remove("overflow-hidden");
-    document.querySelector('aside').classList.remove('blur');
 };
 
 // Move Student Modal
@@ -59,27 +53,23 @@ window.openMoveStudentModal = function(studentId) {
     document.getElementById("move-student-id").value = studentId;
     document.getElementById("moveStudentModal").classList.remove("hidden");
     document.body.classList.add("overflow-hidden");
-    document.querySelector('aside').classList.add('blur');
 };
 
 window.closeMoveStudentModal = function() {
     document.getElementById("moveStudentModal").classList.add("hidden");
     document.body.classList.remove("overflow-hidden");
-    document.querySelector('aside').classList.remove('blur');
 };
 
 // Add Faculty Modal
 window.openModal = function() {
     document.getElementById("modal").classList.remove("hidden");
     document.body.classList.add("overflow-hidden");
-    document.querySelector('aside').classList.add('blur');
     
 };
 
 window.closeModal = function() {
     document.getElementById("modal").classList.add("hidden");
     document.body.classList.remove("overflow-hidden");
-    document.querySelector('aside').classList.remove('blur');
 };
 
 
@@ -187,13 +177,9 @@ window.openActivityDetails = function(title, description) {
     document.getElementById('activityDetailsDescription').textContent = description;
     document.getElementById('ActivityDetails').classList.remove('hidden');
     document.body.classList.add('overflow-hidden');
-    const aside = document.querySelector('aside');
-    if (aside) aside.classList.add('blur');
 };
 
 window.closeActivityDetails = function() {
     document.getElementById('ActivityDetails').classList.add('hidden');
     document.body.classList.remove('overflow-hidden');
-    const aside = document.querySelector('aside');
-    if (aside) aside.classList.remove('blur');
 };

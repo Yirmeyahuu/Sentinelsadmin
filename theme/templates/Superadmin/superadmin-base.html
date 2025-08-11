@@ -28,16 +28,6 @@
     <script src="{% static 'js/superadmin-base/content-animate.js' %}" defer></script>
     <script src="{% static 'js/superadmin-base/buttonsActivate.js' %}"></script>
  
-    <style>
-        * {
-            font-family: 'Poppins', sans-serif;
-        }
-
-        .blur {
-            filter: blur(8px);
-            transition: filter 0.3s;
-        }
-    </style>
 
 </head>
 
@@ -59,10 +49,7 @@
 {% endif %}
 
 <!-- Activity Details Modal -->
-<div id="ActivityDetails" class="fixed inset-0 flex items-center justify-center z-50 hidden">
-    <!-- Backdrop with gaming blur effect -->
-    <div class="fixed inset-0 bg-gray-900/80 backdrop-blur-sm"></div>
-    
+<div id="ActivityDetails" class="fixed inset-0 flex items-center justify-center bg-gray-900/80 z-100 hidden">
     <!-- Modal Content -->
     <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-2xl z-10 relative border-2 border-blue-500/20">
         <!-- Title Section -->
@@ -97,10 +84,7 @@
 </div>
 
 <!-- Logout Confirmation Modal -->
-<div id="logoutModal" class="fixed inset-0 flex items-center justify-center z-50 hidden">
-    <!-- Backdrop with blur effect -->
-    <div class="fixed inset-0 backdrop-blur-sm bg-gray-900/70"></div>
-    
+<div id="logoutModal" class="fixed inset-0 flex items-center justify-center bg-gray-900/80 z-100 hidden">
     <!-- Modal Content -->
     <div class="bg-white p-6 rounded-lg shadow-lg w-96 text-center relative z-10">
         <h2 class="text-lg font-bold text-gray-800 mb-4">Confirm Logout</h2>
@@ -126,7 +110,7 @@
 </div>
 
 <!-- Archive Confirmation Modal -->
-<div id="archiveModal" class="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 hidden z-50">
+<div id="archiveModal" class="fixed inset-0 flex items-center justify-center bg-gray-900/80 hidden z-100">
     <div class="bg-white p-6 rounded-lg shadow-lg w-96">
         <h2 class="text-lg font-bold text-gray-900 mb-4">Archive Faculty</h2>
         <p class="text-gray-700 mb-6">Are you sure you want to archive this faculty? It will be temporarily stored in the archive.</p>
@@ -138,8 +122,7 @@
 </div>
 
 <!-- Edit Faculty Modal -->
-<div id="editFacultyModal" class="fixed inset-0 flex justify-center bg-gray-900/60 items-center hidden z-50">
-    <div class="fixed inset-0 backdrop-blur-sm"></div>
+<div id="editFacultyModal" class="fixed inset-0 flex justify-center bg-gray-900/80 items-center hidden z-100">
     <div class="bg-gray-100 border border-white p-12 rounded-3xl shadow-lg w-1/2 z-10">
         <h2 class="text-xl font-bold mb-4 text-blue-500">Edit Faculty</h2>
         <div class="border-t border-blue-500 p-2 mt-auto"></div>
@@ -187,9 +170,7 @@
 </div>
 
 <!-- Move Faculty Modal -->
-<div id="moveFacultyModal" class="fixed inset-0 z-50 flex items-center justify-center hidden">
-    <!-- Backdrop -->
-    <div class="fixed inset-0 backdrop-blur-sm bg-gray-900/60"></div>
+<div id="moveFacultyModal" class="fixed inset-0 z-100 flex items-center bg-gray-900/80 justify-center hidden">
     <!-- Modal Content -->
     <div class="relative bg-white p-6 rounded-3xl shadow-lg w-96 z-10">
         <h2 class="text-lg font-bold text-blue-500 mb-4">Move Faculty</h2>
@@ -213,9 +194,7 @@
 </div>
 
 <!-- Move Student Modal -->
-<div id="moveStudentModal" class="fixed inset-0 z-50 flex items-center justify-center hidden">
-    <!-- Backdrop -->
-    <div class="fixed inset-0 backdrop-blur-sm bg-gray-900/60"></div>
+<div id="moveStudentModal" class="fixed inset-0 z-100 flex items-center bg-gray-900/80 justify-center hidden">\
     <!-- Modal Content -->
     <div class="relative bg-white p-6 rounded-3xl shadow-lg w-96 z-10">
         <h2 class="text-lg font-bold text-blue-500 mb-4">Move Student</h2>
@@ -240,10 +219,7 @@
 
 
 <!-- Add Faculty Modal -->
-<div id="modal" class="fixed inset-0 flex justify-center items-center hidden z-50">
-    <!-- Backdrop with blur effect -->
-    <div class="fixed inset-0 backdrop-blur-sm bg-gray-900/60"></div>
-    
+<div id="modal" class="fixed inset-0 flex justify-center bg-gray-900/80 items-center hidden z-100">
     <!-- Modal Content -->
     <div class="bg-gray-100 border border-white p-12 rounded-3xl shadow-lg w-1/2 z-10">
         <h2 class="text-xl font-bold mb-4 text-blue-500">Add Faculty</h2>

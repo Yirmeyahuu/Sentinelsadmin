@@ -19,7 +19,7 @@
 {% endif %}
 
 <div class="pr-20 pl-20 ml-20">
-    <div class="bg-white/70 backdrop-blur-sm shadow-xl rounded-3xl p-8 border border-gray-100">
+    <div class="bg-white/70 shadow-xl rounded-3xl p-8 border border-gray-100">
         <!-- Back Button with enhanced hover -->
         <a href="javascript:void(0);" onclick="history.back();" 
            class="inline-flex items-center text-gray-500 hover:text-blue-600 font-medium transition-all duration-200 mb-6 hover:translate-x-[-4px]">
@@ -68,7 +68,7 @@
         <!-- System Information with enhanced cards -->
         <div class="grid md:grid-cols-3 gap-8 mb-8">
             <!-- Faculty ID -->
-            <div class="bg-gray-50/80 backdrop-blur-sm rounded-2xl p-6 shadow-sm border border-gray-100 
+            <div class="bg-gray-50/80 rounded-2xl p-6 shadow-sm border border-gray-100 
                         transition-all duration-300 hover:shadow-md hover:scale-[1.02] cursor-pointer">
                 <label class="text-sm font-semibold text-gray-400 block mb-3">Faculty ID</label>
                 <div class="flex items-center">
@@ -81,7 +81,7 @@
             </div>
 
             <!-- Program -->
-            <div class="bg-gray-50/80 backdrop-blur-sm rounded-2xl p-6 shadow-sm border border-gray-100 
+            <div class="bg-gray-50/80 rounded-2xl p-6 shadow-sm border border-gray-100 
                         transition-all duration-300 hover:shadow-md hover:scale-[1.02] cursor-pointer">
                 <label class="text-sm font-semibold text-gray-400 block mb-3">Program</label>
                 <div class="flex items-center">
@@ -94,7 +94,7 @@
             </div>
 
             <!-- Semester -->
-            <div class="bg-gray-50/80 backdrop-blur-sm rounded-2xl p-6 shadow-sm border border-gray-100 
+            <div class="bg-gray-50/80 rounded-2xl p-6 shadow-sm border border-gray-100 
                         transition-all duration-300 hover:shadow-md hover:scale-[1.02] cursor-pointer">
                 <label class="text-sm font-semibold text-gray-400 block mb-3">Semester</label>
                 <div class="flex items-center">
@@ -126,9 +126,7 @@
 </div>
 
 <!-- Edit Profile Modal -->
-<div id="editProfileModal" class="fixed inset-0 flex items-center justify-center z-50 hidden">
-    <!-- Backdrop without blur -->
-    <div class="fixed inset-0 bg-gray-900/80"></div>
+<div id="editProfileModal" class="fixed inset-0 flex items-center bg-gray-900/80 justify-center z-100 hidden">
     <!-- Modal Content -->
     <div class="bg-white p-8 rounded-2xl shadow-2xl w-[28rem] relative z-10 border border-gray-100">
         <!-- Header -->
@@ -177,9 +175,7 @@
 </div>
 
 <!-- Logout Confirmation Modal -->
-<div id="logoutModal" class="fixed inset-0 flex items-center justify-center z-50 hidden">
-    <!-- Backdrop with blur effect -->
-    <div class="fixed inset-0 bg-gray-900/80"></div>
+<div id="logoutModal" class="fixed inset-0 flex items-center justify-center bg-gray-900/80 z-100 hidden">
     <!-- Modal Content -->
     <div class="bg-white p-6 rounded-lg shadow-lg w-96 text-center relative z-10">
         <h2 class="text-lg font-bold text-gray-800 mb-4">Confirm Logout</h2>

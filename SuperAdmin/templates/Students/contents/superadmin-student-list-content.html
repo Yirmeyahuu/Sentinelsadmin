@@ -271,11 +271,9 @@
 <script>
 function openModal() { 
     document.getElementById("modal").classList.remove("hidden");
-    document.querySelector('aside').classList.add('blur'); // Add blur effect to sidebar
 }
 function closeModal() { 
     document.getElementById("modal").classList.add("hidden"); 
-    document.querySelector('aside').classList.remove('blur'); // Remove blur effect from sidebar
 }
 </script>
 
@@ -381,12 +379,10 @@ function closeModal() {
     function openArchiveModal(url) {
         document.getElementById("archiveModal").classList.remove("hidden");
         document.getElementById("confirmArchiveBtn").setAttribute("href", url);
-        document.querySelector('aside').classList.add('blur');
     }
 
     function closeArchiveModal() {
         document.getElementById("archiveModal").classList.add("hidden");
-        document.querySelector('aside').classList.remove('blur');
     }
 </script>
 
@@ -397,11 +393,9 @@ function closeModal() {
     function openMoveModal(studentId) {
         document.getElementById('move-student-id').value = studentId;
         document.getElementById('moveStudentModal').classList.remove('hidden');
-        document.querySelector('aside').classList.add('blur');
     }
     function closeMoveStudentModal() {
         document.getElementById('moveStudentModal').classList.add('hidden');
-        document.querySelector('aside').classList.remove('blur');
     }
 </script>
 
