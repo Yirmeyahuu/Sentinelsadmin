@@ -876,19 +876,24 @@ def faculty_account(request):
 @faculty_required
 def edit_faculty_account(request):
     faculty_id = request.user.username
-    faculty_ref = db.collection('Authorized Faculty').document(faculty_id)
-    faculty_doc = faculty_ref.get()
-    faculty_data = faculty_doc.to_dict() if faculty_doc.exists else None
+    # Query for the document where faculty_id matches in Firestore
+    users_ref = db.collection('Authorized Faculty')
+    query = users_ref.where('faculty_id', '==', faculty_id).limit(1).get()
+    faculty_ref = query[0].reference if query else None
 
-    if request.method == "POST":
+    if request.method == "POST" and faculty_ref:
         updates = {
             'first_name': request.POST.get('first_name'),
             'last_name': request.POST.get('last_name'),
             'middle_initial': request.POST.get('middle_initial'),
         }
-
         try:
-            faculty_ref.update(updates)
+            # Update PostgreSQL
+            Faculty.objects.filter(faculty_id=faculty_id).update(
+                first_name=updates['first_name'],
+                last_name=updates['last_name'],
+                middle_initial=updates['middle_initial']
+            )
             messages.success(request, 'Profile updated successfully!')
         except Exception as e:
             messages.error(request, 'Failed to update profile. Please try again.')
