@@ -25,13 +25,13 @@ window.closeArchiveModal = function() {
     document.body.classList.remove("overflow-hidden");
 };
 
-// Edit Faculty Modal
-window.openEditFacultyModal = function() {
-    document.getElementById("editFacultyModal").classList.remove("hidden");
+window.openEditFacultyModal = function(facultyId) {
+    document.getElementById("editFacultyModal-" + facultyId).classList.remove("hidden");
+    document.body.classList.add("overflow-hidden");
 };
-
-window.closeEditFacultyModal = function() {
-    document.getElementById("editFacultyModal").classList.add("hidden");
+window.closeEditFacultyModal = function(facultyId) {
+    document.getElementById("editFacultyModal-" + facultyId).classList.add("hidden");
+    document.body.classList.remove("overflow-hidden");
 };
 
 // Move Faculty Modal

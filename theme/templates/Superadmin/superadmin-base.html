@@ -26,9 +26,8 @@
     <script src="{% static 'js/superadmin-base/sidebar.js' %}" defer></script>
     <script src="{% static 'js/superadmin-base/charts.js' %}" defer></script>
     <script src="{% static 'js/superadmin-base/content-animate.js' %}" defer></script>
-    <script src="{% static 'js/superadmin-base/buttonsActivate.js' %}"></script>
+    <script src="{% static 'js/superadmin-base/buttonsActivate.js' %}" defer></script>
  
-
 </head>
 
 <body class="min-h-screen bg-gradient-to-br from-[#E0EAFC] to-[#CFDEF3]">
@@ -171,104 +170,66 @@
     </div>
 </div>
 
-
-<!-- Add Faculty Modal -->
-<div id="modal" class="fixed inset-0 flex justify-center bg-gray-900/80 items-center hidden z-100">
-    <!-- Modal Content -->
-    <div class="bg-gray-100 border border-white p-12 rounded-3xl shadow-lg w-1/2 z-10">
-        <h2 class="text-xl font-bold mb-4 text-blue-500">Add Faculty</h2>
-        <div class="border-t border-blue-500 p-2 mt-auto"></div>
-        <form id="facultyForm" action="{% url 'add_faculty' %}" method="POST">
+<!-- Edit Faculty Modals -->
+{% for faculty in faculties %}
+<div id="editFacultyModal-{{ faculty.faculty_id }}" class="fixed inset-0 flex items-center bg-gray-900/80 justify-center z-[9999] hidden">
+    <div class="bg-white p-8 rounded-2xl shadow-2xl w-[36rem] relative z-10 border border-gray-100">
+        <div class="mb-6">
+            <h2 class="text-xl font-semibold text-gray-800">Edit Faculty</h2>
+            <p class="text-gray-500 text-sm mt-1">Update faculty information</p>
+        </div>
+        <form method="POST" action="{% url 'edit_faculty' faculty.faculty_id %}">
             {% csrf_token %}
-            {% if form.non_field_errors %}
-                <div class="text-red-500 text-sm mb-2">
-                    {{ form.non_field_errors }}
-                </div>
-            {% endif %}
+            <input type="hidden" name="faculty_id" value="{{ faculty.faculty_id }}">
             <div class="grid grid-cols-2 gap-4">
-                <!-- Faculty ID -->
                 <div>
-                    <label class="block text-sm font-bold mb-2 text-blue-500">Faculty ID <span class="text-red-500">*</span></label>
-                    <input type="text" name="faculty_id" placeholder="Enter Faculty ID"
-                           class="w-full p-4 border border-gray-300 rounded-2xl"
-                           required value="{{ form.faculty_id.value|default:'' }}">
-                    {% if form.faculty_id.errors %}
-                        <span class="text-red-500 text-xs">{{ form.faculty_id.errors.0 }}</span>
-                    {% endif %}
+                    <label class="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+                    <input type="text" name="first_name" value="{{ faculty.first_name|default_if_none:'' }}"
+                        class="w-full px-4 py-3 rounded-xl border border-gray-200" placeholder="Enter first name">
                 </div>
-                <!-- First Name -->
                 <div>
-                    <label class="block text-sm font-bold mb-2 text-blue-500">First Name <span class="text-red-500">*</span></label>
-                    <input type="text" name="first_name" placeholder="Enter First Name"
-                           class="w-full p-4 border border-gray-300 rounded-2xl"
-                           required value="{{ form.first_name.value|default:'' }}">
-                    {% if form.first_name.errors %}
-                        <span class="text-red-500 text-xs">{{ form.first_name.errors.0 }}</span>
-                    {% endif %}
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+                    <input type="text" name="last_name" value="{{ faculty.last_name|default_if_none:'' }}"
+                        class="w-full px-4 py-3 rounded-xl border border-gray-200" placeholder="Enter last name">
                 </div>
-                <!-- Last Name -->
                 <div>
-                    <label class="block text-sm font-bold mb-2 text-blue-500">Last Name <span class="text-red-500">*</span></label>
-                    <input type="text" name="last_name" placeholder="Enter Last Name"
-                           class="w-full p-4 border border-gray-300 rounded-2xl"
-                           required value="{{ form.last_name.value|default:'' }}">
-                    {% if form.last_name.errors %}
-                        <span class="text-red-500 text-xs">{{ form.last_name.errors.0 }}</span>
-                    {% endif %}
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Middle Initial</label>
+                    <input type="text" name="middle_initial" value="{{ faculty.middle_initial|default_if_none:'' }}"
+                        class="w-full px-4 py-3 rounded-xl border border-gray-200" placeholder="Enter middle initial">
                 </div>
-                <!-- Middle Initial -->
                 <div>
-                    <label class="block text-sm font-bold mb-2 text-blue-500">Middle Initial <span class="text-red-500">*</span></label>
-                    <input type="text" name="middle_initial" placeholder="Enter Middle Initial"
-                           class="w-full p-4 border border-gray-300 rounded-2xl"
-                           required value="{{ form.middle_initial.value|default:'' }}">
-                    {% if form.middle_initial.errors %}
-                        <span class="text-red-500 text-xs">{{ form.middle_initial.errors.0 }}</span>
-                    {% endif %}
-                </div>
-                <!-- Program -->
-                <div>
-                    <label class="block text-sm font-bold mb-2 text-blue-500">Program <span class="text-red-500">*</span></label>
-                    <select name="program" class="w-full p-4 border border-gray-300 rounded-2xl" required>
-                        <option value="" disabled {% if not form.program.value %}selected{% endif %}>-Select Option-</option>
-                        <option value="Computer Science" {% if form.program.value == "Computer Science" %}selected{% endif %}>Computer Science</option>
-                        <option value="Information Technology" {% if form.program.value == "Information Technology" %}selected{% endif %}>Information Technology</option>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Program</label>
+                    <select name="program" class="w-full px-4 py-3 rounded-xl border border-gray-200">
+                        <option value="Computer Science" {% if faculty.program == "Computer Science" %}selected{% endif %}>Computer Science</option>
+                        <option value="Information Technology" {% if faculty.program == "Information Technology" %}selected{% endif %}>Information Technology</option>
                     </select>
-                    {% if form.program.errors %}
-                        <span class="text-red-500 text-xs">{{ form.program.errors.0 }}</span>
-                    {% endif %}
                 </div>
-                <!-- Year & Section -->
                 <div>
-                    <label class="block text-sm font-bold mb-2 text-blue-500">Year & Section <span class="text-red-500">*</span><span>(e.g. 3A)</span></label>
-                    <input type="text" name="year_section" placeholder="Enter Year and Section"
-                           class="w-full p-4 border border-gray-300 rounded-2xl"
-                           required value="{{ form.year_section.value|default:'' }}">
-                    {% if form.year_section.errors %}
-                        <span class="text-red-500 text-xs">{{ form.year_section.errors.0 }}</span>
-                    {% endif %}
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Year & Section</label>
+                    <input type="text" name="year_section" value="{{ faculty.year_section|default_if_none:'' }}"
+                        class="w-full px-4 py-3 rounded-xl border border-gray-200" placeholder="Enter year & section">
                 </div>
-                <!-- Semester -->
                 <div>
-                    <label class="block text-sm font-bold mb-2 text-blue-500">Semester <span class="text-red-500">*</span></label>
-                    <select name="semester" class="w-full p-4 border border-gray-300 rounded-2xl" required>
-                        <option value="" disabled {% if not form.semester.value %}selected{% endif %}>-Select Option-</option>
-                        <option value="1st Semester" {% if form.semester.value == "1st Semester" %}selected{% endif %}>1st Semester</option>
-                        <option value="2nd Semester" {% if form.semester.value == "2nd Semester" %}selected{% endif %}>2nd Semester</option>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Semester</label>
+                    <select name="semester" class="w-full px-4 py-3 rounded-xl border border-gray-200">
+                        <option value="1st Semester" {% if faculty.semester == "1st Semester" %}selected{% endif %}>1st Semester</option>
+                        <option value="2nd Semester" {% if faculty.semester == "2nd Semester" %}selected{% endif %}>2nd Semester</option>
                     </select>
-                    {% if form.semester.errors %}
-                        <span class="text-red-500 text-xs">{{ form.semester.errors.0 }}</span>
-                    {% endif %}
                 </div>
             </div>
-            <!-- Buttons -->
-            <div class="flex justify-end mt-6">
-                <button type="button" onclick="closeModal()" class="text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2">Cancel</button>
-                <button type="submit" class="text-white bg-blue-800 hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2">Add Faculty</button>
+            <div class="flex justify-end items-center space-x-3 mt-8 pt-6 border-t border-gray-100">
+                <button type="button"
+                    onclick="closeEditFacultyModal('{{ faculty.faculty_id }}')"
+                    class="px-6 py-2.5 rounded-xl border border-gray-300 text-gray-600">Cancel</button>
+                <button type="submit"
+                    class="px-6 py-2.5 rounded-xl bg-blue-500 text-white">Save Changes</button>
             </div>
         </form>
     </div>
 </div>
+{% endfor %}
+
+
 
 
     <!-- Layout Wrapper -->
@@ -577,13 +538,9 @@
                             </span>
                         </a>
                     </li>
-
-
-
-
-
                 </ul>
             </nav>
+
             <!-- User Info & Profile section -->
             <div class="border-t border-gray-300 p-2 mt-auto flex flex-col items-center w-full">
                 <!-- Profile Image Container -->
@@ -619,16 +576,11 @@
             <main id="mainContent" class="p-6 mt-8">
                 {% block content %}{% endblock %}
             </main>
+            <footer class="w-full text-center py-4 text-gray-500 text-sm mt-auto">
+                &copy; {% now "Y" %}  Sentinels. All rights reserved.
+            </footer>
         </div>
 
     </div>
 </body>
 </html>
-
-{% if show_add_modal %}
-<script>
-    window.addEventListener('DOMContentLoaded', function() {
-        openModal();
-    });
-</script>
-{% endif %}
