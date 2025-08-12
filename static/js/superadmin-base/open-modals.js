@@ -28,12 +28,10 @@ window.closeArchiveModal = function() {
 // Edit Faculty Modal
 window.openEditFacultyModal = function() {
     document.getElementById("editFacultyModal").classList.remove("hidden");
-    document.body.classList.add("overflow-hidden");
 };
 
 window.closeEditFacultyModal = function() {
     document.getElementById("editFacultyModal").classList.add("hidden");
-    document.body.classList.remove("overflow-hidden");
 };
 
 // Move Faculty Modal

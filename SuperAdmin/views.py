@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 import firebase_admin
 from firebase_admin import credentials, firestore
@@ -177,31 +177,25 @@ def add_faculty(request):
     else:
         return redirect("FacultyList")
 
-def edit_faculty(request, faculty_id):
-    
-    faculty_ref = db.collection("Authorized Faculty").document(faculty_id)
-    faculty = faculty_ref.get()
 
-    if not faculty.exists:
-        messages.error(request, "Faculty member not found.")
-        return redirect("Superadmin-homepage")
+@superadmin_required
+def edit_faculty(request, faculty_id):
+    faculty = get_object_or_404(Faculty, faculty_id=faculty_id)
 
     if request.method == "POST":
-        updated_data = {
-            "first_name": request.POST.get("first_name"),
-            "last_name": request.POST.get("last_name"),
-            "middle_initial": request.POST.get("middle_initial"),
-            "program": request.POST.get("program"),
-            "year_section": request.POST.get("year_section"),
-            "semester": request.POST.get("semester")
-        }
-        faculty_ref.update(updated_data)
+        faculty.first_name = request.POST.get("first_name")
+        faculty.last_name = request.POST.get("last_name")
+        faculty.middle_initial = request.POST.get("middle_initial")
+        faculty.program = request.POST.get("program")
+        faculty.year_section = request.POST.get("year_section")
+        faculty.semester = request.POST.get("semester")
+        faculty.save()
 
         messages.success(request, "Faculty details updated successfully!")
-        return redirect("faculty-page")
+        return redirect("FacultyList")  # or your faculty list page name
 
-    faculty_data = faculty.to_dict()
-    return render(request, "Admin/EditFaculty.html", {"faculty": faculty_data})
+    # If you want to render a separate edit page (not used in modal pattern)
+    return render(request, "Admin/EditFaculty.html", {"faculty": faculty})
 
 @superadmin_required
 @require_POST
