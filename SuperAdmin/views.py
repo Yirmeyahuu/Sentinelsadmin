@@ -14,6 +14,10 @@ import json, datetime
 from django.core.paginator import Paginator
 from .forms import AddFacultyForm
 from django.db import transaction
+from Student.models import Student # Import the Student model
+from Student.models import Student, ArchivedStudent # Add ArchivedStudent
+from django.db.models import Q # Import Q for complex queries
+
 
 
 
@@ -236,14 +240,35 @@ def Faculty_Archive(request, faculty_id):
 
     return redirect("FacultyList")
 
+
 @superadmin_required
 def Superadmin_Student_Archive(request):
-    archive_ref = db.collection("Archived Students")
-    docs = archive_ref.stream()
-    archived_students = [doc.to_dict() for doc in docs]
+    search_query = request.GET.get('search', '').strip()
+
+    # Base query for archived students, pre-fetching related faculty data
+    archived_students_query = ArchivedStudent.objects.select_related('faculty').all()
+
+    # Apply search filter if a query is provided
+    if search_query:
+        archived_students_query = archived_students_query.filter(
+            Q(first_name__icontains=search_query) |
+            Q(last_name__icontains=search_query) |
+            Q(student_id__icontains=search_query)
+        )
+    
+    # Order by the date they were archived
+    archived_students_query = archived_students_query.order_by('-archived_at')
+
+    # Pagination
+    paginator = Paginator(archived_students_query, 10) # 10 students per page
+    page_number = request.GET.get('page', 1)
+    page_obj = paginator.get_page(page_number)
 
     context = {
-        "archived_students": archived_students
+        "archived_students": page_obj,
+        "search_query": search_query,
+        "page_obj": page_obj,
+        "paginator": paginator,
     }
 
     if request.headers.get('HX-Request'):
@@ -264,7 +289,6 @@ def Archived_faculty_list(request):
         return render(request, 'Faculty/contents/faculty-archived-content.html', context)
     else:
         return render(request, 'Faculty/faculty-archived.html', context)
-
 
 
 @superadmin_required
@@ -400,65 +424,65 @@ def Superadmin_activity_page(request):
     else:
         return render(request, 'Activities/Superadmin-Activity-List.html', context)
 
+
 @superadmin_required
 def Superadmin_Student_Status(request):
+    # Get filter parameters from the request
     status_filter = request.GET.get('status', 'all')
     program_filter = request.GET.get('program', 'all')
     year_section_filter = request.GET.get('year_section', 'all')
     semester_filter = request.GET.get('semester', 'all')
-    search_query = request.GET.get('search', '').strip().lower()
+    search_query = request.GET.get('search', '').strip()
 
-    # Helper to fetch and tag students from a collection
-    def fetch_students(collection, status_label):
-        docs = db.collection(collection).stream()
-        return [{**doc.to_dict(), 'status': status_label, 'id': doc.id} for doc in docs]
+    # Start with a base query for all students, pre-fetching faculty data
+    students_query = Student.objects.select_related('faculty').all()
 
-    # Fetch students from all collections
-    students = []
-    if status_filter in ['all', 'continuing']:
-        students += fetch_students("Registered_Students", "Continuing")
-    if status_filter in ['all', 'completed']:
-        students += fetch_students("Completed Students", "Completed")
-    if status_filter in ['all', 'dropout']:
-        students += fetch_students("Drop-out Students", "Drop-out")
+    # Apply filters based on user selection
+    if status_filter != 'all':
+        # Map the filter value to the model's choices
+        status_map = {
+            'registered': 'Registered',
+            'completed': 'Completed',
+            'dropout': 'Drop-out'
+        }
+        if status_filter in status_map:
+            students_query = students_query.filter(student_status=status_map[status_filter])
 
-    # Gather unique values for dropdowns
-    year_sections = sorted(set(s.get('year_section', '') for s in students if s.get('year_section')))
-
-    # Apply filters
     if program_filter != 'all':
-        students = [s for s in students if s.get('program') == program_filter]
+        students_query = students_query.filter(faculty__program=program_filter)
+    
     if year_section_filter != 'all':
-        students = [s for s in students if s.get('year_section') == year_section_filter]
+        students_query = students_query.filter(faculty__year_section=year_section_filter)
+        
     if semester_filter != 'all':
-        students = [s for s in students if s.get('semester') == semester_filter]
-    if search_query:
-        students = [
-            s for s in students
-            if search_query in str(s.get('first_name', '')).lower()
-            or search_query in str(s.get('last_name', '')).lower()
-            or search_query in str(s.get('student_id', '')).lower()
-            or search_query in str(s.get('id', '')).lower()
-        ]
+        students_query = students_query.filter(faculty__semester=semester_filter)
 
-    students = sorted(
-        students,
-        key=lambda s: str(s.get('first_name', '')).lower()
-    )
+    if search_query:
+        students_query = students_query.filter(
+            Q(first_name__icontains=search_query) |
+            Q(last_name__icontains=search_query) |
+            Q(student_id__icontains=search_query)
+        )
+
+    # Get unique year sections for the filter dropdown
+    year_sections = sorted(list(Faculty.objects.values_list('year_section', flat=True).distinct()))
+
+    # Order the results
+    students_query = students_query.order_by('last_name', 'first_name')
 
     # Pagination
+    paginator = Paginator(students_query, 12)
     page_number = request.GET.get('page', 1)
-    paginator = Paginator(students, 12)
     page_obj = paginator.get_page(page_number)
 
     context = {
-        "students": page_obj.object_list,
+        "students": page_obj,
         "status_filter": status_filter,
         "program_filter": program_filter,
         "year_section_filter": year_section_filter,
         "semester_filter": semester_filter,
         "year_sections": year_sections,
-        "search_query": request.GET.get('search', ''),
+        "search_query": search_query,
         "page_obj": page_obj,
         "paginator": paginator,
     }
@@ -467,7 +491,6 @@ def Superadmin_Student_Status(request):
         return render(request, 'Students/contents/superadmin-student-status-content.html', context)
     else:
         return render(request, 'Students/superadmin-student-status.html', context)
-
 
 
 @superadmin_required
@@ -545,7 +568,6 @@ def move_faculty(request):
         faculty_id = request.POST.get("faculty_id")
         destination = request.POST.get("destination")
 
-        # Try to find the faculty in all possible tables
         faculty = Faculty.objects.filter(faculty_id=faculty_id).first()
         archived_faculty = ArchivedFaculty.objects.filter(faculty_id=faculty_id).first()
 
@@ -553,7 +575,6 @@ def move_faculty(request):
             messages.error(request, "Faculty not found.")
             return redirect("FacultyList")
 
-        # Move logic
         try:
             with transaction.atomic():
                 # Move to Authorized/Continuing
@@ -576,22 +597,53 @@ def move_faculty(request):
                         faculty.faculty_status = 'Continuing'
                         faculty.save()
                         messages.success(request, "Faculty is already in Authorized Faculty.")
+
                 # Move to Deactivated
                 elif destination == "deactivated":
                     if faculty:
                         faculty.faculty_status = 'Deactivated'
                         faculty.save()
                         messages.success(request, "Faculty moved to Deactivated Faculty successfully!")
+                    elif archived_faculty:
+                        Faculty.objects.create(
+                            faculty_id=archived_faculty.faculty_id,
+                            first_name=archived_faculty.first_name,
+                            last_name=archived_faculty.last_name,
+                            middle_initial=archived_faculty.middle_initial,
+                            program=archived_faculty.program,
+                            year_section=archived_faculty.year_section,
+                            semester=archived_faculty.semester,
+                            password='',  # Set as needed
+                            faculty_status='Deactivated'
+                        )
+                        archived_faculty.delete()
+                        messages.success(request, "Faculty moved from Archive to Deactivated Faculty successfully!")
                     else:
-                        messages.error(request, "Faculty not found in active list.")
+                        messages.error(request, "Faculty not found.")
+
                 # Move to Completed
                 elif destination == "completed":
                     if faculty:
                         faculty.faculty_status = 'Completed'
                         faculty.save()
                         messages.success(request, "Faculty moved to Completed Faculty successfully.")
+                    elif archived_faculty:
+                        Faculty.objects.create(
+                            faculty_id=archived_faculty.faculty_id,
+                            first_name=archived_faculty.first_name,
+                            last_name=archived_faculty.last_name,
+                            middle_initial=archived_faculty.middle_initial,
+                            program=archived_faculty.program,
+                            year_section=archived_faculty.year_section,
+                            semester=archived_faculty.semester,
+                            password='',  # Set as needed
+                            faculty_status='Completed'
+                        )
+                        archived_faculty.delete()
+                        messages.success(request, "Faculty moved from Archive to Completed Faculty successfully!")
                     else:
-                        messages.error(request, "Faculty not found in active list.")
+                        messages.error(request, "Faculty not found.")
+
                 # Move to Archive
                 elif destination == "archive":
                     if faculty:
@@ -614,7 +666,8 @@ def move_faculty(request):
         except Exception as e:
             messages.error(request, f"Error moving faculty: {e}")
 
-    return redirect("FacultyList")
+    referer = request.META.get('HTTP_REFERER')
+    return redirect(referer) if referer else redirect("FacultyList")
 
 @superadmin_required
 def Superadmin_Student_List(request):
@@ -622,55 +675,53 @@ def Superadmin_Student_List(request):
     selected_program = request.GET.get('program', 'all')
     selected_year_section = request.GET.get('year_section', 'all')
     selected_semester = request.GET.get('semester', 'all')
-    search_query = request.GET.get('search', '').strip().lower()
-    
-    # Base query: all students
-    students_ref = db.collection("Registered_Students")
+    search_query = request.GET.get('search', '').strip()
+
+    # Base query: all students with related faculty data to prevent N+1 queries
+    students_query = Student.objects.select_related('faculty').filter(student_status='Registered')
+
+    # Apply filters using Django ORM
     if selected_program != 'all':
-        students_ref = students_ref.where("program", "==", selected_program)
-    students = [doc.to_dict() for doc in students_ref.stream()]
-
-    # Apply additional filters in Python
+        students_query = students_query.filter(faculty__program=selected_program)
     if selected_year_section != 'all':
-        students = [s for s in students if s.get('year_section') == selected_year_section]
+        students_query = students_query.filter(faculty__year_section=selected_year_section)
     if selected_semester != 'all':
-        students = [s for s in students if s.get('semester') == selected_semester]
+        students_query = students_query.filter(faculty__semester=selected_semester)
+    
     if search_query:
-        students = [
-            s for s in students
-            if search_query in str(s.get('first_name', '')).lower()
-            or search_query in str(s.get('last_name', '')).lower()
-            or search_query in str(s.get('student_id', '')).lower()
-            or search_query in str(s.get('id', '')).lower()
-        ]
-    
-    # Pagination
-    page_number = request.GET.get('page', 1)
-    paginator = Paginator(students, 10)  # 10 students per page
-    page_obj = paginator.get_page(page_number)
-    
-    # For dashboard cards, always count ALL students (not just filtered)
-    all_students = [doc.to_dict() for doc in db.collection("Registered_Students").stream()]
-    total_students = len(all_students)
-    cs_count = len([s for s in all_students if s.get('program') == 'Computer Science'])
-    it_count = len([s for s in all_students if s.get('program') == 'Information Technology'])
-    active_count = 0  # Placeholder, update with your logic for active students
+        students_query = students_query.filter(
+            Q(first_name__icontains=search_query) |
+            Q(last_name__icontains=search_query) |
+            Q(student_id__icontains=search_query)
+        )
 
-    # For filter dropdowns
-    year_sections = sorted(list(set(s.get('year_section') for s in all_students if s.get('year_section'))))
+    # For dashboard cards, count directly from the database
+    total_students = Student.objects.filter(student_status='Registered').count()
+    cs_count = Student.objects.filter(student_status='Registered', faculty__program='Computer Science').count()
+    it_count = Student.objects.filter(student_status='Registered', faculty__program='Information Technology').count()
+    
+    # For filter dropdowns - get unique values from the Faculty model
+    all_faculties = Faculty.objects.all()
+    year_sections = sorted(list(all_faculties.values_list('year_section', flat=True).distinct()))
+    semesters = sorted(list(all_faculties.values_list('semester', flat=True).distinct()))
+
+    # Pagination
+    paginator = Paginator(students_query, 10)  # 10 students per page
+    page_number = request.GET.get('page', 1)
+    page_obj = paginator.get_page(page_number)
 
     context = {
-        'students': page_obj.object_list,
+        'students': page_obj,
         'total_students': total_students,
         'cs_count': cs_count,
         'it_count': it_count,
-        'active_count': active_count,
-        'inactive_count': len([s for s in all_students if s.get('status') == 'Drop-out']),
+        'active_count': total_students, # 'Registered' students are considered active
         'selected_program': selected_program,
         'selected_year_section': selected_year_section,
         'selected_semester': selected_semester,
         'year_sections': year_sections,
-        'search_query': request.GET.get('search', ''),
+        'semesters': semesters,
+        'search_query': search_query,
         'page_obj': page_obj,
         'paginator': paginator,
     }
@@ -733,63 +784,72 @@ def update_tier_lock(request):
     return JsonResponse({'success': False, 'error': 'Invalid request'})
 
 @superadmin_required
-def superadmin_move_student(request):   
+def superadmin_move_student(request):
     if request.method == "POST":
         student_id = request.POST.get("student_id")
         destination = request.POST.get("destination")
 
-        # Search all collections for the student
-        collections = [
-            "Registered_Students",
-            "Completed Students",
-            "Drop-out Students",
-            "Archived Students"
-        ]
-        student_data = None
-        source_collection = None
-        for collection in collections:
-            ref = db.collection(collection).document(student_id)
-            doc = ref.get()
-            if doc.exists:
-                student_data = doc.to_dict()
-                source_collection = collection
-                break
+        # Find the student in either the active or archived table
+        student = Student.objects.filter(student_id=student_id).first()
+        archived_student = ArchivedStudent.objects.filter(student_id=student_id).first()
 
-        if not student_data:
+        if not student and not archived_student:
             messages.error(request, "Student not found.")
-            return redirect("student-list")
+            return redirect(request.META.get('HTTP_REFERER', 'Superadmin_Student_Status'))
 
-        # Remove from source collection if moving to a different collection
-        dest_map = {
-            "registered": "Registered_Students",
-            "completed": "Completed Students",
-            "dropout": "Drop-out Students",
-            "archive": "Archived Students"
-        }
-        dest_collection = dest_map.get(destination)
-        if dest_collection and source_collection and source_collection != dest_collection:
-            db.collection(source_collection).document(student_id).delete()
+        try:
+            with transaction.atomic():
+                # Destination is one of the active statuses
+                if destination in ["registered", "completed", "dropout"]:
+                    new_status = {
+                        "registered": "Registered",
+                        "completed": "Completed",
+                        "dropout": "Drop-out"
+                    }.get(destination)
 
-        # Move to the selected collection and update status
-        if destination == "registered":
-            student_data["status"] = "Continuing"
-            db.collection("Registered_Students").document(student_id).set(student_data)
-            messages.success(request, "Student moved to Registered Students successfully.")
-            return redirect("student-list")
-        elif destination == "completed":
-            student_data["status"] = "Completed"
-            db.collection("Completed Students").document(student_id).set(student_data)
-            messages.success(request, "Student moved to Completed Students successfully.")
-            return redirect("superadmin-student-status")  # Update with your completed students page name if different
-        elif destination == "dropout":
-            student_data["status"] = "Drop-out"
-            db.collection("Drop-out Students").document(student_id).set(student_data)
-            messages.success(request, "Student moved to Drop-out Students successfully!")
-            return redirect("superadmin-student-status")  # Update with your drop-out students page name if different
-        elif destination == "archive":
-            db.collection("Archived Students").document(student_id).set(student_data)
-            messages.success(request, "Student moved to Archived Students successfully!")
-            return redirect("superadmin_student_archived")
-        else:
-            messages.error(request, "Invalid destination.")
-            return redirect("student-list")
+                    if student:
+                        # Student is already active, just update status
+                        student.student_status = new_status
+                        student.save()
+                        messages.success(request, f"Student status updated to {new_status}.")
+                    elif archived_student:
+                        # Student is archived, so restore to active table
+                        Student.objects.create(
+                            student_id=archived_student.student_id,
+                            first_name=archived_student.first_name,
+                            last_name=archived_student.last_name,
+                            middle_initial=archived_student.middle_initial,
+                            faculty=archived_student.faculty,
+                            student_status=new_status
+                        )
+                        archived_student.delete()
+                        messages.success(request, f"Student restored and moved to {new_status}.")
+
+                # Destination is the archive
+                elif destination == "archive":
+                    if student:
+                        # Move from active to archive
+                        ArchivedStudent.objects.create(
+                            student_id=student.student_id,
+                            first_name=student.first_name,
+                            last_name=student.last_name,
+                            middle_initial=student.middle_initial,
+                            faculty=student.faculty
+                        )
+                        student.delete()
+                        messages.success(request, "Student moved to Archive successfully.")
+                    elif archived_student:
+                        # Already in archive
+                        messages.info(request, "Student is already in the archive.")
+                
+                else:
+                    messages.error(request, "Invalid destination specified.")
+
+        except Exception as e:
+            messages.error(request, f"An error occurred: {e}")
+
+        # Redirect back to the page the user came from
+        return redirect(request.META.get('HTTP_REFERER', 'Superadmin_Student_Status'))
+
+    # Redirect if not a POST request
+    return redirect('Superadmin_Student_Status')

@@ -130,19 +130,19 @@
                         <td class="border border-blue-500 pl-14 pr-2 text-left">
                             {{ student.first_name }} {{ student.middle_initial }} {{ student.last_name }}
                         </td>
-                        <td class="border border-blue-500 p-2 text-center">{{ student.program }}</td>
-                        <td class="border border-blue-500 p-2 text-center">{{ student.year_section }}</td>
-                        <td class="border border-blue-500 p-2 text-center">{{ student.semester }}</td>
+                        <td class="border border-blue-500 p-2 text-center">{{ student.faculty.program }}</td>
+                        <td class="border border-blue-500 p-2 text-center">{{ student.faculty.year_section }}</td>
+                        <td class="border border-blue-500 p-2 text-center">{{ student.faculty.semester }}</td>
                         <td class="border border-blue-500 p-2 text-center">
                             <span class="px-2 py-1 rounded-lg text-xs font-medium
-                                {% if student.status == 'Drop-out' %}
+                                {% if student.student_status == 'Dropout' %}
                                     bg-red-500/20 text-red-700
-                                {% elif student.status == 'Completed' %}
+                                {% elif student.student_status == 'Completed' %}
                                     bg-yellow-500/20 text-yellow-700
                                 {% else %}
                                     bg-green-500/20 text-green-700
                                 {% endif %}">
-                                {{ student.status|default:"Continuing" }}
+                                {{ student.student_status|default:"Registered" }}
                             </span>
                         </td>
                         <td class="border border-blue-500 p-2 text-center">

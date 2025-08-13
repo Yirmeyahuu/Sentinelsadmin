@@ -3,34 +3,37 @@
 </script>
 
 <div class="ml-16 px-6">
-    <!-- Main Content (Student Status Table) -->
     <div class="bg-blue-600 shadow-2xl rounded-tl-4xl rounded-br-4xl p-6 w-full">
+        <!-- Header -->
         <h2 class="text-xl font-bold text-white mb-4 flex items-center gap-2">
             Student Status
             <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" class="inline-block ml-2 text-sky-300">
                 <path fill="currentColor" fill-rule="evenodd" d="M7.317 3.769a42.502 42.502 0 0 1 9.366 0c1.827.204 3.302 1.642 3.516 3.48c.37 3.156.37 6.346 0 9.503c-.215 1.836-1.69 3.275-3.516 3.48a42.5 42.5 0 0 1-9.366 0c-1.827-.205-3.302-1.644-3.516-3.48a40.903 40.903 0 0 1 0-9.504c.214-1.837 1.69-3.275 3.516-3.48ZM13 7.999A1 1 0 1 1 11 8a1 1 0 0 1 2 0Zm-1 2.75a.75.75 0 0 1 .75.75v5a.75.75 0 1 1-1.5 0v-5a.75.75 0 0 1 .75-.75Z" clip-rule="evenodd"/>
             </svg>
-            
         </h2>
+
+        <!-- Filters Section -->
         <div class="flex justify-center items-center mb-4">
             <div class="flex flex-wrap items-center gap-2">
-                <!-- Status & Other Filters -->
                 <form method="get" class="flex flex-wrap items-center gap-2">
+                    <!-- Status Filter -->
                     <label class="font-semibold text-sm text-white">Status:</label>
                     <select name="status" class="p-0.5 text-xs font-medium text-blue-800 bg-white border border-blue-300 rounded-lg" onchange="this.form.submit()">
                         <option value="all" {% if status_filter == 'all' %}selected{% endif %}>All</option>
-                        <option value="continuing" {% if status_filter == 'continuing' %}selected{% endif %}>Continuing</option>
+                        <option value="registered" {% if status_filter == 'registered' %}selected{% endif %}>Registered</option>
                         <option value="completed" {% if status_filter == 'completed' %}selected{% endif %}>Completed</option>
                         <option value="dropout" {% if status_filter == 'dropout' %}selected{% endif %}>Drop-out</option>
                     </select>
-                
+
+                    <!-- Program Filter -->
                     <label class="font-semibold text-sm text-white">Program:</label>
                     <select name="program" class="p-0.5 text-xs font-medium text-blue-800 bg-white border border-blue-300 rounded-lg" onchange="this.form.submit()">
                         <option value="all" {% if program_filter == 'all' %}selected{% endif %}>All</option>
                         <option value="Computer Science" {% if program_filter == 'Computer Science' %}selected{% endif %}>Computer Science</option>
                         <option value="Information Technology" {% if program_filter == 'Information Technology' %}selected{% endif %}>Information Technology</option>
                     </select>
-                
+
+                    <!-- Year & Section Filter -->
                     <label class="font-semibold text-sm text-white">Year & Section:</label>
                     <select name="year_section" class="p-0.5 text-xs font-medium text-blue-800 bg-white border border-blue-300 rounded-lg" onchange="this.form.submit()">
                         <option value="all" {% if year_section_filter == 'all' %}selected{% endif %}>All</option>
@@ -38,22 +41,25 @@
                             <option value="{{ ys }}" {% if year_section_filter == ys %}selected{% endif %}>{{ ys }}</option>
                         {% endfor %}
                     </select>
-                
+
+                    <!-- Semester Filter -->
                     <label class="font-semibold text-sm text-white">Semester:</label>
                     <select name="semester" class="p-0.5 text-xs font-medium text-blue-800 bg-white border border-blue-300 rounded-lg" onchange="this.form.submit()">
                         <option value="all" {% if semester_filter == 'all' %}selected{% endif %}>All</option>
                         <option value="1st Semester" {% if semester_filter == '1st Semester' %}selected{% endif %}>1st Semester</option>
                         <option value="2nd Semester" {% if semester_filter == '2nd Semester' %}selected{% endif %}>2nd Semester</option>
                     </select>
-                
+
                     <input type="hidden" name="search" value="{{ search_query }}">
                 </form>
+
+                <!-- Search Form -->
                 <form method="get" class="ml-4 bg-gray-100 p-1 rounded-3xl flex items-center max-w-sm mx-auto" id="studentSearchForm">
                     <input type="hidden" name="status" value="{{ status_filter }}">
                     <div class="relative w-full">
                         <div class="absolute inset-y-0 start-0 flex items-center ps-2 pointer-events-none">
-                            <svg viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 text-gray-500 dark:text-gray-400">
-                                <path fill-rule="evenodd" d="M12 6a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Zm-1.5 8a4 4 0 0 0-4 4 2 2 0 0 0 2 2h7a2 2 0 0 0 2-2 4 4 0 0 0-4-4h-3Zm6.82-3.096a5.51 5.51 0 0 0-2.797-6.293 3.5 3.5 0 1 1 2.796 6.292ZM19.5 18h.5a2 2 0 0 0 2-2 4 4 0 0 0-4-4h-1.1a5.503 5.503 0 0 1-.471.762A5.998 5.998 0 0 1 19.5 18ZM4 7.5a3.5 3.5 0 0 1 5.477-2.889 5.5 5.5 0 0 0-2.796 6.293A3.501 3.501 0 0 1 4 7.5ZM7.1 12H6a4 4 0 0 0-4 4 2 2 0 0 0 2 2h.5a5.998 5.998 0 0 1 3.071-5.238A5.505 5.505 0 0 1 7.1 12Z" clip-rule="evenodd"/>
+                            <svg viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 text-gray-500">
+                                <path fill-rule="evenodd" d="M12 6a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Z" clip-rule="evenodd"/>
                             </svg>
                         </div>
                         <input
@@ -66,15 +72,14 @@
                         />
                     </div>
                     <button type="submit" class="p-1.5 text-sm ms-1 font-medium text-blue-500 bg-gray-100 rounded-tr-2xl rounded-br-2xl rounded-tl-xl rounded-bl-xl hover:bg-blue-400 hover:text-gray-100 cursor-pointer duration-150">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <path fill="currentColor" d="M15.5 12c2.5 0 4.5 2 4.5 4.5c0 .88-.25 1.71-.69 2.4l3.08 3.1L21 23.39l-3.12-3.07c-.69.43-1.51.68-2.38.68c-2.5 0-4.5-2-4.5-4.5s2-4.5 4.5-4.5m0 2a2.5 2.5 0 0 0-2.5 2.5a2.5 2.5 0 0 0 2.5 2.5a2.5 2.5 0 0 0 2.5-2.5a2.5 2.5 0 0 0-2.5-2.5M10 4a4 4 0 0 1 4 4c0 .91-.31 1.75-.82 2.43c-.86.32-1.63.83-2.27 1.47L10 12a4 4 0 0 1-4-4a4 4 0 0 1 4-4M2 20v-2c0-2.12 3.31-3.86 7.5-4c-.32.78-.5 1.62-.5 2.5c0 1.29.38 2.5 1 3.5H2Z"/>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-width="2" d="m21 21-3.5-3.5M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z"/>
                         </svg>
                         <span class="sr-only">Search</span>
                     </button>
                 </form>
             </div>
         </div>
-
 
         <!-- Student Status Table -->
         <div class="overflow-hidden rounded-2xl shadow-xl w-full bg-gray-100">
@@ -93,27 +98,29 @@
                 <tbody>
                     {% for student in students %}
                     <tr class="text-blue-900 hover:bg-blue-200 transition text-md {% if forloop.counter0|divisibleby:2 %}bg-gray-100{% else %}bg-blue-100{% endif %}">
-                        <td class="border border-blue-500 p-2 text-center">{{ student.student_id|default:student.id }}</td>
+                        <td class="border border-blue-500 p-2 text-center">{{ student.student_id }}</td>
                         <td class="border border-blue-500 p-2 pl-8 text-left">
-                            {{ student.first_name }} {{ student.last_name }}
+                            {{ student.first_name }} {{ student.middle_initial }} {{ student.last_name }}
                         </td>
-                        <td class="border border-blue-500 p-2 text-center">{{ student.program }}</td>
-                        <td class="border border-blue-500 p-2 text-center">{{ student.year_section }}</td>
-                        <td class="border border-blue-500 p-2 text-center">{{ student.semester }}</td>
+                        <td class="border border-blue-500 p-2 text-center">{{ student.faculty.program }}</td>
+                        <td class="border border-blue-500 p-2 text-center">{{ student.faculty.year_section }}</td>
+                        <td class="border border-blue-500 p-2 text-center">{{ student.faculty.semester }}</td>
                         <td class="border border-blue-500 p-2 text-center">
                             <span class="px-2 py-1 rounded-lg text-xs font-medium
-                                {% if student.status == 'Drop-out' or student.status == 'dropout' %}
+                                {% if student.student_status == 'Drop-out' %}
                                     bg-red-500/20 text-red-700
-                                {% elif student.status == 'Completed' or student.status == 'completed' %}
+                                {% elif student.student_status == 'Completed' %}
                                     bg-yellow-500/20 text-yellow-700
                                 {% else %}
                                     bg-green-500/20 text-green-700
                                 {% endif %}">
-                                {{ student.status|title }}
+                                {{ student.student_status }}
                             </span>
                         </td>
                         <td class="border border-blue-500 p-2 text-center">
-                            <button onclick="openMoveStudentModal('{{ student.student_id|default:student.id }}')" class="text-blue-900 hover:text-blue-400 transition-all" title="Move">
+                            <button onclick="openMoveStudentModal('{{ student.student_id }}')" 
+                                    class="text-blue-900 hover:text-blue-400 transition-all" 
+                                    title="Move">
                                 <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24">
                                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                           d="M18 14v4.833A1.166 1.166 0 0 1 16.833 20H5.167A1.167 1.167 0 0 1 4 18.833V7.167A1.166 1.166 0 0 1 5.167 6h4.618m4.447-2H20v5.768m-7.889 2.121 7.778-7.778"/>
@@ -124,15 +131,10 @@
                     {% empty %}
                     <tr>
                         <td colspan="7" class="text-center border border-blue-500 p-4 text-blue-500">
-                            No Student found.
+                            No students found.
                         </td>
                     </tr>
                     {% endfor %}
-                    <tr id="noResultsRow" style="display: none;">
-                        <td colspan="7" class="text-center border border-blue-500 p-4 text-blue-500">
-                            No Student found.
-                        </td>
-                    </tr>
                 </tbody>
             </table>
         </div>

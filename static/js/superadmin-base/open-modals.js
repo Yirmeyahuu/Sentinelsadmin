@@ -25,14 +25,30 @@ window.closeArchiveModal = function() {
     document.body.classList.remove("overflow-hidden");
 };
 
+// Faculty Modal Functions
 window.openEditFacultyModal = function(facultyId) {
-    document.getElementById("editFacultyModal-" + facultyId).classList.remove("hidden");
-    document.body.classList.add("overflow-hidden");
+    const modal = document.getElementById(`editFacultyModal-${facultyId}`);
+    if (modal) {
+        modal.classList.remove('hidden');
+        document.body.classList.add('overflow-hidden');
+    }
 };
+
 window.closeEditFacultyModal = function(facultyId) {
-    document.getElementById("editFacultyModal-" + facultyId).classList.add("hidden");
-    document.body.classList.remove("overflow-hidden");
+    const modal = document.getElementById(`editFacultyModal-${facultyId}`);
+    if (modal) {
+        modal.classList.add('hidden');
+        document.body.classList.remove('overflow-hidden');
+    }
 };
+
+// Close modal when clicking outside
+document.addEventListener('click', function(event) {
+    if (event.target.classList.contains('fixed')) {
+        const facultyId = event.target.id.replace('editFacultyModal-', '');
+        closeEditFacultyModal(facultyId);
+    }
+});
 
 // Move Faculty Modal
 window.openMoveFacultyModal = function(facultyId) {
@@ -59,14 +75,14 @@ window.closeMoveStudentModal = function() {
 };
 
 // Add Faculty Modal
-window.openModal = function() {
-    document.getElementById("modal").classList.remove("hidden");
+window.openAddFacultyModal = function() {
+    document.getElementById("addFacultyModal").classList.remove("hidden");
     document.body.classList.add("overflow-hidden");
-    
+
 };
 
-window.closeModal = function() {
-    document.getElementById("modal").classList.add("hidden");
+window.closeAddFacultyModal = function() {
+    document.getElementById("addFacultyModal").classList.add("hidden");
     document.body.classList.remove("overflow-hidden");
 };
 
