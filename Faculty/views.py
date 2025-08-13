@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 import firebase_admin
 from firebase_admin import credentials, firestore
@@ -14,6 +14,14 @@ from Login.decorators import faculty_required
 from django.core.paginator import Paginator
 
 from Faculty.models import Faculty
+from Student.models import Student, PendingStudent, Task, StudentTaskProgress
+from django.db.models import Q
+
+from django.db.models import Count, Sum, IntegerField
+from django.db import transaction
+from datetime import datetime, timedelta
+import calendar
+from django.db.models.functions import Cast
 
 
 
@@ -56,39 +64,52 @@ def saveActivityDeadline(request):
 
 @faculty_required
 def Faculty_home(request):
-    faculty_id = request.user.username
-
-    # Get faculty data from PostgreSQL
+    # --- PostgreSQL Data Fetching ---
     try:
-        faculty_obj = Faculty.objects.get(faculty_id=faculty_id)
-        faculty_data = {
-            "faculty_id": faculty_obj.faculty_id,
-            "first_name": faculty_obj.first_name,
-            "last_name": faculty_obj.last_name,
-            "middle_initial": faculty_obj.middle_initial,
-            "program": faculty_obj.program,
-            "year_section": faculty_obj.year_section,
-            "semester": faculty_obj.semester,
-        }
+        faculty = Faculty.objects.get(faculty_id=request.user.username)
     except Faculty.DoesNotExist:
-        faculty_data = None
+        messages.error(request, "Faculty profile not found.")
+        return redirect('some_error_page') # Or faculty login
 
-    # Count total users
-    students_ref = db.collection("Registered_Students")
-    students = students_ref.stream()
-    total_users = sum(1 for _ in students)
+    # --- Student & Program Counts ---
+    total_users = Student.objects.filter(student_status='Registered').count()
+    cs_count = Student.objects.filter(faculty__program='Computer Science', student_status='Registered').count()
+    it_count = Student.objects.filter(faculty__program='Information Technology', student_status='Registered').count()
 
-    # Count Computer Science students
-    cs_students_ref = db.collection("Registered_Students").where("program", "==", "Computer Science")
-    cs_students = cs_students_ref.stream()
-    cs_count = sum(1 for _ in cs_students)
+    # --- Quick Lists ---
+    # Recently registered students in the faculty's section
+    quick_students = Student.objects.filter(faculty=faculty).order_by('-pk')[:3]
+    
+    # Recently submitted pending students for the faculty's section
+    quick_pending_students = PendingStudent.objects.filter(
+        program=faculty.program,
+        year_section=faculty.year_section,
+        semester=faculty.semester
+    ).order_by('-submitted_at')[:3]
 
-    # Count Information Technology students
-    it_students_ref = db.collection("Registered_Students").where("program", "==", "Information Technology")
-    it_students = it_students_ref.stream()
-    it_count = sum(1 for _ in it_students)
+    # --- Task Progress for Charts (from PostgreSQL) ---
+    # Sync data first to ensure it's up-to-date
+    sync_student_progress(faculty)
 
-    # Fetch notifications
+    # Now query the synced data
+    task_progress = StudentTaskProgress.objects.filter(student__faculty=faculty)
+    
+    novice_task_counts = list(task_progress.filter(task__tier='Novice').values_list('task__description').annotate(c=Count('task_id')).values_list('c', flat=True))
+    junior_task_counts = list(task_progress.filter(task__tier='Junior').values_list('task__description').annotate(c=Count('task_id')).values_list('c', flat=True))
+    senior_task_counts = list(task_progress.filter(task__tier='Senior').values_list('task__description').annotate(c=Count('task_id')).values_list('c', flat=True))
+
+    # --- Leaderboard Logic (from PostgreSQL) ---
+    leaderboard_students = Student.objects.filter(
+        faculty=faculty,
+        progress_records__task__tier='Novice' # Base leaderboard on Novice tier points
+    ).annotate(
+        total_points=Sum(
+            Cast('progress_records__details__points', output_field=IntegerField())
+        )
+    ).filter(total_points__gt=0).order_by('-total_points')[:10]
+
+
+    # --- Firestore Logic (Notifications & Deadlines - Unchanged) ---
     notifications_ref = db.collection("Notifications").order_by("timestamp", direction=firestore.Query.DESCENDING)
     notifications = []
     for doc in notifications_ref.stream():
@@ -97,14 +118,10 @@ def Faculty_home(request):
         notifications.append(notif)
     unseen_count = sum(1 for notif in notifications if not notif.get('seen', False))
 
-    # Get activity deadlines from Firestore
-    deadlines_doc = db.collection('Activity Deadlines').document(faculty_id).get()
+    deadlines_doc = db.collection('Activity Deadlines').document(faculty.faculty_id).get()
     activity_deadlines = {}
     almost_due_tasks = []
-
-    from datetime import datetime, timedelta
     current_date = datetime.now()
-
     if deadlines_doc.exists:
         deadlines_data = deadlines_doc.to_dict()
         for key, deadline_data in deadlines_data.items():
@@ -113,158 +130,31 @@ def Faculty_home(request):
             activity_deadlines[day] = {
                 'title': deadline_data['title'],
                 'tier': deadline_data.get('tier', ''),
-                'description': deadline_data.get('description', ''),
                 'date_of_deadline': deadline_data['deadline_date'],
                 'time_of_deadline': deadline_data['deadline_time'],
             }
-            # Almost Due: within next 7 days
             if current_date <= deadline_date <= (current_date + timedelta(days=7)):
-                color = 'red' if deadline_date <= (current_date + timedelta(days=2)) else \
-                       'yellow' if deadline_date <= (current_date + timedelta(days=4)) else 'green'
+                color = 'red' if deadline_date <= (current_date + timedelta(days=2)) else 'yellow' if deadline_date <= (current_date + timedelta(days=4)) else 'green'
                 almost_due_tasks.append({
                     'name': f"{deadline_data['tier']}: {deadline_data['title']}",
                     'color': color,
                     'deadline': deadline_date.strftime('%Y-%m-%d')
                 })
-
-    # Sort almost due tasks by deadline
     almost_due_tasks.sort(key=lambda x: x['deadline'])
 
-    # Calendar days with deadline information
-    import calendar
-    current_year = current_date.year
-    current_month = current_date.month
-    cal = calendar.monthcalendar(current_year, current_month)
+    cal = calendar.monthcalendar(current_date.year, current_date.month)
     calendar_days = []
     for week in cal:
         for day in week:
             if day != 0:
-                day_data = {
-                    'date': day,
-                    'today': day == current_date.day,
-                    'has_deadline': day in activity_deadlines,
-                }
+                day_data = {'date': day, 'today': day == current_date.day, 'has_deadline': day in activity_deadlines}
                 if day in activity_deadlines:
-                    deadline = activity_deadlines[day]
-                    day_data.update({
-                        'deadline_title': deadline['title'],
-                        'deadline_tier': deadline['tier'],
-                        'deadline_description': deadline.get('description', ''),
-                        'deadline_date': deadline['date_of_deadline'],
-                        'deadline_time': deadline['time_of_deadline'],
-                    })
+                    day_data.update(activity_deadlines[day])
                 calendar_days.append(day_data)
-
-    # --- Quick Students Table Logic ---
-    quick_students = []
-    if faculty_data:
-        faculty_program = faculty_data.get('program')
-        faculty_year_section = faculty_data.get('year_section')
-        if faculty_program and faculty_year_section:
-            students_ref = db.collection("Registered_Students")
-            students_query = (
-                students_ref
-                .where("program", "==", faculty_program)
-                .where("year_section", "==", faculty_year_section)
-                .order_by("created_at", direction=firestore.Query.DESCENDING)
-                .limit(3)
-            )
-            quick_students = [doc.to_dict() for doc in students_query.stream()]
-
-    # --- Quick Pending Students Table Logic ---
-    quick_pending_students = []
-    if faculty_data:
-        faculty_program = faculty_data.get('program')
-        faculty_year_section = faculty_data.get('year_section')
-        if faculty_program and faculty_year_section:
-            pending_ref = db.collection("Pending Students")
-            pending_query = (
-                pending_ref
-                .where("program", "==", faculty_program)
-                .where("year_section", "==", faculty_year_section)
-                .order_by("created_at", direction=firestore.Query.DESCENDING)
-                .limit(3)
-            )
-            quick_pending_students = [doc.to_dict() for doc in pending_query.stream()]
-
-    # --- Novice Task Progress for Chart ---
-    novice_task_keys = [
-        "Novice_Task_1(Collect Books)",
-        "Novice_Task_2(Collect USB)",
-        "Novice_Task_3(QNA)",
-        "Novice_Task_4_(Defeat Rootkit)",
-    ]
-
-    junior_task_keys = [
-        "Junior_Task_1(Collect Evidence)",
-        "Junior_Task_2(Decrypt USB)",
-        "Junior_Task_3(QNA)",
-        "Junior_Task_4_(Defeat Rootkit)",
-    ]
-    senior_task_keys = [
-        "Senior_Task_1(Scan Network)",
-        "Senior_Task_2(Analyze Traffic)",
-        "Senior_Task_3(QNA)",
-        "Senior_Task_4_(Defeat Rootkit)",
-    ]
-    novice_task_counts = [0, 0, 0, 0]
-    junior_task_counts = [0, 0, 0, 0]
-    senior_task_counts = [0, 0, 0, 0]
-    if faculty_data:
-        faculty_program = faculty_data.get('program')
-        faculty_year_section = faculty_data.get('year_section')
-        faculty_semester = faculty_data.get('semester')
-
-        students_query = db.collection("Registered_Students") \
-            .where("program", "==", faculty_program) \
-            .where("year_section", "==", faculty_year_section) \
-            .where("semester", "==", faculty_semester) \
-            .stream()
-
-        for doc in students_query:
-            student = doc.to_dict()
-            for idx, task_key in enumerate(novice_task_keys):
-                if isinstance(student.get(task_key), dict) and student.get(task_key):
-                    novice_task_counts[idx] += 1
-            for idx, task_key in enumerate(junior_task_keys):
-                if isinstance(student.get(task_key), dict) and student.get(task_key):
-                    junior_task_counts[idx] += 1
-            for idx, task_key in enumerate(senior_task_keys):
-                if isinstance(student.get(task_key), dict) and student.get(task_key):
-                    senior_task_counts[idx] += 1
-
-    # --- Leaderboard Logic ---
-    leaderboard_students = []
-    if faculty_data:
-        faculty_program = faculty_data.get('program')
-        faculty_year_section = faculty_data.get('year_section')
-        faculty_semester = faculty_data.get('semester')
-
-        students_query = db.collection("Registered_Students") \
-            .where("program", "==", faculty_program) \
-            .where("year_section", "==", faculty_year_section) \
-            .where("semester", "==", faculty_semester) \
-            .stream()
-
-        task_keys = novice_task_keys
-
-        for doc in students_query:
-            student = doc.to_dict()
-            total_points = 0
-            for task_key in task_keys:
-                task = student.get(task_key)
-                if task and isinstance(task, dict):
-                    total_points += int(task.get("points", 0))
-            if total_points > 0:
-                leaderboard_students.append({
-                    "name": f"{student.get('first_name', '')} {student.get('last_name', '')}",
-                    "points": total_points,
-                })
-
-        leaderboard_students = sorted(leaderboard_students, key=lambda x: x["points"], reverse=True)[:10]
+    # --- End of Firestore Logic ---
 
     context = {
-        "faculty_data": faculty_data,
+        "faculty_data": faculty,
         "total_users": total_users,
         "cs_count": cs_count,
         "it_count": it_count,
@@ -273,7 +163,7 @@ def Faculty_home(request):
         "notifications": notifications,
         "unseen_count": unseen_count,
         "current_month": current_date.strftime('%B'),
-        "current_year": current_year,
+        "current_year": current_date.year,
         "quick_students": quick_students,
         "quick_pending_students": quick_pending_students,
         "leaderboard_students": leaderboard_students,
@@ -288,6 +178,34 @@ def Faculty_home(request):
         return render(request, 'Home/faculty-home.html', context)
 
 
+def sync_student_progress(faculty):
+    """Helper function to sync Firestore progress to PostgreSQL for a given faculty."""
+    tasks_by_tier = {}
+    for task in Task.objects.all():
+        tasks_by_tier.setdefault(task.tier, []).append(task)
+
+    students_in_section = Student.objects.filter(faculty=faculty, student_status='Registered')
+
+    for student in students_in_section:
+        try:
+            doc_ref = db.collection('Registered_Students').document(student.student_id).get()
+            if not doc_ref.exists: continue
+            progress_data = doc_ref.to_dict()
+
+            for tier, tasks_in_tier in tasks_by_tier.items():
+                required_keys = [t.firestore_key for t in tasks_in_tier]
+                if all(key in progress_data for key in required_keys):
+                    with transaction.atomic():
+                        for task_to_sync in tasks_in_tier:
+                            StudentTaskProgress.objects.get_or_create(
+                                student=student,
+                                task=task_to_sync,
+                                defaults={'details': progress_data.get(task_to_sync.firestore_key, {})}
+                            )
+        except Exception as e:
+            print(f"Error syncing progress for student {student.student_id}: {e}")
+
+
 @csrf_exempt
 def remove_deadline(request):
     if request.method == "POST":
@@ -298,99 +216,67 @@ def remove_deadline(request):
             db.collection('Activity Deadlines').document(doc_name).delete()
     return redirect('home-page')
 
+
 @faculty_required
 def student_list(request):
-    # Fetch faculty data
-    faculty_id = request.user.username
-    users_ref = db.collection('Authorized Faculty')
-    query = users_ref.where('faculty_id', '==', faculty_id).limit(1).get()
-    faculty_data = None
-    if query:
-        faculty_doc = query[0]
-        faculty_data = faculty_doc.to_dict()
+    # Get the logged-in faculty member from PostgreSQL
+    try:
+        faculty = Faculty.objects.get(faculty_id=request.user.username)
+    except Faculty.DoesNotExist:
+        messages.error(request, "Faculty profile not found.")
+        return redirect('some_error_page') # Or faculty login
 
-    # Get ALL students for total count (no filters)
-    all_students_ref = db.collection("Registered_Students")
-    all_students_docs = all_students_ref.stream()
-    total_users = sum(1 for _ in all_students_docs)
-    
-    # Get faculty's assigned program, year_section, and semester
-    faculty_program = faculty_data.get('program')
-    faculty_year_section = faculty_data.get('year_section')
-    faculty_semester = faculty_data.get('semester')
-
-    # 1. All students in the program
-    program_total = db.collection("Registered_Students").where("program", "==", faculty_program).stream()
-    program_total = sum(1 for _ in program_total)
-
-    # 2. Students in program, year_section, semester
-    section_query = db.collection("Registered_Students") \
-        .where("program", "==", faculty_program) \
-        .where("year_section", "==", faculty_year_section) \
-        .where("semester", "==", faculty_semester)
-    section_total = sum(1 for _ in section_query.stream())
-
-    # 3 & 4. Active/Inactive students in that group
-    active_count = 0
-    inactive_count = 0
-    for doc in section_query.stream():
-        data = doc.to_dict()
-        if data.get("is_active"):
-            active_count += 1
-        else:
-            inactive_count += 1
-
-    student_ref = db.collection("Registered_Students")
-    filters = []
-    if faculty_program:
-        filters.append(("program", "==", faculty_program))
-    if faculty_year_section:
-        filters.append(("year_section", "==", faculty_year_section))
-
-    docs_query = student_ref
-    for field, op, value in filters:
-        docs_query = docs_query.where(field, op, value)
-    docs = docs_query.stream()
-    students = [{**doc.to_dict(), "student_id": doc.id} for doc in docs]
+    # Base query for students assigned to this faculty
+    students_query = Student.objects.filter(faculty=faculty, student_status='Registered')
 
     # --- Server-side search ---
-    search_query = request.GET.get('search', '').strip().lower()
+    search_query = request.GET.get('search', '').strip()
     if search_query:
-        students = [
-            s for s in students
-            if search_query in str(s.get('first_name', '')).lower()
-            or search_query in str(s.get('last_name', '')).lower()
-            or search_query in str(s.get('student_id', '')).lower()
-        ]
+        students_query = students_query.filter(
+            Q(first_name__icontains=search_query) |
+            Q(last_name__icontains=search_query) |
+            Q(student_id__icontains=search_query)
+        )
+
+    students_query = students_query.order_by('last_name', 'first_name')
+
+    # --- Calculate Counts from PostgreSQL ---
+    # Total students in the faculty's specific class/section
+    section_total = students_query.count()
+    
+    # Total students in the faculty's entire program
+    program_total = Student.objects.filter(
+        faculty__program=faculty.program, 
+        student_status='Registered'
+    ).count()
+
+    # Total registered students in the system
+    total_users = Student.objects.filter(student_status='Registered').count()
 
     # Pagination
     page_number = request.GET.get('page', 1)
-    paginator = Paginator(students, 8)  # 12 students per page
+    paginator = Paginator(students_query, 8) # 8 students per page
     page_obj = paginator.get_page(page_number)
 
-
-    # Fetch notifications from Firestore, newest first
+    # --- Notifications (still from Firestore as per existing logic) ---
     notifications_ref = db.collection("Notifications").order_by("timestamp", direction=firestore.Query.DESCENDING)
     notifications = []
     for doc in notifications_ref.stream():
         notif = doc.to_dict()
         notif['id'] = doc.id
         notifications.append(notif)
+    # --- End of Firestore logic ---
 
-    context ={
-        "students": page_obj.object_list,
-        "faculty_data": faculty_data,
+    context = {
+        "students": page_obj,
+        "faculty_data": faculty,
         "total_users": total_users,
         "notifications": notifications,
         "program_total": program_total,
         "section_total": section_total,
-        "active_count": active_count,
-        "inactive_count": inactive_count,
-        "search_query": request.GET.get('search', ''),
-        "show_sticky_container": False,
+        "search_query": search_query,
         "page_obj": page_obj,
         "paginator": paginator,
-        "request": request, 
     }
 
     if request.headers.get('HX-Request'):
@@ -403,72 +289,84 @@ def student_list(request):
 
 @faculty_required
 def student_progress(request):
-    faculty_id = request.user.username
-    users_ref = db.collection('Authorized Faculty')
-    query = users_ref.where('faculty_id', '==', faculty_id).limit(1).get()
-    faculty_data = None
-    if query:
-        faculty_doc = query[0]
-        faculty_data = faculty_doc.to_dict()
+    try:
+        faculty = Faculty.objects.get(faculty_id=request.user.username)
+    except Faculty.DoesNotExist:
+        messages.error(request, "Faculty profile not found.")
+        return redirect('some_error_page')
 
-    faculty_program = faculty_data.get('program')
-    faculty_year_section = faculty_data.get('year_section')
-    faculty_semester = faculty_data.get('semester')
+    # --- Sync Logic: Tier Completion Model ---
 
-    program_total = db.collection("Registered_Students").where("program", "==", faculty_program).stream()
-    program_total = sum(1 for _ in program_total)
+    # 1. Get all tasks from DB and group them by tier
+    tasks_by_tier = {}
+    all_tasks = Task.objects.all()
+    for task in all_tasks:
+        if task.tier not in tasks_by_tier:
+            tasks_by_tier[task.tier] = []
+        tasks_by_tier[task.tier].append(task)
 
-    section_query = db.collection("Registered_Students") \
-        .where("program", "==", faculty_program) \
-        .where("year_section", "==", faculty_year_section) \
-        .where("semester", "==", faculty_semester)
+    # 2. Get all students for this faculty
+    students_in_section = Student.objects.filter(faculty=faculty, student_status='Registered')
 
-    section_total = sum(1 for _ in section_query.stream())
+    # 3. Iterate through students to check and sync progress
+    for student in students_in_section:
+        try:
+            doc_ref = db.collection('Registered_Students').document(student.student_id).get()
+            if not doc_ref.exists:
+                continue  # Skip if student has no Firestore record
 
-    # Count students who accomplished each tier
-    novice_count = 0
-    junior_count = 0
-    senior_count = 0
+            progress_data = doc_ref.to_dict()
 
+            # 4. Check each tier for completion
+            for tier, tasks_in_tier in tasks_by_tier.items():
+                # Get the required Firestore keys for this tier
+                required_keys = [t.firestore_key for t in tasks_in_tier]
+                
+                # Check if ALL required keys are in the Firestore data
+                if all(key in progress_data for key in required_keys):
+                    
+                    # Tier is complete in Firestore. Now, sync it to PostgreSQL.
+                    with transaction.atomic(): # Ensure all tasks for the tier are saved together
+                        for task_to_sync in tasks_in_tier:
+                            # Use get_or_create to avoid creating duplicate entries
+                            StudentTaskProgress.objects.get_or_create(
+                                student=student,
+                                task=task_to_sync,
+                                defaults={'details': progress_data.get(task_to_sync.firestore_key, {})}
+                            )
 
-    task_keys = [
-        "Novice_Task_1(Collect Books)",
-        "Novice_Task_2(Collect USB)",
-        "Novice_Task_3(QNA)",
-        "Novice_Task_4_(Defeat Rootkit)",
-    ]
-    for doc in section_query.stream():
-        data = doc.to_dict()
-        if all(isinstance(data.get(task), dict) and data.get(task) for task in task_keys):
-            novice_count += 1
+        except Exception as e:
+            # It's good practice to log errors during the sync process
+            print(f"Error syncing progress for student {student.student_id}: {e}")
+    
+    # --- End of Sync Logic ---
 
-    active_count = 0
-    inactive_count = 0
-    for doc in section_query.stream():
-        data = doc.to_dict()
-        if data.get("is_active"):
-            active_count += 1
-        else:
-            inactive_count += 1
+    # --- Final Counts from PostgreSQL ---
+    # Now that data is synced, we can query PostgreSQL efficiently.
+    # This counts students who have at least one progress record in a given tier.
+    # Since we only add records upon full tier completion, this is accurate.
+    
+    novice_completed_count = Student.objects.filter(
+        faculty=faculty, 
+        progress_records__task__tier='Novice'
+    ).distinct().count()
 
-    notifications_ref = db.collection("Notifications").order_by("timestamp", direction=firestore.Query.DESCENDING)
-    notifications = []
-    for doc in notifications_ref.stream():
-        notif = doc.to_dict()
-        notif['id'] = doc.id
-        notifications.append(notif)
+    junior_completed_count = Student.objects.filter(
+        faculty=faculty, 
+        progress_records__task__tier='Junior'
+    ).distinct().count()
+
+    senior_completed_count = Student.objects.filter(
+        faculty=faculty, 
+        progress_records__task__tier='Senior'
+    ).distinct().count()
 
     context = {
-        "faculty_data": faculty_data,
-        "notifications": notifications,
-        "program_total": program_total,
-        "section_total": section_total,
-        "active_count": active_count,
-        "inactive_count": inactive_count,
-        "novice_count": novice_count,
-        "junior_count": junior_count,
-        "senior_count": senior_count,
-        "show_sticky_container": False,
+        "faculty_data": faculty,
+        "section_total": students_in_section.count(),
+        "novice_count": novice_completed_count,
+        "junior_count": junior_completed_count,
+        "senior_count": senior_completed_count,
     }
 
     if request.headers.get('HX-Request'):
@@ -589,64 +487,33 @@ def restore_student(request, student_id, destination="registered"):
 
 @faculty_required
 def Verify_Student(request):
-    faculty_id = request.user.username
-    users_ref = db.collection('Authorized Faculty')
-    query = users_ref.where('faculty_id', '==', faculty_id).limit(1).get()
-    faculty_data = None
+    # Get the logged-in faculty member
+    faculty = get_object_or_404(Faculty, faculty_id=request.user.username)
 
-    notifications_ref = db.collection("Notifications").order_by("timestamp", direction=firestore.Query.DESCENDING)
-    notifications = []
-    for doc in notifications_ref.stream():
-        notif = doc.to_dict()
-        notif['id'] = doc.id
-        notifications.append(notif)
-
-    if query:
-        faculty_doc = query[0]
-        faculty_data = faculty_doc.to_dict()
-
-    # Get faculty's assigned program and year_section
-    faculty_program = faculty_data.get('program')
-    faculty_year_section = faculty_data.get('year_section')
-
-    # Filter pending students by assigned program and year_section
-    verify_ref = db.collection("Pending Students")
-    filters = []
-    if faculty_program:
-        filters.append(("program", "==", faculty_program))
-    if faculty_year_section:
-        filters.append(("year_section", "==", faculty_year_section))
-
-    docs_query = verify_ref
-    for field, op, value in filters:
-        docs_query = docs_query.where(field, op, value)
-    docs = docs_query.stream()
-
-    verify_students = [{**doc.to_dict(), "student_id": doc.id} for doc in docs]
+    # Filter pending students that match the faculty's class assignments
+    pending_students_query = PendingStudent.objects.filter(
+        program=faculty.program,
+        year_section=faculty.year_section,
+        semester=faculty.semester
+    ).order_by('submitted_at')
 
     # --- Server-side search ---
-    search_query = request.GET.get('search', '').strip().lower()
+    search_query = request.GET.get('search', '').strip()
     if search_query:
-        verify_students = [
-            s for s in verify_students
-            if search_query in str(s.get('first_name', '')).lower()
-            or search_query in str(s.get('last_name', '')).lower()
-            or search_query in str(s.get('student_id', '')).lower()
-        ]
+        pending_students_query = pending_students_query.filter(
+            Q(first_name__icontains=search_query) |
+            Q(last_name__icontains=search_query) |
+            Q(student_id__icontains=search_query)
+        )
 
     context = {
-        "verify_students": verify_students,
-        "faculty_data": faculty_data,
-        "notifications": notifications,
-        "search_query": request.GET.get('search', ''),
-        "show_sticky_container": False,
+        "verify_students": pending_students_query,
+        "search_query": search_query,
     }
 
     if request.headers.get('HX-Request'):
-        # HTMX request: return only the main content
         return render(request, 'Students/contents/students-verify-list-content.html', context)
     else:
-        # Normal request: return the full page
         return render(request, 'Students/students-verify-list.html', context)
 
 
@@ -784,52 +651,38 @@ def Faculty_activity_page(request):
 
 @faculty_required
 def accept_student(request, student_id):
-    pending_ref = db.collection("Pending Students").document(student_id)
-    student = pending_ref.get()
-    if student.exists:
-        student_data = student.to_dict()
-        student_data["created_at"] = firestore.SERVER_TIMESTAMP  # <-- Add this line
-        db.collection("Registered_Students").document(student_id).set(student_data)
-        pending_ref.delete()
-        
-        notification = {
-            "message": f"Student {student.to_dict()['first_name']} {student.to_dict()['last_name']} has been accepted and registered.",
-            "timestamp": firestore.SERVER_TIMESTAMP,
-            "seen": False
-        }
-        db.collection("Notifications").add(notification)
-        
-        messages.success(request, "Student has been accepted and registered successfully!")
-    else:
-        messages.error(request, "Student not found in pending list.")
+    faculty = get_object_or_404(Faculty, faculty_id=request.user.username)
+    pending_student = get_object_or_404(PendingStudent, student_id=student_id)
 
-    return redirect("verify-students")
+    try:
+        # Create a new Student record from the pending data
+        Student.objects.create(
+            student_id=pending_student.student_id,
+            first_name=pending_student.first_name,
+            last_name=pending_student.last_name,
+            middle_initial=pending_student.middle_initial,
+            password=pending_student.password, # Transfer the hashed password
+            faculty=faculty,
+            student_status='Registered'
+        )
+        # Delete the record from the pending table
+        pending_student.delete()
+        messages.success(request, f"Student {pending_student.first_name} {pending_student.last_name} has been accepted.")
+    except Exception as e:
+        messages.error(request, f"An error occurred while accepting the student: {e}")
+
+    return redirect('verify-students')
 
 @faculty_required
 def reject_student(request, student_id):
-    """Reject and remove student from Pending Students"""
-    pending_ref = db.collection("Pending Students").document(student_id)
-    student = pending_ref.get()
+    pending_student = get_object_or_404(PendingStudent, student_id=student_id)
+    try:
+        pending_student.delete()
+        messages.success(request, f"Registration for student {pending_student.first_name} {pending_student.last_name} has been rejected.")
+    except Exception as e:
+        messages.error(request, f"An error occurred while rejecting the student: {e}")
 
-    if student.exists:
-        # Get student info before deletion for notification
-        student_data = student.to_dict()
-        # Delete from Pending Students
-        pending_ref.delete()
-        
-        # Add rejection notification
-        notification = {
-            "message": f"Student {student_data['first_name']} {student_data['last_name']}'s registration was rejected.",
-            "timestamp": firestore.SERVER_TIMESTAMP,
-            "seen": False
-        }
-        db.collection("Notifications").add(notification)
-        
-        messages.success(request, "Student registration has been rejected.")
-    else:
-        messages.error(request, "Student not found in pending list.")
-
-    return redirect("verify-students")
+    return redirect('verify-students')
 
 
 @require_POST
@@ -1043,69 +896,53 @@ def senior_tier(request):
 
 @faculty_required
 def faculty_student_status(request):
-    faculty_id = request.user.username
-    users_ref = db.collection('Authorized Faculty')
-    query = users_ref.where('faculty_id', '==', faculty_id).limit(1).get()
-    faculty_data = query[0].to_dict() if query else None
+    # Get the logged-in faculty member from PostgreSQL
+    try:
+        faculty = Faculty.objects.get(faculty_id=request.user.username)
+    except Faculty.DoesNotExist:
+        messages.error(request, "Faculty profile not found.")
+        return redirect('some_error_page') # Or faculty login
 
-    # Get faculty's assigned program, year_section, semester
-    faculty_program = faculty_data.get('program')
-    faculty_year_section = faculty_data.get('year_section')
-    faculty_semester = faculty_data.get('semester')
-
-    search_query = request.GET.get('search', '').strip().lower()
+    # Get filter and search parameters from the request
     status_filter = request.GET.get('status', 'all').lower()
+    search_query = request.GET.get('search', '').strip()
 
-    # Fetch Completed Students
-    completed_ref = db.collection("Completed Students")
-    completed_query = (
-        completed_ref
-        .where("program", "==", faculty_program)
-        .where("year_section", "==", faculty_year_section)
-        .where("semester", "==", faculty_semester)
+    # Base query for students assigned to this faculty with non-registered statuses
+    students_query = Student.objects.filter(
+        faculty=faculty,
+        student_status__in=['Completed', 'Dropped']
     )
-    completed_students = [{**doc.to_dict(), "student_id": doc.id, "status": "Completed"} for doc in completed_query.stream()]
 
-    # Fetch Drop-out Students
-    dropout_ref = db.collection("Drop-out Students")
-    dropout_query = (
-        dropout_ref
-        .where("program", "==", faculty_program)
-        .where("year_section", "==", faculty_year_section)
-        .where("semester", "==", faculty_semester)
-    )
-    dropout_students = [{**doc.to_dict(), "student_id": doc.id, "status": "Drop-out"} for doc in dropout_query.stream()]
+    # Apply status filter
+    if status_filter == 'completed':
+        students_query = students_query.filter(student_status='Completed')
+    elif status_filter in ['drop-out', 'dropout', 'dropped']:
+        students_query = students_query.filter(student_status='Dropped')
 
-    # Combine and filter by status if needed
-    students = completed_students + dropout_students
-    if status_filter == "completed":
-        students = [s for s in students if s["status"].lower() == "completed"]
-    elif status_filter == "drop-out" or status_filter == "dropout":
-        students = [s for s in students if s["status"].lower() in ["drop-out", "dropout"]]
-
-    # Search
+    # Apply search filter
     if search_query:
-        students = [
-            s for s in students
-            if search_query in str(s.get('first_name', '')).lower()
-            or search_query in str(s.get('last_name', '')).lower()
-            or search_query in str(s.get('student_id', '')).lower()
-        ]
+        students_query = students_query.filter(
+            Q(first_name__icontains=search_query) |
+            Q(last_name__icontains=search_query) |
+            Q(student_id__icontains=search_query)
+        )
+
+    students_query = students_query.order_by('-student_id')
 
     # Pagination
+    paginator = Paginator(students_query, 10)
     page_number = request.GET.get('page', 1)
-    paginator = Paginator(students, 10)
     page_obj = paginator.get_page(page_number)
 
     context = {
-        "students": page_obj.object_list,
-        "faculty_data": faculty_data,
+        "students": page_obj,
+        "faculty_data": faculty,
         "status_filter": status_filter,
-        "search_query": request.GET.get('search', ''),
+        "search_query": search_query,
         "page_obj": page_obj,
         "paginator": paginator,
-        "request": request,
     }
+
     if request.headers.get('HX-Request'):
         return render(request, 'Students/contents/student-status-content.html', context)
     else:

@@ -11,7 +11,7 @@ class Faculty(models.Model):
     password = models.CharField(max_length=128)
     faculty_status = models.CharField(
         max_length=20,
-        choices=[('Continuing', 'Continuing'), ('Deactivated', 'Deactivated'), ('Completed', 'Completed')],
+        choices=[('Continuing', 'Continuing'), ('Completed', 'Completed')],
         default='Continuing'
     )
 
@@ -29,10 +29,12 @@ class ArchivedFaculty(models.Model):
     program = models.CharField(max_length=100)
     year_section = models.CharField(max_length=20)
     semester = models.CharField(max_length=20)
-    faculty_status = models.CharField(max_length=20, default='Archived')
+    archived_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"{self.faculty_id} - {self.first_name} {self.last_name}"
 
     class Meta:
         db_table = 'ArchivedFaculty'
+        verbose_name_plural = "Archived Faculty"
+

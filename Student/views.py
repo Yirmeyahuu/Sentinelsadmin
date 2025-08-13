@@ -1,16 +1,17 @@
 from django.shortcuts import render, redirect
+
 from django.contrib import messages
 from django.contrib.auth.hashers import make_password
 from .models import Student
 from Faculty.models import Faculty
 from firebase_admin import firestore
+from .models import PendingStudent, Student
 
 # Firestore database instance (for notifications)
 db = firestore.client()
 
 def StudentRegister(request):
     if request.method == "POST":
-        # Get data from the registration form
         student_id = request.POST.get("student_id")
         first_name = request.POST.get("first_name")
         last_name = request.POST.get("last_name")
@@ -20,52 +21,41 @@ def StudentRegister(request):
         semester = request.POST.get("semester")
 
         try:
-            # Find the corresponding faculty member
-            faculty = Faculty.objects.get(
+            # Check if a faculty for this class exists and is active
+            if not Faculty.objects.filter(
                 program=program,
                 year_section=year_section,
                 semester=semester,
-                faculty_status='Continuing'  # Ensure faculty is active
-            )
+                faculty_status='Continuing'
+            ).exists():
+                messages.error(request, "Registration failed: No active class found for the selected program, year, and semester.")
+                return redirect('student_register')
 
-            # Create a new Student instance
-            new_student = Student(
+            # Check if student is already pending or registered
+            if PendingStudent.objects.filter(student_id=student_id).exists() or Student.objects.filter(student_id=student_id).exists():
+                 messages.error(request, f"Student ID '{student_id}' is already registered or pending approval.")
+                 return redirect('student_register')
+
+            # Create a new PendingStudent instance
+            PendingStudent.objects.create(
                 student_id=student_id,
                 first_name=first_name,
                 last_name=last_name,
                 middle_initial=middle_initial,
-                # IMPORTANT: Hash the password before saving.
-                # Using student_id as a temporary default password.
-                # You should add a password field to your form.
-                password=make_password(student_id),
-                faculty=faculty,
-                student_status='Registered'  # Set default status
+                program=program,
+                year_section=year_section,
+                semester=semester,
+                password=make_password(student_id), # Using student_id as default password
             )
 
-            new_student.save()
+            messages.success(request, "Registration submitted successfully! Please wait for faculty approval.")
+            return redirect("register_success") # Or redirect to login page
 
-            # --- Keep Firestore notification for the superadmin ---
-            full_name = f"{first_name} {middle_initial} {last_name}".strip()
-            notification = {
-                "message": f"A new student, {full_name}, has registered under Faculty {faculty.faculty_id}.",
-                "timestamp": firestore.SERVER_TIMESTAMP,
-                "seen": False
-            }
-            db.collection("Notifications").add(notification)
-            # ------------------------------------------------
-
-            messages.success(request, "You have registered successfully!")
-            return redirect("register_success")
-
-        except Faculty.DoesNotExist:
-            # Handle case where no matching faculty is found
-            messages.error(request, "Registration failed: No active class found for the selected program, year, and semester.")
-            return redirect('student_register') # Redirect back to the form
         except Exception as e:
-            # Handle other potential errors, like a duplicate student ID
-            messages.error(request, f"An error occurred: {e}")
-            return redirect('student_register') # Redirect back to the form
+            messages.error(request, f"An error occurred during registration: {e}")
+            return redirect('student_register')
 
+    # For GET request, just render the form
     return render(request, 'StudentRegistration/student-registration.html')
 
 def RegisterSuccess(request):

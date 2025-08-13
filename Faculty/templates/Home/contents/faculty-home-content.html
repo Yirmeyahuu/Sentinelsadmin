@@ -204,10 +204,10 @@
                                         {% endif %}
                                     </td>
                                     <td class="px-4 py-3 whitespace-nowrap">
-                                        <span class="text-sky-100">{{ student.name }}</span>
+                                        <span class="text-sky-100">{{ student.first_name }} {{ student.last_name }}</span>
                                     </td>
                                     <td class="px-4 py-3 whitespace-nowrap">
-                                        <span class="text-yellow-300 font-bold">{{ student.points }}</span>
+                                        <span class="text-yellow-300 font-bold">{{ student.total_points }}</span>
                                     </td>
                                 </tr>
                                 {% empty %}

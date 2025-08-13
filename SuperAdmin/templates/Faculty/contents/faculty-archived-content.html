@@ -29,14 +29,16 @@
 
         <!-- Faculty Archive Table-->
         <div class="mt-4 overflow-hidden rounded-2xl border border-blue-500">
-            <table class="w-full min-w-[800px] border-collapse border border-blue-500 ">
+            <table class="w-full min-w-[800px] border-collapse border border-blue-500">
                 <thead>
                     <tr class="bg-blue-400 text-white rounded-lg">
                         <th class="border border-blue-500 p-2">Faculty ID</th>
                         <th class="border border-blue-500 p-2">Full Name</th>
                         <th class="border border-blue-500 p-2">Program</th>
                         <th class="border border-blue-500 p-2">Year & Section</th>
-                        <th class="border border-blue-500 p-2s">Semester</th>
+                        <th class="border border-blue-500 p-2">Semester</th>
+                        <th class="border border-blue-500 p-2">Status</th>
+                        <th class="border border-blue-500 p-2">Archived On</th>
                         <th class="border border-blue-500 p-2">Actions</th>
                     </tr>
                 </thead>
@@ -50,6 +52,12 @@
                             <td class="border border-blue-500 p-2 text-center whitespace-nowrap">{{ faculty.program }}</td>
                             <td class="border border-blue-500 p-2 text-center whitespace-nowrap">{{ faculty.year_section }}</td>
                             <td class="border border-blue-500 p-2 text-center whitespace-nowrap">{{ faculty.semester }}</td>
+                            <td class="border border-blue-500 p-2 text-center whitespace-nowrap">
+                                <span class="px-2 py-1 bg-red-100 text-red-700 rounded-full text-sm">Deactivated</span>
+                            </td>
+                            <td class="border border-blue-500 p-2 text-center whitespace-nowrap">
+                                {{ faculty.archived_at|date:"Y-m-d" }}
+                            </td>
                             <td class="border border-blue-500 p-2 text-center">
                                 <div class="flex items-center justify-center space-x-3">
                                     <!-- Move Modal Icon -->
@@ -73,12 +81,11 @@
                         </tr>
                     {% empty %}
                         <tr>
-                            <td colspan="6" class="text-center border border-blue-500 p-4 bg-gray-100 text-blue-500">No archived users yet.</td>
+                            <td colspan="8" class="text-center border border-blue-500 p-4 bg-gray-100 text-blue-500">No archived users yet.</td>
                         </tr>
                     {% endfor %}
                 </tbody>
             </table>
-
         </div>
     </div>
 </div>

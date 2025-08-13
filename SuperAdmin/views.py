@@ -204,8 +204,15 @@ def edit_faculty(request, faculty_id):
 @superadmin_required
 @require_POST
 def delete_archived_faculty(request, faculty_id):
-    db.collection("Archived Faculty").document(faculty_id).delete()
-    messages.success(request, "Archived faculty deleted permanently.")
+    try:
+        archived_faculty = get_object_or_404(ArchivedFaculty, faculty_id=faculty_id)
+        archived_faculty.delete()
+        messages.success(request, "Archived faculty deleted permanently.")
+    except ArchivedFaculty.DoesNotExist:
+        messages.error(request, "Faculty not found in the archive.")
+    except Exception as e:
+        messages.error(request, f"An error occurred: {e}")
+        
     return redirect('Faculty_Archived')
 
 @superadmin_required
@@ -279,16 +286,33 @@ def Superadmin_Student_Archive(request):
 
 @superadmin_required
 def Archived_faculty_list(request):
-    archived_faculties = ArchivedFaculty.objects.all()
+    search_query = request.GET.get('search', '').strip()
+    
+    archived_faculties_query = ArchivedFaculty.objects.all()
+
+    if search_query:
+        archived_faculties_query = archived_faculties_query.filter(
+            Q(first_name__icontains=search_query) |
+            Q(last_name__icontains=search_query) |
+            Q(faculty_id__icontains=search_query)
+        )
+
+    archived_faculties_query = archived_faculties_query.order_by('-archived_at')
+
+    paginator = Paginator(archived_faculties_query, 10)
+    page_number = request.GET.get('page', 1)
+    page_obj = paginator.get_page(page_number)
 
     context = {
-        "archived_faculties": archived_faculties
+        "archived_faculties": page_obj,
+        "search_query": search_query,
+        "page_obj": page_obj,
+        "paginator": paginator,
     }
 
     if request.headers.get('HX-Request'):
         return render(request, 'Faculty/contents/faculty-archived-content.html', context)
-    else:
-        return render(request, 'Faculty/faculty-archived.html', context)
+    return render(request, 'Faculty/faculty-archived.html', context)
 
 
 @superadmin_required
@@ -563,111 +587,69 @@ def Faculty_Status(request):
 
 
 @superadmin_required
+@require_POST
 def move_faculty(request):
-    if request.method == "POST":
-        faculty_id = request.POST.get("faculty_id")
-        destination = request.POST.get("destination")
+    faculty_id = request.POST.get("faculty_id")
+    destination = request.POST.get("destination")
 
-        faculty = Faculty.objects.filter(faculty_id=faculty_id).first()
-        archived_faculty = ArchivedFaculty.objects.filter(faculty_id=faculty_id).first()
+    try:
+        with transaction.atomic():
+            # First, check if faculty exists in either active or archived table
+            faculty = Faculty.objects.filter(faculty_id=faculty_id).first()
+            archived_faculty = ArchivedFaculty.objects.filter(faculty_id=faculty_id).first()
 
-        if not faculty and not archived_faculty:
-            messages.error(request, "Faculty not found.")
-            return redirect("FacultyList")
+            if not faculty and not archived_faculty:
+                messages.error(request, "Faculty not found.")
+                return redirect(request.META.get('HTTP_REFERER', 'Faculty_list'))
 
-        try:
-            with transaction.atomic():
-                # Move to Authorized/Continuing
-                if destination == "authorized":
-                    if archived_faculty:
-                        Faculty.objects.create(
-                            faculty_id=archived_faculty.faculty_id,
-                            first_name=archived_faculty.first_name,
-                            last_name=archived_faculty.last_name,
-                            middle_initial=archived_faculty.middle_initial,
-                            program=archived_faculty.program,
-                            year_section=archived_faculty.year_section,
-                            semester=archived_faculty.semester,
-                            password='',  # Set as needed
-                            faculty_status='Continuing'
-                        )
-                        archived_faculty.delete()
-                        messages.success(request, "Faculty moved to Authorized Faculty successfully.")
-                    elif faculty:
-                        faculty.faculty_status = 'Continuing'
-                        faculty.save()
-                        messages.success(request, "Faculty is already in Authorized Faculty.")
+            # Case 1: Moving within Active table (between Continuing and Completed)
+            if destination in ["continuing", "completed"] and faculty:
+                faculty.faculty_status = destination.capitalize()
+                faculty.save()
+                messages.success(request, f"Faculty status updated to '{faculty.faculty_status}'.")
 
-                # Move to Deactivated
-                elif destination == "deactivated":
-                    if faculty:
-                        faculty.faculty_status = 'Deactivated'
-                        faculty.save()
-                        messages.success(request, "Faculty moved to Deactivated Faculty successfully!")
-                    elif archived_faculty:
-                        Faculty.objects.create(
-                            faculty_id=archived_faculty.faculty_id,
-                            first_name=archived_faculty.first_name,
-                            last_name=archived_faculty.last_name,
-                            middle_initial=archived_faculty.middle_initial,
-                            program=archived_faculty.program,
-                            year_section=archived_faculty.year_section,
-                            semester=archived_faculty.semester,
-                            password='',  # Set as needed
-                            faculty_status='Deactivated'
-                        )
-                        archived_faculty.delete()
-                        messages.success(request, "Faculty moved from Archive to Deactivated Faculty successfully!")
-                    else:
-                        messages.error(request, "Faculty not found.")
+            # Case 2: Restoring from Archive to Active
+            elif destination in ["continuing", "completed"] and archived_faculty:
+                Faculty.objects.create(
+                    faculty_id=archived_faculty.faculty_id,
+                    first_name=archived_faculty.first_name,
+                    last_name=archived_faculty.last_name,
+                    middle_initial=archived_faculty.middle_initial,
+                    program=archived_faculty.program,
+                    year_section=archived_faculty.year_section,
+                    semester=archived_faculty.semester,
+                    password='',  # A new password should be set upon restoration
+                    faculty_status=destination.capitalize()
+                )
+                archived_faculty.delete()
+                messages.success(request, f"Faculty restored to '{destination.capitalize()}' status.")
 
-                # Move to Completed
-                elif destination == "completed":
-                    if faculty:
-                        faculty.faculty_status = 'Completed'
-                        faculty.save()
-                        messages.success(request, "Faculty moved to Completed Faculty successfully.")
-                    elif archived_faculty:
-                        Faculty.objects.create(
-                            faculty_id=archived_faculty.faculty_id,
-                            first_name=archived_faculty.first_name,
-                            last_name=archived_faculty.last_name,
-                            middle_initial=archived_faculty.middle_initial,
-                            program=archived_faculty.program,
-                            year_section=archived_faculty.year_section,
-                            semester=archived_faculty.semester,
-                            password='',  # Set as needed
-                            faculty_status='Completed'
-                        )
-                        archived_faculty.delete()
-                        messages.success(request, "Faculty moved from Archive to Completed Faculty successfully!")
-                    else:
-                        messages.error(request, "Faculty not found.")
+            # Case 3: Moving from Active to Archive (Deactivating)
+            elif destination == "archive" and faculty:
+                ArchivedFaculty.objects.create(
+                    faculty_id=faculty.faculty_id,
+                    first_name=faculty.first_name,
+                    last_name=faculty.last_name,
+                    middle_initial=faculty.middle_initial,
+                    program=faculty.program,
+                    year_section=faculty.year_section,
+                    semester=faculty.semester
+                )
+                faculty.delete()
+                messages.success(request, "Faculty has been archived (deactivated) successfully.")
+            
+            # Case 4: Already in archive
+            elif destination == "archive" and archived_faculty:
+                messages.info(request, "Faculty is already archived.")
+            
+            else:
+                messages.error(request, "Invalid operation specified.")
 
-                # Move to Archive
-                elif destination == "archive":
-                    if faculty:
-                        ArchivedFaculty.objects.create(
-                            faculty_id=faculty.faculty_id,
-                            first_name=faculty.first_name,
-                            last_name=faculty.last_name,
-                            middle_initial=faculty.middle_initial,
-                            program=faculty.program,
-                            year_section=faculty.year_section,
-                            semester=faculty.semester,
-                            faculty_status='Archived'
-                        )
-                        faculty.delete()
-                        messages.success(request, "Faculty moved to Archived Faculty successfully!")
-                    else:
-                        messages.error(request, "Faculty not found in active list.")
-                else:
-                    messages.error(request, "Invalid destination.")
-        except Exception as e:
-            messages.error(request, f"Error moving faculty: {e}")
+    except Exception as e:
+        messages.error(request, f"An unexpected error occurred: {e}")
 
-    referer = request.META.get('HTTP_REFERER')
-    return redirect(referer) if referer else redirect("FacultyList")
+    referer = request.META.get('HTTP_REFERER', 'Faculty_list')
+    return redirect(referer)
 
 @superadmin_required
 def Superadmin_Student_List(request):
