@@ -2,91 +2,99 @@
     document.title = "SENTINELS | Archived Students";
 </script>
 
-<div class="p-6 ml-20">
-    <div class="bg-blue-600 shadow-lg rounded-2xl p-6">
-        <div class="flex justify-between items-center">
-            <h2 class="text-xl font-bold text-white">Archived Students</h2>
-            <div class="flex items-center space-x-4">
-                <form class="bg-gray-100 p-1 rounded-3xl flex items-center max-w-sm mx-auto">
-                    <label for="simple-search" class="sr-only">Search</label>
-                    <div class="relative w-full">
-                        <div class="absolute inset-y-0 start-0 flex items-center ps-2 pointer-events-none">
-                            <svg viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 text-gray-500 dark:text-gray-400">
-                                <path fill-rule="evenodd" d="M12 6a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Zm-1.5 8a4 4 0 0 0-4 4 2 2 0 0 0 2 2h7a2 2 0 0 0 2-2 4 4 0 0 0-4-4h-3Zm6.82-3.096a5.51 5.51 0 0 0-2.797-6.293 3.5 3.5 0 1 1 2.796 6.292ZM19.5 18h.5a2 2 0 0 0 2-2 4 4 0 0 0-4-4h-1.1a5.503 5.503 0 0 1-.471.762A5.998 5.998 0 0 1 19.5 18ZM4 7.5a3.5 3.5 0 0 1 5.477-2.889 5.5 5.5 0 0 0-2.796 6.293A3.501 3.501 0 0 1 4 7.5ZM7.1 12H6a4 4 0 0 0-4 4 2 2 0 0 0 2 2h.5a5.998 5.998 0 0 1 3.071-5.238A5.505 5.505 0 0 1 7.1 12Z" clip-rule="evenodd"/>
-                            </svg>
-                        </div>
-                        <input 
-                            type="text" 
-                            name="search"
-                            value="{{ search_query }}"
-                            id="searchBar" 
-                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-3xl focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5 dark:bg-white dark:border-blue-500 dark:placeholder-gray-400 dark:text-gray-500 dark:focus:ring-blue-500 dark:focus:border-blue-500" 
-                            placeholder="Search Student..." 
-                        />
-                    </div>
-                    <button type="submit" class="p-1.5 text-sm ms-1 font-medium text-blue-500 bg-gray-100 rounded-tr-2xl rounded-br-2xl rounded-tl-xl rounded-bl-xl hover:bg-blue-400 hover:text-gray-100 cursor-pointer duration-150">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" aria-hidden="true" fill="none" viewBox="0 0 24 24">
-                            <path fill="currentColor" d="M15.5 12c2.5 0 4.5 2 4.5 4.5c0 .88-.25 1.71-.69 2.4l3.08 3.1L21 23.39l-3.12-3.07c-.69.43-1.51.68-2.38.68c-2.5 0-4.5-2-4.5-4.5s2-4.5 4.5-4.5m0 2a2.5 2.5 0 0 0-2.5 2.5a2.5 2.5 0 0 0 2.5 2.5a2.5 2.5 0 0 0 2.5-2.5a2.5 2.5 0 0 0-2.5-2.5M10 4a4 4 0 0 1 4 4c0 .91-.31 1.75-.82 2.43c-.86.32-1.63.83-2.27 1.47L10 12a4 4 0 0 1-4-4a4 4 0 0 1 4-4M2 20v-2c0-2.12 3.31-3.86 7.5-4c-.32.78-.5 1.62-.5 2.5c0 1.29.38 2.5 1 3.5H2Z"/>
+<div class="flex flex-col min-h-screen ml-20">
+    <div class="px-6">
+        <div class="max-w-[calc(100%-80px)] mx-auto">
+            <div class="bg-gradient-to-br from-blue-700/70 to-blue-600 shadow-2xl rounded-2xl p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                        Archived Students
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="m20.25 7.5-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" />
                         </svg>
-                        <span class="sr-only">Search</span>
-                    </button>
-                </form>
-            </div>
-        </div>
-
-        <!-- Student Archive Table -->
-        <div class="mt-4 overflow-hidden rounded-2xl border border-blue-500">
-            <table class="w-full min-w-[800px] border-collapse border border-blue-500">
-                <thead>
-                    <tr class="bg-blue-400 text-white rounded-lg">
-                        <th class="border border-blue-500 p-2">Student ID</th>
-                        <th class="border border-blue-500 p-2">Full Name</th>
-                        <th class="border border-blue-500 p-2">Program</th>
-                        <th class="border border-blue-500 p-2">Year & Section</th>
-                        <th class="border border-blue-500 p-2">Semester</th>
-                        <th class="border border-blue-500 p-2">Archived On</th>
-                        <th class="border border-blue-500 p-2">Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="studentTableBody">
-                    {% for student in archived_students %}
-                        <tr class="studentRow text-blue-900 {% if forloop.counter0|divisibleby:2 %}bg-gray-100{% else %}bg-blue-100{% endif %}">
-                            <td class="border border-blue-500 p-2 text-center whitespace-nowrap">{{ student.student_id }}</td>
-                            <td class="border border-blue-500 p-2 text-center whitespace-nowrap">
-                                {{ student.first_name }} {{ student.middle_initial }} {{ student.last_name }}
-                            </td>
-                            <td class="border border-blue-500 p-2 text-center whitespace-nowrap">{{ student.faculty.program|default:"N/A" }}</td>
-                            <td class="border border-blue-500 p-2 text-center whitespace-nowrap">{{ student.faculty.year_section|default:"N/A" }}</td>
-                            <td class="border border-blue-500 p-2 text-center whitespace-nowrap">{{ student.faculty.semester|default:"N/A" }}</td>
-                            <td class="border border-blue-500 p-2 text-center whitespace-nowrap">{{ student.archived_at|date:"Y-m-d" }}</td>
-                            <td class="border border-blue-500 p-2 text-center">
-                                <div class="flex items-center justify-center space-x-3">
-                                    <!-- Move Modal Icon -->
-                                    <button onclick="openMoveStudentModal('{{ student.student_id }}')" class="text-blue-900 hover:text-blue-400 transition-all cursor-pointer" title="Move">
-                                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24">
-                                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                  d="M18 14v4.833A1.166 1.166 0 0 1 16.833 20H5.167A1.167 1.167 0 0 1 4 18.833V7.167A1.166 1.166 0 0 1 5.167 6h4.618m4.447-2H20v5.768m-7.889 2.121 7.778-7.778"/>
-                                        </svg>
-                                    </button>
-                                    <!-- Delete Icon -->
-                                    <form method="post" action="{% url 'delete_archived_student' student.student_id %}" style="display:inline;">
-                                        {% csrf_token %}
-                                        <button type="submit" class="text-red-700 hover:text-red-500 transition-all cursor-pointer" title="Delete" onclick="return confirm('Delete this student permanently?');">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24">
-                                                <g fill="currentColor"><path d="M3 6.524c0-.395.327-.714.73-.714h4.788c.006-.842.098-1.995.932-2.793A3.68 3.68 0 0 1 12 2a3.68 3.68 0 0 1 2.55 1.017c.834.798.926 1.951.932 2.793h4.788c.403 0 .73.32.73.714a.722.722 0 0 1-.73.714H3.73A.722.722 0 0 1 3 6.524Z"/><path fill-rule="evenodd" d="M11.596 22h.808c2.783 0 4.174 0 5.08-.886c.904-.886.996-2.34 1.181-5.246l.267-4.187c.1-1.577.15-2.366-.303-2.866c-.454-.5-1.22-.5-2.753-.5H8.124c-1.533 0-2.3 0-2.753.5c-.454.5-.404 1.289-.303 2.866l.267 4.188c.185 2.906.277 4.36 1.182 5.245c.905.886 2.296.886 5.079.886Zm-1.35-9.812c-.04-.433-.408-.75-.82-.707c-.413.044-.713.43-.672.865l.5 5.263c.04.434.408.75.82.707c.413-.044.713-.43.672-.864l-.5-5.264Zm4.329-.707c.412.044.713.43.671.865l-.5 5.263c-.04.434-.409.75-.82.707c-.413-.044-.713-.43-.672-.864l.5-5.264c.04-.433.409-.75.82-.707Z" clip-rule="evenodd"/></g>
-                                            </svg>
-                                        </button>
-                                    </form>
+                    </h2>
+                    <div class="flex flex-wrap items-center gap-4">
+                        <!-- Search Bar -->
+                        <form method="get" class="bg-gray-100 p-1 rounded-3xl flex items-center max-w-sm mx-auto">
+                            <div class="relative w-full">
+                                <div class="absolute inset-y-0 start-0 flex items-center ps-2 pointer-events-none">
+                                    <svg viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 text-gray-500 dark:text-gray-400">
+                                        <path fill-rule="evenodd" d="M12 6a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Zm-1.5 8a4 4 0 0 0-4 4 2 2 0 0 0 2 2h7a2 2 0 0 0 2-2 4 4 0 0 0-4-4h-3Zm6.82-3.096a5.51 5.51 0 0 0-2.797-6.293 3.5 3.5 0 1 1 2.796 6.292ZM19.5 18h.5a2 2 0 0 0 2-2 4 4 0 0 0-4-4h-1.1a5.503 5.503 0 0 1-.471.762A5.998 5.998 0 0 1 19.5 18ZM4 7.5a3.5 3.5 0 0 1 5.477-2.889 5.5 5.5 0 0 0-2.796 6.293A3.501 3.501 0 0 1 4 7.5ZM7.1 12H6a4 4 0 0 0-4 4 2 2 0 0 0 2 2h.5a5.998 5.998 0 0 1 3.071-5.238A5.505 5.505 0 0 1 7.1 12Z" clip-rule="evenodd"/>
+                                    </svg>
                                 </div>
-                            </td>
-                        </tr>
-                    {% empty %}
-                        <tr>
-                            <td colspan="7" class="text-center border border-blue-500 p-4 bg-gray-100 text-blue-500">No archived students yet.</td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+                                <input
+                                    type="text"
+                                    name="search"
+                                    value="{{ search_query }}"
+                                    class="bg-white pl-10 border border-gray-300 text-gray-900 text-sm rounded-2xl block w-full ps-14 p-2"
+                                    placeholder="Search Faculty..."
+                                />
+                            </div>
+                            <button type="submit" class="p-1.5 text-sm ms-1 font-medium text-blue-500 bg-gray-100 rounded-tr-2xl rounded-br-2xl rounded-tl-xl rounded-bl-xl hover:bg-blue-400 hover:text-gray-100 cursor-pointer duration-150">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" aria-hidden="true" fill="none" viewBox="0 0 24 24">
+                                    <path fill="currentColor" d="M15.5 12c2.5 0 4.5 2 4.5 4.5c0 .88-.25 1.71-.69 2.4l3.08 3.1L21 23.39l-3.12-3.07c-.69.43-1.51.68-2.38.68c-2.5 0-4.5-2-4.5-4.5s2-4.5 4.5-4.5m0 2a2.5 2.5 0 0 0-2.5 2.5a2.5 2.5 0 0 0 2.5 2.5a2.5 2.5 0 0 0 2.5-2.5a2.5 2.5 0 0 0-2.5-2.5M10 4a4 4 0 0 1 4 4c0 .91-.31 1.75-.82 2.43c-.86.32-1.63.83-2.27 1.47L10 12a4 4 0 0 1-4-4a4 4 0 0 1 4-4M2 20v-2c0-2.12 3.31-3.86 7.5-4c-.32.78-.5 1.62-.5 2.5c0 1.29.38 2.5 1 3.5H2Z"/>
+                                </svg>
+                                <span class="sr-only">Search</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Student Archive Table -->
+                <div class="overflow-hidden rounded-2xl shadow-xl w-full">
+                    <table class="w-full border-separate border-spacing-0 rounded-lg">
+                        <thead>
+                            <tr class="bg-blue-800 text-white rounded-lg">
+                                <th class="border border-blue-700 p-2">Student ID</th>
+                                <th class="border border-blue-700 p-2">Full Name</th>
+                                <th class="border border-blue-700 p-2">Program</th>
+                                <th class="border border-blue-700 p-2">Year & Section</th>
+                                <th class="border border-blue-700 p-2">Semester</th>
+                                <th class="border border-blue-700 p-2">Archived On</th>
+                                <th class="border border-blue-700 p-2">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="studentTableBody">
+                            {% for student in archived_students %}
+                                <tr class="studentRow text-blue-900 {% if forloop.counter0|divisibleby:2 %}bg-gray-100{% else %}bg-blue-100{% endif %}">
+                                    <td class="border border-blue-700 p-2 text-center whitespace-nowrap">{{ student.student_id }}</td>
+                                    <td class="border border-blue-700 p-2 text-center whitespace-nowrap">
+                                        {{ student.first_name }} {{ student.middle_initial }} {{ student.last_name }}
+                                    </td>
+                                    <td class="border border-blue-700 p-2 text-center whitespace-nowrap">{{ student.faculty.program|default:"N/A" }}</td>
+                                    <td class="border border-blue-700 p-2 text-center whitespace-nowrap">{{ student.faculty.year_section|default:"N/A" }}</td>
+                                    <td class="border border-blue-700 p-2 text-center whitespace-nowrap">{{ student.faculty.semester|default:"N/A" }}</td>
+                                    <td class="border border-blue-700 p-2 text-center whitespace-nowrap">{{ student.archived_at|date:"Y-m-d" }}</td>
+                                    <td class="border border-blue-700 p-2 text-center">
+                                        <div class="flex items-center justify-center space-x-3">
+                                            <!-- Move Modal Icon -->
+                                            <button onclick="openMoveStudentModal('{{ student.student_id }}')" class="text-blue-900 hover:text-blue-400 transition-all cursor-pointer" title="Move">
+                                                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24">
+                                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                        d="M18 14v4.833A1.166 1.166 0 0 1 16.833 20H5.167A1.167 1.167 0 0 1 4 18.833V7.167A1.166 1.166 0 0 1 5.167 6h4.618m4.447-2H20v5.768m-7.889 2.121 7.778-7.778"/>
+                                                </svg>
+                                            </button>
+                                            <!-- Delete Icon -->
+                                            <form method="post" action="{% url 'delete_archived_student' student.student_id %}" style="display:inline;">
+                                                {% csrf_token %}
+                                                <button type="submit" class="text-red-700 hover:text-red-500 transition-all cursor-pointer" title="Delete" onclick="return confirm('Delete this student permanently?');">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24">
+                                                        <g fill="currentColor"><path d="M3 6.524c0-.395.327-.714.73-.714h4.788c.006-.842.098-1.995.932-2.793A3.68 3.68 0 0 1 12 2a3.68 3.68 0 0 1 2.55 1.017c.834.798.926 1.951.932 2.793h4.788c.403 0 .73.32.73.714a.722.722 0 0 1-.73.714H3.73A.722.722 0 0 1 3 6.524Z"/><path fill-rule="evenodd" d="M11.596 22h.808c2.783 0 4.174 0 5.08-.886c.904-.886.996-2.34 1.181-5.246l.267-4.187c.1-1.577.15-2.366-.303-2.866c-.454-.5-1.22-.5-2.753-.5H8.124c-1.533 0-2.3 0-2.753.5c-.454.5-.404 1.289-.303 2.866l.267 4.188c.185 2.906.277 4.36 1.182 5.245c.905.886 2.296.886 5.079.886Zm-1.35-9.812c-.04-.433-.408-.75-.82-.707c-.413.044-.713.43-.672.865l.5 5.263c.04.434.408.75.82.707c.413-.044.713-.43.672-.864l-.5-5.264Zm4.329-.707c.412.044.713.43.671.865l-.5 5.263c-.04.434-.409.75-.82.707c-.413-.044-.713-.43-.672-.864l.5-5.264c.04-.433.409-.75.82-.707Z" clip-rule="evenodd"/></g>
+                                                    </svg>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="7" class="text-center border border-blue-700 p-4 bg-gray-100 text-blue-500">No archived students yet.</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
 </div>

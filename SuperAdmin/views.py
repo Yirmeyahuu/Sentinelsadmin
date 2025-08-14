@@ -14,7 +14,6 @@ import json, datetime
 from django.core.paginator import Paginator
 from .forms import AddFacultyForm
 from django.db import transaction
-from Student.models import Student # Import the Student model
 from Student.models import Student, ArchivedStudent # Add ArchivedStudent
 from django.db.models import Q # Import Q for complex queries
 
@@ -33,25 +32,17 @@ db = firestore.client()
 def Superadmin_Home(request):
     db = firestore.client()
 
-    # Total students
-    students_ref = db.collection("Registered_Students")
-    students = students_ref.stream()
-    total_students = sum(1 for _ in students)
+    # Total students (PostgreSQL)
+    total_students = Student.objects.filter(student_status='Registered').count()
 
-    # Total faculty
-    faculty_ref = db.collection("Authorized Faculty")
-    faculty = faculty_ref.stream()
-    total_faculty = sum(1 for _ in faculty)
+    # Total faculty (PostgreSQL)
+    total_faculty = Faculty.objects.filter(faculty_status='Continuing').count()
 
-    # Computer Science students
-    cs_students_ref = db.collection("Registered_Students").where("program", "==", "Computer Science")
-    cs_students = cs_students_ref.stream()
-    cs_students_count = sum(1 for _ in cs_students)
+    # Computer Science students (PostgreSQL)
+    cs_students_count = Student.objects.filter(student_status='Registered', faculty__program='Computer Science').count()
 
-    # Information Technology students
-    it_students_ref = db.collection("Registered_Students").where("program", "==", "Information Technology")
-    it_students = it_students_ref.stream()
-    it_students_count = sum(1 for _ in it_students)
+    # Information Technology students (PostgreSQL)
+    it_students_count = Student.objects.filter(student_status='Registered', faculty__program='Information Technology').count()
 
     tiers = ["Novice", "Junior", "Senior"]
     programs = ["Computer Science", "Information Technology"]
@@ -83,6 +74,19 @@ def Superadmin_Home(request):
 
 @superadmin_required
 def Faculty_list(request):
+
+    # Total students (PostgreSQL)
+    total_students = Student.objects.filter(student_status='Registered').count()
+
+    # Total faculty (PostgreSQL)
+    total_faculty = Faculty.objects.filter(faculty_status='Continuing').count()
+
+    # Computer Science students (PostgreSQL)
+    cs_students_count = Student.objects.filter(student_status='Registered', faculty__program='Computer Science').count()
+
+    # Information Technology students (PostgreSQL)
+    it_students_count = Student.objects.filter(student_status='Registered', faculty__program='Information Technology').count()
+
     # Only fetch faculty with status 'Continuing'
     continuing_faculties = Faculty.objects.filter(faculty_status='Continuing').values(
         'faculty_id', 'first_name', 'middle_initial', 'last_name',
@@ -117,25 +121,12 @@ def Faculty_list(request):
     paginator = Paginator(faculties, 10)  # 10 faculty per page
     page_obj = paginator.get_page(page_number)
 
-    # Dashboard counts (students still from Firestore)
-    students_ref = db.collection("Registered_Students")
-    students = students_ref.stream()
-    total_students = sum(1 for _ in students)
-
     faculty_count = Faculty.objects.count()  # Now from PostgreSQL
-
-    cs_students_ref = db.collection("Registered_Students").where("program", "==", "Computer Science")
-    cs_students = cs_students_ref.stream()
-    cs_students_count = sum(1 for _ in cs_students)
-
-    it_students_ref = db.collection("Registered_Students").where("program", "==", "Information Technology")
-    it_students = it_students_ref.stream()
-    it_students_count = sum(1 for _ in it_students)
 
     context = {
         "faculties": page_obj.object_list,
         "total_students": total_students,
-        "total_faculty": faculty_count,
+        "total_faculty": total_faculty,
         "cs_students": cs_students_count,
         "it_students": it_students_count,
         "search_query": request.GET.get('search', ''),
@@ -451,6 +442,17 @@ def Superadmin_activity_page(request):
 
 @superadmin_required
 def Superadmin_Student_Status(request):
+
+    # Total students (PostgreSQL)
+    total_students = Student.objects.filter(student_status='Registered').count()
+
+    # Computer Science students (PostgreSQL)
+    cs_students_count = Student.objects.filter(student_status='Registered', faculty__program='Computer Science').count()
+
+    # Information Technology students (PostgreSQL)
+    it_students_count = Student.objects.filter(student_status='Registered', faculty__program='Information Technology').count()
+
+
     # Get filter parameters from the request
     status_filter = request.GET.get('status', 'all')
     program_filter = request.GET.get('program', 'all')
@@ -509,6 +511,11 @@ def Superadmin_Student_Status(request):
         "search_query": search_query,
         "page_obj": page_obj,
         "paginator": paginator,
+        "cs_students": cs_students_count,
+        "it_students": it_students_count,
+        'total_students': total_students,
+        'active_count': total_students,
+
     }
 
     if request.headers.get('HX-Request'):
@@ -519,6 +526,19 @@ def Superadmin_Student_Status(request):
 
 @superadmin_required
 def Faculty_Status(request):
+
+    # Total students (PostgreSQL)
+    total_students = Student.objects.filter(student_status='Registered').count()
+
+    # Total faculty (PostgreSQL)
+    total_faculty = Faculty.objects.filter(faculty_status='Continuing').count()
+
+    # Computer Science students (PostgreSQL)
+    cs_students_count = Student.objects.filter(student_status='Registered', faculty__program='Computer Science').count()
+
+    # Information Technology students (PostgreSQL)
+    it_students_count = Student.objects.filter(student_status='Registered', faculty__program='Information Technology').count()
+
     status_filter = request.GET.get('status', 'all')
     program_filter = request.GET.get('program', 'all')
     year_section_filter = request.GET.get('year_section', 'all')
@@ -578,6 +598,11 @@ def Faculty_Status(request):
         "search_query": request.GET.get('search', ''),
         "page_obj": page_obj,
         "paginator": paginator,
+        "total_students": total_students,
+        "total_faculty": total_faculty,
+        "cs_students": cs_students_count,
+        "it_students": it_students_count,
+        
     }
 
     if request.headers.get('HX-Request'):
@@ -653,6 +678,17 @@ def move_faculty(request):
 
 @superadmin_required
 def Superadmin_Student_List(request):
+
+    # Total students (PostgreSQL)
+    total_students = Student.objects.filter(student_status='Registered').count()
+
+    # Computer Science students (PostgreSQL)
+    cs_students_count = Student.objects.filter(student_status='Registered', faculty__program='Computer Science').count()
+
+    # Information Technology students (PostgreSQL)
+    it_students_count = Student.objects.filter(student_status='Registered', faculty__program='Information Technology').count()
+
+
     # Get filter parameters
     selected_program = request.GET.get('program', 'all')
     selected_year_section = request.GET.get('year_section', 'all')
@@ -677,15 +713,6 @@ def Superadmin_Student_List(request):
             Q(student_id__icontains=search_query)
         )
 
-    # For dashboard cards, count directly from the database
-    total_students = Student.objects.filter(student_status='Registered').count()
-    cs_count = Student.objects.filter(student_status='Registered', faculty__program='Computer Science').count()
-    it_count = Student.objects.filter(student_status='Registered', faculty__program='Information Technology').count()
-    
-    # For filter dropdowns - get unique values from the Faculty model
-    all_faculties = Faculty.objects.all()
-    year_sections = sorted(list(all_faculties.values_list('year_section', flat=True).distinct()))
-    semesters = sorted(list(all_faculties.values_list('semester', flat=True).distinct()))
 
     # Pagination
     paginator = Paginator(students_query, 10)  # 10 students per page
@@ -695,17 +722,15 @@ def Superadmin_Student_List(request):
     context = {
         'students': page_obj,
         'total_students': total_students,
-        'cs_count': cs_count,
-        'it_count': it_count,
         'active_count': total_students, # 'Registered' students are considered active
         'selected_program': selected_program,
         'selected_year_section': selected_year_section,
         'selected_semester': selected_semester,
-        'year_sections': year_sections,
-        'semesters': semesters,
         'search_query': search_query,
         'page_obj': page_obj,
         'paginator': paginator,
+        "cs_students": cs_students_count,
+        "it_students": it_students_count,
     }
     
     if request.headers.get('HX-Request'):

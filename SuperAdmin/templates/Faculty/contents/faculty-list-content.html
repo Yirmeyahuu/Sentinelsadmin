@@ -7,68 +7,91 @@
     <!-- Dashboard Cards Container -->
     <div class="px-6 mb-8">
         <div class="max-w-[calc(100%-80px)] mx-auto">
-            <!-- Dashboard Cards Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <!-- Total Students Card -->
-                <div class="relative bg-blue-600 shadow-xl rounded-tl-4xl rounded-br-4xl p-6 flex flex-col items-center overflow-hidden">
-                    <div class="absolute inset-0 opacity-30">
-                        <svg class="w-full h-full" viewBox="0 0 200 200">
-                            <path fill="none" stroke="#1C82AD" stroke-width="8" d="M10 50 Q100 0, 190 50 T 390 50" />
-                            <path fill="none" stroke="#F3F3E0" stroke-width="8" d="M10 150 Q100 200, 190 150 T 390 150" />
-                        </svg>
+                <!-- Dashboard Cards Row -->
+                <div class="flex space-x-6 w-full">
+                    <!-- Total Students Card -->
+                    <div class="relative group bg-gradient-to-br from-blue-500 to-blue-700 shadow-xl rounded-2xl p-6 w-72 transition-all duration-300 hover:shadow-2xl hover:-translate-y-1">
+                        <!-- Decorative Blur Effect -->
+                        <div class="absolute top-0 right-0 w-32 h-32 transform translate-x-16 -translate-y-16">
+                            <div class="absolute inset-0 bg-blue-400 opacity-50 blur-3xl rounded-full"></div>
+                        </div>
+                        <!-- Card Content -->
+                        <div class="flex items-center justify-between relative z-10">
+                            <div>
+                                <p class="text-blue-100 text-sm font-medium mb-1">Total Students</p>
+                                <h3 class="text-4xl font-bold text-white">{{ total_students }}</h3>
+                            </div>
+                            <div class="bg-blue-400/30 p-3 rounded-xl">
+                                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                </svg>
+                                
+                            </div>
+                        </div>
                     </div>
-                    <div class="absolute -top-4 -left-6 w-16 h-16 bg-sky-300 blur-2xl opacity-90 rounded-full"></div>
-                    <div class="absolute bottom-0 right-2 w-20 h-20 bg-sky-300 blur-2xl opacity-90 rounded-full"></div>
-                    <h2 class="text-xl font-semibold text-white mb-4 mt-2 z-10">Total Students</h2>
-                    <p class="text-4xl font-bold text-white z-10">{{ total_students }}</p>
-                </div>
-                <!-- Total Faculty Card -->
-                <div class="relative bg-sky-500 shadow-xl rounded-tl-4xl rounded-br-4xl p-6 flex flex-col items-center overflow-hidden">
-                    <div class="absolute inset-0 opacity-30">
-                        <svg class="w-full h-full" viewBox="0 0 200 200">
-                            <path fill="none" stroke="#1C82AD" stroke-width="8" d="M10 50 Q100 0, 190 50 T 390 50" />
-                            <path fill="none" stroke="#F3F3E0" stroke-width="8" d="M10 150 Q100 200, 190 150 T 390 150" />
-                        </svg>
+                
+                    <!-- Total Faculty Card -->
+                    <div class="relative group bg-gradient-to-br from-indigo-500 to-indigo-700 shadow-xl rounded-2xl p-6 w-72 transition-all duration-300 hover:shadow-2xl hover:-translate-y-1">
+                        <div class="absolute top-0 right-0 w-32 h-32 transform translate-x-16 -translate-y-16">
+                            <div class="absolute inset-0 bg-indigo-400 opacity-50 blur-3xl rounded-full"></div>
+                        </div>
+                        <div class="flex items-center justify-between relative z-10">
+                            <div>
+                                <p class="text-indigo-100 text-sm font-medium mb-1">Total Faculty</p>
+                                <h3 class="text-4xl font-bold text-white">{{ total_faculty }}</h3>
+                            </div>
+                            <div class="bg-indigo-400/30 p-3 rounded-xl">
+                                <svg class="w-8 h-8 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.7141 15h4.268c.4043 0 .732-.3838.732-.8571V3.85714c0-.47338-.3277-.85714-.732-.85714H6.71411c-.55228 0-1 .44772-1 1v4m10.99999 7v-3h3v3h-3Zm-3 6H6.71411c-.55228 0-1-.4477-1-1 0-1.6569 1.34315-3 3-3h2.99999c1.6569 0 3 1.3431 3 3 0 .5523-.4477 1-1 1Zm-1-9.5c0 1.3807-1.1193 2.5-2.5 2.5s-2.49999-1.1193-2.49999-2.5S8.8334 9 10.2141 9s2.5 1.1193 2.5 2.5Z"/>
+                                </svg>
+
+                            </div>
+                        </div>
                     </div>
-                    <div class="absolute -top-4 -left-6 w-16 h-16 bg-sky-300 blur-2xl opacity-90 rounded-full"></div>
-                    <div class="absolute bottom-0 right-2 w-20 h-20 bg-sky-300 blur-2xl opacity-90 rounded-full"></div>
-                    <h2 class="text-xl font-semibold text-white mb-4 mt-2 z-10">Total Faculty</h2>
-                    <p class="text-4xl font-bold text-white z-10">{{ total_faculty }}</p>
-                </div>
-                <!-- Computer Science Students Card -->
-                <div class="relative bg-orange-500 shadow-xl rounded-tl-4xl rounded-br-4xl p-6 flex flex-col items-center overflow-hidden">
-                    <div class="absolute inset-0 opacity-30">
-                        <svg class="w-full h-full" viewBox="0 0 200 200">
-                            <path fill="none" stroke="#1C82AD" stroke-width="8" d="M10 50 Q100 0, 190 50 T 390 50" />
-                            <path fill="none" stroke="#F3F3E0" stroke-width="8" d="M10 150 Q100 200, 190 150 T 390 150" />
-                        </svg>
+                
+                    <!-- CS Students Card -->
+                    <div class="relative group bg-gradient-to-br from-amber-500 to-amber-700 shadow-xl rounded-2xl p-6 w-72 transition-all duration-300 hover:shadow-2xl hover:-translate-y-1">
+                        <div class="absolute top-0 right-0 w-32 h-32 transform translate-x-16 -translate-y-16">
+                            <div class="absolute inset-0 bg-amber-400 opacity-50 blur-3xl rounded-full"></div>
+                        </div>
+                        <div class="flex items-center justify-between relative z-10">
+                            <div>
+                                <p class="text-amber-100 text-sm font-medium mb-1">CS Students</p>
+                                <h3 class="text-4xl font-bold text-white">{{ cs_students }}</h3>
+                            </div>
+                            <div class="bg-amber-400/30 p-3 rounded-xl">
+                                <svg class="w-8 h-8 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.35709 16V5.78571c0-.43393.34822-.78571.77777-.78571H18.5793c.4296 0 .7778.35178.7778.78571V16M5.35709 16h-1c-.55229 0-1 .4477-1 1v1c0 .5523.44771 1 1 1H20.3571c.5523 0 1-.4477 1-1v-1c0-.5523-.4477-1-1-1h-1M5.35709 16H19.3571M9.35709 8l2.62501 2.5L9.35709 13m4.00001 0h2"/>
+                                </svg>
+                            </div>
+                        </div>
                     </div>
-                    <div class="absolute -top-4 -left-6 w-16 h-16 bg-sky-300 blur-2xl opacity-90 rounded-full"></div>
-                    <div class="absolute bottom-0 right-2 w-20 h-20 bg-sky-300 blur-2xl opacity-90 rounded-full"></div>
-                    <h2 class="text-lg font-semibold text-center text-white z-10">Computer Science Students</h2>
-                    <p class="text-4xl font-bold text-white z-10">{{ cs_students }}</p>
-                </div>
-                <!-- Information Technology Students Card -->
-                <div class="relative bg-red-600 shadow-xl rounded-tl-4xl rounded-br-4xl p-6 flex flex-col items-center overflow-hidden">
-                    <div class="absolute inset-0 opacity-30">
-                        <svg class="w-full h-full" viewBox="0 0 200 200">
-                            <path fill="none" stroke="#1C82AD" stroke-width="8" d="M10 50 Q100 0, 190 50 T 390 50" />
-                            <path fill="none" stroke="#F3F3E0" stroke-width="8" d="M10 150 Q100 200, 190 150 T 390 150" />
-                        </svg>
+                
+                    <!-- IT Students Card -->
+                    <div class="relative group bg-gradient-to-br from-rose-500 to-rose-700 shadow-xl rounded-2xl p-6 w-72 transition-all duration-300 hover:shadow-2xl hover:-translate-y-1">
+                        <div class="absolute top-0 right-0 w-32 h-32 transform translate-x-16 -translate-y-16">
+                            <div class="absolute inset-0 bg-rose-400 opacity-50 blur-3xl rounded-full"></div>
+                        </div>
+                        <div class="flex items-center justify-between relative z-10">
+                            <div>
+                                <p class="text-rose-100 text-sm font-medium mb-1">IT Students</p>
+                                <h3 class="text-4xl font-bold text-white">{{ it_students }}</h3>
+                            </div>
+                            <div class="bg-rose-400/30 p-3 rounded-xl">
+                                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                </svg>
+                            </div>
+                        </div>
                     </div>
-                    <div class="absolute -top-4 -left-6 w-16 h-16 bg-sky-300 blur-2xl opacity-90 rounded-full"></div>
-                    <div class="absolute bottom-0 right-2 w-20 h-20 bg-sky-300 blur-2xl opacity-90 rounded-full"></div>
-                    <h2 class="text-lg font-semibold text-center text-white z-10">Information Technology Students</h2>
-                    <p class="text-4xl font-bold text-white z-10">{{ it_students }}</p>
                 </div>
-            </div>
         </div>
     </div>
 
     <!-- Faculty Table Container -->
     <div class="px-6">
         <div class="max-w-[calc(100%-80px)] mx-auto">
-            <div class="bg-blue-600 shadow-2xl rounded-2xl p-6">
+            <div class="bg-gradient-to-br from-blue-700/70 to-blue-600 shadow-2xl rounded-2xl p-6">
                 <!-- Table Header -->
                 <div class="flex justify-between items-center mb-4">
                     <h2 class="text-xl font-bold text-white">Registered Faculty</h2>
@@ -110,25 +133,25 @@
                 <div class="overflow-hidden rounded-2xl shadow-xl w-full">
                     <table class="w-full border-separate border-spacing-0 rounded-lg">
                         <thead>
-                            <tr class="bg-blue-400 text-white">
-                                <th class="border border-blue-500 p-2">Faculty ID</th>
-                                <th class="border border-blue-500 p-2">Full Name</th>
-                                <th class="border border-blue-500 p-2">Program</th>
-                                <th class="border border-blue-500 p-2">Year & Section</th>
-                                <th class="border border-blue-500 p-2">Semester</th>
-                                <th class="border border-blue-500 p-2">Status</th> 
-                                <th class="border border-blue-500 p-2">Actions</th>
+                            <tr class="bg-blue-800 backdrop-blur-sm text-white">
+                                <th class="border border-blue-700 p-2">Faculty ID</th>
+                                <th class="border border-blue-700 p-2">Full Name</th>
+                                <th class="border border-blue-700 p-2">Program</th>
+                                <th class="border border-blue-700 p-2">Year & Section</th>
+                                <th class="border border-blue-700 p-2">Semester</th>
+                                <th class="border border-blue-700 p-2">Status</th> 
+                                <th class="border border-blue-700 p-2">Actions</th>
                             </tr>
                         </thead>
                         <tbody id="facultyTableBody">
                             {% for faculty in faculties %}
                             <tr class="facultyRow text-blue-900 hover:bg-blue-200 transition text-md {% if forloop.counter0|divisibleby:2 %}bg-gray-100{% else %}bg-blue-100{% endif %}">
-                                <td class="border border-blue-500 p-2 text-center whitespace-nowrap">{{ faculty.faculty_id }}</td>
-                                <td class="border border-blue-500 p-2 text-center whitespace-nowrap">{{ faculty.first_name }} {{ faculty.middle_initial }} {{ faculty.last_name }}</td>
-                                <td class="border border-blue-500 p-2 text-center whitespace-nowrap">{{ faculty.program }}</td>
-                                <td class="border border-blue-500 p-2 text-center whitespace-nowrap">{{ faculty.year_section }}</td>
-                                <td class="border border-blue-500 p-2 text-center whitespace-nowrap">{{ faculty.semester }}</td>
-                                <td class="border border-blue-500 p-2 text-center whitespace-nowrap">
+                                <td class="border border-blue-700 p-2 text-center whitespace-nowrap">{{ faculty.faculty_id }}</td>
+                                <td class="border border-blue-700 p-2 text-center whitespace-nowrap">{{ faculty.first_name }} {{ faculty.middle_initial }} {{ faculty.last_name }}</td>
+                                <td class="border border-blue-700 p-2 text-center whitespace-nowrap">{{ faculty.program }}</td>
+                                <td class="border border-blue-700 p-2 text-center whitespace-nowrap">{{ faculty.year_section }}</td>
+                                <td class="border border-blue-700 p-2 text-center whitespace-nowrap">{{ faculty.semester }}</td>
+                                <td class="border border-blue-700 p-2 text-center whitespace-nowrap">
                                     <span class="px-2 py-1 rounded-lg text-xs font-medium
                                         {% if faculty.status == 'Deactivated' %}
                                             bg-red-500/20 text-red-700
