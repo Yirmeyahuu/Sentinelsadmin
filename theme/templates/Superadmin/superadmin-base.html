@@ -403,23 +403,23 @@
         <aside @mouseenter="expanded = true"
                @mouseleave="expanded = false"
                :class="expanded ? 'w-64' : 'w-20'"
-               class="bg-blue-600 text-white p-4 transition-all duration-700 ease-in-out fixed left-0 top-0 h-screen z-50 shadow-lg flex flex-col">
+               class="bg-gradient-to-br from-blue-500/90 to-blue-800 rounded-br-4xl rounded-tr-4xl text-white p-4 transition-all duration-700 ease-in-out fixed left-0 top-0 h-screen z-50 shadow-lg flex flex-col">
 
             <!-- Logo -->
-            <div class="relative flex items-center justify-center mb-6 mt-2 h-18 w-full overflow-hidden">
+            <div class="relative flex items-center justify-center mb-2 h-26 w-full overflow-hidden">
                 <img src="{% static 'assets/img/Sentinels Logo 2.1 (1).png' %}"
                      alt="Full Logo"
-                     class="h-26 w-auto absolute transition-all duration-500 ease-in-out"
+                     class="h-32 p-4 w-auto absolute transition-all duration-300 ease-in-out"
                      :class="expanded ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0'">
                 <img src="{% static 'assets/img/Sentinels Logo copy.png' %}"
                      alt="Icon Logo"
-                     class="h-12 w-auto absolute transition-all duration-500 ease-in-out"
+                     class="h-12 w-auto absolute transition-all duration-300 ease-in-out"
                      :class="expanded ? 'translate-x-full opacity-0' : 'translate-x-0 opacity-100'">
             </div>
 
             <!-- Sidebar Menu -->
             <nav>
-                <p class="text-white font-bold uppercase transition-all duration-600 ease-in-out mb-6"
+                <p class="text-white font-bold uppercase transition-all duration-600 ease-in-out mb-4"
                    :class="expanded ? 'text-sm opacity-100' : 'text-[10px] opacity-80'">
                     Menu
                 </p>
@@ -476,10 +476,10 @@
                     </li>
 
                     <!-- Faculty Menu -->
-                    <li x-data="{ open: false }" @mouseleave="expanded ? null : open = false">
+                    <li x-data="{ open: false }" @mouseleave="expanded ? (open = false) : (open = false)">
                         <!-- Faculty Parent Menu -->
                         <a @click="expanded && (open = !open)" 
-                           class="faculty-parent-menu flex items-center justify-between p-2 hover:bg-blue-700 rounded-2xl cursor-pointer transition-all duration-600 ease-in-out mb-2">
+                        class="faculty-parent-menu flex items-center justify-between p-2 hover:bg-blue-700 rounded-2xl cursor-pointer transition-all duration-300 ease-in-out mb-2">
                             <div class="flex items-center">
                                 <svg viewBox="0 0 24 24" fill="currentColor" class="h-7 w-7 mr-2 flex-shrink-0">
                                     <g fill="currentColor"><path d="M6 2a2 2 0 0 0-2 2v4a1 1 0 0 0 2 0V4h12v7h-2a1 1 0 0 0-1 1v2h-1a1 1 0 1 0 0 2h5a1 1 0 0 0 1-1V3.857C20 2.985 19.367 2 18.268 2z"/><path d="M6 11.5a3.5 3.5 0 1 1 7 0a3.5 3.5 0 0 1-7 0M4 20a4 4 0 0 1 4-4h3a4 4 0 0 1 4 4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2"/></g>
@@ -494,9 +494,9 @@
                                 x-transition:leave-end="opacity-0 -translate-x-4"
                                 class="w-full"
                                 > Faculty
-                            </span>
+                                </span>
                             </div>
-                    
+
                             <!-- Dropdown Icon -->
                             <svg x-show="expanded" 
                                  x-bind:class="{ 'rotate-180': open }" 
@@ -506,68 +506,70 @@
                                 <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 0 1 1.06-.02L10 10.69l3.71-3.5a.75.75 0 0 1 1.06 1.06l-4.24 4a.75.75 0 0 1-1.06 0l-4.24-4a.75.75 0 0 1-.02-1.06z" clip-rule="evenodd" />
                             </svg>
                         </a>
-                    
+
+                        <!-- Dropdown Menu -->
                         <ul x-show="expanded && open" 
-                        x-transition:enter="transition ease-out duration-500"
-                        x-transition:enter-start="transform opacity-0 -translate-y-4 scale-95"
-                        x-transition:enter-end="transform opacity-100 translate-y-0 scale-100"
-                        x-transition:leave="transition ease-in duration-1"
-                        x-transition:leave-start="transform opacity-100 translate-y-0 scale-100"
-                        x-transition:leave-end="transform opacity-0 -translate-y-4 scale-95"
-                        class="space-y-2 bg-blue-700 rounded-2xl shadow-lg p-2 border border-gray-300 origin-top">
+                            x-transition:enter="transition ease-out duration-300"
+                            x-transition:enter-start="transform opacity-0 -translate-y-2 scale-95"
+                            x-transition:enter-end="transform opacity-100 translate-y-0 scale-100"
+                            x-transition:leave="transition ease-in duration-200"
+                            x-transition:leave-start="transform opacity-100 translate-y-0 scale-100"
+                            x-transition:leave-end="transform opacity-0 -translate-y-2 scale-95"
+                            class="space-y-2 bg-blue-700 rounded-2xl shadow-lg p-2 border border-gray-300/20 origin-top backdrop-blur-sm">
 
-                        <!-- Faculty List Submenu -->
-                        <li x-show="expanded && open"
-                            x-transition:enter="transition ease-out duration-200 delay-75"
-                            x-transition:enter-start="opacity-0 transform translate-y-4"
-                            x-transition:enter-end="opacity-100 transform translate-y-0">
-                            <a
-                            data-page="/Superadmin/Faculty-list/"
-                            href="/Superadmin/Faculty-list/"
-                            hx-get="{% url 'FacultyList' %}" 
-                            hx-target="#mainContent" 
-                            hx-push-url="true" 
-                            class="faculty-parent-menu flex items-center p-2 hover:bg-blue-800 rounded-2xl cursor-pointer transition-all duration-300 ease-in-out">
-                                <span class="w-full">Faculty List</span>
-                            </a>
-                        </li>
-                        <li x-show="expanded && open"
-                            x-transition:enter="transition ease-out duration-200 delay-75"
-                            x-transition:enter-start="opacity-0 transform translate-y-4"
-                            x-transition:enter-end="opacity-100 transform translate-y-0">
-                            <a
-                            data-page="/Superadmin/Faculty-status/"
-                            href="/Superadmin/Faculty-status/"
-                            hx-get="{% url 'Faculty_status' %}" 
-                            hx-target="#mainContent" 
-                            hx-push-url="true" 
-                            class="faculty-parent-menu flex items-center p-2 hover:bg-blue-800 rounded-2xl cursor-pointer transition-all duration-300 ease-in-out">
-                                <span class="w-full">Faculty Status</span>
-                            </a>
-                        </li>
-                        <li x-show="expanded && open"
-                            x-transition:enter="transition ease-out duration-200 delay-75"
-                            x-transition:enter-start="opacity-0 transform translate-y-4"
-                            x-transition:enter-end="opacity-100 transform translate-y-0">
-                            <a
-                            data-page="/Superadmin/Faculty-Archived/"
-                            href="/Superadmin/Faculty-Archived/"
-                            hx-get="{% url 'Faculty_Archived' %}" 
-                            hx-target="#mainContent" 
-                            hx-push-url="true" 
-                            class="faculty-parent-menu flex items-center p-2 hover:bg-blue-800 rounded-2xl cursor-pointer transition-all duration-300 ease-in-out">
-                                <span class="w-full">Archived Faculty</span>
-                            </a>
-                        </li>
-
+                            <!-- Faculty List Submenu -->
+                            <li x-show="expanded && open"
+                                x-transition:enter="transition ease-out duration-200 delay-75"
+                                x-transition:enter-start="opacity-0 transform translate-y-2"
+                                x-transition:enter-end="opacity-100 transform translate-y-0">
+                                <a data-page="/Superadmin/Faculty-list/"
+                                href="/Superadmin/Faculty-list/"
+                                hx-get="{% url 'FacultyList' %}" 
+                                hx-target="#mainContent" 
+                                hx-push-url="true" 
+                                class="faculty-parent-menu flex items-center p-2 hover:bg-blue-800/80 rounded-xl cursor-pointer transition-all duration-300 ease-in-out group">
+                                    <span class="w-full group-hover:translate-x-1 transition-transform duration-300">Faculty List</span>
+                                </a>
+                            </li>
+                    
+                            <!-- Faculty Status -->
+                            <li x-show="expanded && open"
+                                x-transition:enter="transition ease-out duration-200 delay-100"
+                                x-transition:enter-start="opacity-0 transform translate-y-2"
+                                x-transition:enter-end="opacity-100 transform translate-y-0">
+                                <a data-page="/Superadmin/Faculty-status/"
+                                   href="/Superadmin/Faculty-status/"
+                                   hx-get="{% url 'Faculty_status' %}" 
+                                   hx-target="#mainContent" 
+                                   hx-push-url="true" 
+                                   class="faculty-parent-menu flex items-center p-2 hover:bg-blue-800/80 rounded-xl cursor-pointer transition-all duration-300 ease-in-out group">
+                                    <span class="w-full group-hover:translate-x-1 transition-transform duration-300">Faculty Status</span>
+                                </a>
+                            </li>
+                    
+                            <!-- Archived Faculty -->
+                            <li x-show="expanded && open"
+                                x-transition:enter="transition ease-out duration-200 delay-125"
+                                x-transition:enter-start="opacity-0 transform translate-y-2"
+                                x-transition:enter-end="opacity-100 transform translate-y-0">
+                                <a data-page="/Superadmin/Faculty-Archived/"
+                                   href="/Superadmin/Faculty-Archived/"
+                                   hx-get="{% url 'Faculty_Archived' %}" 
+                                   hx-target="#mainContent" 
+                                   hx-push-url="true" 
+                                   class="faculty-parent-menu flex items-center p-2 hover:bg-blue-800/80 rounded-xl cursor-pointer transition-all duration-300 ease-in-out group">
+                                    <span class="w-full group-hover:translate-x-1 transition-transform duration-300">Archived Faculty</span>
+                                </a>
+                            </li>
                         </ul>
                     </li>
 
-                    <!-- Replace the Student menu section -->
-                    <li x-data="{ open: false }" @mouseleave="expanded ? null : open = false">
-                        <!-- Parent Menu -->
+
+                    <!-- Student Menu -->
+                    <li x-data="{ open: false }" @mouseleave="expanded ? (open = false) : (open = false)">
+                        <!-- Faculty Parent Menu -->
                         <a @click="expanded && (open = !open)" 
-                           class="students-parent-menu flex items-center justify-between p-2 hover:bg-blue-700 rounded-2xl cursor-pointer transition-all duration-600 ease-in-out mb-2">
+                        class="students-parent-menu flex items-center justify-between p-2 hover:bg-blue-700 rounded-2xl cursor-pointer transition-all duration-300 ease-in-out mb-2">
                             <div class="flex items-center">
                                 <svg viewBox="0 0 24 24" fill="currentColor" class="h-7 w-7 mr-2 flex-shrink-0">
                                     <g fill="#ffff" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width=".5" color="currentColor"><path d="M2.5 6L8 4l5.5 2L11 7.5V9s-.667-.5-3-.5S5 9 5 9V7.5zm0 0v4"/><path d="M11 8.5v.889c0 1.718-1.343 3.111-3 3.111s-3-1.393-3-3.111V8.5m10.318 2.53s.485-.353 2.182-.353s2.182.352 2.182.352m-4.364 0V10L13.5 9l4-1.5l4 1.5l-1.818 1v1.03m-4.364 0v.288a2.182 2.182 0 1 0 4.364 0v-.289M4.385 15.926c-.943.527-3.416 1.602-1.91 2.947C3.211 19.53 4.03 20 5.061 20h5.878c1.03 0 1.85-.47 2.586-1.127c1.506-1.345-.967-2.42-1.91-2.947c-2.212-1.235-5.018-1.235-7.23 0M16 20h3.705c.773 0 1.387-.376 1.939-.902c1.13-1.076-.725-1.936-1.432-2.357A5.34 5.34 0 0 0 16 16.214"/></g>
@@ -582,7 +584,7 @@
                                 x-transition:leave-end="opacity-0 -translate-x-4"
                                 class="w-full"
                                 > Students
-                            </span>
+                                </span>
                             </div>
                     
                             <!-- Dropdown Icon -->
@@ -596,59 +598,59 @@
                         </a>
                     
                         <ul x-show="expanded && open" 
-                        x-transition:enter="transition ease-out duration-500"
-                        x-transition:enter-start="transform opacity-0 -translate-y-4 scale-95"
-                        x-transition:enter-end="transform opacity-100 translate-y-0 scale-100"
-                        x-transition:leave="transition ease-in duration-1"
-                        x-transition:leave-start="transform opacity-100 translate-y-0 scale-100"
-                        x-transition:leave-end="transform opacity-0 -translate-y-4 scale-95"
-                        class="space-y-2 bg-blue-700 rounded-2xl shadow-lg p-2 border border-gray-300 origin-top">
+                            x-transition:enter="transition ease-out duration-300"
+                            x-transition:enter-start="transform opacity-0 -translate-y-2 scale-95"
+                            x-transition:enter-end="transform opacity-100 translate-y-0 scale-100"
+                            x-transition:leave="transition ease-in duration-200"
+                            x-transition:leave-start="transform opacity-100 translate-y-0 scale-100"
+                            x-transition:leave-end="transform opacity-0 -translate-y-2 scale-95"
+                            class="space-y-2 bg-blue-700 rounded-2xl shadow-lg p-2 border border-gray-300/20 origin-top backdrop-blur-sm">
 
-                        <!-- Enrolled Students Item -->
-                        <li x-show="expanded && open"
-                            x-transition:enter="transition ease-out duration-200 delay-150"
-                            x-transition:enter-start="opacity-0 transform translate-y-4"
-                            x-transition:enter-end="opacity-100 transform translate-y-0">
-                            <a
-                            data-page="/Superadmin/student-list/"
-                            href="/Superadmin/student-list/"
-                            hx-get="{% url 'student-list' %}" 
-                            hx-target="#mainContent" 
-                            hx-push-url="true" 
-                            class="students-parent-menu flex items-center p-2 hover:bg-blue-800 rounded-2xl cursor-pointer transition-all duration-300 ease-in-out">
-                                <span class="w-full">Student List</span>
-                            </a>
-                        </li>
+                            <!-- Enrolled Students Item -->
+                            <li x-show="expanded && open"
+                                x-transition:enter="transition ease-out duration-200 delay-75"
+                                x-transition:enter-start="opacity-0 transform translate-y-2"
+                                x-transition:enter-end="opacity-100 transform translate-y-0">
+                                <a
+                                data-page="/Superadmin/student-list/"
+                                href="/Superadmin/student-list/"
+                                hx-get="{% url 'student-list' %}" 
+                                hx-target="#mainContent" 
+                                hx-push-url="true" 
+                                class="faculty-parent-menu flex items-center p-2 hover:bg-blue-800/80 rounded-xl cursor-pointer transition-all duration-300 ease-in-out group">
+                                    <span class="w-full group-hover:translate-x-1 transition-transform duration-300">Student List</span>
+                                </a>
+                            </li>
 
-                        <!-- Student -->
-                        <li x-show="expanded && open"
-                            x-transition:enter="transition ease-out duration-200 delay-225"
-                            x-transition:enter-start="opacity-0 transform translate-y-4"
-                            x-transition:enter-end="opacity-100 transform translate-y-0">
-                            <a
-                            data-page="/Superadmin/Student-status/"
-                            href="/Superadmin/Student-status/"
-                            hx-get="{% url 'superadmin-student-status' %}" 
-                            hx-target="#mainContent" 
-                            hx-push-url="true" 
-                            class="students-parent-menu flex items-center p-2 hover:bg-blue-800 rounded-2xl cursor-pointer transition-all duration-300 ease-in-out">
-                                <span class="w-full">Student Status</span>
-                            </a>
-                        </li>
-                        <li x-show="expanded && open"
-                            x-transition:enter="transition ease-out duration-200 delay-225"
-                            x-transition:enter-start="opacity-0 transform translate-y-4"
-                            x-transition:enter-end="opacity-100 transform translate-y-0">
-                            <a
-                            data-page="/Superadmin/Student-Archived/"
-                            href="/Superadmin/Student-Archived/"
-                            hx-get="{% url 'superadmin_student_archived' %}" 
-                            hx-target="#mainContent" 
-                            hx-push-url="true" 
-                            class="students-parent-menu flex items-center p-2 hover:bg-blue-800 rounded-2xl cursor-pointer transition-all duration-300 ease-in-out">
-                                <span class="w-full">Archived Students</span>
-                            </a>
-                        </li>
+                            <!-- Student -->
+                            <li x-show="expanded && open"
+                                x-transition:enter="transition ease-out duration-200 delay-75"
+                                x-transition:enter-start="opacity-0 transform translate-y-2"
+                                x-transition:enter-end="opacity-100 transform translate-y-0">
+                                <a
+                                data-page="/Superadmin/Student-status/"
+                                href="/Superadmin/Student-status/"
+                                hx-get="{% url 'superadmin-student-status' %}" 
+                                hx-target="#mainContent" 
+                                hx-push-url="true" 
+                                class="faculty-parent-menu flex items-center p-2 hover:bg-blue-800/80 rounded-xl cursor-pointer transition-all duration-300 ease-in-out group">
+                                    <span class="w-full group-hover:translate-x-1 transition-transform duration-300">Student Status</span>
+                                </a>
+                            </li>
+                            <li x-show="expanded && open"
+                                x-transition:enter="transition ease-out duration-200 delay-75"
+                                x-transition:enter-start="opacity-0 transform translate-y-2"
+                                x-transition:enter-end="opacity-100 transform translate-y-0">
+                                <a
+                                data-page="/Superadmin/Student-Archived/"
+                                href="/Superadmin/Student-Archived/"
+                                hx-get="{% url 'superadmin_student_archived' %}" 
+                                hx-target="#mainContent" 
+                                hx-push-url="true" 
+                                class="faculty-parent-menu flex items-center p-2 hover:bg-blue-800/80 rounded-xl cursor-pointer transition-all duration-300 ease-in-out group">
+                                    <span class="w-full group-hover:translate-x-1 transition-transform duration-300">Archived Students</span>
+                                </a>
+                            </li>
                         </ul>
                     </li>
 
