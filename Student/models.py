@@ -6,16 +6,17 @@ class Student(models.Model):
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
     middle_initial = models.CharField(max_length=10, blank=True)
-    password = models.CharField(max_length=128)
-    
+    program = models.CharField(max_length=100, blank=True)
+    year_section = models.CharField(max_length=20, blank=True)
+    semester = models.CharField(max_length=20, blank=True)
     student_status = models.CharField(
         max_length=20,
         choices=[('Registered', 'Registered'), ('Completed', 'Completed'), ('Dropout', 'Drop-out')],
         default='Registered'
     )
+    password = models.CharField(max_length=128)
+    
 
-    # This ForeignKey connects each student to a specific faculty member.
-    # The student's program, year, and semester are determined by their assigned faculty.
     faculty = models.ForeignKey(
         Faculty, 
         on_delete=models.CASCADE, 
@@ -32,10 +33,15 @@ class Student(models.Model):
 
 class ArchivedStudent(models.Model):
     # We use a separate AutoField for the primary key, but keep student_id for identification.
-    student_id = models.CharField(max_length=50, unique=True)
+    student_id = models.CharField(max_length=50, primary_key=True)
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
     middle_initial = models.CharField(max_length=10, blank=True)
+    password = models.CharField(max_length=128, blank=True, default="")
+    program = models.CharField(max_length=100, blank=True)
+    year_section = models.CharField(max_length=20, blank=True)
+    semester = models.CharField(max_length=20, blank=True)
+
 
     # Store a reference to the faculty, but allow it to be null
     # in case the original faculty record is ever deleted.
@@ -64,13 +70,10 @@ class PendingStudent(models.Model):
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
     middle_initial = models.CharField(max_length=10, blank=True)
-    
-    # Store the intended program, year, and semester to find the right faculty
     program = models.CharField(max_length=100)
     year_section = models.CharField(max_length=20)
     semester = models.CharField(max_length=20)
     
-    # The password will be created and stored here, then moved on approval.
     password = models.CharField(max_length=128)
     
     # Timestamp for when the registration was submitted

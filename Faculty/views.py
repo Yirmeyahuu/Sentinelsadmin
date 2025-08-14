@@ -387,27 +387,24 @@ def add_student(request):
             middle_initial = form.cleaned_data["middle_initial"]
 
             # Get faculty's assigned program, year_section, and semester
-            faculty_id = request.user.username
-            users_ref = db.collection('Authorized Faculty')
-            query = users_ref.where('faculty_id', '==', faculty_id).limit(1).get()
-            faculty_data = None
-            if query:
-                faculty_doc = query[0]
-                faculty_data = faculty_doc.to_dict()
-            program = faculty_data.get("program")
-            year_section = faculty_data.get("year_section")
-            semester = faculty_data.get("semester")
+            faculty = Faculty.objects.get(faculty_id=request.user.username)
+            program = faculty.program
+            year_section = faculty.year_section
+            semester = faculty.semester
 
-            db.collection("Registered_Students").document(student_id).set({
-                "student_id": student_id,
-                "first_name": first_name,
-                "last_name": last_name,
-                "middle_initial": middle_initial,
-                "program": program,
-                "year_section": year_section,
-                "semester": semester,
-                "created_at": firestore.SERVER_TIMESTAMP,
-            })
+            # Create the new student in PostgreSQL
+            Student.objects.create(
+                student_id=student_id,
+                first_name=first_name,
+                last_name=last_name,
+                middle_initial=middle_initial,
+                faculty=faculty,
+                program=program,
+                year_section=year_section,
+                semester=semester,
+                student_status='Registered'  # Set default status
+            )
+
             messages.success(request, f"Student {student_id} added successfully!")
             return redirect("faculty-student-list")
         else:
@@ -418,34 +415,26 @@ def add_student(request):
             return render(request, "Students/contents/student-list-content.html", context)
     return redirect("faculty-student-list")
 
-
+@faculty_required
 def edit_student(request, student_id):
-    """Update student details in Firestore"""
-    student_ref = db.collection("Registered_Students").document(student_id)  # Corrected collection name
-    student = student_ref.get()
-
-    if not student.exists:
-        messages.error(request, "Student not found.")
-        return redirect("student-list")
+    """Update student details in PostgreSQL"""
+    student = get_object_or_404(Student, student_id=student_id)
 
     if request.method == "POST":
-        updated_data = {
-            "first_name": request.POST.get("first_name"),
-            "last_name": request.POST.get("last_name"),
-            "middle_initial": request.POST.get("middle_initial"),
-            "program": request.POST.get("program"),
-            "year_section": request.POST.get("year_section"),
-            "semester": request.POST.get("semester")
-        }
+        student.first_name = request.POST.get("first_name")
+        student.last_name = request.POST.get("last_name")
+        student.middle_initial = request.POST.get("middle_initial")
+        student.program = request.POST.get("program")
+        student.year_section = request.POST.get("year_section")
+        student.semester = request.POST.get("semester")
 
-        # Update Firestore document
-        student_ref.update(updated_data)
+        student.save()
 
         messages.success(request, "Student details updated successfully!")
-        return redirect("student-list")
+        return redirect("faculty-student-list")
 
-    student_data = student.to_dict()
-    return render(request, "Admin/EditStudent.html", {"student": student_data})
+    context = {"student": student}
+    return render(request, "Students/edit_student.html", context)
 
 @faculty_required
 def archived_students_list_page(request):
@@ -463,27 +452,6 @@ def archived_students_list_page(request):
     else:
         return render(request, "Students/students-archived.html", context)
 
-def restore_student(request, student_id, destination="registered"):
-    archive_ref = db.collection("Archived Students").document(student_id)
-    student = archive_ref.get()
-
-    if student.exists:
-        student_data = student.to_dict()
-        if destination == "registered":
-            student_data["status"] = "Continuing"
-            db.collection("Registered_Students").document(student_id).set(student_data)
-        elif destination == "completed":
-            student_data["status"] = "Completed"
-            db.collection("Completed Students").document(student_id).set(student_data)
-        elif destination == "dropout":
-            student_data["status"] = "Drop-out"
-            db.collection("Drop-out Students").document(student_id).set(student_data)
-        archive_ref.delete()
-        messages.success(request, "Student has been restored successfully!")
-    else:
-        messages.error(request, "Student not found in archive.")
-
-    return redirect("archived_students_list")
 
 @faculty_required
 def Verify_Student(request):
@@ -655,19 +623,24 @@ def accept_student(request, student_id):
     pending_student = get_object_or_404(PendingStudent, student_id=student_id)
 
     try:
-        # Create a new Student record from the pending data
-        Student.objects.create(
+        new_student = Student.objects.create(
             student_id=pending_student.student_id,
             first_name=pending_student.first_name,
             last_name=pending_student.last_name,
             middle_initial=pending_student.middle_initial,
-            password=pending_student.password, # Transfer the hashed password
             faculty=faculty,
-            student_status='Registered'
+            program=pending_student.program,
+            year_section=pending_student.year_section,
+            semester=pending_student.semester,
+            student_status='Registered',
+            password=pending_student.password  # If you want to transfer password
         )
-        # Delete the record from the pending table
+        # If you use Django's set_password, do it here (optional)
+        # new_student.set_password(pending_student.password)
+        # new_student.save()
+
         pending_student.delete()
-        messages.success(request, f"Student {pending_student.first_name} {pending_student.last_name} has been accepted.")
+        messages.success(request, f"Student {new_student.first_name} {new_student.last_name} has been accepted.")
     except Exception as e:
         messages.error(request, f"An error occurred while accepting the student: {e}")
 
