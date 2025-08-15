@@ -2,13 +2,31 @@
     document.title = "SENTINELS | Pending Students";
 </script>
 
-<div class="flex flex-col items-start w-full pl-28 pr-16">
-        <div class="bg-blue-600 shadow-2xl rounded-tl-4xl rounded-br-4xl p-6 w-full">
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="text-xl font-bold text-white">Pending Students Approval</h2>
-                <div class="flex flex-wrap items-center gap-4">
+<div class="flex flex-col min-h-screen ml-20">
+    <div class="px-6 mb-8">
+        <div class="max-w-[calc(100%-80px)] mx-auto">
+            <div class="bg-gradient-to-br from-blue-700/70 to-blue-600 shadow-2xl rounded-2xl p-6">
+                <!-- Table Header -->
+                <div class="flex justify-between items-center mb-8">
+                    <h2 class="text-xl font-bold text-white flex items-center gap-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" class="text-blue-200">
+                            <path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2zm-1 15l-5-5l1.41-1.41L11 14.17l7.59-7.59L20 8l-9 9z"/>
+                        </svg>
+                        Pending Students Approval
+                    </h2>
+
+                    <!-- Verification Status Badge -->
+                    <div class="  flex items-center justify-center">
+                        <div class="bg-amber-500/20 border border-amber-500/60 rounded-xl px-4 py-2 flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" class="text-amber-400">
+                                <path fill="currentColor" d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 22L12 18.77L5.82 22L7 14.14l-5-4.87l6.91-1.01L12 2z"/>
+                            </svg>
+                            <span class="text-amber-400 font-medium text-sm">{{ verify_students|length }} Student{{ verify_students|length|pluralize }} Awaiting Approval</span>
+                        </div>
+                    </div>            
+
                     <!-- Search Bar -->
-                    <form method="get" class="bg-gray-100 p-1 rounded-3xl flex items-center max-w-sm mx-auto">
+                    <form method="get" class="bg-gray-100 p-1 rounded-3xl flex items-center max-w-sm">
                         <div class="relative w-full">
                             <div class="absolute inset-y-0 start-0 flex items-center ps-2 pointer-events-none">
                                 <svg viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 text-gray-500 dark:text-gray-400">
@@ -19,8 +37,8 @@
                                 type="text"
                                 name="search"
                                 value="{{ search_query }}"
-                                class="bg-white pl-10 border border-gray-300 text-gray-900 text-sm rounded-2xl block w-full ps-14 p-2"
-                                placeholder="Search Student..."
+                                class="bg-white pl-10 border border-gray-300 text-gray-900 text-sm rounded-2xl block w-full ps-14 p-2 focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                                placeholder="Search pending student..."
                             />
                         </div>
                         <button type="submit" class="p-1.5 text-sm ms-1 font-medium text-blue-500 bg-gray-100 rounded-tr-2xl rounded-br-2xl rounded-tl-xl rounded-bl-xl hover:bg-blue-400 hover:text-gray-100 cursor-pointer duration-150">
@@ -31,62 +49,111 @@
                         </button>
                     </form>
                 </div>
-            </div>
-            <!-- Verify Student Table -->
-            <div class="overflow-hidden rounded-2xl shadow-xl w-full bg-gray-100">
-                <table class="w-full border-separate border-spacing-0 rounded-lg">
-                    <thead>
-                        <tr class="bg-blue-400 text-white">
-                            <th class="border border-blue-500 p-2">Student ID</th>
-                            <th class="border border-blue-500 p-2">Full Name</th>
-                            <th class="border border-blue-500 p-2">Program</th>
-                            <th class="border border-blue-500 p-2">Year & Section</th>
-                            <th class="border border-blue-500 p-2">Semester</th>
-                            <th class="border border-blue-500 p-2">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="studentTableBody">
-                        {% for student in verify_students %}
-                            {% if student.student_id %}
-                            <tr class="studentRow text-blue-900 hover:bg-blue-200 transition text-md {% if forloop.counter0|divisibleby:2 %}bg-gray-100{% else %}bg-blue-100{% endif %}">
-                                <td class="border border-blue-500 p-2 text-center">{{ student.student_id }}</td>
-                                <td class="border border-blue-500 pl-14 pr-2 text-left">
-                                    {{ student.first_name }} {{ student.middle_initial }} {{ student.last_name }}
-                                </td>
-                                <td class="border border-blue-500 p-2 text-center">{{ student.program }}</td>
-                                <td class="border border-blue-500 p-2 text-center">{{ student.year_section }}</td>
-                                <td class="border border-blue-500 p-2 text-center">{{ student.semester }}</td>
-                                <td class="border border-blue-500 p-2 text-center">
-                                    <div class="flex items-center justify-center space-x-3">
-                                        <a href="{% url 'accept_student' student.student_id %}" 
-                                           onclick="return confirm('Are you sure you want to accept this student?')"
-                                           class="text-blue-900 hover:text-green-600 transition-colors duration-200">
-                                            <!-- SVG for check -->
-                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6">
-                                                <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm13.36-1.814a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25Z" clip-rule="evenodd" />
-                                            </svg>
-                                        </a>
-                                        <a href="{% url 'reject_student' student.student_id %}"
-                                           onclick="return confirm('Are you sure you want to reject this student?')"
-                                           class="text-blue-900 hover:text-red-600 transition-colors duration-200">
-                                            <!-- SVG for X -->
-                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6">
-                                                <path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25Zm-1.72 6.97a.75.75 0 1 0-1.06 1.06L10.94 12l-1.72 1.72a.75.75 0 1 0 1.06 1.06L12 13.06l1.72 1.72a.75.75 0 1 0 1.06-1.06L13.06 12l1.72-1.72a.75.75 0 1 0-1.06-1.06L12 10.94l-1.72-1.72Z" clip-rule="evenodd" />
-                                            </svg>
-                                        </a>
-                                    </div>
-                                </td>
+
+                <!-- Verify Student Table -->
+                <div class="overflow-x-auto rounded-2xl shadow-xl w-full">
+                    <table class="w-full border-separate border-spacing-0 rounded-lg">
+                        <thead>
+                            <tr class="bg-blue-800 text-white">
+                                <th class="border border-blue-700 p-3 text-left">Student ID</th>
+                                <th class="border border-blue-700 p-3 text-left">Full Name</th>
+                                <th class="border border-blue-700 p-3 text-center">Program</th>
+                                <th class="border border-blue-700 p-3 text-center">Year & Section</th>
+                                <th class="border border-blue-700 p-3 text-center">Semester</th>
+                                <th class="border border-blue-700 p-3 text-center">Actions</th>
                             </tr>
-                            {% endif %}
-                        {% empty %}
-                            <tr>
-                                <td colspan="6" class="text-center border border-blue-500 bg-gray-100 p-4 text-blue-500">
-                                    No pending students.
-                                </td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody id="studentTableBody">
+                            {% for student in verify_students %}
+                                {% if student.student_id %}
+                                <tr class="studentRow text-blue-900 hover:bg-blue-200/50 transition-all duration-200 text-md {% if forloop.counter0|divisibleby:2 %}bg-gray-100{% else %}bg-blue-100{% endif %}">
+                                    <td class="border border-blue-700 p-3 whitespace-nowrap">
+                                        <div class="flex items-center gap-2">
+                                            <div class="w-2 h-2 bg-amber-500 rounded-full animate-pulse"></div>
+                                            <span class="font-mono text-sm">{{ student.student_id }}</span>
+                                        </div>
+                                    </td>
+                                    <td class="border border-blue-700 p-3 whitespace-nowrap">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
+                                                {{ student.first_name|first }}{{ student.last_name|first }}
+                                            </div>
+                                            <span class="font-medium">{{ student.first_name }} {{ student.middle_initial }} {{ student.last_name }}</span>
+                                        </div>
+                                    </td>
+                                    <td class="border border-blue-700 p-3 text-center whitespace-nowrap">
+                                        <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded-lg text-xs font-medium">
+                                            {{ student.program }}
+                                        </span>
+                                    </td>
+                                    <td class="border border-blue-700 p-3 text-center whitespace-nowrap">
+                                        <span class="font-semibold">{{ student.year_section }}</span>
+                                    </td>
+                                    <td class="border border-blue-700 p-3 text-center whitespace-nowrap">
+                                        <span class="px-2 py-1 bg-gray-100 text-gray-700 rounded-lg text-xs font-medium">
+                                            {{ student.semester }}
+                                        </span>
+                                    </td>
+                                    <td class="border border-blue-700 p-3 text-center whitespace-nowrap">
+                                        <div class="flex items-center justify-center space-x-3">
+                                            <!-- Accept Button -->
+                                            <a href="{% url 'accept_student' student.student_id %}" 
+                                            onclick="return confirm('Are you sure you want to accept this student?')"
+                                            class="group relative p-2 bg-green-100 hover:bg-green-500 rounded-lg transition-all duration-200 transform hover:scale-105"
+                                            title="Accept Student">
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 text-green-600 group-hover:text-white transition-colors">
+                                                    <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm13.36-1.814a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25Z" clip-rule="evenodd" />
+                                                </svg>
+                                            </a>
+                                            
+                                            <!-- Reject Button -->
+                                            <a href="{% url 'reject_student' student.student_id %}"
+                                            onclick="return confirm('Are you sure you want to reject this student? This action cannot be undone.')"
+                                            class="group relative p-2 bg-red-100 hover:bg-red-500 rounded-lg transition-all duration-200 transform hover:scale-105"
+                                            title="Reject Student">
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 text-red-600 group-hover:text-white transition-colors">
+                                                    <path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25Zm-1.72 6.97a.75.75 0 1 0-1.06 1.06L10.94 12l-1.72 1.72a.75.75 0 1 0 1.06 1.06L12 13.06l1.72 1.72a.75.75 0 1 0 1.06-1.06L13.06 12l1.72-1.72a.75.75 0 1 0-1.06-1.06L12 10.94l-1.72-1.72Z" clip-rule="evenodd" />
+                                                </svg>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endif %}
+                            {% empty %}
+                                <tr>
+                                    <td colspan="6" class="text-center border border-blue-700 bg-gray-100 px-6 py-12">
+                                        <div class="flex flex-col items-center justify-center text-blue-500">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" class="text-blue-300 mb-3">
+                                                <path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2zm-1 15l-5-5l1.41-1.41L11 14.17l7.59-7.59L20 8l-9 9z"/>
+                                            </svg>
+                                            <h3 class="text-lg font-semibold text-blue-600 mb-1">All Caught Up!</h3>
+                                            <p class="text-sm text-blue-500">No pending students require approval at this time.</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Quick Actions Info -->
+                {% if verify_students %}
+                <div class="mt-6 bg-blue-50/50 backdrop-blur-sm border border-blue-200/50 rounded-xl p-4">
+                    <div class="flex items-start gap-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" class="text-blue-600 mt-0.5 flex-shrink-0">
+                            <path fill="currentColor" d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 22L12 18.77L5.82 22L7 14.14l-5-4.87l6.91-1.01L12 2z"/>
+                        </svg>
+                        <div>
+                            <h4 class="text-blue-800 font-semibold text-sm mb-1">Quick Actions</h4>
+                            <div class="text-blue-600 text-xs space-y-1">
+                                <p>• <span class="text-green-600 font-medium">Accept:</span> Approve student registration and grant system access</p>
+                                <p>• <span class="text-red-600 font-medium">Reject:</span> Decline registration request (action cannot be undone)</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
             </div>
         </div>
+    </div>
 </div>

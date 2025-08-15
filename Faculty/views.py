@@ -14,7 +14,7 @@ from Login.decorators import faculty_required
 from django.core.paginator import Paginator
 
 from Faculty.models import Faculty
-from Student.models import Student, PendingStudent, Task, StudentTaskProgress
+from Student.models import Student, PendingStudent, Task, StudentTaskProgress, ArchivedStudent
 from django.db.models import Q
 
 from django.db.models import Count, Sum, IntegerField
@@ -71,10 +71,13 @@ def Faculty_home(request):
         messages.error(request, "Faculty profile not found.")
         return redirect('some_error_page') # Or faculty login
 
-    # --- Student & Program Counts ---
-    total_users = Student.objects.filter(student_status='Registered').count()
-    cs_count = Student.objects.filter(faculty__program='Computer Science', student_status='Registered').count()
-    it_count = Student.objects.filter(faculty__program='Information Technology', student_status='Registered').count()
+
+    # Total students (PostgreSQL)
+    total_students = Student.objects.filter(student_status='Registered').count()
+    # Computer Science students (PostgreSQL)
+    cs_students_count = Student.objects.filter(student_status='Registered', faculty__program='Computer Science').count()
+    # Information Technology students (PostgreSQL)
+    it_students_count = Student.objects.filter(student_status='Registered', faculty__program='Information Technology').count()
 
     # --- Quick Lists ---
     # Recently registered students in the faculty's section
@@ -155,9 +158,9 @@ def Faculty_home(request):
 
     context = {
         "faculty_data": faculty,
-        "total_users": total_users,
-        "cs_count": cs_count,
-        "it_count": it_count,
+        "total_students": total_students,
+        "cs_students": cs_students_count,
+        "it_students": it_students_count,
         "calendar_days": calendar_days,
         "almost_due_tasks": almost_due_tasks,
         "notifications": notifications,
@@ -438,19 +441,37 @@ def edit_student(request, student_id):
 
 @faculty_required
 def archived_students_list_page(request):
-    archived_students = [
-        {**doc.to_dict(), "student_id": doc.id}
-        for doc in db.collection("Archived Students").stream()
-    ]
+    """
+    Displays a list of students archived by the currently logged-in faculty.
+    Handles search and HTMX requests.
+    """
+    # Get the Faculty profile by matching faculty_id with the user's username
+    faculty_profile = get_object_or_404(Faculty, faculty_id=request.user.username)
+
+    # Base queryset for archived students belonging to this faculty
+    archived_students_query = ArchivedStudent.objects.filter(faculty=faculty_profile)
+
+    # Handle search functionality
+    search_query = request.GET.get('search', '').strip()
+    if search_query:
+        archived_students_query = archived_students_query.filter(
+            Q(student_id__icontains=search_query) |
+            Q(first_name__icontains=search_query) |
+            Q(last_name__icontains=search_query) |
+            Q(program__icontains=search_query)
+        )
+
     context = {
-        "archived_students": archived_students,
-        "search_query": request.GET.get('search', ''),
+        "archived_students": archived_students_query.order_by('-archived_at'),
+        "search_query": search_query,
     }
-    # Only render content for HTMX requests, otherwise render full page
+
+    # Handle HTMX requests for partial page updates
     if request.headers.get('HX-Request'):
         return render(request, "Students/contents/students-archived-content.html", context)
-    else:
-        return render(request, "Students/students-archived.html", context)
+    
+    # Handle standard requests for a full page load
+    return render(request, "Students/students-archived.html", context)
 
 
 @faculty_required

@@ -7,200 +7,330 @@
     <hr class="border-t-2 border-sky-500 my-4">
 
     <!-- Novice Section -->
-    <div class="flex items-center space-x-4 mt-6">
-        <h2 class="text-2xl font-semibold text-sky-700">Novice</h2>
-        {% if activities_novice and activities_novice.0.isLock %}
-            <span class="inline-flex items-center px-3 py-1 rounded-full bg-red-100 text-red-700 text-sm font-semibold border border-red-300">
-                <svg class="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M18.364 5.636l-1.414 1.414A9 9 0 105.636 18.364l1.414-1.414"></path></svg>
-                Deactivated
-            </span>
-        {% else %}
-            <span class="inline-flex items-center px-3 py-1 rounded-full bg-green-100 text-green-700 text-sm font-semibold border border-green-300">
-                <svg class="w-4 h-4 mr-1 text-green-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
-                Activated
-            </span>
-        {% endif %}
-    </div>
-    <hr class="mb-8 border-sky-500 my-4">
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {% for activity in activities_novice %}
-        <div class="relative bg-white shadow-xl rounded-tl-4xl rounded-br-4xl overflow-hidden border-2 border-gray-800/30 transition-all duration-300
-            {% if activity.isLock %} bg-gray-700/70 cursor-not-allowed {% else %} cursor-pointer hover:scale-[1.02] hover:shadow-2xl {% endif %}"
-            data-tier="Novice" data-title="{{ activity.title }}"
-            {% if activity.isLock %}
-                onclick="facultyTierLockedAlert(event)"
-            {% else %}
-            onclick="openFacultyActivityDeadlineModal(
-                `{{ activity.title|escapejs }}`,
-                `{{ activity.description|default:''|escapejs }}`,
-                `{{ activity.tier|default:'Novice' }}`)"
-            {% endif %}
-        >
-            {% if activity.isLock %}
-                <div class="lock-overlay absolute inset-0 bg-gray-700/70 bg-opacity-60 flex items-center justify-center z-10 pointer-events-none transition-all duration-300">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" class="w-16 h-16 text-gray-200 opacity-90" viewBox="0 0 24 24">
-                        <path fill="currentColor" d="M17 9V7c0-2.8-2.2-5-5-5S7 4.2 7 7v2c-1.7 0-3 1.3-3 3v7c0 1.7 1.3 3 3 3h10c1.7 0 3-1.3 3-3v-7c0-1.7-1.3-3-3-3zM9 7c0-1.7 1.3-3 3-3s3 1.3 3 3v2H9V7zm4 10c0 .6-.4 1-1 1s-1-.4-1-1v-3c0-.6.4-1 1-1s1 .4 1 1v3z"/>
-                    </svg>
-                </div>
-            {% endif %}
-            <img src="{{ activity.image }}" alt="Activity Image" class="w-full h-40 object-cover {% if activity.isLock %}brightness-50{% endif %}">
-            <div class="p-4 text-gray-800 {% if activity.isLock %}opacity-80{% endif %}">
-                <h2 class="text-lg font-semibold">{{ activity.title }}</h2>
-                <p class="text-sm">{{ activity.subject }}</p>
-                {# DEADLINE LINE: #}
-                <p class="text-xs mt-1">
-                     {# DEADLINE LINE: #}
-                    {% if activity.deadline_date %}
-                        <span class="inline-flex items-center px-3 py-1 rounded-full bg-green-100 text-green-700 text-xs font-semibold border border-green-300 mt-1">
-                            <svg class="w-4 h-4 mr-1 text-green-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
+    <div class="mb-12">
+        <!-- Section Header -->
+        <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center space-x-4">
+                <h2 class="text-2xl font-bold text-sky-700">Novice</h2>
+                <div class="h-8 w-px bg-sky-200"></div>
+                {% if activities_novice and activities_novice.0.isLock %}
+                    <div class="bg-rose-600 text-white px-6 py-2 rounded-xl text-sm font-medium shadow-lg 
+                               transition-all duration-300">
+                        <div class="flex items-center space-x-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                      d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8V7a4 4 0 00-8 0v4h8z"/>
                             </svg>
-                            Deadline: {{ activity.deadline_date }}
-                        </span>
-                    {% else %}
-                        <span class="inline-flex items-center px-3 py-1 rounded-full bg-red-100 text-gray-500 text-xs font-semibold border border-gray-300 mt-1">
-                            <svg class="w-4 h-4 mr-1 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 5.636l-1.414 1.414A9 9 0 105.636 18.364l1.414-1.414"></path>
+                            <span>Deactivated</span>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="bg-emerald-600 text-white px-6 py-2 rounded-xl text-sm font-medium shadow-lg 
+                               transition-all duration-300">
+                        <div class="flex items-center space-x-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                             </svg>
-                            Deadline not set.
-                        </span>
-                    {% endif %}
-                </p>
-                <div class="flex items-center mt-3 text-xs">
-                    <span class="bg-green-600 text-white px-2 py-1 rounded">{{ activity.progress }}% Resume</span>
-                </div>
+                            <span>Activated</span>
+                        </div>
+                    </div>
+                {% endif %}
             </div>
         </div>
-        {% endfor %}
+    
+        <!-- Activities Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {% for activity in activities_novice %}
+            <div class="group relative bg-gradient-to-br from-sky-700/60 to-sky-600 rounded-2xl shadow-lg overflow-hidden 
+                        transition-all duration-300 hover:shadow-2xl hover:-translate-y-1
+                        border border-sky-500/30 backdrop-blur-sm
+                        {% if activity.isLock %}cursor-not-allowed{% else %}cursor-pointer{% endif %}"
+                 data-tier="Novice" 
+                 data-title="{{ activity.title }}"
+                 {% if activity.isLock %}
+                    onclick="facultyTierLockedAlert(event)"
+                 {% else %}
+                    onclick="openFacultyActivityDeadlineModal(
+                        `{{ activity.title|escapejs }}`,
+                        `{{ activity.description|default:''|escapejs }}`,
+                        `{{ activity.tier|default:'Novice' }}`)"
+                 {% endif %}>
+                
+                <!-- Activity Image Container -->
+                <div class="relative h-48 overflow-hidden">
+                    <img src="{{ activity.image }}" 
+                         alt="{{ activity.title }}" 
+                         class="w-full h-full object-cover transform transition-all duration-500 
+                                group-hover:scale-105 {% if activity.isLock %}filter grayscale brightness-75{% endif %}">
+                    
+                    <!-- Lock Overlay -->
+                    {% if activity.isLock %}
+                    <div class="absolute inset-0 bg-gray-900/60 backdrop-blur-[1px] 
+                                flex items-center justify-center transition-all duration-300">
+                        <svg class="w-12 h-12 text-white" fill="currentColor" viewBox="0 0 24 24">
+                            <path fill-rule="evenodd" d="M8 10V7a4 4 0 1 1 8 0v3h1a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h1Zm2-3a2 2 0 1 1 4 0v3h-4V7Zm2 6a1 1 0 0 1 1 1v3a1 1 0 1 1-2 0v-3a1 1 0 0 1 1-1Z"/>
+                        </svg>
+                    </div>
+                    {% endif %}
+                </div>
+    
+                <!-- Content Section -->
+                <div class="p-5 space-y-4">
+                    <h3 class="text-lg font-semibold text-white group-hover:text-sky-100 
+                               transition-colors duration-300 line-clamp-2">
+                        {{ activity.title }}
+                    </h3>
+    
+                    <!-- Deadline Badge -->
+                    {% if activity.deadline_date %}
+                        <div class="flex items-center space-x-2">
+                            <span class="px-3 py-1 bg-sky-800/50 rounded-full text-sm text-sky-100 border border-sky-500/30">
+                                Deadline: {{ activity.deadline_date }}
+                            </span>
+                        </div>
+                    {% else %}
+                        <div class="flex items-center space-x-2">
+                            <span class="px-3 py-1 bg-sky-800/50 rounded-full text-sm text-sky-100/70 border border-sky-500/30">
+                                No deadline set
+                            </span>
+                        </div>
+                    {% endif %}
+    
+                    <!-- Progress Section -->
+                    <div class="space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-medium text-white">Progress</span>
+                            <span class="text-xs font-medium text-white">{{ activity.progress }}%</span>
+                        </div>
+                        <div class="h-2 rounded-full bg-sky-100 overflow-hidden">
+                            <div class="h-full bg-gradient-to-r from-sky-400 to-sky-500 transition-all duration-300"
+                                 style="width: {{ activity.progress }}%">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
     </div>
 
     <!-- Junior Section -->
-    <div class="flex items-center space-x-4 mt-6">
-        <h2 class="text-2xl font-semibold text-sky-700">Junior</h2>
-        {% if activities_junior and activities_junior.0.isLock %}
-            <span class="inline-flex items-center px-3 py-1 rounded-full bg-red-100 text-red-700 text-sm font-semibold border border-red-300">
-                <svg class="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M18.364 5.636l-1.414 1.414A9 9 0 105.636 18.364l1.414-1.414"></path></svg>
-                Deactivated
-            </span>
-        {% else %}
-            <span class="inline-flex items-center px-3 py-1 rounded-full bg-green-100 text-green-700 text-sm font-semibold border border-green-300">
-                <svg class="w-4 h-4 mr-1 text-green-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
-                Activated
-            </span>
-        {% endif %}
-    </div>
-    <hr class="mb-8 border-sky-500 my-4">
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {% for activity in activities_junior %}
-        <div class="relative bg-white shadow-xl rounded-tl-4xl rounded-br-4xl overflow-hidden border-2 border-gray-800/30 transition-all duration-300
-            {% if activity.isLock %} bg-gray-700/70 cursor-not-allowed {% else %} cursor-pointer hover:scale-[1.02] hover:shadow-2xl {% endif %}"
-            data-tier="Junior" data-title="{{ activity.title }}"
-            {% if activity.isLock %}
-                onclick="facultyTierLockedAlert(event)"
-            {% else %}
-                onclick="openFacultyActivityDeadlineModal(`{{ activity.title|escapejs }}`, `{{ activity.description|default:''|escapejs }}`)"
-            {% endif %}
-        >
-            {% if activity.isLock %}
-                <div class="lock-overlay absolute inset-0 bg-gray-700/70 bg-opacity-60 flex items-center justify-center z-10 pointer-events-none transition-all duration-300">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" class="w-16 h-16 text-gray-200 opacity-90" viewBox="0 0 24 24">
-                        <path fill="currentColor" d="M17 9V7c0-2.8-2.2-5-5-5S7 4.2 7 7v2c-1.7 0-3 1.3-3 3v7c0 1.7 1.3 3 3 3h10c1.7 0 3-1.3 3-3v-7c0-1.7-1.3-3-3-3zM9 7c0-1.7 1.3-3 3-3s3 1.3 3 3v2H9V7zm4 10c0 .6-.4 1-1 1s-1-.4-1-1v-3c0-.6.4-1 1-1s1 .4 1 1v3z"/>
-                    </svg>
-                </div>
-            {% endif %}
-            <img src="{{ activity.image }}" alt="Activity Image" class="w-full h-40 object-cover {% if activity.isLock %}brightness-50{% endif %}">
-            <div class="p-4 text-gray-800 {% if activity.isLock %}opacity-80{% endif %}">
-                <h2 class="text-lg font-semibold">{{ activity.title }}</h2>
-                <p class="text-sm">{{ activity.subject }}</p>
-                {# DEADLINE LINE: #}
-                <p class="text-xs mt-1">
-                    {# DEADLINE LINE: #}
-                   {% if activity.deadline_date %}
-                       <span class="inline-flex items-center px-3 py-1 rounded-full bg-green-100 text-green-700 text-xs font-semibold border border-green-300 mt-1">
-                           <svg class="w-4 h-4 mr-1 text-green-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                               <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
-                           </svg>
-                           Deadline: {{ activity.deadline_date }}
-                       </span>
-                   {% else %}
-                       <span class="inline-flex items-center px-3 py-1 rounded-full bg-red-100 text-gray-500 text-xs font-semibold border border-gray-300 mt-1">
-                           <svg class="w-4 h-4 mr-1 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                               <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 5.636l-1.414 1.414A9 9 0 105.636 18.364l1.414-1.414"></path>
-                           </svg>
-                           Deadline not set.
-                       </span>
-                   {% endif %}
-               </p>
-                <div class="flex items-center mt-3 text-xs">
-                    <span class="bg-green-600 text-white px-2 py-1 rounded">{{ activity.progress }}% Resume</span>
-                </div>
+    <div class="mb-12">
+        <!-- Section Header -->
+        <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center space-x-4">
+                <h2 class="text-2xl font-bold text-sky-700">Junior</h2>
+                <div class="h-8 w-px bg-sky-200"></div>
+                {% if activities_junior and activities_junior.0.isLock %}
+                    <div class="bg-rose-600 text-white px-6 py-2 rounded-xl text-sm font-medium shadow-lg 
+                               transition-all duration-300">
+                        <div class="flex items-center space-x-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                      d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8V7a4 4 0 00-8 0v4h8z"/>
+                            </svg>
+                            <span>Deactivated</span>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="bg-emerald-600 text-white px-6 py-2 rounded-xl text-sm font-medium shadow-lg 
+                               transition-all duration-300">
+                        <div class="flex items-center space-x-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                            </svg>
+                            <span>Activated</span>
+                        </div>
+                    </div>
+                {% endif %}
             </div>
         </div>
-        {% endfor %}
+    
+        <!-- Activities Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {% for activity in activities_junior %}
+            <div class="group relative bg-gradient-to-br from-sky-700/60 to-sky-600 rounded-2xl shadow-lg overflow-hidden 
+                        transition-all duration-300 hover:shadow-2xl hover:-translate-y-1
+                        border border-sky-500/30 backdrop-blur-sm
+                        {% if activity.isLock %}cursor-not-allowed{% else %}cursor-pointer{% endif %}"
+                 data-tier="Junior" 
+                 data-title="{{ activity.title }}"
+                 {% if activity.isLock %}
+                    onclick="facultyTierLockedAlert(event)"
+                 {% else %}
+                    onclick="openFacultyActivityDeadlineModal(
+                        `{{ activity.title|escapejs }}`,
+                        `{{ activity.description|default:''|escapejs }}`,
+                        `{{ activity.tier|default:'Junior' }}`)"
+                 {% endif %}>
+                
+                <!-- Activity Image Container -->
+                <div class="relative h-48 overflow-hidden">
+                    <img src="{{ activity.image }}" 
+                         alt="{{ activity.title }}" 
+                         class="w-full h-full object-cover transform transition-all duration-500 
+                                group-hover:scale-105 {% if activity.isLock %}filter grayscale brightness-75{% endif %}">
+                    
+                    <!-- Lock Overlay -->
+                    {% if activity.isLock %}
+                    <div class="absolute inset-0 bg-gray-900/60 backdrop-blur-[1px] 
+                                flex items-center justify-center transition-all duration-300">
+                        <svg class="w-12 h-12 text-white" fill="currentColor" viewBox="0 0 24 24">
+                            <path fill-rule="evenodd" d="M8 10V7a4 4 0 1 1 8 0v3h1a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h1Zm2-3a2 2 0 1 1 4 0v3h-4V7Zm2 6a1 1 0 0 1 1 1v3a1 1 0 1 1-2 0v-3a1 1 0 0 1 1-1Z"/>
+                        </svg>
+                    </div>
+                    {% endif %}
+                </div>
+    
+                <!-- Content Section -->
+                <div class="p-5 space-y-4">
+                    <h3 class="text-lg font-semibold text-white group-hover:text-sky-100 
+                               transition-colors duration-300 line-clamp-2">
+                        {{ activity.title }}
+                    </h3>
+                    
+                    <p class="text-sm text-sky-200">{{ activity.subject }}</p>
+    
+                    <!-- Deadline Badge -->
+                    {% if activity.deadline_date %}
+                        <div class="flex items-center space-x-2">
+                            <span class="px-3 py-1 bg-sky-800/50 rounded-full text-sm text-sky-100 border border-sky-500/30">
+                                Deadline: {{ activity.deadline_date }}
+                            </span>
+                        </div>
+                    {% else %}
+                        <div class="flex items-center space-x-2">
+                            <span class="px-3 py-1 bg-sky-800/50 rounded-full text-sm text-sky-100/70 border border-sky-500/30">
+                                No deadline set
+                            </span>
+                        </div>
+                    {% endif %}
+    
+                    <!-- Progress Section -->
+                    <div class="space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-medium text-white">Progress</span>
+                            <span class="text-xs font-medium text-white">{{ activity.progress }}%</span>
+                        </div>
+                        <div class="h-2 rounded-full bg-sky-100 overflow-hidden">
+                            <div class="h-full bg-gradient-to-r from-sky-400 to-sky-500 transition-all duration-300"
+                                 style="width: {{ activity.progress }}%">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
     </div>
 
     <!-- Senior Section -->
-    <div class="flex items-center space-x-4 mt-6">
-        <h2 class="text-2xl font-semibold text-sky-700">Senior</h2>
-        {% if activities_senior and activities_senior.0.isLock %}
-            <span class="inline-flex items-center px-3 py-1 rounded-full bg-red-100 text-red-700 text-sm font-semibold border border-red-300">
-                <svg class="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M18.364 5.636l-1.414 1.414A9 9 0 105.636 18.364l1.414-1.414"></path></svg>
-                Deactivated
-            </span>
-        {% else %}
-            <span class="inline-flex items-center px-3 py-1 rounded-full bg-green-100 text-green-700 text-sm font-semibold border border-green-300">
-                <svg class="w-4 h-4 mr-1 text-green-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
-                Activated
-            </span>
-        {% endif %}
-    </div>
-    <hr class="mb-8 border-sky-500 my-4">
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {% for activity in activities_senior %}
-        <div class="relative bg-white shadow-xl rounded-tl-4xl rounded-br-4xl overflow-hidden border-2 border-gray-800/30 transition-all duration-300
-            {% if activity.isLock %} bg-gray-700/70 cursor-not-allowed {% else %} cursor-pointer hover:scale-[1.02] hover:shadow-2xl {% endif %}"
-            data-tier="Senior" data-title="{{ activity.title }}"
-            {% if activity.isLock %}
-                onclick="facultyTierLockedAlert(event)"
-            {% else %}
-                onclick="openFacultyActivityDeadlineModal(`{{ activity.title|escapejs }}`, `{{ activity.description|default:''|escapejs }}`)"
-            {% endif %}
-        >
-            {% if activity.isLock %}
-                <div class="lock-overlay absolute inset-0 bg-gray-700/70 bg-opacity-60 flex items-center justify-center z-10 pointer-events-none transition-all duration-300">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" class="w-16 h-16 text-gray-200 opacity-90" viewBox="0 0 24 24">
-                        <path fill="currentColor" d="M17 9V7c0-2.8-2.2-5-5-5S7 4.2 7 7v2c-1.7 0-3 1.3-3 3v7c0 1.7 1.3 3 3 3h10c1.7 0 3-1.3 3-3v-7c0-1.7-1.3-3-3-3zM9 7c0-1.7 1.3-3 3-3s3 1.3 3 3v2H9V7zm4 10c0 .6-.4 1-1 1s-1-.4-1-1v-3c0-.6.4-1 1-1s1 .4 1 1v3z"/>
-                    </svg>
-                </div>
-            {% endif %}
-            <img src="{{ activity.image }}" alt="Activity Image" class="w-full h-40 object-cover {% if activity.isLock %}brightness-50{% endif %}">
-            <div class="p-4 text-gray-800 {% if activity.isLock %}opacity-80{% endif %}">
-                <h2 class="text-lg font-semibold">{{ activity.title }}</h2>
-                <p class="text-sm">{{ activity.subject }}</p>
-                {# DEADLINE LINE: #}
-                <p class="text-xs mt-1">
-                    {# DEADLINE LINE: #}
-                   {% if activity.deadline_date %}
-                       <span class="inline-flex items-center px-3 py-1 rounded-full bg-green-100 text-green-700 text-xs font-semibold border border-green-300 mt-1">
-                           <svg class="w-4 h-4 mr-1 text-green-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                               <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
-                           </svg>
-                           Deadline: {{ activity.deadline_date }}
-                       </span>
-                   {% else %}
-                       <span class="inline-flex items-center px-3 py-1 rounded-full bg-red-100 text-gray-500 text-xs font-semibold border border-gray-300 mt-1">
-                           <svg class="w-4 h-4 mr-1 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                               <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 5.636l-1.414 1.414A9 9 0 105.636 18.364l1.414-1.414"></path>
-                           </svg>
-                           Deadline not set.
-                       </span>
-                   {% endif %}
-               </p>
-                <div class="flex items-center mt-3 text-xs">
-                    <span class="bg-green-600 text-white px-2 py-1 rounded">{{ activity.progress }}% Resume</span>
-                </div>
+    <div class="mb-12">
+        <!-- Section Header -->
+        <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center space-x-4">
+                <h2 class="text-2xl font-bold text-sky-700">Senior</h2>
+                <div class="h-8 w-px bg-sky-200"></div>
+                {% if activities_senior and activities_senior.0.isLock %}
+                    <div class="bg-rose-600 text-white px-6 py-2 rounded-xl text-sm font-medium shadow-lg 
+                               transition-all duration-300">
+                        <div class="flex items-center space-x-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                      d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8V7a4 4 0 00-8 0v4h8z"/>
+                            </svg>
+                            <span>Deactivated</span>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="bg-emerald-600 text-white px-6 py-2 rounded-xl text-sm font-medium shadow-lg 
+                               transition-all duration-300">
+                        <div class="flex items-center space-x-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                            </svg>
+                            <span>Activated</span>
+                        </div>
+                    </div>
+                {% endif %}
             </div>
         </div>
-        {% endfor %}
+    
+        <!-- Activities Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {% for activity in activities_senior %}
+            <div class="group relative bg-gradient-to-br from-sky-700/60 to-sky-600 rounded-2xl shadow-lg overflow-hidden 
+                        transition-all duration-300 hover:shadow-2xl hover:-translate-y-1
+                        border border-sky-500/30 backdrop-blur-sm
+                        {% if activity.isLock %}cursor-not-allowed{% else %}cursor-pointer{% endif %}"
+                 data-tier="Senior" 
+                 data-title="{{ activity.title }}"
+                 {% if activity.isLock %}
+                    onclick="facultyTierLockedAlert(event)"
+                 {% else %}
+                    onclick="openFacultyActivityDeadlineModal(
+                        `{{ activity.title|escapejs }}`,
+                        `{{ activity.description|default:''|escapejs }}`,
+                        `{{ activity.tier|default:'Senior' }}`)"
+                 {% endif %}>
+                
+                <!-- Activity Image Container -->
+                <div class="relative h-48 overflow-hidden">
+                    <img src="{{ activity.image }}" 
+                         alt="{{ activity.title }}" 
+                         class="w-full h-full object-cover transform transition-all duration-500 
+                                group-hover:scale-105 {% if activity.isLock %}filter grayscale brightness-75{% endif %}">
+                    
+                    <!-- Lock Overlay -->
+                    {% if activity.isLock %}
+                    <div class="absolute inset-0 bg-gray-900/60 backdrop-blur-[1px] 
+                                flex items-center justify-center transition-all duration-300">
+                        <svg class="w-12 h-12 text-white" fill="currentColor" viewBox="0 0 24 24">
+                            <path fill-rule="evenodd" d="M8 10V7a4 4 0 1 1 8 0v3h1a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h1Zm2-3a2 2 0 1 1 4 0v3h-4V7Zm2 6a1 1 0 0 1 1 1v3a1 1 0 1 1-2 0v-3a1 1 0 0 1 1-1Z"/>
+                        </svg>
+                    </div>
+                    {% endif %}
+                </div>
+    
+                <!-- Content Section -->
+                <div class="p-5 space-y-4">
+                    <h3 class="text-lg font-semibold text-white group-hover:text-sky-100 
+                               transition-colors duration-300 line-clamp-2">
+                        {{ activity.title }}
+                    </h3>
+                    
+                    <p class="text-sm text-sky-200">{{ activity.subject }}</p>
+    
+                    <!-- Deadline Badge -->
+                    {% if activity.deadline_date %}
+                        <div class="flex items-center space-x-2">
+                            <span class="px-3 py-1 bg-sky-800/50 rounded-full text-sm text-sky-100 border border-sky-500/30">
+                                Deadline: {{ activity.deadline_date }}
+                            </span>
+                        </div>
+                    {% else %}
+                        <div class="flex items-center space-x-2">
+                            <span class="px-3 py-1 bg-sky-800/50 rounded-full text-sm text-sky-100/70 border border-sky-500/30">
+                                No deadline set
+                            </span>
+                        </div>
+                    {% endif %}
+    
+                    <!-- Progress Section -->
+                    <div class="space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-medium text-white">Progress</span>
+                            <span class="text-xs font-medium text-white">{{ activity.progress }}%</span>
+                        </div>
+                        <div class="h-2 rounded-full bg-sky-100 overflow-hidden">
+                            <div class="h-full bg-gradient-to-r from-sky-400 to-sky-500 transition-all duration-300"
+                                 style="width: {{ activity.progress }}%">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
     </div>
 </div>
