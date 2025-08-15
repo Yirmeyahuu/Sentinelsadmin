@@ -890,30 +890,37 @@ def senior_tier(request):
 
 @faculty_required
 def faculty_student_status(request):
+    """
+    Displays all students assigned to the logged-in faculty,
+    with options to filter by their status (e.g., Registered, Completed, Drop-out).
+    """
+    # Get the logged-in faculty member from PostgreSQL
     # Get the logged-in faculty member from PostgreSQL
     try:
+        # CORRECTED: Changed lookup from user=request.user to faculty_id=request.user.username
         faculty = Faculty.objects.get(faculty_id=request.user.username)
     except Faculty.DoesNotExist:
         messages.error(request, "Faculty profile not found.")
-        return redirect('some_error_page') # Or faculty login
+        return redirect('login') # Redirect to login if faculty profile is missing
 
     # Get filter and search parameters from the request
     status_filter = request.GET.get('status', 'all').lower()
     search_query = request.GET.get('search', '').strip()
 
-    # Base query for students assigned to this faculty with non-registered statuses
-    students_query = Student.objects.filter(
-        faculty=faculty,
-        student_status__in=['Completed', 'Dropped']
-    )
+    # --- CORRECTED QUERY ---
+    # Base query now fetches ALL students assigned to this faculty
+    students_query = Student.objects.filter(faculty=faculty)
 
-    # Apply status filter
+    # Apply status filter based on selection
     if status_filter == 'completed':
         students_query = students_query.filter(student_status='Completed')
-    elif status_filter in ['drop-out', 'dropout', 'dropped']:
-        students_query = students_query.filter(student_status='Dropped')
+    elif status_filter in ['drop-out', 'dropout']:
+        students_query = students_query.filter(student_status='Drop-out')
+    elif status_filter == 'registered':
+        students_query = students_query.filter(student_status='Registered')
+    # If 'all', no status filter is applied.
 
-    # Apply search filter
+    # Apply search filter across multiple fields
     if search_query:
         students_query = students_query.filter(
             Q(first_name__icontains=search_query) |
@@ -921,18 +928,19 @@ def faculty_student_status(request):
             Q(student_id__icontains=search_query)
         )
 
-    students_query = students_query.order_by('-student_id')
+    # Order the results for consistent display
+    students_query = students_query.order_by('last_name', 'first_name')
 
     # Pagination
-    paginator = Paginator(students_query, 10)
+    paginator = Paginator(students_query, 10) # 10 students per page
     page_number = request.GET.get('page', 1)
     page_obj = paginator.get_page(page_number)
 
     context = {
         "students": page_obj,
         "faculty_data": faculty,
-        "status_filter": status_filter,
         "search_query": search_query,
+        "status_filter": status_filter, # Pass filter to template
         "page_obj": page_obj,
         "paginator": paginator,
     }
@@ -941,3 +949,23 @@ def faculty_student_status(request):
         return render(request, 'Students/contents/student-status-content.html', context)
     else:
         return render(request, 'Students/student-status.html', context)
+
+
+@faculty_required
+def facultyHelp(request):
+    """
+    Renders the Help & User Manual page.
+    """
+    # Get the logged-in faculty member from PostgreSQL
+    try:
+        faculty = Faculty.objects.get(faculty_id=request.user.username)
+    except Faculty.DoesNotExist:
+        messages.error(request, "Faculty profile not found.")
+        return redirect('some_error_page') # Or faculty login
+
+    context = {
+        'faculty_data': faculty,
+        'page': 'help' # To highlight the active page in the sidebar
+    }
+    
+    return render(request, 'Help/contents/help-content.html', context)

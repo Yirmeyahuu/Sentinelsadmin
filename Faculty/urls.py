@@ -42,5 +42,6 @@ urlpatterns = [
     path('Tier/Junior/', views.junior_tier, name='junior-tier'),
     path('Tier/Senior/', views.senior_tier, name='senior-tier'),
 
+    path('Help/', views.facultyHelp, name='faculty-help'),
 
 ]

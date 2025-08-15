@@ -164,14 +164,14 @@
                                 <td class="border border-blue-700 p-2 text-center whitespace-nowrap">{{ student.semester }}</td>
                                 <td class="border border-blue-700 p-2 text-center whitespace-nowrap">
                                     <span class="px-3 py-1.5 rounded-lg text-xs font-medium inline-block min-w-[90px]
-                                        {% if student.status == 'Drop-out' or student.status == 'dropout' %}
+                                        {% if student.status == 'Drop-out' %}
                                             bg-red-500/20 text-red-700
-                                        {% elif student.status == 'Completed' or student.status == 'completed' %}
+                                        {% elif student.status == 'Completed' %}
                                             bg-yellow-500/20 text-yellow-700
                                         {% else %}
                                             bg-green-500/20 text-green-700
                                         {% endif %}">
-                                        {{ student.status|title }}
+                                        {{ student.status|default:"Continuing" }}
                                     </span>
                                 </td>
                                 <td class="border border-blue-700 p-2 text-center whitespace-nowrap">

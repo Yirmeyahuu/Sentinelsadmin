@@ -459,7 +459,12 @@
                     </li>
                     <!-- Add Help Button -->
                     <li>
-                        <a href="javascript:void(0);" 
+                        <a 
+                            data-page="/Faculty/Help/"
+                            href="/Faculty/Help/"
+                            hx-get="{% url 'faculty-help' %}" 
+                            hx-target="#mainContent" 
+                            hx-push-url="true"
                             class="flex items-center p-2 hover:bg-blue-700 rounded-2xl transition-all duration-300 ease-in-out">
                             <svg viewBox="0 0 24 24" fill="currentColor" class="h-7 w-7 mr-2 flex-shrink-0">
                                 <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 5.524 4.477 10 10 10s10-4.476 10-10c0-5.523-4.477-10-10-10zm0 15a1 1 0 100 2 1 1 0 000-2zm1-2.5V9a1 1 0 00-2 0v5.5a1 1 0 002 0z" clip-rule="evenodd"/>
