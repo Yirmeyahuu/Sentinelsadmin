@@ -408,6 +408,13 @@ def add_student(request):
                 student_status='Registered'  # Set default status
             )
 
+            # Also create a corresponding document in Firestore for progress tracking
+            try:
+                db.collection('Registered_Students').document(student_id).set({})
+            except Exception as e:
+                # If Firestore fails, inform the user but don't stop the process
+                messages.error(request, f"Student added to database, but failed to create Firestore record: {e}")
+
             messages.success(request, f"Student {student_id} added successfully!")
             return redirect("faculty-student-list")
         else:
@@ -644,6 +651,7 @@ def accept_student(request, student_id):
     pending_student = get_object_or_404(PendingStudent, student_id=student_id)
 
     try:
+        # Create the student in PostgreSQL
         new_student = Student.objects.create(
             student_id=pending_student.student_id,
             first_name=pending_student.first_name,
@@ -654,13 +662,19 @@ def accept_student(request, student_id):
             year_section=pending_student.year_section,
             semester=pending_student.semester,
             student_status='Registered',
-            password=pending_student.password  # If you want to transfer password
+            password=pending_student.password   
         )
-        # If you use Django's set_password, do it here (optional)
-        # new_student.set_password(pending_student.password)
-        # new_student.save()
 
+        # Create the corresponding document in Firestore for progress tracking      
+        try:
+            db.collection('Registered_Students').document(new_student.student_id).set({})
+        except Exception as e:
+            # If Firestore fails, inform the user but don't stop the process
+            messages.error(request, f"Student accepted, but failed to create Firestore record: {e}")
+
+        # Delete the pending record from PostgreSQL
         pending_student.delete()
+        
         messages.success(request, f"Student {new_student.first_name} {new_student.last_name} has been accepted.")
     except Exception as e:
         messages.error(request, f"An error occurred while accepting the student: {e}")
