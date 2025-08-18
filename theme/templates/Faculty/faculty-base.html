@@ -93,65 +93,9 @@
     </div>
 </div>
 
-<!-- Edit Student Modal -->
-<div id="editStudentModal" class="fixed inset-0 flex justify-center bg-gray-900/80 items-center hidden z-100">
-    <!-- Modal Content -->
-    <div class="bg-gray-100 border border-white p-12 rounded-3xl shadow-lg w-1/2 z-10">
-        <h2 class="text-xl font-bold mb-4 text-blue-500">Edit Student</h2>
-        <div class="border-t border-blue-500 p-2 mt-auto"></div>
-        <form id="editStudentForm" method="POST">
-            {% csrf_token %}
-            <input type="hidden" name="student_id" id="edit-student-id">
-            <div class="grid grid-cols-2 gap-4">
-                <!-- First Name -->
-                <div>
-                    <label class="block text-sm font-bold mb-2 text-blue-500">First Name <span class="text-red-500"> * </span></label>
-                    <input type="text" name="first_name" id="edit-first-name" class="w-full p-4 border border-gray-300 rounded-2xl" required>
-                </div>
-                <!-- Last Name -->
-                <div>
-                    <label class="block text-sm font-bold mb-2 text-blue-500">Last Name <span class="text-red-500"> * </span></label>
-                    <input type="text" name="last_name" id="edit-last-name" class="w-full p-4 border border-gray-300 rounded-2xl" required>
-                </div>
-                <!-- Middle Initial -->
-                <div>
-                    <label class="block text-sm font-bold mb-2 text-blue-500">Middle Initial <span class="text-red-500"> * </span></label>
-                    <input type="text" name="middle_initial" id="edit-middle-initial" class="w-full p-4 border border-gray-300 rounded-2xl">
-                </div>
-            </div>
-            <!-- Buttons -->
-            <div class="flex justify-end mt-6">
-                <button type="button" onclick="closeEditModal()" class="text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2">Cancel</button>
-                <button type="submit" class="text-white bg-blue-800 hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2">Save Changes</button>
-            </div>
-        </form>
-    </div>
-</div>
 
 
-<!-- Move Student Modal -->
-<div id="moveStudentModal" class="fixed inset-0 z-50 flex items-center bg-gray-900/80 justify-center hidden">
-    <!-- Modal Content -->
-    <div class="relative bg-white p-6 rounded-3xl shadow-lg w-96 z-10">
-        <h2 class="text-lg font-bold text-blue-500 mb-4">Move Student</h2>
-        <form id="moveStudentForm" method="POST" action="{% url 'faculty_move_student' %}">
-            {% csrf_token %}
-            <input type="hidden" name="student_id" id="move-student-id">
-            <label class="block mb-2 text-blue-500">Move to:</label>
-            <select name="destination" id="move-student-destination" class="w-full p-2 border rounded-2xl mb-4 text-blue-500 cursor-pointer" required>
-                <option value="" disabled selected>Select destination</option>
-                <option value="registered">Registered Students</option>
-                <option value="completed">Completed Students</option>
-                <option value="dropout">Drop-out Students</option>
-                <option value="archive">Archive Student</option>
-            </select>
-            <div class="flex justify-end space-x-2">
-                <button type="button" onclick="closeMoveStudentModal()" class="bg-gray-300 text-gray-700 px-4 py-2 rounded-2xl cursor-pointer hover:bg-gray-200">Cancel</button>
-                <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-2xl cursor-pointer hover:bg-blue-500">Move</button>
-            </div>
-        </form>
-    </div>
-</div>
+
 
 <!-- Student Progress Modal -->
 <div id="progressModal" class="fixed inset-0 flex items-center justify-center bg-gray-900/70 hidden z-50">
@@ -171,6 +115,33 @@
 </div>
 
 <body class="min-h-screen bg-gradient-to-br from-[#E0EAFC] to-[#CFDEF3]">
+
+<!-- Student Edit Modals Container -->
+<div id="studentModalsContainer"></div>
+
+<!-- Move Student Modal -->
+<div id="moveStudentModal" class="fixed inset-0 flex items-center justify-center bg-gray-900/80 z-100 hidden">
+    <!-- Modal Content -->
+    <div class="relative bg-white p-6 rounded-3xl shadow-lg w-96">
+        <h2 class="text-lg font-bold text-blue-500 mb-4">Move Student</h2>
+        <form id="moveStudentForm" method="POST" action="{% url 'faculty_move_student' %}">
+            {% csrf_token %}
+            <input type="hidden" name="student_id" id="move-student-id">
+            <label class="block mb-2 text-blue-500">Move to:</label>
+            <select name="destination" id="move-student-destination" class="w-full p-2 border rounded-2xl mb-4 text-blue-500 cursor-pointer" required>
+                <option value="" disabled selected>Select destination</option>
+                <option value="registered">Registered Students</option>
+                <option value="completed">Completed Students</option>
+                <option value="dropout">Drop-out Students</option>
+                <option value="archive">Archive Student</option>
+            </select>
+            <div class="flex justify-end space-x-2">
+                <button type="button" onclick="closeMoveStudentModal()" class="bg-gray-300 text-gray-700 px-4 py-2 rounded-2xl cursor-pointer hover:bg-gray-200">Cancel</button>
+                <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-2xl cursor-pointer hover:bg-blue-500">Move</button>
+            </div>
+        </form>
+    </div>
+</div>
 
 <!-- Global Notification-->
 {% if messages %}

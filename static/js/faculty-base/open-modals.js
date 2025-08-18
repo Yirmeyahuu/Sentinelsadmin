@@ -15,13 +15,26 @@ window.closeStudentModal = function() {
     document.getElementById('modal').classList.add('hidden');
 };
 
-// Edit Student Modal
-window.openEditModal = function() {
-    document.getElementById('editStudentModal').classList.remove('hidden');
+
+// Student Modal Functions
+window.openEditModal = function(studentId) {
+    const modal = document.getElementById(`editStudentModal-${studentId}`);
+    if (modal) {
+        modal.classList.remove('hidden');
+        document.body.classList.add('overflow-hidden');
+    }
 };
-window.closeEditModal = function() {
-    document.getElementById('editStudentModal').classList.add('hidden');
+
+window.closeEditModal = function(studentId) {
+    const modal = document.getElementById(`editStudentModal-${studentId}`);
+    if (modal) {
+        modal.classList.add('hidden');
+        document.body.classList.remove('overflow-hidden');
+    }
 };
+
+// Move Student Modal
+// ...existing code...
 
 // Move Student Modal
 window.openMoveStudentModal = function(studentId) {

@@ -405,14 +405,24 @@ def add_student(request):
                 program=program,
                 year_section=year_section,
                 semester=semester,
-                student_status='Registered'  # Set default status
+                student_status='Registered'
             )
 
-            # Also create a corresponding document in Firestore for progress tracking
+            # Prepare the data for Firestore
+            firestore_data = {
+                'student_id': student_id,
+                'first_name': first_name,
+                'last_name': last_name,
+                'middle_initial': middle_initial,
+                'program': program,
+                'year_section': year_section,
+                'semester': semester,
+            }
+
+            # Also create a corresponding document in Firestore with student details
             try:
-                db.collection('Registered_Students').document(student_id).set({})
+                db.collection('Registered_Students').document(student_id).set(firestore_data)
             except Exception as e:
-                # If Firestore fails, inform the user but don't stop the process
                 messages.error(request, f"Student added to database, but failed to create Firestore record: {e}")
 
             messages.success(request, f"Student {student_id} added successfully!")
@@ -427,24 +437,33 @@ def add_student(request):
 
 @faculty_required
 def edit_student(request, student_id):
-    """Update student details in PostgreSQL"""
     student = get_object_or_404(Student, student_id=student_id)
 
     if request.method == "POST":
-        student.first_name = request.POST.get("first_name")
-        student.last_name = request.POST.get("last_name")
-        student.middle_initial = request.POST.get("middle_initial")
-        student.program = request.POST.get("program")
-        student.year_section = request.POST.get("year_section")
-        student.semester = request.POST.get("semester")
-
+        # Only update the fields that are present in the modal form
+        student.first_name = request.POST.get("first_name", student.first_name)
+        student.last_name = request.POST.get("last_name", student.last_name)
+        student.middle_initial = request.POST.get("middle_initial", student.middle_initial)
         student.save()
+
+        # Also update the corresponding document in Firestore
+        try:
+            firestore_data = {
+                'first_name': student.first_name,
+                'last_name': student.last_name,
+                'middle_initial': student.middle_initial,
+            }
+            db.collection('Registered_Students').document(student.student_id).update(firestore_data)
+        except Exception as e:
+            messages.error(request, f"Student updated in database, but failed to update Firestore record: {e}")
+
 
         messages.success(request, "Student details updated successfully!")
         return redirect("faculty-student-list")
+        
+    # This part is for non-modal pages, which is fine to leave as is.
+    return render(request, "Students/edit_student.html", {"student": student})
 
-    context = {"student": student}
-    return render(request, "Students/edit_student.html", context)
 
 @faculty_required
 def archived_students_list_page(request):
@@ -503,6 +522,7 @@ def Verify_Student(request):
         )
 
     context = {
+        "faculty_data": faculty,  # This line fixes the issue
         "verify_students": pending_students_query,
         "search_query": search_query,
     }
@@ -511,6 +531,7 @@ def Verify_Student(request):
         return render(request, 'Students/contents/students-verify-list-content.html', context)
     else:
         return render(request, 'Students/students-verify-list.html', context)
+
 
 
 
@@ -662,14 +683,24 @@ def accept_student(request, student_id):
             year_section=pending_student.year_section,
             semester=pending_student.semester,
             student_status='Registered',
-            password=pending_student.password   
+            password=pending_student.password
         )
 
-        # Create the corresponding document in Firestore for progress tracking      
+        # Prepare the data for Firestore from the pending student object
+        firestore_data = {
+            'student_id': pending_student.student_id,
+            'first_name': pending_student.first_name,
+            'last_name': pending_student.last_name,
+            'middle_initial': pending_student.middle_initial,
+            'program': pending_student.program,
+            'year_section': pending_student.year_section,
+            'semester': pending_student.semester,
+        }
+
+        # Create the corresponding document in Firestore with student details
         try:
-            db.collection('Registered_Students').document(new_student.student_id).set({})
+            db.collection('Registered_Students').document(new_student.student_id).set(firestore_data)
         except Exception as e:
-            # If Firestore fails, inform the user but don't stop the process
             messages.error(request, f"Student accepted, but failed to create Firestore record: {e}")
 
         # Delete the pending record from PostgreSQL
@@ -680,6 +711,8 @@ def accept_student(request, student_id):
         messages.error(request, f"An error occurred while accepting the student: {e}")
 
     return redirect('verify-students')
+
+
 
 @faculty_required
 def reject_student(request, student_id):
@@ -823,14 +856,17 @@ def move_student(request):
 
 @faculty_required
 def novice_tier(request):
-    faculty_id = request.user.username
-    users_ref = db.collection('Authorized Faculty')
-    query = users_ref.where('faculty_id', '==', faculty_id).limit(1).get()
-    faculty_data = query[0].to_dict() if query else {}
+    # --- CORRECTED: Fetch faculty data from PostgreSQL for consistency ---
+    try:
+        faculty = get_object_or_404(Faculty, faculty_id=request.user.username)
+    except Faculty.DoesNotExist:
+        messages.error(request, "Faculty profile not found.")
+        return redirect('login')
 
-    faculty_program = faculty_data.get('program')
-    faculty_year_section = faculty_data.get('year_section')
-    faculty_semester = faculty_data.get('semester')
+    # Now use the faculty object's attributes
+    faculty_program = faculty.program
+    faculty_year_section = faculty.year_section
+    faculty_semester = faculty.semester
 
     # Task map for filtering
     task_map = {
@@ -887,18 +923,159 @@ def novice_tier(request):
     context = {
         "novice_students": novice_students,
         "novice_leaderboard": novice_leaderboard,
-        "faculty_data": faculty_data,
+        "faculty_data": faculty,
         "selected_task": selected_task,
     }
     return render(request, 'Tier/Novice.html', context)
 
+
 @faculty_required
 def junior_tier(request):
-    return render(request, 'Tier/Junior.html')
+    # --- Fetch faculty data from PostgreSQL for consistency ---
+    try:
+        faculty = get_object_or_404(Faculty, faculty_id=request.user.username)
+    except Faculty.DoesNotExist:
+        messages.error(request, "Faculty profile not found.")
+        return redirect('login')
+
+    # Use the faculty object's attributes to find the correct students
+    faculty_program = faculty.program
+    faculty_year_section = faculty.year_section
+    faculty_semester = faculty.semester
+
+    # Task map for filtering Junior tier tasks
+    task_map = {
+        "task1": "Junior_Task_1(Domain Research)",
+        "task2": "Junior_Task_2(Analyze Email)",
+        "task3": "Junior_Task_3(Security Policy)",
+        "task4": "Junior_Task_4(Social Engineering)",
+    }
+    selected_task = request.GET.get("task", "task1")
+    selected_task_map = task_map.get(selected_task, "Junior_Task_1(Domain Research)")
+
+    students_query = db.collection("Registered_Students") \
+        .where("program", "==", faculty_program) \
+        .where("year_section", "==", faculty_year_section) \
+        .where("semester", "==", faculty_semester) \
+        .stream()
+
+    junior_students = []
+    leaderboard_students = []
+
+    for doc in students_query:
+        student = doc.to_dict()
+        # For progress table (filtered by selected task)
+        task_data = student.get(selected_task_map)
+        if task_data:
+            junior_students.append({
+                "student_id": student.get("student_id", doc.id),
+                "first_name": student.get("first_name", ""),
+                "last_name": student.get("last_name", ""),
+                "points": task_data.get("points", 0),
+                "total_time_completed": task_data.get("time_taken", ""),
+            })
+        # For leaderboard (sum all tasks)
+        total_points = 0
+        for task_key in task_map.values():
+            task = student.get(task_key)
+            if task and isinstance(task, dict):
+                total_points += int(task.get("points", 0))
+        if total_points > 0:
+            leaderboard_students.append({
+                "student_id": student.get("student_id", doc.id),
+                "first_name": student.get("first_name", ""),
+                "last_name": student.get("last_name", ""),
+                "points": total_points,
+            })
+
+    # Sort leaderboard by total points descending
+    junior_leaderboard = sorted(
+        leaderboard_students,
+        key=lambda x: x["points"],
+        reverse=True
+    )
+
+    context = {
+        "junior_students": junior_students,
+        "junior_leaderboard": junior_leaderboard,
+        "faculty_data": faculty,
+        "selected_task": selected_task,
+    }
+    return render(request, 'Tier/Junior.html', context)
 
 @faculty_required
 def senior_tier(request):
-    return render(request, 'Tier/Senior.html')
+    # --- Fetch faculty data from PostgreSQL for consistency ---
+    try:
+        faculty = get_object_or_404(Faculty, faculty_id=request.user.username)
+    except Faculty.DoesNotExist:
+        messages.error(request, "Faculty profile not found.")
+        return redirect('login')
+
+    # Use the faculty object's attributes to find the correct students
+    faculty_program = faculty.program
+    faculty_year_section = faculty.year_section
+    faculty_semester = faculty.semester
+
+    # Task map for filtering Senior tier tasks
+    task_map = {
+        "task1": "Senior_Task_1(Threat Landscape)",
+        "task2": "Senior_Task_2(Malware Ontology)",
+        "task3": "Senior_Task_3(Incident Response)",
+        "task4": "Senior_Task_4(AI Malware)",
+    }
+    selected_task = request.GET.get("task", "task1")
+    selected_task_map = task_map.get(selected_task, "Senior_Task_1(Threat Landscape)")
+
+    students_query = db.collection("Registered_Students") \
+        .where("program", "==", faculty_program) \
+        .where("year_section", "==", faculty_year_section) \
+        .where("semester", "==", faculty_semester) \
+        .stream()
+
+    senior_students = []
+    leaderboard_students = []
+
+    for doc in students_query:
+        student = doc.to_dict()
+        # For progress table (filtered by selected task)
+        task_data = student.get(selected_task_map)
+        if task_data:
+            senior_students.append({
+                "student_id": student.get("student_id", doc.id),
+                "first_name": student.get("first_name", ""),
+                "last_name": student.get("last_name", ""),
+                "points": task_data.get("points", 0),
+                "total_time_completed": task_data.get("time_taken", ""),
+            })
+        # For leaderboard (sum all tasks)
+        total_points = 0
+        for task_key in task_map.values():
+            task = student.get(task_key)
+            if task and isinstance(task, dict):
+                total_points += int(task.get("points", 0))
+        if total_points > 0:
+            leaderboard_students.append({
+                "student_id": student.get("student_id", doc.id),
+                "first_name": student.get("first_name", ""),
+                "last_name": student.get("last_name", ""),
+                "points": total_points,
+            })
+
+    # Sort leaderboard by total points descending
+    senior_leaderboard = sorted(
+        leaderboard_students,
+        key=lambda x: x["points"],
+        reverse=True
+    )
+
+    context = {
+        "senior_students": senior_students,
+        "senior_leaderboard": senior_leaderboard,
+        "faculty_data": faculty,
+        "selected_task": selected_task,
+    }
+    return render(request, 'Tier/Senior.html', context)
 
 
 
