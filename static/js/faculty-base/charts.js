@@ -1,5 +1,4 @@
 // Chart.js and Neon Glow Plugin integration for Faculty Home
-
 window.initFacultyHomeChart = function() {
     const tierColors = {
         Novice: { neonColor: '#0ff', neonFill: 'rgba(0,255,255,0.15)' },
@@ -15,7 +14,7 @@ window.initFacultyHomeChart = function() {
     const seniorData = (window.seniorTaskCounts && Array.isArray(window.seniorTaskCounts) && window.seniorTaskCounts.length > 0)
         ? window.seniorTaskCounts : [0, 0, 0, 0];
     
-    console.log('Chart Data:', { noviceData, juniorData, seniorData }); // Debug log
+    console.log('Faculty Chart Data:', { noviceData, juniorData, seniorData }); // Debug log
     
     const tierData = {
         Novice: { labels: ['Task 1', 'Task 2', 'Task 3', 'Task 4'], data: noviceData },
@@ -80,19 +79,59 @@ window.initFacultyHomeChart = function() {
     }
 
     function changeTier(tier) {
+        // Store current data in chart instance for reference
+        const data = chartInstance.originalData;
+        
         currentTier = tier;
         document.getElementById('tierLabel').textContent = tier === 'All' ? 'All Tier' : tier;
         document.getElementById('tierMenuBtnText').textContent = tier === 'All' ? 'All Tier' : tier;
 
         if (tier === 'All') {
-            chartInstance.data.labels = tierData.Novice.labels;
-            chartInstance.data.datasets = getAllTierDatasets();
+            chartInstance.data.labels = data.tierData.Novice.labels;
+            chartInstance.data.datasets = [
+                {
+                    label: 'Novice',
+                    data: data.tierData.Novice.data,
+                    borderColor: tierColors.Novice.neonColor,
+                    backgroundColor: tierColors.Novice.neonFill,
+                    tension: 0.4,
+                    fill: true,
+                    pointBackgroundColor: tierColors.Novice.neonColor,
+                    pointBorderColor: '#fff',
+                    pointRadius: 6,
+                    pointHoverRadius: 8,
+                },
+                {
+                    label: 'Junior',
+                    data: data.tierData.Junior.data,
+                    borderColor: tierColors.Junior.neonColor,
+                    backgroundColor: tierColors.Junior.neonFill,
+                    tension: 0.4,
+                    fill: true,
+                    pointBackgroundColor: tierColors.Junior.neonColor,
+                    pointBorderColor: '#fff',
+                    pointRadius: 6,
+                    pointHoverRadius: 8,
+                },
+                {
+                    label: 'Senior',
+                    data: data.tierData.Senior.data,
+                    borderColor: tierColors.Senior.neonColor,
+                    backgroundColor: tierColors.Senior.neonFill,
+                    tension: 0.4,
+                    fill: true,
+                    pointBackgroundColor: tierColors.Senior.neonColor,
+                    pointBorderColor: '#fff',
+                    pointRadius: 6,
+                    pointHoverRadius: 8,
+                }
+            ];
             chartInstance.options.plugins.neonGlow.glowColor = undefined;
         } else {
-            chartInstance.data.labels = tierData[tier].labels;
+            chartInstance.data.labels = data.tierData[tier].labels;
             chartInstance.data.datasets = [{
                 label: 'Accomplished',
-                data: tierData[tier].data,
+                data: data.tierData[tier].data,
                 borderColor: tierColors[tier].neonColor,
                 backgroundColor: tierColors[tier].neonFill,
                 tension: 0.4,
@@ -165,6 +204,13 @@ window.initFacultyHomeChart = function() {
                 }
             }
         });
+
+        // Store original data in the chart instance for dropdown functionality
+        chartInstance.originalData = {
+            tierData: tierData,
+            maxValue: maxValue
+        };
+
         // Expose changeTier globally for button onclicks
         window.changeTier = changeTier;
         changeTier(currentTier);
@@ -175,7 +221,10 @@ window.initFacultyHomeChart = function() {
 function tryInitFacultyHomeChart() {
     if (document.getElementById('noviceLineChart')) {
         console.log('Initializing Faculty Home Chart'); // Debug log
-        window.initFacultyHomeChart && window.initFacultyHomeChart();
+        // Add a small delay to ensure the script tag has been processed
+        setTimeout(() => {
+            window.initFacultyHomeChart && window.initFacultyHomeChart();
+        }, 50);
     }
 }
 

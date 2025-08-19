@@ -98,17 +98,26 @@ window.initSuperadminHomeChart = function() {
         });
     }
 
+    // Store current data in the chart instance for dropdown functionality
+    window.superadminChartInstance.originalData = {
+        labels: allLabels,
+        csData: csData,
+        itData: itData
+    };
+
     window.changeProgram = function(program) {
+        const data = window.superadminChartInstance.originalData;
+        
         document.getElementById('programLabel').textContent = program === 'All' ? 'All Programs' : program;
         document.getElementById('programMenuBtnText').textContent = program === 'All' ? 'All Programs' : program;
 
         if (program === 'All') {
             window.superadminChartInstance.data = {
-                labels: allLabels,
+                labels: data.labels,
                 datasets: [
                     {
                         label: 'Computer Science',
-                        data: csData,
+                        data: data.csData,
                         borderColor: '#f59e42',
                         backgroundColor: 'rgba(245, 158, 66, 0.15)',
                         tension: 0.4,
@@ -120,7 +129,7 @@ window.initSuperadminHomeChart = function() {
                     },
                     {
                         label: 'Information Technology',
-                        data: itData,
+                        data: data.itData,
                         borderColor: '#ef4444',
                         backgroundColor: 'rgba(239, 68, 68, 0.15)',
                         tension: 0.4,
@@ -134,11 +143,11 @@ window.initSuperadminHomeChart = function() {
             };
         } else if (program === 'Computer Science') {
             window.superadminChartInstance.data = {
-                labels: allLabels,
+                labels: data.labels,
                 datasets: [
                     {
                         label: 'Computer Science',
-                        data: csData,
+                        data: data.csData,
                         borderColor: '#f59e42',
                         backgroundColor: 'rgba(245, 158, 66, 0.15)',
                         tension: 0.4,
@@ -152,11 +161,11 @@ window.initSuperadminHomeChart = function() {
             };
         } else if (program === 'Information Technology') {
             window.superadminChartInstance.data = {
-                labels: allLabels,
+                labels: data.labels,
                 datasets: [
                     {
                         label: 'Information Technology',
-                        data: itData,
+                        data: data.itData,
                         borderColor: '#ef4444',
                         backgroundColor: 'rgba(239, 68, 68, 0.15)',
                         tension: 0.4,
@@ -181,7 +190,10 @@ window.initSuperadminHomeChart = function() {
 function tryInitSuperadminHomeChart() {
     if (document.getElementById('programLineChart')) {
         console.log('Initializing Superadmin Home Chart'); // Debug log
-        window.initSuperadminHomeChart && window.initSuperadminHomeChart();
+        // Add a small delay to ensure the script tag has been processed
+        setTimeout(() => {
+            window.initSuperadminHomeChart && window.initSuperadminHomeChart();
+        }, 50);
     }
 }
 

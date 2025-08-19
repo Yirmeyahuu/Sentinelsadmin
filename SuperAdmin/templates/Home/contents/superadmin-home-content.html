@@ -121,13 +121,18 @@
                             </div>
                         </div>
                     </div>
-                    
-                    <!-- Add this script block before the chart container -->
+                                        
                     <script>
                         // Pass Django data to JavaScript for chart rendering
                         window.csTierData = {{ cs_tier_data|safe }};
                         window.itTierData = {{ it_tier_data|safe }};
                         window.tierLabels = {{ tier_labels|safe }};
+                        
+                        console.log('Data set from template:', {
+                            csTierData: window.csTierData,
+                            itTierData: window.itTierData,
+                            tierLabels: window.tierLabels
+                        });
                     </script>
                     
                     <!-- Chart Canvas Container -->
