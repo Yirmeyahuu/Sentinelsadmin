@@ -62,8 +62,6 @@ class ArchivedStudent(models.Model):
         db_table = 'ArchivedStudents'
         verbose_name_plural = "Archived Students"
 
-
-
 class PendingStudent(models.Model):
     # This model holds student data before it's verified by a faculty member.
     student_id = models.CharField(max_length=50, primary_key=True)
@@ -86,10 +84,6 @@ class PendingStudent(models.Model):
         db_table = 'PendingStudents'
         verbose_name_plural = "Pending Students"
 
-
-
-# --- Progress Tracking Models (Correct Location) ---
-
 class Task(models.Model):
     """Represents a single, definable task in the game."""
     TIER_CHOICES = [
@@ -108,7 +102,6 @@ class Task(models.Model):
     class Meta:
         db_table = 'Tasks'
         ordering = ['tier', 'task_id']
-
 
 class StudentTaskProgress(models.Model):
     """Links a Student to a Task they have completed."""

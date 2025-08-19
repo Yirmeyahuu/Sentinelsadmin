@@ -12,7 +12,7 @@ from .forms import ActivityDeadlineForm, AddStudentForm
 from django.views.decorators.csrf import csrf_exempt
 from Login.decorators import faculty_required
 from django.core.paginator import Paginator
-from django.templatetags.static import static  # Add this line if missing
+from django.templatetags.static import static
 
 
 
@@ -36,11 +36,9 @@ import pytz
 if not firebase_admin._apps:
     cred = credentials.Certificate("/Users/jeremiahpantaras/Documents/sentinels-project/sentinels-a61ff-firebase-adminsdk-fbsvc-aaf9572a3f.json")
     firebase_admin.initialize_app(cred)
-
 db = firestore.client()
 
-
-
+# This is the save deadline of Activity process
 @csrf_exempt
 @faculty_required
 def saveActivityDeadline(request):
@@ -77,8 +75,7 @@ def saveActivityDeadline(request):
             return JsonResponse({'status': 'error', 'message': f'Failed to save deadline: {str(e)}'})
             
     return JsonResponse({'status': 'error', 'message': 'Invalid request'})
-
-
+# This is the Faculty homepage
 @faculty_required
 def Faculty_home(request):
     # --- PostgreSQL Data Fetching ---
@@ -314,9 +311,7 @@ def Faculty_home(request):
         return render(request, 'Home/contents/faculty-home-content.html', context)
     else:
         return render(request, 'Home/faculty-home.html', context)
-
-
-
+# This is the remove deadline of Activity process
 @csrf_exempt
 @faculty_required
 def remove_deadline(request):
@@ -344,8 +339,7 @@ def remove_deadline(request):
             messages.error(request, "Missing title or faculty information.")
     
     return redirect(request.META.get('HTTP_REFERER', 'faculty-activity-page'))
-
-
+# This is the student list of Faculty
 @faculty_required
 def student_list(request):
     # Get the logged-in faculty member from PostgreSQL
@@ -414,8 +408,7 @@ def student_list(request):
     else:
         # Normal request: return the full page
         return render(request, 'Students/student-list.html', context)
-
-
+# This is the student progress of Faculty
 @faculty_required
 def student_progress(request):
     try:
@@ -502,9 +495,7 @@ def student_progress(request):
         return render(request, 'Students/contents/students-progress-content.html', context)
     else:
         return render(request, 'Students/students-progress.html', context)
-
-
-
+# This is the add student process of Faculty
 @faculty_required
 def add_student(request):
     if request.method == "POST":
@@ -560,7 +551,7 @@ def add_student(request):
             }
             return render(request, "Students/contents/student-list-content.html", context)
     return redirect("faculty-student-list")
-
+# This is the edit student process of Faculty
 @faculty_required
 def edit_student(request, student_id):
     student = get_object_or_404(Student, student_id=student_id)
@@ -589,8 +580,7 @@ def edit_student(request, student_id):
         
     # This part is for non-modal pages, which is fine to leave as is.
     return render(request, "Students/edit_student.html", {"student": student})
-
-
+# This is the archived students list of Faculty
 @faculty_required
 def archived_students_list_page(request):
     """
@@ -624,8 +614,7 @@ def archived_students_list_page(request):
     
     # Handle standard requests for a full page load
     return render(request, "Students/students-archived.html", context)
-
-
+# This is the verify student process of Faculty
 @faculty_required
 def Verify_Student(request):
     # Get the logged-in faculty member
@@ -657,10 +646,7 @@ def Verify_Student(request):
         return render(request, 'Students/contents/students-verify-list-content.html', context)
     else:
         return render(request, 'Students/students-verify-list.html', context)
-
-
-
-
+# This is the faculty activity page
 @faculty_required
 def Faculty_activity_page(request):
     # Get faculty data from PostgreSQL (not Firestore)
@@ -796,8 +782,7 @@ def Faculty_activity_page(request):
         return render(request, 'Activities/contents/Faculty-Activity-List-content.html', context)
     else:
         return render(request, 'Activities/Faculty-Activity-List.html', context)
-
-
+# This is the accept student process of Faculty
 @faculty_required
 def accept_student(request, student_id):
     faculty = get_object_or_404(Faculty, faculty_id=request.user.username)
@@ -843,9 +828,7 @@ def accept_student(request, student_id):
         messages.error(request, f"An error occurred while accepting the student: {e}")
 
     return redirect('verify-students')
-
-
-
+# This is the reject student process of Faculty
 @faculty_required
 def reject_student(request, student_id):
     pending_student = get_object_or_404(PendingStudent, student_id=student_id)
@@ -856,8 +839,7 @@ def reject_student(request, student_id):
         messages.error(request, f"An error occurred while rejecting the student: {e}")
 
     return redirect('verify-students')
-
-
+# This is the mark all notifications as read process of Faculty
 @require_POST
 @faculty_required
 def mark_all_notifications_read(request):
@@ -866,7 +848,7 @@ def mark_all_notifications_read(request):
         notif.reference.update({"seen": True})
     messages.success(request, "All notifications marked as read.")
     return redirect(request.META.get('HTTP_REFERER', '/'))
-
+# This is the faculty account page
 @faculty_required
 def faculty_account(request):
     faculty_id = request.user.username
@@ -898,7 +880,7 @@ def faculty_account(request):
     else:
         # Normal request: return the full page
         return render(request, 'Faculty/faculty-account.html', context)
-    
+# This is the edit faculty account process
 @faculty_required
 def edit_faculty_account(request):
     faculty_id = request.user.username
@@ -921,11 +903,11 @@ def edit_faculty_account(request):
             print(f"Error updating profile: {e}")
 
     return redirect("faculty-account")
-
+# This is the upload faculty profile image process
 def handle_image_upload(image):
     # Implement your image upload logic
     pass
-
+# This is the move student process of Faculty
 @faculty_required
 def move_student(request):
     if request.method == "POST":
@@ -1093,7 +1075,7 @@ def move_student(request):
             return redirect("faculty-student-list")
             
     return redirect(request.META.get('HTTP_REFERER', 'faculty-student-list'))
-
+# This is the novice tier page of Faculty
 @faculty_required
 def novice_tier(request):
     # --- CORRECTED: Fetch faculty data from PostgreSQL for consistency ---
@@ -1167,8 +1149,7 @@ def novice_tier(request):
         "selected_task": selected_task,
     }
     return render(request, 'Tier/Novice.html', context)
-
-
+# This is the junior tier page of Faculty
 @faculty_required
 def junior_tier(request):
     # --- Fetch faculty data from PostgreSQL for consistency ---
@@ -1242,7 +1223,7 @@ def junior_tier(request):
         "selected_task": selected_task,
     }
     return render(request, 'Tier/Junior.html', context)
-
+# This is the senior tier page of Faculty
 @faculty_required
 def senior_tier(request):
     # --- Fetch faculty data from PostgreSQL for consistency ---
@@ -1316,9 +1297,7 @@ def senior_tier(request):
         "selected_task": selected_task,
     }
     return render(request, 'Tier/Senior.html', context)
-
-
-
+# This is the faculty student status page
 @faculty_required
 def faculty_student_status(request):
     """
@@ -1380,8 +1359,7 @@ def faculty_student_status(request):
         return render(request, 'Students/contents/student-status-content.html', context)
     else:
         return render(request, 'Students/student-status.html', context)
-
-
+# This is the faculty help page
 @faculty_required
 def facultyHelp(request):
 

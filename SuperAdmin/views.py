@@ -19,15 +19,13 @@ from django.db.models import Q # Import Q for complex queries
 
 
 
-
 # Initialize Firebase if not already initialized
 if not firebase_admin._apps:
     cred = credentials.Certificate("C:/Users/ASUS/Desktop/Super_Admin/sentinels-repository/sentinels-a61ff-firebase-adminsdk-fbsvc-35c84e60a7.json")
     firebase_admin.initialize_app(cred)
-
 db = firestore.client()
 
-
+# This is the Home page
 @superadmin_required
 def Superadmin_Home(request):
     db = firestore.client()
@@ -151,7 +149,7 @@ def Superadmin_Home(request):
     else:
         # Normal request: return the full page
         return render(request, 'Home/superadmin-home.html', context)
-
+# This is the Faculty list page
 @superadmin_required
 def Faculty_list(request):
 
@@ -218,7 +216,7 @@ def Faculty_list(request):
         return render(request, 'Faculty/contents/faculty-list-content.html', context)
     else:
         return render(request, 'Faculty/faculty-list.html', context)
-
+# This is the Faculty add process
 @superadmin_required
 def add_faculty(request):
     if request.method == "POST":
@@ -251,8 +249,7 @@ def add_faculty(request):
             return render(request, 'Faculty/faculty-list.html', context)
     else:
         return redirect("FacultyList")
-
-
+# This is the Faculty edit process
 @superadmin_required
 def edit_faculty(request, faculty_id):
     faculty = get_object_or_404(Faculty, faculty_id=faculty_id)
@@ -271,7 +268,7 @@ def edit_faculty(request, faculty_id):
 
     # If you want to render a separate edit page (not used in modal pattern)
     return render(request, "Admin/EditFaculty.html", {"faculty": faculty})
-
+# This is the Faculty delete process
 @superadmin_required
 @require_POST
 def delete_archived_faculty(request, faculty_id):
@@ -285,15 +282,14 @@ def delete_archived_faculty(request, faculty_id):
         messages.error(request, f"An error occurred: {e}")
         
     return redirect('Faculty_Archived')
-
+# This is the Student Archive process
 @superadmin_required
 @require_POST
 def delete_archived_student(request, student_id):
     db.collection("Archived Students").document(student_id).delete()
     messages.success(request, "Archived student deleted permanently.")
     return redirect('superadmin_student_archived')
-
-
+# This is the Faculty Archive process
 @superadmin_required
 def Faculty_Archive(request, faculty_id):
     """Move faculty member to ArchivedFaculty table in PostgreSQL"""
@@ -317,8 +313,7 @@ def Faculty_Archive(request, faculty_id):
         messages.error(request, "Faculty member not found.")
 
     return redirect("FacultyList")
-
-
+# This is the Student Archive process
 @superadmin_required
 def Superadmin_Student_Archive(request):
     search_query = request.GET.get('search', '').strip()
@@ -353,8 +348,7 @@ def Superadmin_Student_Archive(request):
         return render(request, 'Students/contents/superadmin-archived-students-content.html', context)
     else:
         return render(request, 'Students/superadmin-archived-students.html', context)
-
-
+# This is the Faculty Archive list page
 @superadmin_required
 def Archived_faculty_list(request):
     search_query = request.GET.get('search', '').strip()
@@ -384,8 +378,7 @@ def Archived_faculty_list(request):
     if request.headers.get('HX-Request'):
         return render(request, 'Faculty/contents/faculty-archived-content.html', context)
     return render(request, 'Faculty/faculty-archived.html', context)
-
-
+# This is the Faculty restore process
 @superadmin_required
 def restore_faculty(request, faculty_id):
     try:
@@ -408,8 +401,7 @@ def restore_faculty(request, faculty_id):
         messages.error(request, "Faculty member not found in archive.")
 
     return redirect("archive-page")
-
-#This is the activity page for the faculty
+#This is the activity page for the superadmin
 def Superadmin_activity_page(request):
     activities_novice = [
         {
@@ -518,8 +510,7 @@ def Superadmin_activity_page(request):
         return render(request, 'Activities/contents/Superadmin-Activity-List-content.html', context)
     else:
         return render(request, 'Activities/Superadmin-Activity-List.html', context)
-
-
+# This is the Student Status page
 @superadmin_required
 def Superadmin_Student_Status(request):
 
@@ -602,8 +593,7 @@ def Superadmin_Student_Status(request):
         return render(request, 'Students/contents/superadmin-student-status-content.html', context)
     else:
         return render(request, 'Students/superadmin-student-status.html', context)
-
-
+# This is the Faculty Status page
 @superadmin_required
 def Faculty_Status(request):
 
@@ -689,8 +679,7 @@ def Faculty_Status(request):
         return render(request, 'Faculty/contents/faculty-status-content.html', context)
     else:
         return render(request, 'Faculty/faculty-status.html', context)
-
-
+# This is the Faculty move process
 @superadmin_required
 @require_POST
 def move_faculty(request):
@@ -755,7 +744,7 @@ def move_faculty(request):
 
     referer = request.META.get('HTTP_REFERER', 'Faculty_list')
     return redirect(referer)
-
+# This is the Student List page
 @superadmin_required
 def Superadmin_Student_List(request):
 
@@ -817,8 +806,7 @@ def Superadmin_Student_List(request):
         return render(request, 'Students/contents/superadmin-student-list-content.html', context)
     else:
         return render(request, 'Students/superadmin-student-list.html', context)
-    
-
+# This is the Game Trigger update process
 @superadmin_required
 @csrf_exempt
 def update_game_trigger(request):
@@ -844,8 +832,7 @@ def update_game_trigger(request):
         )
         return JsonResponse({'success': True})
     return JsonResponse({'success': False, 'error': 'Invalid request'})
-
-
+# This is the Tier Lock update process
 @superadmin_required
 @csrf_exempt
 def update_tier_lock(request):
@@ -869,7 +856,7 @@ def update_tier_lock(request):
         db.collection("Game Triggers").document(doc_name).set(update_data, merge=True)
         return JsonResponse({'success': True})
     return JsonResponse({'success': False, 'error': 'Invalid request'})
-
+# This is the Student Move process
 @superadmin_required
 def superadmin_move_student(request):
     if request.method == "POST":

@@ -51,7 +51,6 @@ def Sentinels_login_view(request):
 
     return render(request, 'Login/sentinels-login.html')
 
-
 def Faculty_logout_view(request):
     """Logs out the faculty account and redirects to the login page."""
     if request.method == 'POST':  # Ensure logout is triggered via POST for security
@@ -62,7 +61,6 @@ def Faculty_logout_view(request):
     else:
         # If accessed via GET, redirect to the login page
         return redirect('sentinels_login')
-
 
 def superadmin_logout(request):
     if request.method == 'POST':  # Ensure logout is triggered via POST for security
