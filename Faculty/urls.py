@@ -31,6 +31,8 @@ urlpatterns = [
     #URLS FOR ACTIVITY PAGE
     path("Activity-list/", views.Faculty_activity_page, name='faculty-activity-page'),
     path('save-activity-deadline/', views.saveActivityDeadline, name='save-activity-deadline'),
+    path('remove-deadline/', views.remove_deadline, name='remove-deadline'), 
+
     
     #URLS FOR STUDENT DASHBOARD
     path('Student-progress/', views.student_progress, name='student-progress'),

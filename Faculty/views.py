@@ -12,6 +12,9 @@ from .forms import ActivityDeadlineForm, AddStudentForm
 from django.views.decorators.csrf import csrf_exempt
 from Login.decorators import faculty_required
 from django.core.paginator import Paginator
+from django.templatetags.static import static  # Add this line if missing
+
+
 
 from Faculty.models import Faculty
 from Student.models import Student, PendingStudent, Task, StudentTaskProgress, ArchivedStudent
@@ -22,6 +25,9 @@ from django.db import transaction
 from datetime import datetime, timedelta
 import calendar
 from django.db.models.functions import Cast
+
+from django.utils import timezone
+import pytz
 
 
 
@@ -46,19 +52,30 @@ def saveActivityDeadline(request):
             tier = data.get('tier')
             date = data.get('date')
             time = data.get('time')
+            
+            # Add faculty validation
+            try:
+                faculty = Faculty.objects.get(faculty_id=faculty_id)
+            except Faculty.DoesNotExist:
+                return JsonResponse({'status': 'error', 'message': 'Faculty profile not found.'})
+                
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)})
 
-        db.collection('Activity Deadlines').document(faculty_id).set({
-            title: {
-                'tier': tier,
-                'title': title,
-                'deadline_date': date,
-                'deadline_time': time,
-                'created_at': firestore.SERVER_TIMESTAMP
-            }
-        }, merge=True)
-        return JsonResponse({'status': 'success'})
+        try:
+            db.collection('Activity Deadlines').document(faculty_id).set({
+                title: {
+                    'tier': tier,
+                    'title': title,
+                    'deadline_date': date,
+                    'deadline_time': time,
+                    'created_at': firestore.SERVER_TIMESTAMP
+                }
+            }, merge=True)
+            return JsonResponse({'status': 'success', 'message': 'Deadline set successfully!'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': f'Failed to save deadline: {str(e)}'})
+            
     return JsonResponse({'status': 'error', 'message': 'Invalid request'})
 
 
@@ -181,14 +198,22 @@ def Faculty_home(request):
         notifications.append(notif)
     unseen_count = sum(1 for notif in notifications if not notif.get('seen', False))
 
+    # FIX: Use Philippine timezone instead of system timezone
+    philippine_tz = pytz.timezone('Asia/Manila')
+    current_date = timezone.now().astimezone(philippine_tz)
+
     deadlines_doc = db.collection('Activity Deadlines').document(faculty.faculty_id).get()
     activity_deadlines = {}
     almost_due_tasks = []
-    current_date = datetime.now()
+    
     if deadlines_doc.exists:
         deadlines_data = deadlines_doc.to_dict()
         for key, deadline_data in deadlines_data.items():
+            # Parse deadline date and make it timezone-aware
             deadline_date = datetime.strptime(deadline_data['deadline_date'], '%Y-%m-%d')
+            # Make it Philippine timezone aware for comparison
+            deadline_date = philippine_tz.localize(deadline_date.replace(hour=23, minute=59, second=59))
+            
             day = deadline_date.day
             activity_deadlines[day] = {
                 'title': deadline_data['title'],
@@ -196,30 +221,73 @@ def Faculty_home(request):
                 'date_of_deadline': deadline_data['deadline_date'],
                 'time_of_deadline': deadline_data['deadline_time'],
             }
-            if current_date <= deadline_date <= (current_date + timedelta(days=7)):
-                color = 'red' if deadline_date <= (current_date + timedelta(days=2)) else 'yellow' if deadline_date <= (current_date + timedelta(days=4)) else 'green'
+            
+            # Use Philippine time for comparison
+            current_date_only = current_date.replace(hour=0, minute=0, second=0, microsecond=0)
+            deadline_date_only = deadline_date.replace(hour=0, minute=0, second=0, microsecond=0)
+            
+            if current_date_only <= deadline_date_only <= (current_date_only + timedelta(days=7)):
+                days_until = (deadline_date_only - current_date_only).days
+                color = 'red' if days_until <= 2 else 'yellow' if days_until <= 4 else 'green'
                 almost_due_tasks.append({
                     'name': f"{deadline_data['tier']}: {deadline_data['title']}",
                     'color': color,
                     'deadline': deadline_date.strftime('%Y-%m-%d')
                 })
+    
     almost_due_tasks.sort(key=lambda x: x['deadline'])
 
-    cal = calendar.monthcalendar(current_date.year, current_date.month)
-    calendar_days = []
-    for week in cal:
-        for day in week:
-            if day != 0:
-                day_data = {'date': day, 'today': day == current_date.day, 'has_deadline': day in activity_deadlines}
-                if day in activity_deadlines:
-                    day_data.update(activity_deadlines[day])
-                calendar_days.append(day_data)
-    # --- End of Firestore Logic ---
+    # IMPROVED: Better calendar generation with proper timezone handling
+    def generate_calendar_data(year, month, current_day, timezone_obj):
+        """Generate calendar data with proper timezone handling"""
+        import calendar as cal
+        
+        # Get the first day of the month and number of days
+        first_day_weekday = cal.weekday(year, month, 1)  # 0=Monday, 6=Sunday
+        # Convert to calendar format (0=Sunday, 6=Saturday)
+        first_day_weekday = (first_day_weekday + 1) % 7
+        
+        days_in_month = cal.monthrange(year, month)[1]
+        
+        calendar_data = []
+        
+        # Add empty cells for days before month starts
+        for _ in range(first_day_weekday):
+            calendar_data.append({
+                'date': '',
+                'is_empty': True,
+                'today': False,
+                'has_deadline': False
+            })
+        
+        # Add all days of the month
+        for day in range(1, days_in_month + 1):
+            day_data = {
+                'date': day,
+                'is_empty': False,
+                'today': day == current_day,
+                'has_deadline': day in activity_deadlines
+            }
+            
+            if day in activity_deadlines:
+                day_data.update(activity_deadlines[day])
+                
+            calendar_data.append(day_data)
+        
+        return calendar_data
 
-    print(f"Debug - Novice task counts: {novice_task_counts}")
-    print(f"Debug - Junior task counts: {junior_task_counts}")
-    print(f"Debug - Senior task counts: {senior_task_counts}")
-    print(f"Debug - Total students found: {len(leaderboard_students)}")
+    # Generate calendar using the improved function
+    calendar_days = generate_calendar_data(
+        current_date.year, 
+        current_date.month, 
+        current_date.day, 
+        philippine_tz
+    )
+
+    # Debug information
+    print(f"Debug - Current Philippine time: {current_date}")
+    print(f"Debug - Today is: {current_date.strftime('%A, %B %d, %Y')}")
+    print(f"Debug - Calendar generated for: {current_date.strftime('%B %Y')}")
 
     context = {
         "faculty_data": faculty,
@@ -232,6 +300,8 @@ def Faculty_home(request):
         "unseen_count": unseen_count,
         "current_month": current_date.strftime('%B'),
         "current_year": current_date.year,
+        "current_month_year": current_date.strftime('%B %Y'),
+        "current_day_name": current_date.strftime('%A'), 
         "quick_students": quick_students,
         "quick_pending_students": quick_pending_students,
         "leaderboard_students": leaderboard_students,
@@ -246,43 +316,34 @@ def Faculty_home(request):
         return render(request, 'Home/faculty-home.html', context)
 
 
-# def sync_student_progress(faculty):
-#     """Helper function to sync Firestore progress to PostgreSQL for a given faculty."""
-#     tasks_by_tier = {}
-#     for task in Task.objects.all():
-#         tasks_by_tier.setdefault(task.tier, []).append(task)
-
-#     students_in_section = Student.objects.filter(faculty=faculty, student_status='Registered')
-
-#     for student in students_in_section:
-#         try:
-#             doc_ref = db.collection('Registered_Students').document(student.student_id).get()
-#             if not doc_ref.exists: continue
-#             progress_data = doc_ref.to_dict()
-
-#             for tier, tasks_in_tier in tasks_by_tier.items():
-#                 required_keys = [t.firestore_key for t in tasks_in_tier]
-#                 if all(key in progress_data for key in required_keys):
-#                     with transaction.atomic():
-#                         for task_to_sync in tasks_in_tier:
-#                             StudentTaskProgress.objects.get_or_create(
-#                                 student=student,
-#                                 task=task_to_sync,
-#                                 defaults={'details': progress_data.get(task_to_sync.firestore_key, {})}
-#                             )
-#         except Exception as e:
-#             print(f"Error syncing progress for student {student.student_id}: {e}")
-
 
 @csrf_exempt
+@faculty_required
 def remove_deadline(request):
     if request.method == "POST":
         title = request.POST.get('title')
-        if title:
-            from django.utils.text import slugify
-            doc_name = slugify(title)
-            db.collection('Activity Deadlines').document(doc_name).delete()
-    return redirect('home-page')
+        faculty_id = request.user.username
+        
+        # Add faculty validation
+        try:
+            faculty = Faculty.objects.get(faculty_id=faculty_id)
+        except Faculty.DoesNotExist:
+            messages.error(request, "Faculty profile not found.")
+            return redirect('login')
+        
+        if title and faculty_id:
+            try:
+                # Remove the specific deadline field from the faculty's document
+                db.collection('Activity Deadlines').document(faculty_id).update({
+                    title: firestore.DELETE_FIELD
+                })
+                messages.success(request, f"Deadline for '{title}' removed successfully.")
+            except Exception as e:
+                messages.error(request, f"Failed to remove deadline: {str(e)}")
+        else:
+            messages.error(request, "Missing title or faculty information.")
+    
+    return redirect(request.META.get('HTTP_REFERER', 'faculty-activity-page'))
 
 
 @faculty_required
@@ -600,18 +661,25 @@ def Verify_Student(request):
 
 
 
-#This is the activity page for the faculty
+@faculty_required
 def Faculty_activity_page(request):
-    faculty_id = request.user.username
+    # Get faculty data from PostgreSQL (not Firestore)
+    try:
+        faculty = Faculty.objects.get(faculty_id=request.user.username)
+        faculty_data = {
+            "faculty_id": faculty.faculty_id,
+            "first_name": faculty.first_name,
+            "last_name": faculty.last_name,
+            "middle_initial": faculty.middle_initial,
+            "program": faculty.program,
+            "year_section": faculty.year_section,
+            "semester": faculty.semester,
+        }
+    except Faculty.DoesNotExist:
+        messages.error(request, "Faculty profile not found.")
+        return redirect('login')
 
-    # Get faculty data
-    users_ref = db.collection('Authorized Faculty')
-    query = users_ref.where('faculty_id', '==', faculty_id).limit(1).get()
-    faculty_data = None
-    if query:
-        faculty_doc = query[0]
-        faculty_data = faculty_doc.to_dict()
-
+    faculty_id = faculty.faculty_id  # Use the faculty object
 
     activities_novice = [
         {
@@ -631,11 +699,11 @@ def Faculty_activity_page(request):
         },
         {
             "title": "Novice Boss Battle",
-            "description": "In the Novice Boss Battle, the player faces their first major test as the academy's network is suddenly compromised. The school's AI assistant has been hijacked and transformed into *The Deceiver AI*, a malicious entity designed to challenge the player’s grasp of cybersecurity. As classroom screens fade to black and a chilling robotic voice taunts them, the player recalls their father’s warning about social engineering: that deception, not just intrusion, is a hacker’s greatest weapon. To stop the AI from spreading misinformation and damaging the academy's defenses, the player must correctly answer three tricky cybersecurity questions that blur the line between truth and lie. Success earns them the **“Defender of Knowledge”** achievement, while failure results in data corruption and a forced retry—proving that in cybersecurity, knowing the truth is the first line of defense.",
+            "description": "In the Novice Boss Battle, the player faces their first major test as the academy's network is suddenly compromised. The school's AI assistant has been hijacked and transformed into *The Deceiver AI*, a malicious entity designed to challenge the player's grasp of cybersecurity. As classroom screens fade to black and a chilling robotic voice taunts them, the player recalls their father's warning about social engineering: that deception, not just intrusion, is a hacker's greatest weapon. To stop the AI from spreading misinformation and damaging the academy's defenses, the player must correctly answer three tricky cybersecurity questions that blur the line between truth and lie. Success earns them the **\"Defender of Knowledge\"** achievement, while failure results in data corruption and a forced retry—proving that in cybersecurity, knowing the truth is the first line of defense.",
             "image": static("assets/img/Photo4.png"),
         },
     ]
-
+    
     activities_junior = [
         {
             "title": "Junior Task 1",
@@ -654,15 +722,15 @@ def Faculty_activity_page(request):
         },
         {
             "title": "Junior Boss Battle",
-            "description": "In the Junior Boss Battle, the player faces a crafty hacker disguised as an employee who uses social engineering tactics to steal data. The player must spot fake emails, false boss impersonations, and phishing login pages before time expires. Falling for any trick means restarting the fight. Success rewards the “Master of Awareness” achievement. A flashback reminds the player that the biggest threats often come disguised as harmless.",
+            "description": "In the Junior Boss Battle, the player faces a crafty hacker disguised as an employee who uses social engineering tactics to steal data. The player must spot fake emails, false boss impersonations, and phishing login pages before time expires. Falling for any trick means restarting the fight. Success rewards the \"Master of Awareness\" achievement. A flashback reminds the player that the biggest threats often come disguised as harmless.",
             "image": static("assets/img/Photo4.png"),
         },
     ]
-
+    
     activities_senior = [
         {
             "title": "Senior Task 1",
-            "description": "Threat Landscape, the player is called to the Cyber Threat Intelligence Lab to analyze the company’s network for vulnerabilities. Guided by a flashback of their father’s advice, they must identify weak points before attackers do. The key challenge is recognizing that weak passwords on wireless access points are a major risk. Correct answers lead to praise and progression; wrong answers require retrying the analysis. This task emphasizes the importance of spotting real network threats early.",
+            "description": "Threat Landscape, the player is called to the Cyber Threat Intelligence Lab to analyze the company's network for vulnerabilities. Guided by a flashback of their father's advice, they must identify weak points before attackers do. The key challenge is recognizing that weak passwords on wireless access points are a major risk. Correct answers lead to praise and progression; wrong answers require retrying the analysis. This task emphasizes the importance of spotting real network threats early.",
             "image": static("assets/img/Photo1.png"),
         },
         {
@@ -672,18 +740,17 @@ def Faculty_activity_page(request):
         },
         {
             "title": "Senior Task 3",
-            "description": "Risk Management & Incident Countermeasure, the player leads a simulated breach response after an alert shows unauthorized access and data theft. A flashback reminds them that quick action is crucial during an attack. The player must choose the best first steps—disconnecting the compromised system and blocking the attacker’s IP—to contain the threat. Correct choices earn praise and progress, while wrong ones prompt a retry. This task emphasizes swift and effective incident response in cybersecurity.",
+            "description": "Risk Management & Incident Countermeasure, the player leads a simulated breach response after an alert shows unauthorized access and data theft. A flashback reminds them that quick action is crucial during an attack. The player must choose the best first steps—disconnecting the compromised system and blocking the attacker's IP—to contain the threat. Correct choices earn praise and progress, while wrong ones prompt a retry. This task emphasizes swift and effective incident response in cybersecurity.",
             "image": static("assets/img/Photo3.png"),
         },
         {
             "title": "Senior Boss Battle",
-            "description": "The player now faces an advanced AI-powered malware that adapts to every defense they deploy. The virus launches attacks like DDoS, ransomware, and privilege escalation, and the player must quickly select the correct countermeasure to stop each one. Acting too slowly or choosing wrong lets the virus mutate, making it harder to defeat. Success earns the “Cyber Guardian” achievement. A flashback reminds the player: threats evolve fast, so staying sharp and acting swiftly is key.",
+            "description": "The player now faces an advanced AI-powered malware that adapts to every defense they deploy. The virus launches attacks like DDoS, ransomware, and privilege escalation, and the player must quickly select the correct countermeasure to stop each one. Acting too slowly or choosing wrong lets the virus mutate, making it harder to defeat. Success earns the \"Cyber Guardian\" achievement. A flashback reminds the player: threats evolve fast, so staying sharp and acting swiftly is key.",
             "image": static("assets/img/Photo4.png"),
         },
     ]
 
-        # Fetch lock states from Game Triggers
-    
+    # Fetch lock states from Game Triggers
     game_triggers_ref = db.collection("Game Triggers")
     doc_map = {
         'Novice': 'Novice State',
@@ -718,7 +785,7 @@ def Faculty_activity_page(request):
         activity['deadline_date'] = activity_deadlines.get(activity['title'])
 
     context = {
-        "faculty_data": faculty_data,
+        "faculty_data": faculty_data,  # Use the PostgreSQL faculty data
         "activities_novice": activities_novice,
         "activities_junior": activities_junior,
         "activities_senior": activities_senior,

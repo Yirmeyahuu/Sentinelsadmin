@@ -415,30 +415,28 @@
                         </span>
                     </div>
                 </div>
-        
+                                        
                 <!-- Calendar Section -->
                 <div class="relative z-10 bg-white/95 backdrop-blur-sm rounded-xl w-full p-4 mb-6 shadow-lg border border-white/10">
                     <div class="flex justify-between items-center mb-4">
-                        <h3 id="calendarMonthLabel" class="text-base font-semibold text-gray-800"></h3>
-                        <button class="p-2 hover:bg-sky-50 rounded-lg transition-colors duration-200">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-sky-700" fill="none" viewBox="0 0 24 24" 
-                                 stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                            </svg>
-                        </button>
+                        <!-- Display the month and year -->
+                        <h3 id="calendarMonthLabel" class="text-base font-semibold text-gray-800">{{ current_month_year }}</h3>
+                        <div class="text-xs text-gray-500">{{ current_day_name }}</div> <!-- Debug info -->
                     </div>
                     <div class="grid grid-cols-7 gap-1 text-center text-xs mb-2">
-                        <div class="font-medium text-sky-800">S</div>
-                        <div class="font-medium text-sky-800">M</div>
-                        <div class="font-medium text-sky-800">T</div>
-                        <div class="font-medium text-sky-800">W</div>
-                        <div class="font-medium text-sky-800">T</div>
-                        <div class="font-medium text-sky-800">F</div>
-                        <div class="font-medium text-sky-800">S</div>
+                        <div class="font-medium text-sky-800">Sun</div>
+                        <div class="font-medium text-sky-800">Mon</div>
+                        <div class="font-medium text-sky-800">Tue</div>
+                        <div class="font-medium text-sky-800">Wed</div>
+                        <div class="font-medium text-sky-800">Thu</div>
+                        <div class="font-medium text-sky-800">Fri</div>
+                        <div class="font-medium text-sky-800">Sat</div>
                     </div>
                     <div class="grid grid-cols-7 gap-1 text-center">
                         {% for day in calendar_days %}
+                        {% if day.is_empty %}
+                        <div class="p-2"></div> <!-- Empty cell -->
+                        {% else %}
                         <div class="relative p-2 
                             {% if day.today %}bg-sky-100 text-sky-700 font-bold ring-2 ring-sky-500
                             {% elif day.has_deadline %}bg-amber-50 hover:bg-amber-100
@@ -447,10 +445,10 @@
                             {% if day.has_deadline %}calendar-deadline{% endif %}"
                             {% if day.has_deadline %}
                                 onclick="openDeadlineInfoModal(
-                                    '{{ day.deadline_title|escapejs }}',
-                                    '{{ day.deadline_description|default:"No description"|escapejs }}',
-                                    '{{ day.deadline_date|escapejs }}',
-                                    '{{ day.deadline_time|escapejs }}'
+                                    '{{ day.title|escapejs }}',
+                                    '{{ day.tier|default:""|escapejs }}',
+                                    '{{ day.date_of_deadline|escapejs }}',
+                                    '{{ day.time_of_deadline|escapejs }}'
                                 )"
                             {% endif %}
                         >
@@ -459,6 +457,7 @@
                             <div class="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-amber-500 rounded-full"></div>
                             {% endif %}
                         </div>
+                        {% endif %}
                         {% endfor %}
                     </div>
                 </div>

@@ -18,6 +18,10 @@ SECRET_KEY = 'django-insecure-ktfkhd0zkk(f8q_vzlivj(_xjx(gvu91t-%vl=6$ud+t2q$+o+
 DEBUG = True
 
 
+TIME_ZONE = 'Asia/Manila'
+USE_TZ = True
+
+
 ALLOWED_HOSTS = []
 
 #firestore-database

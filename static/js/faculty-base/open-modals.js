@@ -33,8 +33,6 @@ window.closeEditModal = function(studentId) {
     }
 };
 
-// Move Student Modal
-// ...existing code...
 
 // Move Student Modal
 window.openMoveStudentModal = function(studentId) {
@@ -141,6 +139,48 @@ window.submitFacultyDeadline = function(event) {
         }
     });
 };
+
+
+window.removeActivityDeadline = function(title) {
+    if (confirm(`Are you sure you want to remove the deadline for "${title}"?`)) {
+        const formData = new FormData();
+        formData.append('title', title);
+        formData.append('csrfmiddlewaretoken', getCookie('csrftoken'));
+
+        fetch('/Faculty/remove-deadline/', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            if (response.ok) {
+                alert('Deadline removed successfully!');
+                location.reload(); // Reload to update the UI
+            } else {
+                alert('Failed to remove deadline.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while removing the deadline.');
+        });
+    }
+};
+
+// Helper function to get CSRF token (if not already present)
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
 
 // Helper to get CSRF token
 function getCookie(name) {
