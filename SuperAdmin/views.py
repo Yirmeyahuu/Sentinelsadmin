@@ -44,25 +44,105 @@ def Superadmin_Home(request):
     # Information Technology students (PostgreSQL)
     it_students_count = Student.objects.filter(student_status='Registered', faculty__program='Information Technology').count()
 
-    tiers = ["Novice", "Junior", "Senior"]
-    programs = ["Computer Science", "Information Technology"]
-    tier_counts = {prog: [] for prog in programs}
+    # Task maps for each tier (same as Faculty_Home)
+    novice_tasks = [
+        "Novice_Task_1(Collect Books)",
+        "Novice_Task_2(Collect USB)", 
+        "Novice_Task_3(QNA)",
+        "Novice_Task_4_(Defeat Rootkit)"
+    ]
+    junior_tasks = [
+        "Junior_Task_1(Domain Research)",
+        "Junior_Task_2(Analyze Email)",
+        "Junior_Task_3(Security Policy)", 
+        "Junior_Task_4(Social Engineering)"
+    ]
+    senior_tasks = [
+        "Senior_Task_1(Threat Landscape)",
+        "Senior_Task_2(Malware Ontology)",
+        "Senior_Task_3(Incident Response)",
+        "Senior_Task_4(AI Malware)"
+    ]
 
-    for prog in programs:
-        for tier in tiers:
-            count = db.collection("Registered_Students") \
-                .where("program", "==", prog) \
-                .where("tier", "==", tier).stream()
-            tier_counts[prog].append(sum(1 for _ in count))
+    # Initialize tier completion counters
+    cs_tier_counts = [0, 0, 0]  # [novice, junior, senior]
+    it_tier_counts = [0, 0, 0]  # [novice, junior, senior]
+
+    # Process Computer Science students
+    cs_students_query = db.collection("Registered_Students") \
+        .where("program", "==", "Computer Science") \
+        .stream()
+
+    for doc in cs_students_query:
+        student_data = doc.to_dict()
+        
+        # Check Novice tier completion (all 4 tasks must be completed)
+        novice_completed = all(
+            student_data.get(task_key, {}).get("points", 0) > 0 
+            for task_key in novice_tasks
+        )
+        if novice_completed:
+            cs_tier_counts[0] += 1
+
+        # Check Junior tier completion
+        junior_completed = all(
+            student_data.get(task_key, {}).get("points", 0) > 0 
+            for task_key in junior_tasks
+        )
+        if junior_completed:
+            cs_tier_counts[1] += 1
+
+        # Check Senior tier completion
+        senior_completed = all(
+            student_data.get(task_key, {}).get("points", 0) > 0 
+            for task_key in senior_tasks
+        )
+        if senior_completed:
+            cs_tier_counts[2] += 1
+
+    # Process Information Technology students
+    it_students_query = db.collection("Registered_Students") \
+        .where("program", "==", "Information Technology") \
+        .stream()
+
+    for doc in it_students_query:
+        student_data = doc.to_dict()
+        
+        # Check Novice tier completion
+        novice_completed = all(
+            student_data.get(task_key, {}).get("points", 0) > 0 
+            for task_key in novice_tasks
+        )
+        if novice_completed:
+            it_tier_counts[0] += 1
+
+        # Check Junior tier completion
+        junior_completed = all(
+            student_data.get(task_key, {}).get("points", 0) > 0 
+            for task_key in junior_tasks
+        )
+        if junior_completed:
+            it_tier_counts[1] += 1
+
+        # Check Senior tier completion
+        senior_completed = all(
+            student_data.get(task_key, {}).get("points", 0) > 0 
+            for task_key in senior_tasks
+        )
+        if senior_completed:
+            it_tier_counts[2] += 1
+
+    print(f"Debug - CS tier counts: {cs_tier_counts}")
+    print(f"Debug - IT tier counts: {it_tier_counts}")
 
     context = {
         "total_students": total_students,
         "total_faculty": total_faculty,
         "cs_students": cs_students_count,
         "it_students": it_students_count,
-        "tier_labels": tiers,
-        "cs_tier_data": tier_counts["Computer Science"],
-        "it_tier_data": tier_counts["Information Technology"],
+        "tier_labels": ["Novice", "Junior", "Senior"],
+        "cs_tier_data": cs_tier_counts,
+        "it_tier_data": it_tier_counts,
     }
 
     if request.headers.get('HX-Request'):

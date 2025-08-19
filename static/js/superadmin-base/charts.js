@@ -2,14 +2,24 @@ window.initSuperadminHomeChart = function() {
     const chartElem = document.getElementById('programLineChart');
     if (!chartElem) return;
 
-    const allLabels = ["Novice", "Junior", "Senior"];
-    const csData = [12, 8, 5]; // Replace with your dynamic data if needed
-    const itData = [10, 7, 9]; // Replace with your dynamic data if needed
+    // Use dynamic data from Django with fallback
+    const allLabels = window.tierLabels || ["Novice", "Junior", "Senior"];
+    const csData = window.csTierData || [0, 0, 0];
+    const itData = window.itTierData || [0, 0, 0];
+
+    console.log('Superadmin Chart Data:', { allLabels, csData, itData }); // Debug log
 
     // Destroy previous chart instance if exists
     if (window.superadminChartInstance) {
         window.superadminChartInstance.destroy();
     }
+
+    // Calculate max value for better scaling
+    const maxValue = Math.max(
+        Math.max(...csData),
+        Math.max(...itData),
+        5 // Minimum scale
+    );
 
     const ctx = chartElem.getContext('2d');
     window.superadminChartInstance = new Chart(ctx, {
@@ -58,8 +68,17 @@ window.initSuperadminHomeChart = function() {
                 },
                 y: {
                     beginAtZero: true,
-                    title: { display: true, text: 'Students', color: '#fff' },
-                    ticks: { color: '#fff' },
+                    title: { display: true, text: 'Students Completed', color: '#fff' },
+                    min: 0,
+                    max: Math.max(maxValue, 5),
+                    ticks: {
+                        color: '#fff',
+                        stepSize: 1,
+                        precision: 0,
+                        callback: function(value) {
+                            return Number.isInteger(value) ? value : null;
+                        }
+                    },
                     grid: { color: 'rgba(255,255,255,0.2)' }
                 }
             }
@@ -153,20 +172,21 @@ window.initSuperadminHomeChart = function() {
         window.superadminChartInstance.update();
         menu.classList.add('hidden');
     };
+    
     // Set default program
     window.changeProgram('All');
 };
 
-// Initialize on full page load
-document.addEventListener('DOMContentLoaded', function() {
+// Display chart on page load and after HTMX swaps
+function tryInitSuperadminHomeChart() {
     if (document.getElementById('programLineChart')) {
-        window.initSuperadminHomeChart();
+        console.log('Initializing Superadmin Home Chart'); // Debug log
+        window.initSuperadminHomeChart && window.initSuperadminHomeChart();
     }
-});
+}
+
+// Initialize on full page load
+document.addEventListener('DOMContentLoaded', tryInitSuperadminHomeChart);
 
 // Re-initialize after HTMX swaps
-document.body.addEventListener('htmx:afterSwap', function() {
-    if (document.getElementById('programLineChart')) {
-        window.initSuperadminHomeChart();
-    }
-});
+document.body.addEventListener('htmx:afterSwap', tryInitSuperadminHomeChart);

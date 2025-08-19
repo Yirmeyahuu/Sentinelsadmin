@@ -122,6 +122,14 @@
                         </div>
                     </div>
                     
+                    <!-- Add this script block before the chart container -->
+                    <script>
+                        // Pass Django data to JavaScript for chart rendering
+                        window.csTierData = {{ cs_tier_data|safe }};
+                        window.itTierData = {{ it_tier_data|safe }};
+                        window.tierLabels = {{ tier_labels|safe }};
+                    </script>
+                    
                     <!-- Chart Canvas Container -->
                     <div class="mt-4 rounded-xl bg-blue-900/50 p-4 border border-sky-600/30">
                         <canvas id="programLineChart" height="80"></canvas>
