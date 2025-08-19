@@ -71,7 +71,6 @@ def Faculty_home(request):
         messages.error(request, "Faculty profile not found.")
         return redirect('some_error_page') # Or faculty login
 
-
     # Total students (PostgreSQL)
     total_students = Student.objects.filter(student_status='Registered').count()
     # Computer Science students (PostgreSQL)
@@ -90,27 +89,88 @@ def Faculty_home(request):
         semester=faculty.semester
     ).order_by('-submitted_at')[:3]
 
-    # --- Task Progress for Charts (from PostgreSQL) ---
-    # Sync data first to ensure it's up-to-date
-    sync_student_progress(faculty)
+    # --- Task Progress for Charts (from Firebase) ---
+    # Query Firebase for students in this faculty's section
+    students_query = db.collection("Registered_Students") \
+        .where("program", "==", faculty.program) \
+        .where("year_section", "==", faculty.year_section) \
+        .where("semester", "==", faculty.semester) \
+        .stream()
 
-    # Now query the synced data
-    task_progress = StudentTaskProgress.objects.filter(student__faculty=faculty)
+    # Task maps for each tier
+    novice_tasks = [
+        "Novice_Task_1(Collect Books)",
+        "Novice_Task_2(Collect USB)", 
+        "Novice_Task_3(QNA)",
+        "Novice_Task_4_(Defeat Rootkit)"
+    ]
+    junior_tasks = [
+        "Junior_Task_1(Domain Research)",
+        "Junior_Task_2(Analyze Email)",
+        "Junior_Task_3(Security Policy)", 
+        "Junior_Task_4(Social Engineering)"
+    ]
+    senior_tasks = [
+        "Senior_Task_1(Threat Landscape)",
+        "Senior_Task_2(Malware Ontology)",
+        "Senior_Task_3(Incident Response)",
+        "Senior_Task_4(AI Malware)"
+    ]
+
+    # Initialize counters
+    novice_task_counts = [0, 0, 0, 0]
+    junior_task_counts = [0, 0, 0, 0]
+    senior_task_counts = [0, 0, 0, 0]
     
-    novice_task_counts = list(task_progress.filter(task__tier='Novice').values_list('task__description').annotate(c=Count('task_id')).values_list('c', flat=True))
-    junior_task_counts = list(task_progress.filter(task__tier='Junior').values_list('task__description').annotate(c=Count('task_id')).values_list('c', flat=True))
-    senior_task_counts = list(task_progress.filter(task__tier='Senior').values_list('task__description').annotate(c=Count('task_id')).values_list('c', flat=True))
+    leaderboard_students = []
 
-    # --- Leaderboard Logic (from PostgreSQL) ---
-    leaderboard_students = Student.objects.filter(
-        faculty=faculty,
-        progress_records__task__tier='Novice' # Base leaderboard on Novice tier points
-    ).annotate(
-        total_points=Sum(
-            Cast('progress_records__details__points', output_field=IntegerField())
-        )
-    ).filter(total_points__gt=0).order_by('-total_points')[:10]
+    # Process each student's Firebase data
+    for doc in students_query:
+        student_data = doc.to_dict()
+        student_id = student_data.get("student_id", doc.id)
+        first_name = student_data.get("first_name", "")
+        last_name = student_data.get("last_name", "")
+        
+        total_points = 0
+        
+        # Count Novice tier completions
+        for i, task_key in enumerate(novice_tasks):
+            task_data = student_data.get(task_key)
+            if task_data and isinstance(task_data, dict):
+                points = task_data.get("points", 0)
+                if points > 0:  # Task completed
+                    novice_task_counts[i] += 1
+                    total_points += int(points)
+        
+        # Count Junior tier completions
+        for i, task_key in enumerate(junior_tasks):
+            task_data = student_data.get(task_key)
+            if task_data and isinstance(task_data, dict):
+                points = task_data.get("points", 0)
+                if points > 0:  # Task completed
+                    junior_task_counts[i] += 1
+                    total_points += int(points)
+        
+        # Count Senior tier completions
+        for i, task_key in enumerate(senior_tasks):
+            task_data = student_data.get(task_key)
+            if task_data and isinstance(task_data, dict):
+                points = task_data.get("points", 0)
+                if points > 0:  # Task completed
+                    senior_task_counts[i] += 1
+                    total_points += int(points)
+        
+        # Add to leaderboard if student has points
+        if total_points > 0:
+            leaderboard_students.append({
+                "student_id": student_id,
+                "first_name": first_name,
+                "last_name": last_name,
+                "points": total_points,
+            })
 
+    # Sort leaderboard by total points descending
+    leaderboard_students = sorted(leaderboard_students, key=lambda x: x["points"], reverse=True)[:10]
 
     # --- Firestore Logic (Notifications & Deadlines - Unchanged) ---
     notifications_ref = db.collection("Notifications").order_by("timestamp", direction=firestore.Query.DESCENDING)
@@ -156,6 +216,11 @@ def Faculty_home(request):
                 calendar_days.append(day_data)
     # --- End of Firestore Logic ---
 
+    print(f"Debug - Novice task counts: {novice_task_counts}")
+    print(f"Debug - Junior task counts: {junior_task_counts}")
+    print(f"Debug - Senior task counts: {senior_task_counts}")
+    print(f"Debug - Total students found: {len(leaderboard_students)}")
+
     context = {
         "faculty_data": faculty,
         "total_students": total_students,
@@ -181,32 +246,32 @@ def Faculty_home(request):
         return render(request, 'Home/faculty-home.html', context)
 
 
-def sync_student_progress(faculty):
-    """Helper function to sync Firestore progress to PostgreSQL for a given faculty."""
-    tasks_by_tier = {}
-    for task in Task.objects.all():
-        tasks_by_tier.setdefault(task.tier, []).append(task)
+# def sync_student_progress(faculty):
+#     """Helper function to sync Firestore progress to PostgreSQL for a given faculty."""
+#     tasks_by_tier = {}
+#     for task in Task.objects.all():
+#         tasks_by_tier.setdefault(task.tier, []).append(task)
 
-    students_in_section = Student.objects.filter(faculty=faculty, student_status='Registered')
+#     students_in_section = Student.objects.filter(faculty=faculty, student_status='Registered')
 
-    for student in students_in_section:
-        try:
-            doc_ref = db.collection('Registered_Students').document(student.student_id).get()
-            if not doc_ref.exists: continue
-            progress_data = doc_ref.to_dict()
+#     for student in students_in_section:
+#         try:
+#             doc_ref = db.collection('Registered_Students').document(student.student_id).get()
+#             if not doc_ref.exists: continue
+#             progress_data = doc_ref.to_dict()
 
-            for tier, tasks_in_tier in tasks_by_tier.items():
-                required_keys = [t.firestore_key for t in tasks_in_tier]
-                if all(key in progress_data for key in required_keys):
-                    with transaction.atomic():
-                        for task_to_sync in tasks_in_tier:
-                            StudentTaskProgress.objects.get_or_create(
-                                student=student,
-                                task=task_to_sync,
-                                defaults={'details': progress_data.get(task_to_sync.firestore_key, {})}
-                            )
-        except Exception as e:
-            print(f"Error syncing progress for student {student.student_id}: {e}")
+#             for tier, tasks_in_tier in tasks_by_tier.items():
+#                 required_keys = [t.firestore_key for t in tasks_in_tier]
+#                 if all(key in progress_data for key in required_keys):
+#                     with transaction.atomic():
+#                         for task_to_sync in tasks_in_tier:
+#                             StudentTaskProgress.objects.get_or_create(
+#                                 student=student,
+#                                 task=task_to_sync,
+#                                 defaults={'details': progress_data.get(task_to_sync.firestore_key, {})}
+#                             )
+#         except Exception as e:
+#             print(f"Error syncing progress for student {student.student_id}: {e}")
 
 
 @csrf_exempt
@@ -804,12 +869,12 @@ def move_student(request):
             "Registered_Students",
             "Completed Students",
             "Drop-out Students",
-            "Archived Students"
-        ]
+        ]  # Removed "Archived Students" since it doesn't exist in Firebase
         student = None
         student_data = None
         found_collection = None
 
+        # First, try to find student in Firebase collections
         for collection in collections:
             ref = db.collection(collection).document(student_id)
             doc = ref.get()
@@ -819,39 +884,148 @@ def move_student(request):
                 found_collection = collection
                 break
 
+        # If not found in Firebase, check if it's an archived student being restored
+        if not student_data and destination == "registered":
+            try:
+                archived_student = ArchivedStudent.objects.get(student_id=student_id)
+                # Create student_data from archived student for Firebase
+                student_data = {
+                    "student_id": archived_student.student_id,
+                    "first_name": archived_student.first_name,
+                    "last_name": archived_student.last_name,
+                    "middle_initial": archived_student.middle_initial,
+                    "program": archived_student.program,
+                    "year_section": archived_student.year_section,
+                    "semester": archived_student.semester,
+                    "password": archived_student.password,
+                    "status": "Continuing"
+                }
+                found_collection = "Archive"  # Indicate it came from archive
+            except ArchivedStudent.DoesNotExist:
+                pass
+
         if not student_data:
             messages.error(request, "Student not found.")
+            return redirect("faculty-student-list")
+
+        # Get faculty for PostgreSQL operations
+        try:
+            faculty = Faculty.objects.get(faculty_id=request.user.username)
+        except Faculty.DoesNotExist:
+            messages.error(request, "Faculty profile not found.")
             return redirect("faculty-student-list")
 
         if destination == "registered":
             # Set status to Continuing, move to Registered_Students
             student_data["status"] = "Continuing"
             db.collection("Registered_Students").document(student_id).set(student_data)
-            # Remove from old collection if not already there
-            if found_collection != "Registered_Students":
+            
+            # Remove from old Firebase collection if it exists (but not if from archive)
+            if found_collection != "Archive" and found_collection != "Registered_Students" and student:
                 student.delete()
-            messages.success(request, "Student set as Continuing in Registered Students.")
+            
+            # Update PostgreSQL Student status or restore from archive
+            try:
+                # Check if student exists in ArchivedStudent table
+                archived_student = ArchivedStudent.objects.get(student_id=student_id)
+                # Restore student from archive to active Student table
+                Student.objects.create(
+                    student_id=archived_student.student_id,
+                    first_name=archived_student.first_name,
+                    last_name=archived_student.last_name,
+                    middle_initial=archived_student.middle_initial,
+                    password=archived_student.password,
+                    program=archived_student.program,
+                    year_section=archived_student.year_section,
+                    semester=archived_student.semester,
+                    faculty=archived_student.faculty,
+                    student_status='Registered'
+                )
+                # Remove from archived table
+                archived_student.delete()
+                messages.success(request, "Student restored from archive to Registered Students.")
+            except ArchivedStudent.DoesNotExist:
+                # Student is not in archive, just update status if exists in Student table
+                try:
+                    Student.objects.filter(student_id=student_id).update(student_status='Registered')
+                    messages.success(request, "Student status updated to Registered.")
+                except Student.DoesNotExist:
+                    messages.success(request, "Student moved to Registered Students.")
+                
         elif destination == "completed":
             student_data["status"] = "Completed"
             db.collection("Completed Students").document(student_id).set(student_data)
             if found_collection != "Completed Students":
                 student.delete()
+                
+            # Update PostgreSQL Student status
+            try:
+                Student.objects.filter(student_id=student_id).update(student_status='Completed')
+            except Student.DoesNotExist:
+                pass
+                
             messages.info(request, "Student moved to Completed Students successfully.")
-        elif destination == "dropout":
+            
+        elif destination == "dropout":  # Changed from "Drop-out" to "dropout"
             student_data["status"] = "Drop-out"
             db.collection("Drop-out Students").document(student_id).set(student_data)
             if found_collection != "Drop-out Students":
                 student.delete()
+                
+            # Update PostgreSQL Student status
+            try:
+                Student.objects.filter(student_id=student_id).update(student_status='Drop-out')
+            except Student.DoesNotExist:
+                pass
+                
             messages.success(request, "Student moved to Drop-out Students successfully!")
+            
         elif destination == "archive":
-            student_data["status"] = "Archived"
-            db.collection("Archived Students").document(student_id).set(student_data)
-            if found_collection != "Archived Students":
+            # Handle PostgreSQL archiving - MOVE student from Student table to ArchivedStudent table
+            try:
+                # Get the student from PostgreSQL
+                postgres_student = Student.objects.get(student_id=student_id)
+                
+                # Create archived student record
+                ArchivedStudent.objects.create(
+                    student_id=postgres_student.student_id,
+                    first_name=postgres_student.first_name,
+                    last_name=postgres_student.last_name,
+                    middle_initial=postgres_student.middle_initial,
+                    password=postgres_student.password,
+                    program=postgres_student.program,
+                    year_section=postgres_student.year_section,
+                    semester=postgres_student.semester,
+                    faculty=faculty,
+                )
+                
+                # DELETE the student from the Student table (moved, not copied)
+                postgres_student.delete()
+                
+            except Student.DoesNotExist:
+                # If student doesn't exist in PostgreSQL, create archived record from Firestore data
+                ArchivedStudent.objects.create(
+                    student_id=student_id,
+                    first_name=student_data.get('first_name', ''),
+                    last_name=student_data.get('last_name', ''),
+                    middle_initial=student_data.get('middle_initial', ''),
+                    password=student_data.get('password', ''),
+                    program=student_data.get('program', ''),
+                    year_section=student_data.get('year_section', ''),
+                    semester=student_data.get('semester', ''),
+                    faculty=faculty,
+                )
+            
+            # Remove student from Firebase (no "Archived Students" collection needed)
+            if found_collection and student:
                 student.delete()
-            messages.success(request, "Student moved to Archived Students successfully!")
+                
+            messages.success(request, "Student moved to Archive successfully!")
+            
         else:
             messages.error(request, "Invalid destination.")
             return redirect("faculty-student-list")
+            
     return redirect(request.META.get('HTTP_REFERER', 'faculty-student-list'))
 
 @faculty_required
@@ -1105,7 +1279,7 @@ def faculty_student_status(request):
     # Apply status filter based on selection
     if status_filter == 'completed':
         students_query = students_query.filter(student_status='Completed')
-    elif status_filter in ['drop-out', 'dropout']:
+    elif status_filter in ['drop-out', 'dropout']:  # Fixed: removed duplicate 'drop-out'
         students_query = students_query.filter(student_status='Drop-out')
     elif status_filter == 'registered':
         students_query = students_query.filter(student_status='Registered')
@@ -1144,6 +1318,8 @@ def faculty_student_status(request):
 
 @faculty_required
 def facultyHelp(request):
+
+
     """
     Renders the Help & User Manual page.
     """

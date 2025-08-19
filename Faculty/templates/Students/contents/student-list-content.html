@@ -41,8 +41,8 @@
                             <p class="text-sky-200 text-xs mt-1">{{ faculty_data.semester }} Students</p>
                         </div>
                         <div class="bg-sky-400/30 p-3 rounded-xl">
-                            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
+                            <svg class="w-8 h-8 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.35709 16V5.78571c0-.43393.34822-.78571.77777-.78571H18.5793c.4296 0 .7778.35178.7778.78571V16M5.35709 16h-1c-.55229 0-1 .4477-1 1v1c0 .5523.44771 1 1 1H20.3571c.5523 0 1-.4477 1-1v-1c0-.5523-.4477-1-1-1h-1M5.35709 16H19.3571M9.35709 8l2.62501 2.5L9.35709 13m4.00001 0h2"/>
                             </svg>
                         </div>
                     </div>
@@ -166,7 +166,7 @@
                                         {% else %}
                                             bg-green-500/20 text-green-700
                                         {% endif %}">
-                                        {{ student.status|default:"Continuing" }}
+                                        {{ student.status|default:"Registered" }}
                                     </span>
                                 </td>
                                 <td class="border border-blue-700 p-2 text-center whitespace-nowrap">

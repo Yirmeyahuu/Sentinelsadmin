@@ -11,7 +11,7 @@ class Student(models.Model):
     semester = models.CharField(max_length=20, blank=True)
     student_status = models.CharField(
         max_length=20,
-        choices=[('Registered', 'Registered'), ('Completed', 'Completed'), ('Dropout', 'Drop-out')],
+        choices=[('Registered', 'Registered'), ('Completed', 'Completed'), ('Drop-out', 'Drop-out')],
         default='Registered'
     )
     password = models.CharField(max_length=128)

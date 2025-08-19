@@ -7,18 +7,20 @@ window.initFacultyHomeChart = function() {
         Senior: { neonColor: '#fff700', neonFill: 'rgba(255,247,0,0.15)' }
     };
 
-    // Use dynamic data from Django for Novice
-    const noviceData = (window.noviceTaskCounts && Array.isArray(window.noviceTaskCounts))
+    // Use dynamic data from Django - with better validation
+    const noviceData = (window.noviceTaskCounts && Array.isArray(window.noviceTaskCounts) && window.noviceTaskCounts.length > 0)
         ? window.noviceTaskCounts : [0, 0, 0, 0];
-    const juniorData = (window.juniorTaskCounts && Array.isArray(window.juniorTaskCounts))
+    const juniorData = (window.juniorTaskCounts && Array.isArray(window.juniorTaskCounts) && window.juniorTaskCounts.length > 0)
         ? window.juniorTaskCounts : [0, 0, 0, 0];
-    const seniorData = (window.seniorTaskCounts && Array.isArray(window.seniorTaskCounts))
+    const seniorData = (window.seniorTaskCounts && Array.isArray(window.seniorTaskCounts) && window.seniorTaskCounts.length > 0)
         ? window.seniorTaskCounts : [0, 0, 0, 0];
     
+    console.log('Chart Data:', { noviceData, juniorData, seniorData }); // Debug log
+    
     const tierData = {
-        Novice: { labels: ['Task 1', 'Task 2', 'Task 3', 'Boss Battle'], data: noviceData },
-        Junior: { labels: ['Task 1', 'Task 2', 'Task 3', 'Boss Battle'], data: juniorData },
-        Senior: { labels: ['Task 1', 'Task 2', 'Task 3', 'Boss Battle'], data: seniorData }
+        Novice: { labels: ['Task 1', 'Task 2', 'Task 3', 'Task 4'], data: noviceData },
+        Junior: { labels: ['Task 1', 'Task 2', 'Task 3', 'Task 4'], data: juniorData },
+        Senior: { labels: ['Task 1', 'Task 2', 'Task 3', 'Task 4'], data: seniorData }
     };
     let currentTier = 'All';
     let chartInstance;
@@ -113,6 +115,15 @@ window.initFacultyHomeChart = function() {
         if (window.facultyHomeChartInstance) {
             window.facultyHomeChartInstance.destroy();
         }
+        
+        // Calculate max value for better scaling
+        const maxValue = Math.max(
+            Math.max(...noviceData),
+            Math.max(...juniorData),
+            Math.max(...seniorData),
+            window.totalUsers || 10
+        );
+        
         chartInstance = window.facultyHomeChartInstance = new Chart(ctx, {
             type: 'line',
             data: {
@@ -140,7 +151,7 @@ window.initFacultyHomeChart = function() {
                         beginAtZero: true,
                         title: { display: true, text: 'Students Accomplished', color: '#fff' },
                         min: 0,
-                        max: typeof window.totalUsers === "number" ? window.totalUsers : undefined,
+                        max: Math.max(maxValue, 5), // Ensure minimum scale of 5
                         ticks: {
                             color: '#fff',
                             stepSize: 1,
@@ -163,6 +174,7 @@ window.initFacultyHomeChart = function() {
 // Display chart on page load and after HTMX swaps
 function tryInitFacultyHomeChart() {
     if (document.getElementById('noviceLineChart')) {
+        console.log('Initializing Faculty Home Chart'); // Debug log
         window.initFacultyHomeChart && window.initFacultyHomeChart();
     }
 }

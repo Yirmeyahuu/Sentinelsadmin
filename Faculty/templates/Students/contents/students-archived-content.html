@@ -66,17 +66,14 @@
                                     <td class="border border-blue-700 p-2 text-center whitespace-nowrap">{{ student.semester }}</td>
                                     <td class="border border-blue-700 p-2 text-center whitespace-nowrap">{{ student.archived_at|date:"Y-m-d" }}</td>
                                     <td class="border border-blue-700 p-2 text-center">
-                                        {% if student.student_id %}
-                                            <div class="flex items-center justify-center">
-                                                <a href="{% url 'restore_student' student.student_id %}" 
-                                                   class="flex items-center justify-center text-blue-900 hover:text-green-600 transition-all"
-                                                   title="Restore Student">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-6 w-6">
-                                                        <path fill-rule="evenodd" d="M4.755 10.059a7.5 7.5 0 0 1 12.548-3.364l1.903 1.903h-3.183a.75.75 0 1 0 0 1.5h4.992a.75.75 0 0 0 .75-.75V4.356a.75.75 0 0 0-1.5 0v3.18l-1.9-1.9A9 9 0 0 0 3.306 9.67a.75.75 0 1 0 1.45.388Zm15.408 3.352a.75.75 0 0 0-.919.53 7.5 7.5 0 0 1-12.548 3.364l-1.902-1.903h3.183a.75.75 0 0 0 0-1.5H2.984a.75.75 0 0 0-.75.75v4.992a.75.75 0 0 0 1.5 0v-3.18l1.9 1.9a9 9 0 0 0 15.059-4.035.75.75 0 0 0-.53-.918Z" clip-rule="evenodd" />
-                                                    </svg>
-                                                </a>
-                                            </div>
-                                        {% endif %}
+                                        <!-- Move Button -->
+                                        <button onclick="event.stopPropagation(); openMoveStudentModal('{{ student.student_id }}')"
+                                                class="text-blue-900 hover:text-blue-400 transition-all cursor-pointer"
+                                                title="Move Student">
+                                            <svg class="w-6 h-6" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 14v4.833A1.166 1.166 0 0 1 16.833 20H5.167A1.167 1.167 0 0 1 4 18.833V7.167A1.166 1.166 0 0 1 5.167 6h4.618m4.447-2H20v5.768m-7.889 2.121 7.778-7.778"/>
+                                            </svg>
+                                        </button>
                                     </td>
                                 </tr>
                             {% empty %}

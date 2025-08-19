@@ -254,6 +254,7 @@
                         </div>
                     </div>
                     
+                    <!-- filepath: /Users/jeremiahpantaras/Documents/sentinels-project/Faculty/templates/Home/contents/faculty-home-content.html -->
                     <!-- Chart Canvas Container -->
                     <div class="mt-4 rounded-xl bg-blue-900/50 p-4 border border-sky-600/30">
                         <!-- Keep your existing scripts -->
@@ -261,7 +262,7 @@
                             window.noviceTaskCounts = {{ novice_task_counts|safe }};
                             window.juniorTaskCounts = {{ junior_task_counts|safe }};
                             window.seniorTaskCounts = {{ senior_task_counts|safe }};
-                            window.totalUsers = {{ total_users }};
+                            window.totalUsers = {{ total_students }}; // Changed from total_users to total_students
                         </script>
                         <canvas id="noviceLineChart" height="80"></canvas>
                     </div>
@@ -345,7 +346,7 @@
                                             <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 24 24">
                                                 <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
                                             </svg>
-                                            <span class="text-yellow-400 font-bold">{{ student.total_points }}</span>
+                                            <span class="text-yellow-400 font-bold">{{ student.points }}</span>
                                         </div>
                                     </td>
                                 </tr>
