@@ -888,7 +888,7 @@ def move_student(request):
         if not student_data and destination == "registered":
             try:
                 archived_student = ArchivedStudent.objects.get(student_id=student_id)
-                # Create student_data from archived student for Firebase
+                # Create student_data from archived student for Firebase (WITHOUT password and status)
                 student_data = {
                     "student_id": archived_student.student_id,
                     "first_name": archived_student.first_name,
@@ -897,8 +897,7 @@ def move_student(request):
                     "program": archived_student.program,
                     "year_section": archived_student.year_section,
                     "semester": archived_student.semester,
-                    "password": archived_student.password,
-                    "status": "Continuing"
+                    # Removed: password and status - these belong only in PostgreSQL
                 }
                 found_collection = "Archive"  # Indicate it came from archive
             except ArchivedStudent.DoesNotExist:
@@ -916,8 +915,7 @@ def move_student(request):
             return redirect("faculty-student-list")
 
         if destination == "registered":
-            # Set status to Continuing, move to Registered_Students
-            student_data["status"] = "Continuing"
+            # Move to Registered_Students (Firebase doesn't store status or password)
             db.collection("Registered_Students").document(student_id).set(student_data)
             
             # Remove from old Firebase collection if it exists (but not if from archive)
@@ -934,12 +932,12 @@ def move_student(request):
                     first_name=archived_student.first_name,
                     last_name=archived_student.last_name,
                     middle_initial=archived_student.middle_initial,
-                    password=archived_student.password,
+                    password=archived_student.password,  # Password only in PostgreSQL
                     program=archived_student.program,
                     year_section=archived_student.year_section,
                     semester=archived_student.semester,
                     faculty=archived_student.faculty,
-                    student_status='Registered'
+                    student_status='Registered'  # Status only in PostgreSQL
                 )
                 # Remove from archived table
                 archived_student.delete()
@@ -953,12 +951,12 @@ def move_student(request):
                     messages.success(request, "Student moved to Registered Students.")
                 
         elif destination == "completed":
-            student_data["status"] = "Completed"
+            # Move to Completed Students in Firebase (no status stored)
             db.collection("Completed Students").document(student_id).set(student_data)
             if found_collection != "Completed Students":
                 student.delete()
                 
-            # Update PostgreSQL Student status
+            # Update PostgreSQL Student status only
             try:
                 Student.objects.filter(student_id=student_id).update(student_status='Completed')
             except Student.DoesNotExist:
@@ -966,13 +964,13 @@ def move_student(request):
                 
             messages.info(request, "Student moved to Completed Students successfully.")
             
-        elif destination == "dropout":  # Changed from "Drop-out" to "dropout"
-            student_data["status"] = "Drop-out"
+        elif destination == "dropout":
+            # Move to Drop-out Students in Firebase (no status stored)
             db.collection("Drop-out Students").document(student_id).set(student_data)
             if found_collection != "Drop-out Students":
                 student.delete()
                 
-            # Update PostgreSQL Student status
+            # Update PostgreSQL Student status only
             try:
                 Student.objects.filter(student_id=student_id).update(student_status='Drop-out')
             except Student.DoesNotExist:
@@ -986,13 +984,13 @@ def move_student(request):
                 # Get the student from PostgreSQL
                 postgres_student = Student.objects.get(student_id=student_id)
                 
-                # Create archived student record
+                # Create archived student record (includes password and status)
                 ArchivedStudent.objects.create(
                     student_id=postgres_student.student_id,
                     first_name=postgres_student.first_name,
                     last_name=postgres_student.last_name,
                     middle_initial=postgres_student.middle_initial,
-                    password=postgres_student.password,
+                    password=postgres_student.password,  # Password only in PostgreSQL
                     program=postgres_student.program,
                     year_section=postgres_student.year_section,
                     semester=postgres_student.semester,
@@ -1004,12 +1002,13 @@ def move_student(request):
                 
             except Student.DoesNotExist:
                 # If student doesn't exist in PostgreSQL, create archived record from Firestore data
+                # Note: No password available from Firestore, will need default or manual reset
                 ArchivedStudent.objects.create(
                     student_id=student_id,
                     first_name=student_data.get('first_name', ''),
                     last_name=student_data.get('last_name', ''),
                     middle_initial=student_data.get('middle_initial', ''),
-                    password=student_data.get('password', ''),
+                    password='',  # Empty password - will need reset when restored
                     program=student_data.get('program', ''),
                     year_section=student_data.get('year_section', ''),
                     semester=student_data.get('semester', ''),
