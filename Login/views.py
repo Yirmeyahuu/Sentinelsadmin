@@ -6,6 +6,11 @@ from django.contrib.auth.decorators import login_required
 from Login.decorators import faculty_required, superadmin_required
 from django.http import HttpResponseRedirect
 
+from django.utils import timezone
+from Faculty.models import Faculty
+from django.contrib.auth.hashers import make_password
+import re
+
 db = firestore.client()
 # Initialize Firebase Admin SDK
 
@@ -72,22 +77,58 @@ def superadmin_logout(request):
         # If accessed via GET, redirect to the home page or login page
         return redirect('sentinels_login')
     
+
+
 def change_password_view(request):
     """Allows faculty to change their password after first login."""
     if request.method == 'POST':
         new_password = request.POST.get('new_password')
+        confirm_password = request.POST.get('confirm_password')
         faculty_id = request.session.get('faculty_id')
 
-        if faculty_id and new_password:
-            # Update Firestore with the new password
-            doc_ref = db.collection('Authorized Faculty').document(faculty_id)
-            doc_ref.update({
-                'faculty_password': new_password,
-                'password_updated': True
-            })
+        if not faculty_id:
+            messages.error(request, "Session expired. Please login again.")
+            return redirect('sentinels_login')
 
-            messages.success(request, "Password updated successfully. Successfully Login.")
-            
+        # Basic validation
+        if not new_password or not confirm_password:
+            messages.error(request, "Both password fields are required.")
+            return render(request, 'Login/change-password.html')
+
+        if new_password != confirm_password:
+            messages.error(request, "Passwords do not match.")
+            return render(request, 'Login/change-password.html')
+
+        # Only check if password is not the default
+        if new_password == "welcomeadmin":
+            messages.error(request, "Please choose a different password than the default.")
+            return render(request, 'Login/change-password.html')
+
+        # Optional: Minimum length check (you can remove this too if you want complete freedom)
+        if len(new_password) < 3:
+            messages.error(request, "Password must be at least 3 characters long.")
+            return render(request, 'Login/change-password.html')
+
+        try:
+            # Update PostgreSQL with the new password
+            faculty = Faculty.objects.get(faculty_id=faculty_id)
+            faculty.set_password(new_password)
+            faculty.password_changed = True
+            faculty.password_changed_at = timezone.now()
+            faculty.save()
+
+            # Clear the password change requirement from session
+            request.session['requires_password_change'] = False
+
+            messages.success(request, "Password updated successfully!")
             return redirect('home-page')
+
+        except Faculty.DoesNotExist:
+            messages.error(request, "Faculty profile not found.")
+            return redirect('sentinels_login')
+
+        except Exception as e:
+            messages.error(request, f"An error occurred: {str(e)}")
+            return render(request, 'Login/change-password.html')
 
     return render(request, 'Login/change-password.html')

@@ -58,6 +58,7 @@ class Command(BaseCommand):
                 universal_newlines=True,
                 bufsize=1
             )
+            
             self.processes.append(django_process)
             
             # Start Tailwind watch

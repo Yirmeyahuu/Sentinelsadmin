@@ -1,10 +1,12 @@
 from django.contrib.auth.decorators import user_passes_test
 from django.shortcuts import redirect, render
 
-
 def faculty_required(view_func):
     def _wrapped_view(request, *args, **kwargs):
         if request.session.get('user_type') == 'faculty':
+            # Check if password change is required
+            if request.session.get('requires_password_change'):
+                return redirect('change_password')
             return view_func(request, *args, **kwargs)
         elif request.user.is_authenticated:
             # Logged in but not faculty
