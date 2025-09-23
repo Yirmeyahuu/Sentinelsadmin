@@ -54,14 +54,6 @@ window.closeProgressModal = function() {
     document.getElementById('progressModal').classList.add('hidden');
 };
 
-// Notification Modal
-window.openNotificationModal = function() {
-    document.getElementById('notificationModal').classList.remove('hidden');
-};
-window.closeNotificationModal = function() {
-    document.getElementById('notificationModal').classList.add('hidden');
-};
-
 // Logout Modal
 window.openLogoutModal = function() {
     document.getElementById('logoutModal').classList.remove('hidden');

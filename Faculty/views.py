@@ -75,6 +75,8 @@ def saveActivityDeadline(request):
             return JsonResponse({'status': 'error', 'message': f'Failed to save deadline: {str(e)}'})
             
     return JsonResponse({'status': 'error', 'message': 'Invalid request'})
+
+
 # This is the Faculty homepage
 @faculty_required
 def Faculty_home(request):
@@ -339,6 +341,7 @@ def remove_deadline(request):
             messages.error(request, "Missing title or faculty information.")
     
     return redirect(request.META.get('HTTP_REFERER', 'faculty-activity-page'))
+
 # This is the student list of Faculty
 @faculty_required
 def student_list(request):
@@ -349,6 +352,11 @@ def student_list(request):
         messages.error(request, "Faculty profile not found.")
         return redirect('some_error_page') # Or faculty login
 
+    # Computer Science students (PostgreSQL)
+    cs_students_count = Student.objects.filter(student_status='Registered', faculty__program='Computer Science').count()
+    # Information Technology students (PostgreSQL)
+    it_students_count = Student.objects.filter(student_status='Registered', faculty__program='Information Technology').count()
+    
     # Base query for students assigned to this faculty
     students_query = Student.objects.filter(faculty=faculty, student_status='Registered')
 
@@ -376,6 +384,58 @@ def student_list(request):
     # Total registered students in the system
     total_users = Student.objects.filter(student_status='Registered').count()
 
+    # --- Active/Inactive Students Logic (Firebase) ---
+    # Define all task fields to check for activity
+    task_fields = [
+        "Novice_Task_1(Collect Books)",
+        "Novice_Task_2(Collect USB)", 
+        "Novice_Task_3(QNA)",
+        "Novice_Task_4_(Defeat Rootkit)",
+        "Junior_Task_1(Domain Research)",
+        "Junior_Task_2(Analyze Email)",
+        "Junior_Task_3(Security Policy)", 
+        "Junior_Task_4(Social Engineering)",
+        "Senior_Task_1(Threat Landscape)",
+        "Senior_Task_2(Malware Ontology)",
+        "Senior_Task_3(Incident Response)",
+        "Senior_Task_4(AI Malware)"
+    ]
+
+    active_students_count = 0
+    inactive_students_count = 0
+
+    # Get all student IDs from the current query
+    student_ids = list(students_query.values_list('student_id', flat=True))
+
+    # Check Firebase for each student's activity
+    for student_id in student_ids:
+        try:
+            # Get student document from Firebase
+            doc_ref = db.collection('Registered_Students').document(student_id).get()
+            
+            if doc_ref.exists:
+                student_data = doc_ref.to_dict()
+                has_tasks = False
+                
+                # Check if any task field exists in the student's document
+                for task_field in task_fields:
+                    if task_field in student_data:
+                        has_tasks = True
+                        break
+                
+                if has_tasks:
+                    active_students_count += 1
+                else:
+                    inactive_students_count += 1
+            else:
+                # Student not found in Firebase = inactive
+                inactive_students_count += 1
+                
+        except Exception as e:
+            # If there's an error accessing Firebase, consider student inactive
+            print(f"Error checking Firebase for student {student_id}: {e}")
+            inactive_students_count += 1
+
     # Pagination
     page_number = request.GET.get('page', 1)
     paginator = Paginator(students_query, 8) # 8 students per page
@@ -394,12 +454,16 @@ def student_list(request):
         "students": page_obj,
         "faculty_data": faculty,
         "total_users": total_users,
+        "cs_students": cs_students_count,
+        "it_students": it_students_count,
         "notifications": notifications,
         "program_total": program_total,
         "section_total": section_total,
         "search_query": search_query,
         "page_obj": page_obj,
         "paginator": paginator,
+        "active_students_count": active_students_count,
+        "inactive_students_count": inactive_students_count,
     }
 
     if request.headers.get('HX-Request'):
@@ -408,6 +472,7 @@ def student_list(request):
     else:
         # Normal request: return the full page
         return render(request, 'Students/student-list.html', context)
+    
 # This is the student progress of Faculty
 @faculty_required
 def student_progress(request):
@@ -460,6 +525,58 @@ def student_progress(request):
         except Exception as e:
             # It's good practice to log errors during the sync process
             print(f"Error syncing progress for student {student.student_id}: {e}")
+
+    # --- Active/Inactive Students Logic (Firebase) ---
+    # Define all task fields to check for activity
+    task_fields = [
+        "Novice_Task_1(Collect Books)",
+        "Novice_Task_2(Collect USB)", 
+        "Novice_Task_3(QNA)",
+        "Novice_Task_4_(Defeat Rootkit)",
+        "Junior_Task_1(Domain Research)",
+        "Junior_Task_2(Analyze Email)",
+        "Junior_Task_3(Security Policy)", 
+        "Junior_Task_4(Social Engineering)",
+        "Senior_Task_1(Threat Landscape)",
+        "Senior_Task_2(Malware Ontology)",
+        "Senior_Task_3(Incident Response)",
+        "Senior_Task_4(AI Malware)"
+    ]
+
+    active_students_count = 0
+    inactive_students_count = 0
+
+    # Get all student IDs from the current query
+    student_ids = list(students_in_section.values_list('student_id', flat=True))
+
+    # Check Firebase for each student's activity
+    for student_id in student_ids:
+        try:
+            # Get student document from Firebase
+            doc_ref = db.collection('Registered_Students').document(student_id).get()
+            
+            if doc_ref.exists:
+                student_data = doc_ref.to_dict()
+                has_tasks = False
+                
+                # Check if any task field exists in the student's document
+                for task_field in task_fields:
+                    if task_field in student_data:
+                        has_tasks = True
+                        break
+                
+                if has_tasks:
+                    active_students_count += 1
+                else:
+                    inactive_students_count += 1
+            else:
+                # Student not found in Firebase = inactive
+                inactive_students_count += 1
+                
+        except Exception as e:
+            # If there's an error accessing Firebase, consider student inactive
+            print(f"Error checking Firebase for student {student_id}: {e}")
+            inactive_students_count += 1
     
     # --- End of Sync Logic ---
 
@@ -489,12 +606,16 @@ def student_progress(request):
         "novice_count": novice_completed_count,
         "junior_count": junior_completed_count,
         "senior_count": senior_completed_count,
+        "active_students_count": active_students_count,
+        "inactive_students_count": inactive_students_count,
     }
 
     if request.headers.get('HX-Request'):
         return render(request, 'Students/contents/students-progress-content.html', context)
     else:
         return render(request, 'Students/students-progress.html', context)
+    
+
 # This is the add student process of Faculty
 @faculty_required
 def add_student(request):
@@ -1305,13 +1426,26 @@ def faculty_student_status(request):
     with options to filter by their status (e.g., Registered, Completed, Drop-out).
     """
     # Get the logged-in faculty member from PostgreSQL
-    # Get the logged-in faculty member from PostgreSQL
     try:
         # CORRECTED: Changed lookup from user=request.user to faculty_id=request.user.username
         faculty = Faculty.objects.get(faculty_id=request.user.username)
     except Faculty.DoesNotExist:
         messages.error(request, "Faculty profile not found.")
         return redirect('login') # Redirect to login if faculty profile is missing
+
+    # Computer Science students (PostgreSQL)
+    cs_students_count = Student.objects.filter(student_status='Registered', faculty__program='Computer Science').count()
+    # Information Technology students (PostgreSQL)
+    it_students_count = Student.objects.filter(student_status='Registered', faculty__program='Information Technology').count()
+    
+    # Total students in the faculty's entire program
+    program_total = Student.objects.filter(
+        faculty__program=faculty.program, 
+        student_status='Registered'
+    ).count()
+    
+    # Total students in the faculty's specific class/section (only Registered)
+    section_total = Student.objects.filter(faculty=faculty, student_status='Registered').count()
 
     # Get filter and search parameters from the request
     status_filter = request.GET.get('status', 'all').lower()
@@ -1341,6 +1475,58 @@ def faculty_student_status(request):
     # Order the results for consistent display
     students_query = students_query.order_by('last_name', 'first_name')
 
+    # --- Active/Inactive Students Logic (Firebase) ---
+    # Define all task fields to check for activity
+    task_fields = [
+        "Novice_Task_1(Collect Books)",
+        "Novice_Task_2(Collect USB)", 
+        "Novice_Task_3(QNA)",
+        "Novice_Task_4_(Defeat Rootkit)",
+        "Junior_Task_1(Domain Research)",
+        "Junior_Task_2(Analyze Email)",
+        "Junior_Task_3(Security Policy)", 
+        "Junior_Task_4(Social Engineering)",
+        "Senior_Task_1(Threat Landscape)",
+        "Senior_Task_2(Malware Ontology)",
+        "Senior_Task_3(Incident Response)",
+        "Senior_Task_4(AI Malware)"
+    ]
+
+    active_students_count = 0
+    inactive_students_count = 0
+
+    # Get only REGISTERED student IDs from the faculty for active/inactive check
+    registered_student_ids = list(Student.objects.filter(faculty=faculty, student_status='Registered').values_list('student_id', flat=True))
+
+    # Check Firebase for each registered student's activity
+    for student_id in registered_student_ids:
+        try:
+            # Get student document from Firebase
+            doc_ref = db.collection('Registered_Students').document(student_id).get()
+            
+            if doc_ref.exists:
+                student_data = doc_ref.to_dict()
+                has_tasks = False
+                
+                # Check if any task field exists in the student's document
+                for task_field in task_fields:
+                    if task_field in student_data:
+                        has_tasks = True
+                        break
+                
+                if has_tasks:
+                    active_students_count += 1
+                else:
+                    inactive_students_count += 1
+            else:
+                # Student not found in Firebase = inactive
+                inactive_students_count += 1
+                
+        except Exception as e:
+            # If there's an error accessing Firebase, consider student inactive
+            print(f"Error checking Firebase for student {student_id}: {e}")
+            inactive_students_count += 1
+
     # Pagination
     paginator = Paginator(students_query, 10) # 10 students per page
     page_number = request.GET.get('page', 1)
@@ -1353,30 +1539,15 @@ def faculty_student_status(request):
         "status_filter": status_filter, # Pass filter to template
         "page_obj": page_obj,
         "paginator": paginator,
+        "cs_students": cs_students_count,
+        "it_students": it_students_count,
+        "program_total": program_total,
+        "section_total": section_total,
+        "active_students_count": active_students_count,
+        "inactive_students_count": inactive_students_count,
     }
 
     if request.headers.get('HX-Request'):
         return render(request, 'Students/contents/student-status-content.html', context)
     else:
         return render(request, 'Students/student-status.html', context)
-# This is the faculty help page
-@faculty_required
-def facultyHelp(request):
-
-
-    """
-    Renders the Help & User Manual page.
-    """
-    # Get the logged-in faculty member from PostgreSQL
-    try:
-        faculty = Faculty.objects.get(faculty_id=request.user.username)
-    except Faculty.DoesNotExist:
-        messages.error(request, "Faculty profile not found.")
-        return redirect('some_error_page') # Or faculty login
-
-    context = {
-        'faculty_data': faculty,
-        'page': 'help' # To highlight the active page in the sidebar
-    }
-    
-    return render(request, 'Help/contents/help-content.html', context)
