@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Sentinels{% endblock %}</title>
     {% tailwind_css %}
-    <link rel="icon" href="{% static 'assets/img/Sentinels Logo.png' %}">
+    <link rel="icon" href="{% static 'assets/img/SENTINELSLOGO.svg' %}">
     <link rel="stylesheet" href="{% static 'css/dist/styles.css' %}">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
@@ -47,6 +47,21 @@
     </script>
 
 </head>
+
+<!-- Global Notification-->
+{% if messages %}
+  {% for message in messages %}
+    <div id="django-message-{{ forloop.counter }}" class="p-4 mb-4 text-sm text-green-800 rounded-lg bg-green-50 fixed top-5 right-5 shadow-lg z-50">
+      <span class="font-medium">{{ message.tags|title }}!</span> {{ message }}
+    </div>
+    <script>
+      setTimeout(function() {
+        var msg = document.getElementById("django-message-{{ forloop.counter }}");
+        if (msg) msg.style.display = "none";
+      }, 5000);
+    </script>
+  {% endfor %}
+{% endif %}
 
 <!-- Add Student Modal-->
 <div id="modal" class="fixed inset-0 flex justify-center items-center bg-gray-900/80 hidden z-100">
@@ -112,10 +127,6 @@
     </div>
 </div>
 
-
-
-
-
 <!-- Student Progress Modal -->
 <div id="progressModal" class="fixed inset-0 flex items-center justify-center bg-gray-900/70 hidden z-50">
     <div class="bg-white p-8 rounded-tl-4xl rounded-br-4xl shadow-lg w-full max-w-md relative">
@@ -133,7 +144,9 @@
     </div>
 </div>
 
+
 <body class="min-h-screen bg-gradient-to-br from-[#E0EAFC] to-[#CFDEF3]">
+
 
 <!-- Student Edit Modals Container -->
 <div id="studentModalsContainer"></div>
@@ -162,20 +175,7 @@
     </div>
 </div>
 
-<!-- Global Notification-->
-{% if messages %}
-  {% for message in messages %}
-    <div id="django-message-{{ forloop.counter }}" class="p-4 mb-4 text-sm text-green-800 rounded-lg bg-green-50 fixed top-5 right-5 shadow-lg z-50">
-      <span class="font-medium">{{ message.tags|title }}!</span> {{ message }}
-    </div>
-    <script>
-      setTimeout(function() {
-        var msg = document.getElementById("django-message-{{ forloop.counter }}");
-        if (msg) msg.style.display = "none";
-      }, 5000);
-    </script>
-  {% endfor %}
-{% endif %}
+
 
 <!-- Faculty Activity Deadline Modal -->
 <div id="facultyActivityDeadlineModal" class="fixed inset-0 flex items-center justify-center bg-gray-900/80 z-100 hidden">
@@ -213,11 +213,11 @@
 
             <!-- Logo -->
             <div class="relative flex items-center justify-center mb-2 h-26 w-full overflow-hidden">
-                <img src="{% static 'assets/img/Sentinels Logo 2.1 (1).png' %}"
+                <img src="{% static 'assets/img/Sentinels Logo white.svg' %}"
                      alt="Full Logo"
                      class="h-32 p-4 w-auto absolute transition-all duration-300 ease-in-out"
                      :class="expanded ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0'">
-                <img src="{% static 'assets/img/Sentinels Logo copy.png' %}"
+                <img src="{% static 'assets/img/UPDATED-LOGO.svg' %}"
                      alt="Icon Logo"
                      class="h-12 w-auto absolute transition-all duration-300 ease-in-out"
                      :class="expanded ? 'translate-x-full opacity-0' : 'translate-x-0 opacity-100'">
@@ -428,7 +428,7 @@
                     <!-- Expanded Profile (Full info) -->
                     <div class="absolute flex items-center space-x-3 transition-all duration-500 ease-in-out"
                          :class="expanded ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0'">
-                        <img src="{% static 'assets/img/Default Profile.jpg' %}" 
+                        <img src="{% static 'assets/img/Default Profile.webp' %}" 
                              alt="User Profile"
                              class="w-12 h-12 rounded-full border-4 border-white object-cover">
                         <div class="flex flex-col">

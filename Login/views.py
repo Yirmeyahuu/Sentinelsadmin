@@ -1,4 +1,4 @@
-from django.contrib import messages  # Corrected import for messages
+from django.contrib import messages
 from django.shortcuts import render, redirect
 from firebase_admin import credentials, firestore
 from django.contrib.auth import authenticate, login, logout, get_user_model
@@ -19,8 +19,10 @@ def Sentinels_login_view(request):
     if request.user.is_authenticated:
         user_type = request.session.get('user_type')
         if user_type == 'superadmin':
+            messages.success(request, "You have successfully logged in.")
             return redirect('Superadmin-homepage')
         elif user_type == 'faculty':
+            messages.success(request, "You have successfully logged in.")
             return redirect('home-page')
 
     if request.method == 'POST':
