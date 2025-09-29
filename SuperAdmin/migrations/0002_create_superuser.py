@@ -3,8 +3,7 @@ from django.contrib.auth import get_user_model
 
 def create_admin(apps, schema_editor):
     User = get_user_model()
-    # Only create the superuser if it doesn't already exist
-    if not User.objects.filter(username='admin').exists():
+    if not User.objects.filter(username='sentinelsadmin').exists():
         User.objects.create_superuser(
             username='sentinelsadmin',
             email='admin@sentinels.com',
@@ -14,7 +13,7 @@ def create_admin(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('SuperAdmin', '0001_initial'),
+        ('SuperAdmin', '0002_initial'),
     ]
 
     operations = [
