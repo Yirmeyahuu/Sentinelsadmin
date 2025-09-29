@@ -27,7 +27,7 @@ USE_TZ = True
 
 
 if os.getenv("RENDER"):  # when running on Render
-    ALLOWED_HOSTS = ["sentinels0-project.onrender.com"]
+    ALLOWED_HOSTS = ["sentinels-project.onrender.com"]
 else:  # local development
     ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
 
