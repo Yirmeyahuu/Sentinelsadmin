@@ -6,8 +6,9 @@ from Faculty.models import Faculty
 from firebase_admin import firestore
 from .models import PendingStudent, Student
 
-# Firestore database instance (for notifications)
-db = firestore.client()
+# Firestore database instance
+from SentinelsProject.firebase_config import db
+
 
 def StudentRegister(request):
     if request.method == "POST":

@@ -18,11 +18,8 @@ from django.db.models import Q # Import Q for complex queries
 
 
 
-# Initialize Firebase if not already initialized
-if not firebase_admin._apps:
-    cred = credentials.Certificate("C:/Users/ASUS/Desktop/Super_Admin/sentinels-repository/sentinels-a61ff-firebase-adminsdk-fbsvc-35c84e60a7.json")
-    firebase_admin.initialize_app(cred)
-db = firestore.client()
+# Firestore database instance
+from SentinelsProject.firebase_config import db
 
 # This is the Home page
 @superadmin_required

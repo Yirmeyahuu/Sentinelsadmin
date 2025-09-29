@@ -1,7 +1,6 @@
 from pathlib import Path
-import os
-import firebase_admin
-from firebase_admin import credentials, firestore
+import os, json
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -15,19 +14,21 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = 'django-insecure-ktfkhd0zkk(f8q_vzlivj(_xjx(gvu91t-%vl=6$ud+t2q$+o+'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
+load_dotenv()
+#DEBUG = True
+DEBUG = os.getenv("DEBUG", "False") == "True"
 
 TIME_ZONE = 'Asia/Manila'
 USE_TZ = True
 
 
-ALLOWED_HOSTS = []
+if os.getenv("RENDER"):  # when running on Render
+    ALLOWED_HOSTS = ["sentinels.onrender.com"]
+else:  # local development
+    ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
 
-#firestore-database
-cred = credentials.Certificate("/Users/jeremiahpantaras/Documents/sentinels-project/sentinels-a61ff-firebase-adminsdk-fbsvc-aaf9572a3f.json")
-firebase_admin.initialize_app(cred)
-db = firestore.client()
+
+
 # Application definition
 # /Users/jeremiahpantaras/Documents/sentinels-project/sentinels-a61ff-firebase-adminsdk-fbsvc-aaf9572a3f.json
 # C:/Users/ASUS/Desktop/Thesis/sentinels-a61ff-firebase-adminsdk-fbsvc-35c84e60a7.json
@@ -67,6 +68,7 @@ NPM_BIN_PATH = "/usr/local/bin/npm"
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -109,16 +111,28 @@ WSGI_APPLICATION = 'SentinelsProject.wsgi.application'
 #         'PORT': '5432',
 #     }
 # }
+#POSTGRESQL DATABASE ON RENDER
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'sentinels_db',
-        'USER': 'postgres',
-        'PASSWORD': '!Poypoy.mignon!01',
-        'HOST': 'localhost',
-        'PORT': '5432',
+        'NAME': os.getenv('DB_NAME', 'sentinels_db'),
+        'USER': os.getenv('DB_USER', 'postgres'),
+        'PASSWORD': os.getenv('DB_PASSWORD', ''),
+        'HOST': os.getenv('DB_HOST', 'localhost'),
+        'PORT': os.getenv('DB_PORT', '5432'),
     }
 }
+#DATABASE LOCALLY
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'sentinels_db',
+#         'USER': 'postgres',
+#         'PASSWORD': '!Poypoy.mignon!01',
+#         'HOST': 'localhost',
+#         'PORT': '5432',
+#     }
+# }
 
 
 # Password validation
@@ -155,8 +169,12 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'   # note the starting slash (important for production)
 
+# Where collectstatic will put all static files
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+# Extra static files during development
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),
     os.path.join(BASE_DIR, 'theme/static'),

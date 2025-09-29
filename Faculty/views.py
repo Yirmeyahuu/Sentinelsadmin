@@ -1,9 +1,9 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-from firebase_admin import firestore
 from django.contrib import messages
 from django.templatetags.static import static
 from django.views.decorators.http import require_POST
+from firebase_admin import firestore   
 from django.http import JsonResponse
 import json
 from .forms import AddStudentForm
@@ -20,7 +20,10 @@ import calendar as cal
 from django.utils import timezone
 import pytz
 
-db = firestore.client()
+# Firestore database instance
+from SentinelsProject.firebase_config import db
+
+
 
 # This is the save deadline of Activity process
 @csrf_exempt

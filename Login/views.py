@@ -1,12 +1,14 @@
 from django.contrib import messages
 from django.shortcuts import render, redirect
-from firebase_admin import firestore
 from django.contrib.auth import authenticate, login, logout
 
 from django.utils import timezone
 from Faculty.models import Faculty
 
-db = firestore.client() # Firestore database instance (for notifications)
+# Firestore database instance
+from SentinelsProject.firebase_config import db
+
+
 
 def Sentinels_login_view(request):
     # Redirect authenticated users to their respective homepages

@@ -1,8 +1,3 @@
-# These are some examples of commonly ignored file patterns.
-# You should customize this list as applicable to your project.
-# Learn more about .gitignore:
-#     https://www.atlassian.com/git/tutorials/saving-changes/gitignore
-
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -15,10 +10,9 @@ venv/
 env/
 virt/
 
-# Django database and settings (if sensitive)
+# Django database (local only, don’t push SQLite)
 *.sqlite3
 db.sqlite3
-config/settings.py
 
 # IDE/editor files
 .vscode/
@@ -29,6 +23,7 @@ config/settings.py
 # Node and frontend build artifacts
 node_modules/
 dist/
+build/
 
 # MacOS and system files
 .DS_Store
@@ -46,21 +41,18 @@ Thumbs.db
 # Test reports
 TEST*.xml
 
-# Media and large files
-*.mp4
-*.tiff
-*.avi
-*.flv
-*.mov
-*.wmv
+# Media and large files (optional — you might store media elsewhere like S3)
+media/
 
-# Firebase credentials and secrets
-sentinels-a61ff-firebase-adminsdk-fbsvc-aaf9572a3f.json
+# Firebase credentials and secrets (always ignore!)
 *.json
 
-# Static and media files (uncomment if you build them)
-# static/
-# media/
+# Django secret or environment-specific files
+.env
+*.env
+
+# Static files (collected files, NOT your source static in theme/)
+staticfiles/
 
 # Python egg files
 *.egg-info/
@@ -89,4 +81,4 @@ yarn-debug.log*
 yarn-error.log*
 
 # Ignore screenshots if not needed
-# screenshots/
+screenshots/
