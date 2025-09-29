@@ -6,13 +6,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}SENTINELS{% endblock title%}</title>
     {% tailwind_css %}
-    <link rel="icon" href="{% static 'assets/img/SentinelsLogo.svg' %}">
+    <link rel="icon" href="{% static 'assets/img/SENTINELSLOGO.svg' %}">
     <link rel="stylesheet" href="{% static 'css/dist/styles.css' %}">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     <script src="https://unpkg.com/htmx.org@1.9.6"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Basic Open Graph tags -->
+    <meta property="og:title" content="Sentinels Web System" />
+    <meta property="og:description" content="An educational cybersecurity RPG for STI WNU students." />
+    <meta property="og:image" content="https://sentinelsadmin.onrender.com/static/assets/img/login-bg.png" />
+    <meta property="og:url" content="https://sentinelsadmin.onrender.com/" />
+    <meta property="og:type" content="website" />
+
+    <!-- Optional for Twitter Cards -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Sentinels Web System" />
+    <meta name="twitter:description" content="An educational cybersecurity RPG for STI WNU students." />
+    <meta name="twitter:image" content="https://sentinelsadmin.onrender.com/static/assets/img/login-bg.png" />
 
 
     <!-- HTMX and Alpine.js scripts -->
