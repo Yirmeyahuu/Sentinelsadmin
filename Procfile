@@ -1,1 +1,1 @@
-web: gunicorn SentinelsProject.wsgi:application --log-file -
+web: gunicorn SentinelsProject.wsgi:application
