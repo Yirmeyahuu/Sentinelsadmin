@@ -560,6 +560,80 @@ window.helpContentMap = {
                 </div>
             </div>
         `
+    },
+        '/Faculty/account/': {
+        title: 'Faculty Account Help',
+        content: `
+            <div class="space-y-6">
+                <div class="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-2xl border-l-4 border-blue-500">
+                    <h4 class="font-bold text-blue-700 mb-3 flex items-center text-lg">
+                        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" />
+                        </svg>
+                        Faculty Account Overview
+                    </h4>
+                    <p class="text-gray-700 leading-relaxed">Your personal dashboard providing a comprehensive overview of your students, activities, and teaching responsibilities.</p>
+                </div>
+                
+                <div class="bg-gradient-to-r from-green-50 to-emerald-50 p-6 rounded-2xl border-l-4 border-green-500">
+                    <h4 class="font-bold text-green-700 mb-4 flex items-center text-lg">
+                        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Key Statistics
+                    </h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                            <div class="flex items-center">
+                                <div class="w-3 h-3 bg-blue-500 rounded-full mr-3"></div>
+                                <div>
+                                    <span class="font-semibold text-gray-800">Total Students:</span>
+                                    <p class="text-sm text-gray-600 mt-1">Number of students under your supervision</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                            <div class="flex items-center">
+                                <div class="w-3 h-3 bg-indigo-500 rounded-full mr-3"></div>
+                                <div>
+                                    <span class="font-semibold text-gray-800">Active Activities:</span>
+                                    <p class="text-sm text-gray-600 mt-1">Currently available activities for students</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                            <div class="flex items-center">
+                                <div class="w-3 h-3 bg-amber-500 rounded-full mr-3"></div>
+                                <div>
+                                    <span class="font-semibold text-gray-800">Pending Verifications:</span>
+                                    <p class="text-sm text-gray-600 mt-1">Students awaiting verification or approval</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                            <div class="flex items-center">
+                                <div class="w-3 h-3 bg-rose-500 rounded-full mr-3"></div>
+                                <div>
+                                    <span class="font-semibold text-gray-800">Recent Activity:</span>
+                                    <p class="text-sm text-gray-600 mt-1">Latest student submissions and updates</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-gradient-to-r from-purple-50 to-violet-50 p-6 rounded-2xl border-l-4 border-purple-500">
+                    <h4 class="font-bold text-purple-700 mb-3 flex items-center text-lg">
+                        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z" />
+                            <path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z" />
+                        </svg>
+                        Quick Actions
+                    </h4>
+                    <p class="text-gray-700 leading-relaxed">Access quick links to manage students, verify submissions, and track progress across all activity tiers.</p>
+                </div>
+            </div>
+        `
     }
 };
 

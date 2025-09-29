@@ -8,13 +8,12 @@ from django.http import JsonResponse
 from django.templatetags.static import static
 from Login.decorators import superadmin_required
 from django.views.decorators.csrf import csrf_exempt
-from django.utils.decorators import method_decorator
 from django.views.decorators.http import require_POST
-import json, datetime
+import json
 from django.core.paginator import Paginator
 from .forms import AddFacultyForm
 from django.db import transaction
-from Student.models import Student, ArchivedStudent # Add ArchivedStudent
+from Student.models import Student, ArchivedStudent
 from django.db.models import Q # Import Q for complex queries
 
 

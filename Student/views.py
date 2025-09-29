@@ -1,5 +1,4 @@
 from django.shortcuts import render, redirect
-
 from django.contrib import messages
 from django.contrib.auth.hashers import make_password
 from .models import Student

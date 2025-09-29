@@ -1,41 +1,25 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-import firebase_admin
-from firebase_admin import credentials, firestore
+from firebase_admin import firestore
 from django.contrib import messages
 from django.templatetags.static import static
 from django.views.decorators.http import require_POST
-from django.contrib.auth import logout
 from django.http import JsonResponse
 import json
-from .forms import ActivityDeadlineForm, AddStudentForm
+from .forms import AddStudentForm
 from django.views.decorators.csrf import csrf_exempt
 from Login.decorators import faculty_required
 from django.core.paginator import Paginator
 from django.templatetags.static import static
-
-
-
 from Faculty.models import Faculty
 from Student.models import Student, PendingStudent, Task, StudentTaskProgress, ArchivedStudent
 from django.db.models import Q
-
-from django.db.models import Count, Sum, IntegerField
 from django.db import transaction
 from datetime import datetime, timedelta
-import calendar
-from django.db.models.functions import Cast
-
+import calendar as cal
 from django.utils import timezone
 import pytz
 
-
-
-
-# Initialize Firebase if not already initialized
-if not firebase_admin._apps:
-    cred = credentials.Certificate("/Users/jeremiahpantaras/Documents/sentinels-project/sentinels-a61ff-firebase-adminsdk-fbsvc-aaf9572a3f.json")
-    firebase_admin.initialize_app(cred)
 db = firestore.client()
 
 # This is the save deadline of Activity process
@@ -239,7 +223,6 @@ def Faculty_home(request):
     # IMPROVED: Better calendar generation with proper timezone handling
     def generate_calendar_data(year, month, current_day, timezone_obj):
         """Generate calendar data with proper timezone handling"""
-        import calendar as cal
         
         # Get the first day of the month and number of days
         first_day_weekday = cal.weekday(year, month, 1)  # 0=Monday, 6=Sunday

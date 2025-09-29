@@ -1,18 +1,12 @@
 from django.contrib import messages
 from django.shortcuts import render, redirect
-from firebase_admin import credentials, firestore
-from django.contrib.auth import authenticate, login, logout, get_user_model
-from django.contrib.auth.decorators import login_required
-from Login.decorators import faculty_required, superadmin_required
-from django.http import HttpResponseRedirect
+from firebase_admin import firestore
+from django.contrib.auth import authenticate, login, logout
 
 from django.utils import timezone
 from Faculty.models import Faculty
-from django.contrib.auth.hashers import make_password
-import re
 
-db = firestore.client()
-# Initialize Firebase Admin SDK
+db = firestore.client() # Firestore database instance (for notifications)
 
 def Sentinels_login_view(request):
     # Redirect authenticated users to their respective homepages
@@ -41,12 +35,6 @@ def Sentinels_login_view(request):
                 login(request, user)
                 request.session['user_type'] = 'faculty'
                 request.session['faculty_id'] = username_or_id
-
-                # Optionally, redirect to password change page if needed
-                # (You can add a flag in your Faculty model or session if you want this logic)
-                # Example:
-                # if not user.profile.password_updated:
-                #     return redirect('change_password')
 
                 return redirect('home-page')
 
