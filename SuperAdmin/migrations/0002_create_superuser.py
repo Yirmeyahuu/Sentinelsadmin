@@ -1,3 +1,5 @@
+# SuperAdmin/migrations/0002_create_superuser.py
+
 from django.db import migrations
 from django.contrib.auth import get_user_model
 
