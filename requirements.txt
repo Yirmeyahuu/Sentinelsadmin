@@ -10,6 +10,7 @@ charset-normalizer==3.4.2
 click==8.1.8
 cookiecutter==2.6.0
 cryptography==44.0.3
+dj-database-url==3.0.1
 Django==5.2
 django-browser-reload==1.18.0
 django-tailwind==4.0.1
