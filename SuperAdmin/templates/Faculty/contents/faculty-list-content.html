@@ -97,6 +97,83 @@
                     <h2 class="text-xl font-bold text-white">Registered Faculty</h2>
                     <!-- Search and Add Controls -->
                     <div class="flex flex-wrap items-center gap-4">
+                        <!-- Export Dropdown -->
+                        <div class="relative inline-block text-left">
+                            <button onclick="toggleExportDropdown()" class="bg-green-500 font-bold text-sm text-white px-3 py-2 shadow-lg rounded-xl hover:bg-green-600 transition duration-150 cursor-pointer flex items-center gap-1" title="Export Faculty Data">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
+                                </svg>
+                                Export
+                                <svg class="w-4 h-4 ml-1" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                                </svg>
+                            </button>
+                            <div id="exportDropdown" class="hidden absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10">
+                                <div class="py-1">
+                                    <a href="{% url 'export_faculty_csv' %}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                        <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"/>
+                                        </svg>
+                                        Export as CSV
+                                    </a>
+                                    <a href="{% url 'export_faculty_excel' %}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                        <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"/>
+                                        </svg>
+                                        Export as Excel
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Template Dropdown -->
+                        <div class="relative inline-block text-left">
+                            <button onclick="toggleTemplateDropdown()" class="bg-blue-500 font-bold text-sm text-white px-3 py-2 shadow-lg rounded-xl hover:bg-blue-600 transition duration-150 cursor-pointer flex items-center gap-1" title="Download Templates">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z"/>
+                                </svg>
+                                Templates
+                                <svg class="w-4 h-4 ml-1" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                                </svg>
+                            </button>
+                            <div id="templateDropdown" class="hidden absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10">
+                                <div class="py-1">
+                                    <a href="{% url 'download_faculty_csv_template' %}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                        <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"/>
+                                        </svg>
+                                        CSV Template
+                                    </a>
+                                    <a href="{% url 'download_faculty_excel_template' %}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                        <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"/>
+                                        </svg>
+                                        Excel Template
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Import Button -->
+                        <button class="bg-orange-500 font-bold text-sm text-white px-3 py-2 shadow-lg rounded-xl hover:bg-orange-600 transition duration-150 cursor-pointer flex items-center gap-1" 
+                                onclick="openImportCsvModal()"
+                                title="Import Faculty from CSV/Excel">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M5,4V7H10.5V19H13.5V7H19V4H5Z"/>
+                            </svg>
+                            Import
+                        </button>
+
+                        <!-- Add Button -->
+                        <button class="bg-gray-100 font-bold text-sm text-sky-500 px-3 py-2 shadow-lg rounded-xl hover:bg-sky-600 hover:text-gray-100 transition duration-150 cursor-pointer flex items-center gap-1" 
+                                onclick="openAddFacultyModal()">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z"/>
+                            </svg>
+                            Add Faculty
+                        </button>
+                        
                         <!-- Search Bar -->
                         <form method="get" class="bg-gray-100 p-1 rounded-3xl flex items-center max-w-sm mx-auto">
                             <div class="relative w-full">
@@ -120,13 +197,6 @@
                                 <span class="sr-only">Search</span>
                             </button>
                         </form>
-                        <!-- Add Button -->
-                        <button class="bg-gray-100 font-bold text-sm text-blue-500 px-3 py-2 shadow-lg rounded-xl hover:bg-blue-400 hover:text-gray-100 transition duration-150 cursor-pointer" 
-                                onclick="openAddFacultyModal()">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 472 384">
-                                    <path fill="currentColor" d="M298.5 192q-35.5 0-60.5-25t-25-60.5T238 46t60.5-25T359 46t25 60.5t-25 60.5t-60.5 25zM107 149h64v43h-64v64H64v-64H0v-43h64V85h43v64zm191.5 86q31.5 0 69.5 9t69.5 29.5T469 320v43H128v-43q0-26 31.5-46.5T229 244t69.5-9z"/>
-                                </svg>
-                        </button>
                     </div>
                 </div>
                 <!-- Faculty Table -->

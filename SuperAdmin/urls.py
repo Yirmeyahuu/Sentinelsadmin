@@ -25,4 +25,12 @@ urlpatterns = [
     path('student/move/', views.superadmin_move_student, name='move_student'),
     path("Student-Archived/", views.Superadmin_Student_Archive, name="superadmin_student_archived"),
     path('archived-student/delete/<str:student_id>/', views.delete_archived_student, name='delete_archived_student'),
+
+
+    path('faculty/export-csv/', views.export_faculty_csv, name='export_faculty_csv'),
+    path('faculty/import-csv/', views.import_faculty_csv, name='import_faculty_csv'),
+    path('faculty/download-template/', views.download_faculty_csv_template, name='download_faculty_csv_template'),
+    path('faculty/export-excel/', views.export_faculty_excel, name='export_faculty_excel'),
+    path('faculty/download-excel-template/', views.download_faculty_excel_template, name='download_faculty_excel_template'),
+    
 ]
