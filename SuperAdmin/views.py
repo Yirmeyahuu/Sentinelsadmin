@@ -15,6 +15,17 @@ from .forms import AddFacultyForm
 from django.db import transaction
 from Student.models import Student, ArchivedStudent
 from django.db.models import Q # Import Q for complex queries
+import io
+
+#Import CSV and Excel libraries
+import csv
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
+
+from openpyxl import load_workbook
+from django.http import HttpResponse
+
+
 
 
 
@@ -923,3 +934,485 @@ def superadmin_move_student(request):
 
     # Redirect if not a POST request
     return redirect('Superadmin_Student_Status')
+
+
+
+# CSV Export for Faculty
+@superadmin_required
+def export_faculty_csv(request):
+    """Export faculty data to CSV file"""
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="faculty_export.csv"'
+    
+    writer = csv.writer(response)
+    # Write CSV header
+    writer.writerow([
+        'Faculty ID',
+        'First Name', 
+        'Last Name',
+        'Middle Initial',
+        'Program',
+        'Year Section',
+        'Semester',
+        'Status'
+    ])
+    
+    # Write faculty data
+    faculties = Faculty.objects.all().order_by('faculty_id')
+    for faculty in faculties:
+        writer.writerow([
+            faculty.faculty_id,
+            faculty.first_name,
+            faculty.last_name,
+            faculty.middle_initial or '',
+            faculty.program,
+            faculty.year_section,
+            faculty.semester,
+            faculty.faculty_status
+        ])
+    
+    return response
+
+# Excel Export for Faculty
+@superadmin_required
+def export_faculty_excel(request):
+    """Export faculty data to Excel file"""
+    from openpyxl import Workbook
+    from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+    from django.http import HttpResponse
+    
+    # Create workbook and worksheet
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Faculty Export"
+    
+    # Define headers
+    headers = [
+        'Faculty ID',
+        'First Name', 
+        'Last Name',
+        'Middle Initial',
+        'Program',
+        'Year Section',
+        'Semester',
+        'Status'
+    ]
+    
+    # Style for headers
+    header_font = Font(bold=True, color="FFFFFF")
+    header_fill = PatternFill(start_color="366092", end_color="366092", fill_type="solid")
+    header_alignment = Alignment(horizontal="center", vertical="center")
+    thin_border = Border(
+        left=Side(style='thin'),
+        right=Side(style='thin'),
+        top=Side(style='thin'),
+        bottom=Side(style='thin')
+    )
+    
+    # Add headers with styling
+    for col, header in enumerate(headers, 1):
+        cell = ws.cell(row=1, column=col, value=header)
+        cell.font = header_font
+        cell.fill = header_fill
+        cell.alignment = header_alignment
+        cell.border = thin_border
+    
+    # Get faculty data and add to worksheet
+    faculties = Faculty.objects.all().order_by('faculty_id')
+    for row, faculty in enumerate(faculties, 2):
+        data = [
+            faculty.faculty_id,
+            faculty.first_name,
+            faculty.last_name,
+            faculty.middle_initial or '',
+            faculty.program,
+            faculty.year_section,
+            faculty.semester,
+            faculty.faculty_status
+        ]
+        
+        for col, value in enumerate(data, 1):
+            cell = ws.cell(row=row, column=col, value=value)
+            cell.border = thin_border
+            cell.alignment = Alignment(horizontal="center", vertical="center")
+            
+            # Add status color coding
+            if col == 8:  # Status column
+                if value == 'Completed':
+                    cell.fill = PatternFill(start_color="FFF2CC", end_color="FFF2CC", fill_type="solid")
+                elif value == 'Deactivated':
+                    cell.fill = PatternFill(start_color="FFCCCC", end_color="FFCCCC", fill_type="solid")
+                else:  # Continuing
+                    cell.fill = PatternFill(start_color="E8F5E8", end_color="E8F5E8", fill_type="solid")
+    
+    # Auto-adjust column widths
+    for column in ws.columns:
+        max_length = 0
+        column_letter = column[0].column_letter
+        for cell in column:
+            try:
+                if len(str(cell.value)) > max_length:
+                    max_length = len(str(cell.value))
+            except:
+                pass
+        adjusted_width = min(max_length + 2, 50)
+        ws.column_dimensions[column_letter].width = adjusted_width
+    
+    # Create response
+    response = HttpResponse(
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = 'attachment; filename="faculty_export.xlsx"'
+    
+    wb.save(response)
+    return response
+
+# CSV Import for Faculty
+@superadmin_required
+def import_faculty_csv(request):
+    """Import faculty data from CSV file"""
+    if request.method == 'POST' and request.FILES.get('csv_file'):
+        csv_file = request.FILES['csv_file']
+        
+        # Validate file type
+        if not csv_file.name.endswith('.csv'):
+            messages.error(request, 'Please upload a CSV file.')
+            return redirect('FacultyList')
+        
+        try:
+            # Read CSV file
+            file_data = csv_file.read().decode('utf-8')
+            io_string = io.StringIO(file_data)
+            csv_reader = csv.DictReader(io_string)
+            
+            success_count = 0
+            error_count = 0
+            errors = []
+            
+            # Process each row
+            for row_num, row in enumerate(csv_reader, start=2):  # Start at 2 for header
+                try:
+                    faculty_id = row.get('Faculty ID', '').strip()
+                    first_name = row.get('First Name', '').strip()
+                    last_name = row.get('Last Name', '').strip()
+                    middle_initial = row.get('Middle Initial', '').strip()
+                    program = row.get('Program', '').strip()
+                    year_section = row.get('Year Section', '').strip()
+                    semester = row.get('Semester', '').strip()
+                    status = row.get('Status', 'Continuing').strip()
+                    
+                    # Validate required fields
+                    if not all([faculty_id, first_name, last_name, program, year_section, semester]):
+                        errors.append(f'Row {row_num}: Missing required fields')
+                        error_count += 1
+                        continue
+                    
+                    # Validate program
+                    if program not in ['Computer Science', 'Information Technology']:
+                        errors.append(f'Row {row_num}: Invalid program "{program}"')
+                        error_count += 1
+                        continue
+                    
+                    # Validate status
+                    if status not in ['Continuing', 'Completed']:
+                        status = 'Continuing'  # Default to Continuing
+                    
+                    # Check if faculty already exists
+                    if Faculty.objects.filter(faculty_id=faculty_id).exists():
+                        errors.append(f'Row {row_num}: Faculty ID "{faculty_id}" already exists')
+                        error_count += 1
+                        continue
+                    
+                    # Create faculty
+                    default_password = "welcomeadmin"
+                    hashed_password = make_password(default_password)
+                    
+                    Faculty.objects.create(
+                        faculty_id=faculty_id,
+                        first_name=first_name,
+                        last_name=last_name,
+                        middle_initial=middle_initial,
+                        program=program,
+                        year_section=year_section,
+                        semester=semester,
+                        password=hashed_password,
+                        faculty_status=status
+                    )
+                    success_count += 1
+                    
+                except Exception as e:
+                    errors.append(f'Row {row_num}: {str(e)}')
+                    error_count += 1
+                    continue
+            
+            # Show results
+            if success_count > 0:
+                messages.success(request, f'Successfully imported {success_count} faculty members.')
+            
+            if error_count > 0:
+                error_message = f'{error_count} rows had errors:\n' + '\n'.join(errors[:10])  # Show first 10 errors
+                if len(errors) > 10:
+                    error_message += f'\n... and {len(errors) - 10} more errors.'
+                messages.error(request, error_message)
+                
+        except Exception as e:
+            messages.error(request, f'Error processing CSV file: {str(e)}')
+    
+    return redirect('FacultyList')
+
+# Download CSV Template
+@superadmin_required
+def download_faculty_csv_template(request):
+    """Download a CSV template for faculty import"""
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="faculty_import_template.csv"'
+    
+    writer = csv.writer(response)
+    # Write CSV header with sample data
+    writer.writerow([
+        'Faculty ID',
+        'First Name', 
+        'Last Name',
+        'Middle Initial',
+        'Program',
+        'Year Section',
+        'Semester',
+        'Status'
+    ])
+    
+    # Add sample row as example
+    writer.writerow([
+        'F2024001',
+        'John',
+        'Doe',
+        'A',
+        'Computer Science',
+        '1A',
+        '1st Semester',
+        'Continuing'
+    ])
+    
+    return response
+
+
+    """Import faculty data from CSV or Excel file"""
+    if request.method == 'POST' and request.FILES.get('csv_file'):
+        uploaded_file = request.FILES['csv_file']
+        
+        # Get file extension
+        file_extension = uploaded_file.name.split('.')[-1].lower()
+        
+        # Validate file type
+        if file_extension not in ['csv', 'xlsx', 'xls']:
+            messages.error(request, 'Please upload a CSV or Excel file (.csv, .xlsx, .xls).')
+            return redirect('FacultyList')
+        
+        try:
+            success_count = 0
+            error_count = 0
+            errors = []
+            
+            # Process based on file type
+            if file_extension == 'csv':
+                # Handle CSV file
+                file_data = uploaded_file.read().decode('utf-8')
+                io_string = io.StringIO(file_data)
+                reader = csv.DictReader(io_string)
+                rows = list(reader)
+            else:
+                # Handle Excel file (.xlsx or .xls)
+                workbook = load_workbook(uploaded_file, read_only=True)
+                worksheet = workbook.active
+                
+                # Get header row (first row)
+                headers = []
+                for cell in worksheet[1]:
+                    headers.append(cell.value)
+                
+                # Convert Excel data to dictionary format
+                rows = []
+                for row in worksheet.iter_rows(min_row=2, values_only=True):
+                    if any(row):  # Skip empty rows
+                        row_dict = {}
+                        for i, value in enumerate(row):
+                            if i < len(headers) and headers[i]:
+                                row_dict[headers[i]] = str(value) if value is not None else ''
+                        rows.append(row_dict)
+            
+            # Process each row
+            for row_num, row in enumerate(rows, start=2):  # Start at 2 for header
+                try:
+                    faculty_id = row.get('Faculty ID', '').strip()
+                    first_name = row.get('First Name', '').strip()
+                    last_name = row.get('Last Name', '').strip()
+                    middle_initial = row.get('Middle Initial', '').strip()
+                    program = row.get('Program', '').strip()
+                    year_section = row.get('Year Section', '').strip()
+                    semester = row.get('Semester', '').strip()
+                    status = row.get('Status', 'Continuing').strip()
+                    
+                    # Validate required fields
+                    if not all([faculty_id, first_name, last_name, program, year_section, semester]):
+                        errors.append(f'Row {row_num}: Missing required fields')
+                        error_count += 1
+                        continue
+                    
+                    # Validate program
+                    if program not in ['Computer Science', 'Information Technology']:
+                        errors.append(f'Row {row_num}: Invalid program "{program}"')
+                        error_count += 1
+                        continue
+                    
+                    # Validate status
+                    if status not in ['Continuing', 'Completed']:
+                        status = 'Continuing'  # Default to Continuing
+                    
+                    # Check if faculty already exists
+                    if Faculty.objects.filter(faculty_id=faculty_id).exists():
+                        errors.append(f'Row {row_num}: Faculty ID "{faculty_id}" already exists')
+                        error_count += 1
+                        continue
+                    
+                    # Create faculty
+                    default_password = "welcomeadmin"
+                    hashed_password = make_password(default_password)
+                    
+                    Faculty.objects.create(
+                        faculty_id=faculty_id,
+                        first_name=first_name,
+                        last_name=last_name,
+                        middle_initial=middle_initial,
+                        program=program,
+                        year_section=year_section,
+                        semester=semester,
+                        password=hashed_password,
+                        faculty_status=status
+                    )
+                    success_count += 1
+                    
+                except Exception as e:
+                    errors.append(f'Row {row_num}: {str(e)}')
+                    error_count += 1
+                    continue
+            
+            # Show results
+            if success_count > 0:
+                messages.success(request, f'Successfully imported {success_count} faculty members from {file_extension.upper()} file.')
+            
+            if error_count > 0:
+                error_message = f'{error_count} rows had errors:\n' + '\n'.join(errors[:10])  # Show first 10 errors
+                if len(errors) > 10:
+                    error_message += f'\n... and {len(errors) - 10} more errors.'
+                messages.error(request, error_message)
+                
+        except Exception as e:
+            messages.error(request, f'Error processing {file_extension.upper()} file: {str(e)}')
+    
+    return redirect('FacultyList')
+
+
+@superadmin_required
+def download_faculty_excel_template(request):
+    """Download an Excel template for faculty import"""
+    from openpyxl import Workbook
+    from openpyxl.styles import Font, PatternFill, Alignment
+    from django.http import HttpResponse
+    
+    # Create workbook and worksheet
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Faculty Template"
+    
+    # Define headers
+    headers = [
+        'Faculty ID',
+        'First Name', 
+        'Last Name',
+        'Middle Initial',
+        'Program',
+        'Year Section',
+        'Semester',
+        'Status'
+    ]
+    
+    # Style for headers
+    header_font = Font(bold=True, color="FFFFFF")
+    header_fill = PatternFill(start_color="366092", end_color="366092", fill_type="solid")
+    header_alignment = Alignment(horizontal="center", vertical="center")
+    
+    # Add headers with styling
+    for col, header in enumerate(headers, 1):
+        cell = ws.cell(row=1, column=col, value=header)
+        cell.font = header_font
+        cell.fill = header_fill
+        cell.alignment = header_alignment
+    
+    # Add sample data
+    sample_data = [
+        'F2024001',
+        'John',
+        'Doe',
+        'A',
+        'Computer Science',
+        '1A',
+        '1st Semester',
+        'Continuing'
+    ]
+    
+    for col, value in enumerate(sample_data, 1):
+        ws.cell(row=2, column=col, value=value)
+    
+    # Add instructions in a separate sheet
+    instructions_ws = wb.create_sheet("Instructions")
+    instructions = [
+        ["Faculty Import Instructions", ""],
+        ["", ""],
+        ["Required Columns:", ""],
+        ["Faculty ID", "Unique identifier for the faculty member (Required)"],
+        ["First Name", "Faculty member's first name (Required)"],
+        ["Last Name", "Faculty member's last name (Required)"],
+        ["Middle Initial", "Faculty member's middle initial (Optional)"],
+        ["Program", "Must be 'Computer Science' or 'Information Technology' (Required)"],
+        ["Year Section", "Year and section (e.g., '1A', '2B') (Required)"],
+        ["Semester", "Semester (e.g., '1st Semester', '2nd Semester') (Required)"],
+        ["Status", "Either 'Continuing' or 'Completed' (Optional - defaults to 'Continuing')"],
+        ["", ""],
+        ["Important Notes:", ""],
+        ["• All imported faculty will have the default password 'welcomeadmin'", ""],
+        ["• Existing Faculty IDs will be skipped", ""],
+        ["• Make sure to follow the exact column names as shown in the template", ""],
+        ["• Remove the sample data before importing your actual data", ""],
+    ]
+    
+    for row, (instruction, detail) in enumerate(instructions, 1):
+        instructions_ws.cell(row=row, column=1, value=instruction)
+        instructions_ws.cell(row=row, column=2, value=detail)
+        if row == 1:  # Title
+            instructions_ws.cell(row=row, column=1).font = Font(bold=True, size=14)
+        elif instruction and instruction.endswith(":"):  # Section headers
+            instructions_ws.cell(row=row, column=1).font = Font(bold=True)
+    
+    # Adjust column widths
+    for ws_sheet in [ws, instructions_ws]:
+        for column in ws_sheet.columns:
+            max_length = 0
+            column_letter = column[0].column_letter
+            for cell in column:
+                try:
+                    if len(str(cell.value)) > max_length:
+                        max_length = len(str(cell.value))
+                except:
+                    pass
+            adjusted_width = min(max_length + 2, 50)
+            ws_sheet.column_dimensions[column_letter].width = adjusted_width
+    
+    # Create response
+    response = HttpResponse(
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = 'attachment; filename="faculty_import_template.xlsx"'
+    
+    wb.save(response)
+    return response
+
+
