@@ -700,9 +700,6 @@
   .h-64 {
     height: calc(var(--spacing) * 64);
   }
-  .h-\[500px\] {
-    height: 500px;
-  }
   .h-full {
     height: 100%;
   }
@@ -2481,9 +2478,6 @@
   .p-12 {
     padding: calc(var(--spacing) * 12);
   }
-  .px-1 {
-    padding-inline: calc(var(--spacing) * 1);
-  }
   .px-2 {
     padding-inline: calc(var(--spacing) * 2);
   }
@@ -3317,8 +3311,16 @@
     --tw-font-weight: var(--font-weight-medium);
     font-weight: var(--font-weight-medium);
   }
+<<<<<<< HEAD
   .peer-focus\:text-blue-400:is(:where(.peer):focus ~ *) {
     color: var(--color-blue-400);
+=======
+  .peer-focus\:text-blue-500:is(:where(.peer):focus ~ *) {
+    color: var(--color-blue-500);
+  }
+  .peer-focus\:text-blue-600:is(:where(.peer):focus ~ *) {
+    color: var(--color-blue-600);
+>>>>>>> NewFeature
   }
   .peer-focus\:text-blue-500:is(:where(.peer):focus ~ *) {
     color: var(--color-blue-500);
