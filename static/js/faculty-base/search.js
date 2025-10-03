@@ -1,5 +1,5 @@
 /**
- * Faculty Search Functionality
+ * student Search Functionality
  * Handles search operations, clear functionality, and UI enhancements
  */
 
@@ -101,10 +101,10 @@ function showSearchLoading() {
  * Perform live search (optional feature)
  */
 function performLiveSearch(query) {
-    const facultyRows = document.querySelectorAll('.facultyRow');
+    const studentRows = document.querySelectorAll('.studentRow');
     let visibleCount = 0;
     
-    facultyRows.forEach(row => {
+    studentRows.forEach(row => {
         const rowText = row.textContent.toLowerCase();
         const searchQuery = query.toLowerCase();
         
@@ -124,8 +124,8 @@ function performLiveSearch(query) {
  * Clear live search results
  */
 function clearLiveSearch() {
-    const facultyRows = document.querySelectorAll('.facultyRow');
-    facultyRows.forEach(row => {
+    const studentRows = document.querySelectorAll('.studentRow');
+    studentRows.forEach(row => {
         row.style.display = '';
     });
     
@@ -199,22 +199,22 @@ function applyFilters() {
     const programFilter = document.querySelector('#program-filter')?.value || '';
     const statusFilter = document.querySelector('#status-filter')?.value || '';
     
-    const facultyRows = document.querySelectorAll('.facultyRow');
+    const studentRows = document.querySelectorAll('.studentRow');
     let visibleCount = 0;
     
-    facultyRows.forEach(row => {
+    studentRows.forEach(row => {
         const cells = row.querySelectorAll('td');
         if (cells.length < 6) return;
         
         const fullName = cells[1].textContent.toLowerCase();
-        const facultyId = cells[0].textContent.toLowerCase();
+        const studentId = cells[0].textContent.toLowerCase();
         const program = cells[2].textContent;
         const status = cells[5].textContent.trim();
         
         // Check search query
         const matchesSearch = !searchQuery || 
             fullName.includes(searchQuery) || 
-            facultyId.includes(searchQuery) || 
+            studentId.includes(searchQuery) || 
             program.toLowerCase().includes(searchQuery);
         
         // Check program filter
@@ -240,10 +240,10 @@ function applyFilters() {
 function highlightSearchTerms(query) {
     if (!query) return;
     
-    const facultyRows = document.querySelectorAll('.facultyRow');
+    const studentRows = document.querySelectorAll('.studentRow');
     const regex = new RegExp(`(${query})`, 'gi');
     
-    facultyRows.forEach(row => {
+    studentRows.forEach(row => {
         const cells = row.querySelectorAll('td');
         cells.forEach(cell => {
             if (cell.textContent.toLowerCase().includes(query.toLowerCase())) {
@@ -257,14 +257,14 @@ function highlightSearchTerms(query) {
  * Export search results functionality
  */
 function exportSearchResults() {
-    const visibleRows = document.querySelectorAll('.facultyRow:not([style*="display: none"])');
+    const visibleRows = document.querySelectorAll('.studentRow:not([style*="display: none"])');
     const data = [];
     
     visibleRows.forEach(row => {
         const cells = row.querySelectorAll('td');
         if (cells.length >= 6) {
             data.push({
-                faculty_id: cells[0].textContent.trim(),
+                student_id: cells[0].textContent.trim(),
                 full_name: cells[1].textContent.trim(),
                 program: cells[2].textContent.trim(),
                 year_section: cells[3].textContent.trim(),
@@ -275,7 +275,7 @@ function exportSearchResults() {
     });
     
     // Convert to CSV and download
-    downloadCSV(data, 'faculty_search_results.csv');
+    downloadCSV(data, 'student_search_results.csv');
 }
 
 /**

@@ -1,6 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-from django.contrib import messages
 from django.templatetags.static import static
 from django.views.decorators.http import require_POST
 from firebase_admin import firestore   
@@ -19,6 +18,13 @@ from datetime import datetime, timedelta
 import calendar as cal
 from django.utils import timezone
 import pytz
+
+import csv
+import io
+from openpyxl import load_workbook, Workbook
+from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+from django.http import HttpResponse
+from django.contrib.auth.hashers import make_password
 
 # Firestore database instance
 from SentinelsProject.firebase_config import db
@@ -1537,3 +1543,417 @@ def faculty_student_status(request):
         return render(request, 'Students/contents/student-status-content.html', context)
     else:
         return render(request, 'Students/student-status.html', context)
+
+
+
+# CSV Export for Students
+@faculty_required
+def export_student_csv(request):
+    """Export student data to CSV file"""
+    try:
+        faculty = Faculty.objects.get(faculty_id=request.user.username)
+    except Faculty.DoesNotExist:
+        messages.error(request, "Faculty profile not found.")
+        return redirect('login')
+    
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="students_export.csv"'
+    
+    writer = csv.writer(response)
+    # Write CSV header
+    writer.writerow([
+        'Student ID',
+        'First Name', 
+        'Last Name',
+        'Middle Initial',
+        'Program',
+        'Year Section',
+        'Semester',
+        'Status'
+    ])
+    
+    # Write student data for this faculty's section
+    students = Student.objects.filter(faculty=faculty).order_by('student_id')
+    for student in students:
+        writer.writerow([
+            student.student_id,
+            student.first_name,
+            student.last_name,
+            student.middle_initial or '',
+            student.faculty.program,
+            student.faculty.year_section,
+            student.faculty.semester,
+            student.student_status
+        ])
+    
+    return response
+
+# Excel Export for Students
+@faculty_required
+def export_student_excel(request):
+    """Export student data to Excel file"""
+    try:
+        faculty = Faculty.objects.get(faculty_id=request.user.username)
+    except Faculty.DoesNotExist:
+        messages.error(request, "Faculty profile not found.")
+        return redirect('login')
+    
+    # Create workbook and worksheet
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Students Export"
+    
+    # Define headers
+    headers = [
+        'Student ID',
+        'First Name', 
+        'Last Name',
+        'Middle Initial',
+        'Program',
+        'Year Section',
+        'Semester',
+        'Status'
+    ]
+    
+    # Style for headers
+    header_font = Font(bold=True, color="FFFFFF")
+    header_fill = PatternFill(start_color="366092", end_color="366092", fill_type="solid")
+    header_alignment = Alignment(horizontal="center", vertical="center")
+    thin_border = Border(
+        left=Side(style='thin'),
+        right=Side(style='thin'),
+        top=Side(style='thin'),
+        bottom=Side(style='thin')
+    )
+    
+    # Add headers with styling
+    for col, header in enumerate(headers, 1):
+        cell = ws.cell(row=1, column=col, value=header)
+        cell.font = header_font
+        cell.fill = header_fill
+        cell.alignment = header_alignment
+        cell.border = thin_border
+    
+    # Get student data and add to worksheet
+    students = Student.objects.filter(faculty=faculty).order_by('student_id')
+    for row, student in enumerate(students, 2):
+        data = [
+            student.student_id,
+            student.first_name,
+            student.last_name,
+            student.middle_initial or '',
+            student.faculty.program,
+            student.faculty.year_section,
+            student.faculty.semester,
+            student.student_status
+        ]
+        
+        for col, value in enumerate(data, 1):
+            cell = ws.cell(row=row, column=col, value=value)
+            cell.border = thin_border
+            cell.alignment = Alignment(horizontal="center", vertical="center")
+            
+            # Add status color coding
+            if col == 8:  # Status column
+                if value == 'Completed':
+                    cell.fill = PatternFill(start_color="FFF2CC", end_color="FFF2CC", fill_type="solid")
+                elif value == 'Drop-out':
+                    cell.fill = PatternFill(start_color="FFCCCC", end_color="FFCCCC", fill_type="solid")
+                else:  # Registered
+                    cell.fill = PatternFill(start_color="E8F5E8", end_color="E8F5E8", fill_type="solid")
+    
+    # Auto-adjust column widths
+    for column in ws.columns:
+        max_length = 0
+        column_letter = column[0].column_letter
+        for cell in column:
+            try:
+                if len(str(cell.value)) > max_length:
+                    max_length = len(str(cell.value))
+            except:
+                pass
+        adjusted_width = min(max_length + 2, 50)
+        ws.column_dimensions[column_letter].width = adjusted_width
+    
+    # Create response
+    response = HttpResponse(
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = 'attachment; filename="students_export.xlsx"'
+    
+    wb.save(response)
+    return response
+
+# CSV Import for Students
+@faculty_required
+def import_student_csv(request):
+    """Import student data from CSV or Excel file"""
+    try:
+        faculty = Faculty.objects.get(faculty_id=request.user.username)
+    except Faculty.DoesNotExist:
+        messages.error(request, "Faculty profile not found.")
+        return redirect('login')
+    
+    if request.method == 'POST' and request.FILES.get('csv_file'):
+        uploaded_file = request.FILES['csv_file']
+        
+        # Get file extension
+        file_extension = uploaded_file.name.split('.')[-1].lower()
+        
+        # Validate file type
+        if file_extension not in ['csv', 'xlsx', 'xls']:
+            messages.error(request, 'Please upload a CSV or Excel file (.csv, .xlsx, .xls).')
+            return redirect('faculty-student-list')
+        
+        try:
+            success_count = 0
+            error_count = 0
+            errors = []
+            
+            # Process based on file type
+            if file_extension == 'csv':
+                # Handle CSV file
+                file_data = uploaded_file.read().decode('utf-8')
+                io_string = io.StringIO(file_data)
+                reader = csv.DictReader(io_string)
+                rows = list(reader)
+            else:
+                # Handle Excel file (.xlsx or .xls)
+                workbook = load_workbook(uploaded_file, read_only=True)
+                worksheet = workbook.active
+                
+                # Get header row (first row)
+                headers = []
+                for cell in worksheet[1]:
+                    headers.append(cell.value)
+                
+                # Convert Excel data to dictionary format
+                rows = []
+                for row in worksheet.iter_rows(min_row=2, values_only=True):
+                    if any(row):  # Skip empty rows
+                        row_dict = {}
+                        for i, value in enumerate(row):
+                            if i < len(headers) and headers[i]:
+                                row_dict[headers[i]] = str(value) if value is not None else ''
+                        rows.append(row_dict)
+            
+            # Process each row
+            for row_num, row in enumerate(rows, start=2):  # Start at 2 for header
+                try:
+                    student_id = row.get('Student ID', '').strip()
+                    first_name = row.get('First Name', '').strip()
+                    last_name = row.get('Last Name', '').strip()
+                    middle_initial = row.get('Middle Initial', '').strip()
+                    status = row.get('Status', 'Registered').strip()
+                    
+                    # Validate required fields
+                    if not all([student_id, first_name, last_name]):
+                        errors.append(f'Row {row_num}: Missing required fields (Student ID, First Name, Last Name)')
+                        error_count += 1
+                        continue
+                    
+                    # Validate status
+                    if status not in ['Registered', 'Completed', 'Drop-out']:
+                        status = 'Registered'  # Default to Registered
+                    
+                    # Check if student already exists
+                    if Student.objects.filter(student_id=student_id).exists():
+                        errors.append(f'Row {row_num}: Student ID "{student_id}" already exists')
+                        error_count += 1
+                        continue
+                    
+                    # Create student with faculty's program/section info
+                    Student.objects.create(
+                        student_id=student_id,
+                        first_name=first_name,
+                        last_name=last_name,
+                        middle_initial=middle_initial,
+                        faculty=faculty,
+                        student_status=status
+                    )
+                    
+                    # Also create Firestore record
+                    firestore_data = {
+                        'student_id': student_id,
+                        'first_name': first_name,
+                        'last_name': last_name,
+                        'middle_initial': middle_initial,
+                        'program': faculty.program,
+                        'year_section': faculty.year_section,
+                        'semester': faculty.semester,
+                    }
+                    
+                    try:
+                        db.collection('Registered_Students').document(student_id).set(firestore_data)
+                    except Exception as e:
+                        print(f"Failed to create Firestore record for {student_id}: {e}")
+                    
+                    success_count += 1
+                    
+                except Exception as e:
+                    errors.append(f'Row {row_num}: {str(e)}')
+                    error_count += 1
+                    continue
+            
+            # Show results
+            if success_count > 0:
+                messages.success(request, f'Successfully imported {success_count} students from {file_extension.upper()} file.')
+            
+            if error_count > 0:
+                error_message = f'{error_count} rows had errors:\n' + '\n'.join(errors[:10])  # Show first 10 errors
+                if len(errors) > 10:
+                    error_message += f'\n... and {len(errors) - 10} more errors.'
+                messages.error(request, error_message)
+                
+        except Exception as e:
+            messages.error(request, f'Error processing {file_extension.upper()} file: {str(e)}')
+    
+    return redirect('faculty-student-list')
+
+# Download CSV Template
+@faculty_required
+def download_student_csv_template(request):
+    """Download a CSV template for student import"""
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="student_import_template.csv"'
+    
+    writer = csv.writer(response)
+    # Write CSV header with sample data
+    writer.writerow([
+        'Student ID',
+        'First Name', 
+        'Last Name',
+        'Middle Initial',
+        'Status'
+    ])
+    
+    # Add sample row as example
+    writer.writerow([
+        'S2024001',
+        'Juan',
+        'Dela Cruz',
+        'M',
+        'Registered'
+    ])
+    
+    return response
+
+# Download Excel Template
+@faculty_required
+def download_student_excel_template(request):
+    """Download an Excel template for student import"""
+    try:
+        faculty = Faculty.objects.get(faculty_id=request.user.username)
+    except Faculty.DoesNotExist:
+        messages.error(request, "Faculty profile not found.")
+        return redirect('login')
+    
+    # Create workbook and worksheet
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Students Template"
+    
+    # Define headers
+    headers = [
+        'Student ID',
+        'First Name', 
+        'Last Name',
+        'Middle Initial',
+        'Status'
+    ]
+    
+    # Style for headers
+    header_font = Font(bold=True, color="FFFFFF")
+    header_fill = PatternFill(start_color="366092", end_color="366092", fill_type="solid")
+    header_alignment = Alignment(horizontal="center", vertical="center")
+    
+    # Add headers with styling
+    for col, header in enumerate(headers, 1):
+        cell = ws.cell(row=1, column=col, value=header)
+        cell.font = header_font
+        cell.fill = header_fill
+        cell.alignment = header_alignment
+    
+    # Add sample data
+    sample_data = [
+        'S2024001',
+        'Juan',
+        'Dela Cruz',
+        'M',
+        'Registered'
+    ]
+    
+    for col, value in enumerate(sample_data, 1):
+        ws.cell(row=2, column=col, value=value)
+    
+    # Add instructions in a separate sheet
+    instructions_ws = wb.create_sheet("Instructions")
+    instructions = [
+        ["Student Import Instructions", ""],
+        ["", ""],
+        [f"Faculty: {faculty.first_name} {faculty.last_name}", ""],
+        [f"Program: {faculty.program}", ""],
+        [f"Year Section: {faculty.year_section}", ""],
+        [f"Semester: {faculty.semester}", ""],
+        ["", ""],
+        ["Required Columns:", ""],
+        ["Student ID", "Unique identifier for the student (Required)"],
+        ["First Name", "Student's first name (Required)"],
+        ["Last Name", "Student's last name (Required)"],
+        ["Middle Initial", "Student's middle initial (Optional)"],
+        ["Status", "Either 'Registered', 'Completed', or 'Drop-out' (Optional - defaults to 'Registered')"],
+        ["", ""],
+        ["Important Notes:", ""],
+        ["• Students will be assigned to your current program and section", ""],
+        ["• Existing Student IDs will be skipped", ""],
+        ["• Make sure to follow the exact column names as shown in the template", ""],
+        ["• Remove the sample data before importing your actual data", ""],
+    ]
+    
+    for row, (instruction, detail) in enumerate(instructions, 1):
+        instructions_ws.cell(row=row, column=1, value=instruction)
+        instructions_ws.cell(row=row, column=2, value=detail)
+        if row == 1:  # Title
+            instructions_ws.cell(row=row, column=1).font = Font(bold=True, size=14)
+        elif instruction and instruction.endswith(":"):  # Section headers
+            instructions_ws.cell(row=row, column=1).font = Font(bold=True)
+    
+    # Adjust column widths
+    for ws_sheet in [ws, instructions_ws]:
+        for column in ws_sheet.columns:
+            max_length = 0
+            column_letter = column[0].column_letter
+            for cell in column:
+                try:
+                    if len(str(cell.value)) > max_length:
+                        max_length = len(str(cell.value))
+                except:
+                    pass
+            adjusted_width = min(max_length + 2, 50)
+            ws_sheet.column_dimensions[column_letter].width = adjusted_width
+    
+    # Create response
+    response = HttpResponse(
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = 'attachment; filename="student_import_template.xlsx"'
+    
+    wb.save(response)
+    return response
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

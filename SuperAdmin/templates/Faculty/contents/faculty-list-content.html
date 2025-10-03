@@ -92,141 +92,150 @@
     <div class="px-6">
         <div class="max-w-[calc(100%-80px)] mx-auto">
             <div class="bg-gradient-to-br from-blue-700/70 to-blue-600 shadow-2xl rounded-2xl p-6">
-                <!-- Table Header -->
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-xl font-bold text-white">Registered Faculty</h2>
-                    <!-- Search and Add Controls -->
-                    <div class="flex flex-wrap items-center gap-4">
-                        <!-- Export Dropdown -->
-                        <div class="relative inline-block text-left">
-                            <button onclick="toggleExportDropdown()" class="bg-green-500 font-bold text-sm text-white px-3 py-2 shadow-lg rounded-xl hover:bg-green-600 transition duration-150 cursor-pointer flex items-center gap-1" title="Export Faculty Data">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                                    <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
-                                </svg>
-                                Export
-                                <svg class="w-4 h-4 ml-1" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path>
-                                </svg>
-                            </button>
-                            <div id="exportDropdown" class="hidden absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10">
-                                <div class="py-1">
-                                    <a href="{% url 'export_faculty_csv' %}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                        <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                                            <path d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"/>
-                                        </svg>
-                                        Export as CSV
-                                    </a>
-                                    <a href="{% url 'export_faculty_excel' %}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                        <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                                            <path d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"/>
-                                        </svg>
-                                        Export as Excel
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Template Dropdown -->
-                        <div class="relative inline-block text-left">
-                            <button onclick="toggleTemplateDropdown()" class="bg-blue-500 font-bold text-sm text-white px-3 py-2 shadow-lg rounded-xl hover:bg-blue-600 transition duration-150 cursor-pointer flex items-center gap-1" title="Download Templates">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                                    <path d="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z"/>
-                                </svg>
-                                Templates
-                                <svg class="w-4 h-4 ml-1" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path>
-                                </svg>
-                            </button>
-                            <div id="templateDropdown" class="hidden absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10">
-                                <div class="py-1">
-                                    <a href="{% url 'download_faculty_csv_template' %}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                        <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                                            <path d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"/>
-                                        </svg>
-                                        CSV Template
-                                    </a>
-                                    <a href="{% url 'download_faculty_excel_template' %}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                        <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                                            <path d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"/>
-                                        </svg>
-                                        Excel Template
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Import Button -->
-                        <button class="bg-orange-500 font-bold text-sm text-white px-3 py-2 shadow-lg rounded-xl hover:bg-orange-600 transition duration-150 cursor-pointer flex items-center gap-1" 
-                                onclick="openImportCsvModal()"
-                                title="Import Faculty from CSV/Excel">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M9,16V10H5L12,3L19,10H15V16H9M5,20V18H19V20H5Z"/>
-                            </svg>
-                            Import
-                        </button>
+                <!-- Table Header - Updated Layout -->
+                <div class="mb-4">
+                    <!-- Title Section -->
+                    <div class="mb-4">
+                        <h2 class="text-xl font-bold text-white">Registered Faculty</h2>
+                    </div>
                     
-                        <!-- Add Button -->
-                        <button class="bg-gray-100 font-bold text-sm text-sky-500 px-3 py-2 shadow-lg rounded-xl hover:bg-sky-600 hover:text-gray-100 transition duration-150 cursor-pointer flex items-center gap-1" 
-                                onclick="openAddFacultyModal()">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z"/>
-                            </svg>
-                            Add Faculty
-                        </button>
+                    <!-- Controls Section -->
+                    <div class="flex flex-wrap items-center gap-4 justify-between">
+                        <!-- Left Side Controls (Export, Templates, Import, Add) -->
+                        <div class="flex flex-wrap items-center gap-3">
+                            <!-- Export Dropdown -->
+                            <div class="relative inline-block text-left">
+                                <button onclick="toggleExportDropdown()" class="bg-green-500 font-bold text-sm text-white px-3 py-2 shadow-lg rounded-xl hover:bg-green-600 transition duration-150 cursor-pointer flex items-center gap-1" title="Export Faculty Data">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
+                                    </svg>
+                                    Export
+                                    <svg class="w-4 h-4 ml-1" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                                    </svg>
+                                </button>
+                                <div id="exportDropdown" class="hidden absolute left-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10">
+                                    <div class="py-1">
+                                        <a href="{% url 'export_faculty_csv' %}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                            <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                                <path d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"/>
+                                            </svg>
+                                            Export as CSV
+                                        </a>
+                                        <a href="{% url 'export_faculty_excel' %}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                            <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                                <path d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"/>
+                                            </svg>
+                                            Export as Excel
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Template Dropdown -->
+                            <div class="relative inline-block text-left">
+                                <button onclick="toggleTemplateDropdown()" class="bg-blue-500 font-bold text-sm text-white px-3 py-2 shadow-lg rounded-xl hover:bg-blue-600 transition duration-150 cursor-pointer flex items-center gap-1" title="Download Templates">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z"/>
+                                    </svg>
+                                    Templates
+                                    <svg class="w-4 h-4 ml-1" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                                    </svg>
+                                </button>
+                                <div id="templateDropdown" class="hidden absolute left-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10">
+                                    <div class="py-1">
+                                        <a href="{% url 'download_faculty_csv_template' %}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                            <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                                <path d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"/>
+                                            </svg>
+                                            CSV Template
+                                        </a>
+                                        <a href="{% url 'download_faculty_excel_template' %}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                            <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                                <path d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"/>
+                                            </svg>
+                                            Excel Template
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Import Button -->
+                            <button class="bg-orange-500 font-bold text-sm text-white px-3 py-2 shadow-lg rounded-xl hover:bg-orange-600 transition duration-150 cursor-pointer flex items-center gap-1" 
+                                    onclick="openImportCsvModal()"
+                                    title="Import Faculty from CSV/Excel">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M9,16V10H5L12,3L19,10H15V16H9M5,20V18H19V20H5Z"/>
+                                </svg>
+                                Import
+                            </button>
                         
-                        <!-- Search Bar -->
-                        <form method="get" class="relative">
-                            <div class="relative group">
-                                <!-- Search Input Container -->
-                                <div class="relative flex items-center bg-white rounded-xl shadow-lg border border-gray-200 hover:border-blue-300 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100 transition-all duration-300 h-[38px]">
-                                    <!-- Search Icon -->
-                                    <div class="absolute left-3 flex items-center pointer-events-none">
-                                        <svg class="w-4 h-4 text-gray-400 group-focus-within:text-blue-500 transition-colors duration-200" 
-                                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                                        </svg>
+                            <!-- Add Button -->
+                            <button class="bg-gray-100 font-bold text-sm text-sky-500 px-3 py-2 shadow-lg rounded-xl hover:bg-sky-600 hover:text-gray-100 transition duration-150 cursor-pointer flex items-center gap-1" 
+                                    onclick="openAddFacultyModal()">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z"/>
+                                </svg>
+                                Add Faculty
+                            </button>
+                        </div>
+                        
+                        <!-- Right Side - Search Bar -->
+                        <div class="flex-shrink-0">
+                            <form method="get" class="relative">
+                                <div class="relative group">
+                                    <!-- Search Input Container -->
+                                    <div class="relative flex items-center bg-white rounded-xl shadow-lg border border-gray-200 hover:border-blue-300 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100 transition-all duration-300 h-[38px] min-w-[300px]">
+                                        <!-- Search Icon -->
+                                        <div class="absolute left-3 flex items-center pointer-events-none">
+                                            <svg class="w-4 h-4 text-gray-400 group-focus-within:text-blue-500 transition-colors duration-200" 
+                                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                            </svg>
+                                        </div>
+                                        
+                                        <!-- Search Input -->
+                                        <input
+                                            type="text"
+                                            name="search"
+                                            value="{{ search_query }}"
+                                            class="w-full pl-10 pr-16 py-2 bg-transparent text-gray-900 placeholder-gray-500 rounded-xl focus:outline-none text-sm font-medium"
+                                            placeholder="Search faculty by name, ID, or program..."
+                                            autocomplete="off"
+                                        />
+                                        
+                                        <!-- Clear Button (shown when there's text) -->
+                                        {% if search_query %}
+                                        <button type="button" 
+                                                onclick="clearSearch()"
+                                                class="absolute right-12 p-1 text-gray-400 hover:text-gray-600 transition-colors duration-200">
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                            </svg>
+                                        </button>
+                                        {% endif %}
+                                        
+                                        <!-- Search Button -->
+                                        <button type="submit" 
+                                                class="absolute right-1 flex items-center justify-center w-8 h-8 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:from-blue-600 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                            </svg>
+                                        </button>
                                     </div>
                                     
-                                    <!-- Search Input -->
-                                    <input
-                                        type="text"
-                                        name="search"
-                                        value="{{ search_query }}"
-                                        class="w-full pl-10 pr-16 py-2 bg-transparent text-gray-900 placeholder-gray-500 rounded-xl focus:outline-none text-sm font-medium"
-                                        placeholder="Search faculty by name, ID, or program..."
-                                        autocomplete="off"
-                                    />
-                                    
-                                    <!-- Clear Button (shown when there's text) -->
+                                    <!-- Search Results Counter -->
                                     {% if search_query %}
-                                    <button type="button" 
-                                            onclick="clearSearch()"
-                                            class="absolute right-12 p-1 text-gray-400 hover:text-gray-600 transition-colors duration-200">
-                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                                        </svg>
-                                    </button>
+                                    <div class="absolute top-full right-0 mt-2 px-3 py-1 bg-blue-50 text-blue-700 text-xs font-medium rounded-lg border border-blue-200 z-[9999]">
+                                        Found {{ paginator.count }} result{{ paginator.count|pluralize }} for "{{ search_query }}" (Page {{ page_obj.number }} of {{ paginator.num_pages }})
+                                    </div>
                                     {% endif %}
-                                    
-                                    <!-- Search Button -->
-                                    <button type="submit" 
-                                            class="absolute right-1 flex items-center justify-center w-8 h-8 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:from-blue-600 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200">
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                                        </svg>
-                                    </button>
                                 </div>
-                                
-                                <!-- Search Results Counter (optional) -->
-                                {% if search_query %}
-                                <div class="absolute top-full left-0 mt-2 px-3 py-1 bg-blue-50 text-blue-700 text-xs font-medium rounded-lg border border-blue-200 z-[9999]">
-                                    Found {{ faculties|length }} result{{ faculties|length|pluralize }} for "{{ search_query }}"
-                                </div>
-                                {% endif %}
-                            </div>
-                        </form>
+                            </form>
+                        </div>
                     </div>
                 </div>
                 <!-- Faculty Table -->
@@ -291,6 +300,57 @@
                             {% endfor %}
                         </tbody>
                     </table>
+                </div>
+                <!-- Pagination Controls -->
+                <div class="flex justify-center mt-6">
+                    <nav class="flex items-center gap-1 text-sm" aria-label="Pagination">
+                        {% if page_obj.has_previous %}
+                            <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}"
+                               class="flex items-center px-3 py-1.5 bg-gray-100 text-blue-400 hover:text-white hover:bg-blue-500 rounded-full transition-colors duration-200">
+                                <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                                </svg>
+                                Prev
+                            </a>
+                        {% else %}
+                            <span class="flex items-center px-3 py-1.5 text-gray-400 bg-gray-100 rounded-full cursor-not-allowed">
+                                <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                                </svg>
+                                Prev
+                            </span>
+                        {% endif %}
+
+                        <div class="flex items-center gap-1">
+                            {% for num in paginator.page_range %}
+                                {% if page_obj.number == num %}
+                                    <span class="px-3 py-1.5 bg-blue-400 text-white font-medium rounded-full">{{ num }}</span>
+                                {% else %}
+                                    <a href="?page={{ num }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}"
+                                       class="px-3 py-1.5 text-blue-500 bg-gray-100 hover:bg-blue-400 hover:text-gray-100 rounded-full transition-colors duration-200">
+                                        {{ num }}
+                                    </a>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+
+                        {% if page_obj.has_next %}
+                            <a href="?page={{ page_obj.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}"
+                               class="flex items-center px-3 py-1.5 bg-gray-100 text-blue-400 hover:text-white hover:bg-blue-500 rounded-full transition-colors duration-200">
+                                Next
+                                <svg class="w-5 h-5 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                </svg>
+                            </a>
+                        {% else %}
+                            <span class="flex items-center px-3 py-1.5 text-gray-400 bg-gray-100 rounded-full cursor-not-allowed">
+                                Next
+                                <svg class="w-5 h-5 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                </svg>
+                            </span>
+                        {% endif %}
+                    </nav>
                 </div>
             </div>
         </div>

@@ -36,4 +36,11 @@ urlpatterns = [
     path('Tier/Junior/', views.junior_tier, name='junior-tier'),
     path('Tier/Senior/', views.senior_tier, name='senior-tier'),
 
+
+    # Student Import/Export URLs
+    path('students/export/csv/', views.export_student_csv, name='export_student_csv'),
+    path('students/export/excel/', views.export_student_excel, name='export_student_excel'),
+    path('students/import/', views.import_student_csv, name='import_student_csv'),
+    path('students/template/csv/', views.download_student_csv_template, name='download_student_csv_template'),
+    path('students/template/excel/', views.download_student_excel_template, name='download_student_excel_template'),
 ]

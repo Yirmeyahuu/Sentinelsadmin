@@ -203,7 +203,7 @@ def Faculty_list(request):
 
     # Pagination
     page_number = request.GET.get('page', 1)
-    paginator = Paginator(faculties, 10)  # 10 faculty per page
+    paginator = Paginator(faculties, 8)  # 10 faculty per page
     page_obj = paginator.get_page(page_number)
 
     faculty_count = Faculty.objects.count()  # Now from PostgreSQL
