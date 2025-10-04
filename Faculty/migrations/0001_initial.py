@@ -52,7 +52,7 @@ class Migration(migrations.Migration):
                 ('semester', models.CharField(choices=[('1st Semester', '1st Semester'), ('2nd Semester', '2nd Semester'), ('Summer', 'Summer')], max_length=20)),
                 ('is_active', models.BooleanField(default=True)),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('faculty', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='assignments', to='faculty.faculty')),
+                ('faculty', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='assignments', to='Faculty.Faculty')),
             ],
             options={
                 'db_table': 'Faculty_Assignment',
