@@ -75,36 +75,61 @@ def saveActivityDeadline(request):
 def Faculty_home(request):
     # --- PostgreSQL Data Fetching ---
     try:
-        faculty = Faculty.objects.get(faculty_id=request.user.username)
+        # Get faculty_id from session instead of request.user.username
+        faculty_id = request.session.get('faculty_id')
+        if not faculty_id:
+            messages.error(request, "Session expired. Please login again.")
+            return redirect('sentinels_login')
+            
+        faculty = Faculty.objects.prefetch_related('assignments').get(faculty_id=faculty_id)
+        
+        # Get active assignments for this faculty
+        faculty_assignments = faculty.assignments.filter(is_active=True)
+        
     except Faculty.DoesNotExist:
         messages.error(request, "Faculty profile not found.")
-        return redirect('some_error_page') # Or faculty login
+        return redirect('sentinels_login')
 
     # Total students (PostgreSQL)
     total_students = Student.objects.filter(student_status='Registered').count()
-    # Computer Science students (PostgreSQL)
-    cs_students_count = Student.objects.filter(student_status='Registered', faculty__program='Computer Science').count()
-    # Information Technology students (PostgreSQL)
-    it_students_count = Student.objects.filter(student_status='Registered', faculty__program='Information Technology').count()
+    
+    # Computer Science students (PostgreSQL) - Updated to use assignments
+    cs_students_count = Student.objects.filter(
+        student_status='Registered', 
+        faculty_assignment__program='Computer Science'
+    ).count()
+    
+    # Information Technology students (PostgreSQL) - Updated to use assignments
+    it_students_count = Student.objects.filter(
+        student_status='Registered', 
+        faculty_assignment__program='Information Technology'
+    ).count()
 
     # --- Quick Lists ---
-    # Recently registered students in the faculty's section
-    quick_students = Student.objects.filter(faculty=faculty).order_by('-pk')[:3]
+    # Recently registered students in any of the faculty's assignments
+    quick_students = Student.objects.filter(
+        faculty_assignment__in=faculty_assignments
+    ).order_by('-pk')[:3]
     
-    # Recently submitted pending students for the faculty's section
-    quick_pending_students = PendingStudent.objects.filter(
-        program=faculty.program,
-        year_section=faculty.year_section,
-        semester=faculty.semester
-    ).order_by('-submitted_at')[:3]
+    # Recently submitted pending students for any of the faculty's assignments
+    quick_pending_students = []
+    for assignment in faculty_assignments:
+        pending = PendingStudent.objects.filter(
+            program=assignment.program,
+            year_section=assignment.year_section,
+            semester=assignment.semester
+        ).order_by('-submitted_at')[:3]
+        quick_pending_students.extend(pending)
+    
+    # Sort and limit to 3 most recent
+    quick_pending_students = sorted(quick_pending_students, key=lambda x: x.submitted_at, reverse=True)[:3]
 
     # --- Task Progress for Charts (from Firebase) ---
-    # Query Firebase for students in this faculty's section
-    students_query = db.collection("Registered_Students") \
-        .where("program", "==", faculty.program) \
-        .where("year_section", "==", faculty.year_section) \
-        .where("semester", "==", faculty.semester) \
-        .stream()
+    # Initialize counters
+    novice_task_counts = [0, 0, 0, 0]
+    junior_task_counts = [0, 0, 0, 0]
+    senior_task_counts = [0, 0, 0, 0]
+    leaderboard_students = []
 
     # Task maps for each tier
     novice_tasks = [
@@ -126,62 +151,68 @@ def Faculty_home(request):
         "Senior_Task_4(AI Malware)"
     ]
 
-    # Initialize counters
-    novice_task_counts = [0, 0, 0, 0]
-    junior_task_counts = [0, 0, 0, 0]
-    senior_task_counts = [0, 0, 0, 0]
-    
-    leaderboard_students = []
+    # Process each assignment's Firebase data
+    for assignment in faculty_assignments:
+        # Query Firebase for students in this assignment's section
+        students_query = db.collection("Registered_Students") \
+            .where("program", "==", assignment.program) \
+            .where("year_section", "==", assignment.year_section) \
+            .where("semester", "==", assignment.semester) \
+            .stream()
 
-    # Process each student's Firebase data
-    for doc in students_query:
-        student_data = doc.to_dict()
-        student_id = student_data.get("student_id", doc.id)
-        first_name = student_data.get("first_name", "")
-        last_name = student_data.get("last_name", "")
-        
-        total_points = 0
-        
-        # Count Novice tier completions
-        for i, task_key in enumerate(novice_tasks):
-            task_data = student_data.get(task_key)
-            if task_data and isinstance(task_data, dict):
-                points = task_data.get("points", 0)
-                if points > 0:  # Task completed
-                    novice_task_counts[i] += 1
-                    total_points += int(points)
-        
-        # Count Junior tier completions
-        for i, task_key in enumerate(junior_tasks):
-            task_data = student_data.get(task_key)
-            if task_data and isinstance(task_data, dict):
-                points = task_data.get("points", 0)
-                if points > 0:  # Task completed
-                    junior_task_counts[i] += 1
-                    total_points += int(points)
-        
-        # Count Senior tier completions
-        for i, task_key in enumerate(senior_tasks):
-            task_data = student_data.get(task_key)
-            if task_data and isinstance(task_data, dict):
-                points = task_data.get("points", 0)
-                if points > 0:  # Task completed
-                    senior_task_counts[i] += 1
-                    total_points += int(points)
-        
-        # Add to leaderboard if student has points
-        if total_points > 0:
-            leaderboard_students.append({
-                "student_id": student_id,
-                "first_name": first_name,
-                "last_name": last_name,
-                "points": total_points,
-            })
+        # Process each student's Firebase data
+        for doc in students_query:
+            student_data = doc.to_dict()
+            student_id = student_data.get("student_id", doc.id)
+            first_name = student_data.get("first_name", "")
+            last_name = student_data.get("last_name", "")
+            
+            total_points = 0
+            
+            # Count Novice tier completions
+            for i, task_key in enumerate(novice_tasks):
+                task_data = student_data.get(task_key)
+                if task_data and isinstance(task_data, dict):
+                    points = task_data.get("points", 0)
+                    if points > 0:  # Task completed
+                        novice_task_counts[i] += 1
+                        total_points += int(points)
+            
+            # Count Junior tier completions
+            for i, task_key in enumerate(junior_tasks):
+                task_data = student_data.get(task_key)
+                if task_data and isinstance(task_data, dict):
+                    points = task_data.get("points", 0)
+                    if points > 0:  # Task completed
+                        junior_task_counts[i] += 1
+                        total_points += int(points)
+            
+            # Count Senior tier completions
+            for i, task_key in enumerate(senior_tasks):
+                task_data = student_data.get(task_key)
+                if task_data and isinstance(task_data, dict):
+                    points = task_data.get("points", 0)
+                    if points > 0:  # Task completed
+                        senior_task_counts[i] += 1
+                        total_points += int(points)
+            
+            # Add to leaderboard if student has points (avoid duplicates)
+            if total_points > 0:
+                existing_student = next((s for s in leaderboard_students if s["student_id"] == student_id), None)
+                if existing_student:
+                    existing_student["points"] += total_points
+                else:
+                    leaderboard_students.append({
+                        "student_id": student_id,
+                        "first_name": first_name,
+                        "last_name": last_name,
+                        "points": total_points,
+                    })
 
     # Sort leaderboard by total points descending
     leaderboard_students = sorted(leaderboard_students, key=lambda x: x["points"], reverse=True)[:10]
 
-    # --- Firestore Logic (Notifications & Deadlines - Unchanged) ---
+    # --- Firestore Logic (Notifications & Deadlines) ---
     notifications_ref = db.collection("Notifications").order_by("timestamp", direction=firestore.Query.DESCENDING)
     notifications = []
     for doc in notifications_ref.stream():
@@ -229,7 +260,7 @@ def Faculty_home(request):
     
     almost_due_tasks.sort(key=lambda x: x['deadline'])
 
-    # IMPROVED: Better calendar generation with proper timezone handling
+    # Calendar generation function (unchanged)
     def generate_calendar_data(year, month, current_day, timezone_obj):
         """Generate calendar data with proper timezone handling"""
         
@@ -275,13 +306,9 @@ def Faculty_home(request):
         philippine_tz
     )
 
-    # Debug information
-    print(f"Debug - Current Philippine time: {current_date}")
-    print(f"Debug - Today is: {current_date.strftime('%A, %B %d, %Y')}")
-    print(f"Debug - Calendar generated for: {current_date.strftime('%B %Y')}")
-
     context = {
         "faculty_data": faculty,
+        "faculty_assignments": faculty_assignments,  # Add this for template use
         "total_students": total_students,
         "cs_students": cs_students_count,
         "it_students": it_students_count,
@@ -305,6 +332,8 @@ def Faculty_home(request):
         return render(request, 'Home/contents/faculty-home-content.html', context)
     else:
         return render(request, 'Home/faculty-home.html', context)
+    
+
 # This is the remove deadline of Activity process
 @csrf_exempt
 @faculty_required
@@ -337,20 +366,60 @@ def remove_deadline(request):
 # This is the student list of Faculty
 @faculty_required
 def student_list(request):
-    # Get the logged-in faculty member from PostgreSQL
+    # Get the logged-in faculty member from PostgreSQL using session
+    faculty_id = request.session.get('faculty_id')
+    if not faculty_id:
+        messages.error(request, "Session expired. Please login again.")
+        return redirect('sentinels_login')
+    
     try:
-        faculty = Faculty.objects.get(faculty_id=request.user.username)
+        faculty = Faculty.objects.prefetch_related('assignments').get(faculty_id=faculty_id)
     except Faculty.DoesNotExist:
         messages.error(request, "Faculty profile not found.")
-        return redirect('some_error_page') # Or faculty login
+        return redirect('sentinels_login')
 
-    # Computer Science students (PostgreSQL)
-    cs_students_count = Student.objects.filter(student_status='Registered', faculty__program='Computer Science').count()
-    # Information Technology students (PostgreSQL)
-    it_students_count = Student.objects.filter(student_status='Registered', faculty__program='Information Technology').count()
+    # Get active assignments for this faculty
+    faculty_assignments = faculty.assignments.filter(is_active=True)
     
-    # Base query for students assigned to this faculty
-    students_query = Student.objects.filter(faculty=faculty, student_status='Registered')
+    if not faculty_assignments.exists():
+        messages.warning(request, "No active assignments found for your account.")
+        context = {
+            "students": [],
+            "faculty_data": faculty,
+            "total_users": 0,
+            "cs_students": 0,
+            "it_students": 0,
+            "notifications": [],
+            "program_total": 0,
+            "section_total": 0,
+            "search_query": "",
+            "active_students_count": 0,
+            "inactive_students_count": 0,
+        }
+        if request.headers.get('HX-Request'):
+            return render(request, 'Students/contents/student-list-content.html', context)
+        else:
+            return render(request, 'Students/student-list.html', context)
+
+    # Computer Science students (PostgreSQL) - Updated to use FacultyAssignment
+    cs_students_count = Student.objects.filter(
+        student_status='Registered', 
+        faculty_assignment__program='Computer Science',
+        faculty_assignment__is_active=True
+    ).count()
+    
+    # Information Technology students (PostgreSQL) - Updated to use FacultyAssignment
+    it_students_count = Student.objects.filter(
+        student_status='Registered', 
+        faculty_assignment__program='Information Technology',
+        faculty_assignment__is_active=True
+    ).count()
+    
+    # Base query for students assigned to this faculty's active assignments
+    students_query = Student.objects.filter(
+        faculty_assignment__in=faculty_assignments, 
+        student_status='Registered'
+    )
 
     # --- Server-side search ---
     search_query = request.GET.get('search', '').strip()
@@ -367,9 +436,9 @@ def student_list(request):
     # Total students in the faculty's specific class/section
     section_total = students_query.count()
     
-    # Total students in the faculty's entire program
+    # Total students in all the faculty's active assignments
     program_total = Student.objects.filter(
-        faculty__program=faculty.program, 
+        faculty_assignment__in=faculty_assignments,
         student_status='Registered'
     ).count()
 
@@ -445,6 +514,7 @@ def student_list(request):
     context = {
         "students": page_obj,
         "faculty_data": faculty,
+        "faculty_assignments": faculty_assignments,  # Add assignments to context
         "total_users": total_users,
         "cs_students": cs_students_count,
         "it_students": it_students_count,
@@ -468,11 +538,38 @@ def student_list(request):
 # This is the student progress of Faculty
 @faculty_required
 def student_progress(request):
+    # Get the logged-in faculty member using session
+    faculty_id = request.session.get('faculty_id')
+    if not faculty_id:
+        messages.error(request, "Session expired. Please login again.")
+        return redirect('sentinels_login')
+    
     try:
-        faculty = Faculty.objects.get(faculty_id=request.user.username)
+        faculty = Faculty.objects.prefetch_related('assignments').get(faculty_id=faculty_id)
     except Faculty.DoesNotExist:
         messages.error(request, "Faculty profile not found.")
-        return redirect('some_error_page')
+        return redirect('sentinels_login')
+
+    # Get active assignments for this faculty
+    faculty_assignments = faculty.assignments.filter(is_active=True)
+    
+    if not faculty_assignments.exists():
+        messages.warning(request, "No active assignments found for your account.")
+        context = {
+            "faculty_data": faculty,
+            "faculty_assignments": [],
+            "section_total": 0,
+            "program_total": 0,
+            "novice_count": 0,
+            "junior_count": 0,
+            "senior_count": 0,
+            "active_students_count": 0,
+            "inactive_students_count": 0,
+        }
+        if request.headers.get('HX-Request'):
+            return render(request, 'Students/contents/students-progress-content.html', context)
+        else:
+            return render(request, 'Students/students-progress.html', context)
 
     # --- Sync Logic: Tier Completion Model ---
 
@@ -484,8 +581,11 @@ def student_progress(request):
             tasks_by_tier[task.tier] = []
         tasks_by_tier[task.tier].append(task)
 
-    # 2. Get all students for this faculty
-    students_in_section = Student.objects.filter(faculty=faculty, student_status='Registered')
+    # 2. Get all students for this faculty's assignments
+    students_in_section = Student.objects.filter(
+        faculty_assignment__in=faculty_assignments, 
+        student_status='Registered'
+    )
 
     # 3. Iterate through students to check and sync progress
     for student in students_in_section:
@@ -578,23 +678,31 @@ def student_progress(request):
     # Since we only add records upon full tier completion, this is accurate.
     
     novice_completed_count = Student.objects.filter(
-        faculty=faculty, 
+        faculty_assignment__in=faculty_assignments, 
         progress_records__task__tier='Novice'
     ).distinct().count()
 
     junior_completed_count = Student.objects.filter(
-        faculty=faculty, 
+        faculty_assignment__in=faculty_assignments, 
         progress_records__task__tier='Junior'
     ).distinct().count()
 
     senior_completed_count = Student.objects.filter(
-        faculty=faculty, 
+        faculty_assignment__in=faculty_assignments, 
         progress_records__task__tier='Senior'
     ).distinct().count()
+    
+    # Calculate totals for dashboard cards
+    program_total = Student.objects.filter(
+        faculty_assignment__in=faculty_assignments,
+        student_status='Registered'
+    ).count()
 
     context = {
         "faculty_data": faculty,
+        "faculty_assignments": faculty_assignments,  # Add assignments to context
         "section_total": students_in_section.count(),
+        "program_total": program_total,  # Add program total for dashboard cards
         "novice_count": novice_completed_count,
         "junior_count": junior_completed_count,
         "senior_count": senior_completed_count,
@@ -727,17 +835,51 @@ def archived_students_list_page(request):
     
     # Handle standard requests for a full page load
     return render(request, "Students/students-archived.html", context)
+
 # This is the verify student process of Faculty
 @faculty_required
 def Verify_Student(request):
-    # Get the logged-in faculty member
-    faculty = get_object_or_404(Faculty, faculty_id=request.user.username)
+    # Get the logged-in faculty member using session
+    faculty_id = request.session.get('faculty_id')
+    if not faculty_id:
+        messages.error(request, "Session expired. Please login again.")
+        return redirect('sentinels_login')
+    
+    try:
+        faculty = Faculty.objects.prefetch_related('assignments').get(faculty_id=faculty_id)
+    except Faculty.DoesNotExist:
+        messages.error(request, "Faculty profile not found.")
+        return redirect('sentinels_login')
 
+    # Get active assignments for this faculty
+    faculty_assignments = faculty.assignments.filter(is_active=True)
+    
+    if not faculty_assignments.exists():
+        messages.warning(request, "No active assignments found for your account.")
+        context = {
+            "faculty_data": faculty,
+            "verify_students": [],
+            "search_query": "",
+        }
+        if request.headers.get('HX-Request'):
+            return render(request, 'Students/contents/students-verify-list-content.html', context)
+        else:
+            return render(request, 'Students/students-verify-list.html', context)
+
+    # Build query for pending students that match ANY of the faculty's active assignments
+    from django.db.models import Q
+    
+    assignment_filters = Q()
+    for assignment in faculty_assignments:
+        assignment_filters |= Q(
+            program=assignment.program,
+            year_section=assignment.year_section,
+            semester=assignment.semester
+        )
+    
     # Filter pending students that match the faculty's class assignments
     pending_students_query = PendingStudent.objects.filter(
-        program=faculty.program,
-        year_section=faculty.year_section,
-        semester=faculty.semester
+        assignment_filters
     ).order_by('submitted_at')
 
     # --- Server-side search ---
@@ -750,7 +892,8 @@ def Verify_Student(request):
         )
 
     context = {
-        "faculty_data": faculty,  # This line fixes the issue
+        "faculty_data": faculty,
+        "faculty_assignments": faculty_assignments,  # Add assignments to context
         "verify_students": pending_students_query,
         "search_query": search_query,
     }
@@ -759,26 +902,32 @@ def Verify_Student(request):
         return render(request, 'Students/contents/students-verify-list-content.html', context)
     else:
         return render(request, 'Students/students-verify-list.html', context)
+    
 # This is the faculty activity page
 @faculty_required
 def Faculty_activity_page(request):
-    # Get faculty data from PostgreSQL (not Firestore)
+    # Get faculty data from PostgreSQL using session
+    faculty_id = request.session.get('faculty_id')
+    if not faculty_id:
+        messages.error(request, "Session expired. Please login again.")
+        return redirect('sentinels_login')
+    
     try:
-        faculty = Faculty.objects.get(faculty_id=request.user.username)
+        faculty = Faculty.objects.prefetch_related('assignments').get(faculty_id=faculty_id)
+        
+        # Get active assignments for this faculty
+        assignments = faculty.assignments.filter(is_active=True)
+        
         faculty_data = {
             "faculty_id": faculty.faculty_id,
             "first_name": faculty.first_name,
             "last_name": faculty.last_name,
             "middle_initial": faculty.middle_initial,
-            "program": faculty.program,
-            "year_section": faculty.year_section,
-            "semester": faculty.semester,
+            "assignments": assignments,  # Pass assignments instead of individual fields
         }
     except Faculty.DoesNotExist:
         messages.error(request, "Faculty profile not found.")
-        return redirect('login')
-
-    faculty_id = faculty.faculty_id  # Use the faculty object
+        return redirect('sentinels_login')
 
     activities_novice = [
         {
@@ -864,27 +1013,44 @@ def Faculty_activity_page(request):
         else:
             lock_states[tier] = True
     
-    # Get activity deadlines from Firestore
+    # Get activity deadlines from Firestore - Use faculty_id directly
     deadlines_doc = db.collection('Activity Deadlines').document(faculty_id).get()
     activity_deadlines = {}
     if deadlines_doc.exists:
         deadlines_data = deadlines_doc.to_dict()
         for key, deadline_data in deadlines_data.items():
-            activity_deadlines[deadline_data['title']] = deadline_data['deadline_date']
+            if isinstance(deadline_data, dict) and 'title' in deadline_data:
+                activity_deadlines[deadline_data['title']] = {
+                    'deadline_date': deadline_data.get('deadline_date'),
+                    'deadline_time': deadline_data.get('deadline_time')
+                }
     
-    # Add isLock and deadline_date to each activity
+    # Add isLock and deadline info to each activity
     for activity in activities_novice:
-        activity['isLock'] = lock_states['Novice']
-        activity['deadline_date'] = activity_deadlines.get(activity['title'])
+        activity['isLock'] = lock_states.get('Novice', True)
+        deadline_info = activity_deadlines.get(activity['title'], {})
+        activity['deadline_date'] = deadline_info.get('deadline_date')
+        activity['deadline_time'] = deadline_info.get('deadline_time')
+        activity['progress'] = 0  # You can calculate this from Firebase if needed
+        
     for activity in activities_junior:
-        activity['isLock'] = lock_states['Junior']
-        activity['deadline_date'] = activity_deadlines.get(activity['title'])
+        activity['isLock'] = lock_states.get('Junior', True)
+        deadline_info = activity_deadlines.get(activity['title'], {})
+        activity['deadline_date'] = deadline_info.get('deadline_date')
+        activity['deadline_time'] = deadline_info.get('deadline_time')
+        activity['progress'] = 0  # You can calculate this from Firebase if needed
+        activity['subject'] = 'Cybersecurity'  # Add subject for Junior/Senior tasks
+        
     for activity in activities_senior:
-        activity['isLock'] = lock_states['Senior']
-        activity['deadline_date'] = activity_deadlines.get(activity['title'])
+        activity['isLock'] = lock_states.get('Senior', True)
+        deadline_info = activity_deadlines.get(activity['title'], {})
+        activity['deadline_date'] = deadline_info.get('deadline_date')
+        activity['deadline_time'] = deadline_info.get('deadline_time')
+        activity['progress'] = 0  # You can calculate this from Firebase if needed
+        activity['subject'] = 'Advanced Cybersecurity'  # Add subject for Junior/Senior tasks
 
     context = {
-        "faculty_data": faculty_data,  # Use the PostgreSQL faculty data
+        "faculty_data": faculty_data,
         "activities_novice": activities_novice,
         "activities_junior": activities_junior,
         "activities_senior": activities_senior,
@@ -895,6 +1061,7 @@ def Faculty_activity_page(request):
         return render(request, 'Activities/contents/Faculty-Activity-List-content.html', context)
     else:
         return render(request, 'Activities/Faculty-Activity-List.html', context)
+    
 # This is the accept student process of Faculty
 @faculty_required
 def accept_student(request, student_id):
@@ -961,20 +1128,27 @@ def mark_all_notifications_read(request):
         notif.reference.update({"seen": True})
     messages.success(request, "All notifications marked as read.")
     return redirect(request.META.get('HTTP_REFERER', '/'))
+
 # This is the faculty account page
 @faculty_required
 def faculty_account(request):
-    faculty_id = request.user.username
+    faculty_id = request.session.get('faculty_id')  # Use session instead of request.user.username
+    if not faculty_id:
+        messages.error(request, "Session expired. Please login again.")
+        return redirect('sentinels_login')
+    
     try:
-        faculty_obj = Faculty.objects.get(faculty_id=faculty_id)
+        faculty_obj = Faculty.objects.prefetch_related('assignments').get(faculty_id=faculty_id)
+        
+        # Get active assignments for this faculty
+        assignments = faculty_obj.assignments.filter(is_active=True)
+        
         faculty_data = {
             "faculty_id": faculty_obj.faculty_id,
             "first_name": faculty_obj.first_name,
             "last_name": faculty_obj.last_name,
             "middle_initial": faculty_obj.middle_initial,
-            "program": faculty_obj.program,
-            "year_section": faculty_obj.year_section,
-            "semester": faculty_obj.semester,
+            "assignments": assignments,  # Pass assignments instead of individual fields
             "profile_image": getattr(faculty_obj, "profile_image", None),  # If you have this field
         }
     except Faculty.DoesNotExist:
@@ -993,6 +1167,7 @@ def faculty_account(request):
     else:
         # Normal request: return the full page
         return render(request, 'Faculty/faculty-account.html', context)
+    
 # This is the edit faculty account process
 @faculty_required
 def edit_faculty_account(request):
@@ -1188,20 +1363,36 @@ def move_student(request):
             return redirect("faculty-student-list")
             
     return redirect(request.META.get('HTTP_REFERER', 'faculty-student-list'))
+
+
 # This is the novice tier page of Faculty
 @faculty_required
 def novice_tier(request):
-    # --- CORRECTED: Fetch faculty data from PostgreSQL for consistency ---
+    # Get the logged-in faculty member using session
+    faculty_id = request.session.get('faculty_id')
+    if not faculty_id:
+        messages.error(request, "Session expired. Please login again.")
+        return redirect('sentinels_login')
+    
     try:
-        faculty = get_object_or_404(Faculty, faculty_id=request.user.username)
+        faculty = Faculty.objects.prefetch_related('assignments').get(faculty_id=faculty_id)
     except Faculty.DoesNotExist:
         messages.error(request, "Faculty profile not found.")
-        return redirect('login')
+        return redirect('sentinels_login')
 
-    # Now use the faculty object's attributes
-    faculty_program = faculty.program
-    faculty_year_section = faculty.year_section
-    faculty_semester = faculty.semester
+    # Get active assignments for this faculty
+    faculty_assignments = faculty.assignments.filter(is_active=True)
+    
+    if not faculty_assignments.exists():
+        messages.warning(request, "No active assignments found for your account.")
+        context = {
+            "novice_students": [],
+            "novice_leaderboard": [],
+            "faculty_data": faculty,
+            "faculty_assignments": [],
+            "selected_task": "task1",
+        }
+        return render(request, 'Tier/Novice.html', context)
 
     # Task map for filtering
     task_map = {
@@ -1213,42 +1404,50 @@ def novice_tier(request):
     selected_task = request.GET.get("task", "task1")
     selected_task_map = task_map.get(selected_task, "Novice_Task_1(Collect Books)")
 
-    students_query = db.collection("Registered_Students") \
-        .where("program", "==", faculty_program) \
-        .where("year_section", "==", faculty_year_section) \
-        .where("semester", "==", faculty_semester) \
-        .stream()
-
     novice_students = []
     leaderboard_students = []
 
-    for doc in students_query:
-        student = doc.to_dict()
-        # For progress table (filtered by selected task)
-        task_data = student.get(selected_task_map)
-        if task_data:
-            novice_students.append({
-                "student_id": student.get("student_id", doc.id),
-                "first_name": student.get("first_name", ""),
-                "last_name": student.get("last_name", ""),
-                "points": task_data.get("points", 0),
-                "total_time_completed": task_data.get("time_taken", ""),
-            })
-        # For leaderboard (sum all tasks)
-        total_points = 0
-        for task_key in task_map.values():
-            task = student.get(task_key)
-            if task and isinstance(task, dict):
-                total_points += int(task.get("points", 0))
-        if total_points > 0:
-            leaderboard_students.append({
-                "student_id": student.get("student_id", doc.id),
-                "first_name": student.get("first_name", ""),
-                "last_name": student.get("last_name", ""),
-                "points": total_points,
-            })
+    # Process each assignment's Firebase data
+    for assignment in faculty_assignments:
+        # Query Firebase for students in this assignment's section
+        students_query = db.collection("Registered_Students") \
+            .where("program", "==", assignment.program) \
+            .where("year_section", "==", assignment.year_section) \
+            .where("semester", "==", assignment.semester) \
+            .stream()
 
-    # Sort leaderboard by total points descending``
+        for doc in students_query:
+            student = doc.to_dict()
+            student_id = student.get("student_id", doc.id)
+            
+            # For progress table (filtered by selected task)
+            task_data = student.get(selected_task_map)
+            if task_data:
+                novice_students.append({
+                    "student_id": student_id,
+                    "first_name": student.get("first_name", ""),
+                    "last_name": student.get("last_name", ""),
+                    "points": task_data.get("points", 0),
+                    "total_time_completed": task_data.get("time_taken", ""),
+                })
+            
+            # For leaderboard (sum all tasks) - avoid duplicates
+            existing_student = next((s for s in leaderboard_students if s["student_id"] == student_id), None)
+            if not existing_student:
+                total_points = 0
+                for task_key in task_map.values():
+                    task = student.get(task_key)
+                    if task and isinstance(task, dict):
+                        total_points += int(task.get("points", 0))
+                if total_points > 0:
+                    leaderboard_students.append({
+                        "student_id": student_id,
+                        "first_name": student.get("first_name", ""),
+                        "last_name": student.get("last_name", ""),
+                        "points": total_points,
+                    })
+
+    # Sort leaderboard by total points descending
     novice_leaderboard = sorted(
         leaderboard_students,
         key=lambda x: x["points"],
@@ -1259,23 +1458,40 @@ def novice_tier(request):
         "novice_students": novice_students,
         "novice_leaderboard": novice_leaderboard,
         "faculty_data": faculty,
+        "faculty_assignments": faculty_assignments,  # Add assignments to context
         "selected_task": selected_task,
     }
     return render(request, 'Tier/Novice.html', context)
+
+
 # This is the junior tier page of Faculty
 @faculty_required
 def junior_tier(request):
-    # --- Fetch faculty data from PostgreSQL for consistency ---
+    # Get the logged-in faculty member using session
+    faculty_id = request.session.get('faculty_id')
+    if not faculty_id:
+        messages.error(request, "Session expired. Please login again.")
+        return redirect('sentinels_login')
+    
     try:
-        faculty = get_object_or_404(Faculty, faculty_id=request.user.username)
+        faculty = Faculty.objects.prefetch_related('assignments').get(faculty_id=faculty_id)
     except Faculty.DoesNotExist:
         messages.error(request, "Faculty profile not found.")
-        return redirect('login')
+        return redirect('sentinels_login')
 
-    # Use the faculty object's attributes to find the correct students
-    faculty_program = faculty.program
-    faculty_year_section = faculty.year_section
-    faculty_semester = faculty.semester
+    # Get active assignments for this faculty
+    faculty_assignments = faculty.assignments.filter(is_active=True)
+    
+    if not faculty_assignments.exists():
+        messages.warning(request, "No active assignments found for your account.")
+        context = {
+            "junior_students": [],
+            "junior_leaderboard": [],
+            "faculty_data": faculty,
+            "faculty_assignments": [],
+            "selected_task": "task1",
+        }
+        return render(request, 'Tier/Junior.html', context)
 
     # Task map for filtering Junior tier tasks
     task_map = {
@@ -1287,40 +1503,48 @@ def junior_tier(request):
     selected_task = request.GET.get("task", "task1")
     selected_task_map = task_map.get(selected_task, "Junior_Task_1(Domain Research)")
 
-    students_query = db.collection("Registered_Students") \
-        .where("program", "==", faculty_program) \
-        .where("year_section", "==", faculty_year_section) \
-        .where("semester", "==", faculty_semester) \
-        .stream()
-
     junior_students = []
     leaderboard_students = []
 
-    for doc in students_query:
-        student = doc.to_dict()
-        # For progress table (filtered by selected task)
-        task_data = student.get(selected_task_map)
-        if task_data:
-            junior_students.append({
-                "student_id": student.get("student_id", doc.id),
-                "first_name": student.get("first_name", ""),
-                "last_name": student.get("last_name", ""),
-                "points": task_data.get("points", 0),
-                "total_time_completed": task_data.get("time_taken", ""),
-            })
-        # For leaderboard (sum all tasks)
-        total_points = 0
-        for task_key in task_map.values():
-            task = student.get(task_key)
-            if task and isinstance(task, dict):
-                total_points += int(task.get("points", 0))
-        if total_points > 0:
-            leaderboard_students.append({
-                "student_id": student.get("student_id", doc.id),
-                "first_name": student.get("first_name", ""),
-                "last_name": student.get("last_name", ""),
-                "points": total_points,
-            })
+    # Process each assignment's Firebase data
+    for assignment in faculty_assignments:
+        # Query Firebase for students in this assignment's section
+        students_query = db.collection("Registered_Students") \
+            .where("program", "==", assignment.program) \
+            .where("year_section", "==", assignment.year_section) \
+            .where("semester", "==", assignment.semester) \
+            .stream()
+
+        for doc in students_query:
+            student = doc.to_dict()
+            student_id = student.get("student_id", doc.id)
+            
+            # For progress table (filtered by selected task)
+            task_data = student.get(selected_task_map)
+            if task_data:
+                junior_students.append({
+                    "student_id": student_id,
+                    "first_name": student.get("first_name", ""),
+                    "last_name": student.get("last_name", ""),
+                    "points": task_data.get("points", 0),
+                    "total_time_completed": task_data.get("time_taken", ""),
+                })
+            
+            # For leaderboard (sum all tasks) - avoid duplicates
+            existing_student = next((s for s in leaderboard_students if s["student_id"] == student_id), None)
+            if not existing_student:
+                total_points = 0
+                for task_key in task_map.values():
+                    task = student.get(task_key)
+                    if task and isinstance(task, dict):
+                        total_points += int(task.get("points", 0))
+                if total_points > 0:
+                    leaderboard_students.append({
+                        "student_id": student_id,
+                        "first_name": student.get("first_name", ""),
+                        "last_name": student.get("last_name", ""),
+                        "points": total_points,
+                    })
 
     # Sort leaderboard by total points descending
     junior_leaderboard = sorted(
@@ -1333,23 +1557,39 @@ def junior_tier(request):
         "junior_students": junior_students,
         "junior_leaderboard": junior_leaderboard,
         "faculty_data": faculty,
+        "faculty_assignments": faculty_assignments,  # Add assignments to context
         "selected_task": selected_task,
     }
     return render(request, 'Tier/Junior.html', context)
+
 # This is the senior tier page of Faculty
 @faculty_required
 def senior_tier(request):
-    # --- Fetch faculty data from PostgreSQL for consistency ---
+    # Get the logged-in faculty member using session
+    faculty_id = request.session.get('faculty_id')
+    if not faculty_id:
+        messages.error(request, "Session expired. Please login again.")
+        return redirect('sentinels_login')
+    
     try:
-        faculty = get_object_or_404(Faculty, faculty_id=request.user.username)
+        faculty = Faculty.objects.prefetch_related('assignments').get(faculty_id=faculty_id)
     except Faculty.DoesNotExist:
         messages.error(request, "Faculty profile not found.")
-        return redirect('login')
+        return redirect('sentinels_login')
 
-    # Use the faculty object's attributes to find the correct students
-    faculty_program = faculty.program
-    faculty_year_section = faculty.year_section
-    faculty_semester = faculty.semester
+    # Get active assignments for this faculty
+    faculty_assignments = faculty.assignments.filter(is_active=True)
+    
+    if not faculty_assignments.exists():
+        messages.warning(request, "No active assignments found for your account.")
+        context = {
+            "senior_students": [],
+            "senior_leaderboard": [],
+            "faculty_data": faculty,
+            "faculty_assignments": [],
+            "selected_task": "task1",
+        }
+        return render(request, 'Tier/Senior.html', context)
 
     # Task map for filtering Senior tier tasks
     task_map = {
@@ -1361,40 +1601,48 @@ def senior_tier(request):
     selected_task = request.GET.get("task", "task1")
     selected_task_map = task_map.get(selected_task, "Senior_Task_1(Threat Landscape)")
 
-    students_query = db.collection("Registered_Students") \
-        .where("program", "==", faculty_program) \
-        .where("year_section", "==", faculty_year_section) \
-        .where("semester", "==", faculty_semester) \
-        .stream()
-
     senior_students = []
     leaderboard_students = []
 
-    for doc in students_query:
-        student = doc.to_dict()
-        # For progress table (filtered by selected task)
-        task_data = student.get(selected_task_map)
-        if task_data:
-            senior_students.append({
-                "student_id": student.get("student_id", doc.id),
-                "first_name": student.get("first_name", ""),
-                "last_name": student.get("last_name", ""),
-                "points": task_data.get("points", 0),
-                "total_time_completed": task_data.get("time_taken", ""),
-            })
-        # For leaderboard (sum all tasks)
-        total_points = 0
-        for task_key in task_map.values():
-            task = student.get(task_key)
-            if task and isinstance(task, dict):
-                total_points += int(task.get("points", 0))
-        if total_points > 0:
-            leaderboard_students.append({
-                "student_id": student.get("student_id", doc.id),
-                "first_name": student.get("first_name", ""),
-                "last_name": student.get("last_name", ""),
-                "points": total_points,
-            })
+    # Process each assignment's Firebase data
+    for assignment in faculty_assignments:
+        # Query Firebase for students in this assignment's section
+        students_query = db.collection("Registered_Students") \
+            .where("program", "==", assignment.program) \
+            .where("year_section", "==", assignment.year_section) \
+            .where("semester", "==", assignment.semester) \
+            .stream()
+
+        for doc in students_query:
+            student = doc.to_dict()
+            student_id = student.get("student_id", doc.id)
+            
+            # For progress table (filtered by selected task)
+            task_data = student.get(selected_task_map)
+            if task_data:
+                senior_students.append({
+                    "student_id": student_id,
+                    "first_name": student.get("first_name", ""),
+                    "last_name": student.get("last_name", ""),
+                    "points": task_data.get("points", 0),
+                    "total_time_completed": task_data.get("time_taken", ""),
+                })
+            
+            # For leaderboard (sum all tasks) - avoid duplicates
+            existing_student = next((s for s in leaderboard_students if s["student_id"] == student_id), None)
+            if not existing_student:
+                total_points = 0
+                for task_key in task_map.values():
+                    task = student.get(task_key)
+                    if task and isinstance(task, dict):
+                        total_points += int(task.get("points", 0))
+                if total_points > 0:
+                    leaderboard_students.append({
+                        "student_id": student_id,
+                        "first_name": student.get("first_name", ""),
+                        "last_name": student.get("last_name", ""),
+                        "points": total_points,
+                    })
 
     # Sort leaderboard by total points descending
     senior_leaderboard = sorted(
@@ -1407,9 +1655,11 @@ def senior_tier(request):
         "senior_students": senior_students,
         "senior_leaderboard": senior_leaderboard,
         "faculty_data": faculty,
+        "faculty_assignments": faculty_assignments,  # Add assignments to context
         "selected_task": selected_task,
     }
     return render(request, 'Tier/Senior.html', context)
+
 # This is the faculty student status page
 @faculty_required
 def faculty_student_status(request):
@@ -1417,40 +1667,78 @@ def faculty_student_status(request):
     Displays all students assigned to the logged-in faculty,
     with options to filter by their status (e.g., Registered, Completed, Drop-out).
     """
-    # Get the logged-in faculty member from PostgreSQL
+    # Get the logged-in faculty member from PostgreSQL using session
+    faculty_id = request.session.get('faculty_id')
+    if not faculty_id:
+        messages.error(request, "Session expired. Please login again.")
+        return redirect('sentinels_login')
+    
     try:
-        # CORRECTED: Changed lookup from user=request.user to faculty_id=request.user.username
-        faculty = Faculty.objects.get(faculty_id=request.user.username)
+        faculty = Faculty.objects.prefetch_related('assignments').get(faculty_id=faculty_id)
     except Faculty.DoesNotExist:
         messages.error(request, "Faculty profile not found.")
-        return redirect('login') # Redirect to login if faculty profile is missing
+        return redirect('sentinels_login')
 
-    # Computer Science students (PostgreSQL)
-    cs_students_count = Student.objects.filter(student_status='Registered', faculty__program='Computer Science').count()
-    # Information Technology students (PostgreSQL)
-    it_students_count = Student.objects.filter(student_status='Registered', faculty__program='Information Technology').count()
+    # Get active assignments for this faculty
+    faculty_assignments = faculty.assignments.filter(is_active=True)
     
-    # Total students in the faculty's entire program
+    if not faculty_assignments.exists():
+        messages.warning(request, "No active assignments found for your account.")
+        context = {
+            "students": [],
+            "faculty_data": faculty,
+            "faculty_assignments": [],
+            "search_query": "",
+            "status_filter": "all",
+            "cs_students": 0,
+            "it_students": 0,
+            "program_total": 0,
+            "section_total": 0,
+            "active_students_count": 0,
+            "inactive_students_count": 0,
+        }
+        if request.headers.get('HX-Request'):
+            return render(request, 'Students/contents/student-status-content.html', context)
+        else:
+            return render(request, 'Students/student-status.html', context)
+
+    # Computer Science students (PostgreSQL) - Updated to use FacultyAssignment
+    cs_students_count = Student.objects.filter(
+        student_status='Registered', 
+        faculty_assignment__program='Computer Science',
+        faculty_assignment__is_active=True
+    ).count()
+    
+    # Information Technology students (PostgreSQL) - Updated to use FacultyAssignment
+    it_students_count = Student.objects.filter(
+        student_status='Registered', 
+        faculty_assignment__program='Information Technology',
+        faculty_assignment__is_active=True
+    ).count()
+    
+    # Total students in all the faculty's active assignments (only Registered)
     program_total = Student.objects.filter(
-        faculty__program=faculty.program, 
+        faculty_assignment__in=faculty_assignments,
         student_status='Registered'
     ).count()
     
-    # Total students in the faculty's specific class/section (only Registered)
-    section_total = Student.objects.filter(faculty=faculty, student_status='Registered').count()
+    # Total students in the faculty's specific assignments (only Registered)
+    section_total = Student.objects.filter(
+        faculty_assignment__in=faculty_assignments, 
+        student_status='Registered'
+    ).count()
 
     # Get filter and search parameters from the request
     status_filter = request.GET.get('status', 'all').lower()
     search_query = request.GET.get('search', '').strip()
 
-    # --- CORRECTED QUERY ---
-    # Base query now fetches ALL students assigned to this faculty
-    students_query = Student.objects.filter(faculty=faculty)
+    # Base query now fetches ALL students assigned to this faculty's assignments
+    students_query = Student.objects.filter(faculty_assignment__in=faculty_assignments)
 
     # Apply status filter based on selection
     if status_filter == 'completed':
         students_query = students_query.filter(student_status='Completed')
-    elif status_filter in ['drop-out', 'dropout']:  # Fixed: removed duplicate 'drop-out'
+    elif status_filter in ['drop-out', 'dropout']:
         students_query = students_query.filter(student_status='Drop-out')
     elif status_filter == 'registered':
         students_query = students_query.filter(student_status='Registered')
@@ -1487,8 +1775,11 @@ def faculty_student_status(request):
     active_students_count = 0
     inactive_students_count = 0
 
-    # Get only REGISTERED student IDs from the faculty for active/inactive check
-    registered_student_ids = list(Student.objects.filter(faculty=faculty, student_status='Registered').values_list('student_id', flat=True))
+    # Get only REGISTERED student IDs from the faculty's assignments for active/inactive check
+    registered_student_ids = list(Student.objects.filter(
+        faculty_assignment__in=faculty_assignments, 
+        student_status='Registered'
+    ).values_list('student_id', flat=True))
 
     # Check Firebase for each registered student's activity
     for student_id in registered_student_ids:
@@ -1527,6 +1818,7 @@ def faculty_student_status(request):
     context = {
         "students": page_obj,
         "faculty_data": faculty,
+        "faculty_assignments": faculty_assignments,  # Add assignments to context
         "search_query": search_query,
         "status_filter": status_filter, # Pass filter to template
         "page_obj": page_obj,

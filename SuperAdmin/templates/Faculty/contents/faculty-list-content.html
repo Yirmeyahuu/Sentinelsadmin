@@ -181,6 +181,7 @@
                             </button>
                         </div>
                         
+                        
                         <!-- Right Side - Search Bar -->
                         <div class="flex-shrink-0">
                             <form method="get" class="relative">
@@ -257,19 +258,43 @@
                             <tr class="facultyRow text-blue-900 hover:bg-blue-200 transition text-md {% if forloop.counter0|divisibleby:2 %}bg-gray-100{% else %}bg-blue-100{% endif %}">
                                 <td class="border border-blue-700 p-2 text-center whitespace-nowrap">{{ faculty.faculty_id }}</td>
                                 <td class="border border-blue-700 p-2 text-center whitespace-nowrap">{{ faculty.first_name }} {{ faculty.middle_initial }} {{ faculty.last_name }}</td>
-                                <td class="border border-blue-700 p-2 text-center whitespace-nowrap">{{ faculty.program }}</td>
-                                <td class="border border-blue-700 p-2 text-center whitespace-nowrap">{{ faculty.year_section }}</td>
-                                <td class="border border-blue-700 p-2 text-center whitespace-nowrap">{{ faculty.semester }}</td>
+                                <td class="border border-blue-700 p-2 text-center">
+                                    <div class="space-y-1">
+                                        {% for assignment in faculty.assignments.all %}
+                                            <div class="text-xs bg-blue-50 rounded px-1 py-0.5">{{ assignment.program }}</div>
+                                        {% empty %}
+                                            <span class="text-gray-500 text-xs">-</span>
+                                        {% endfor %}
+                                    </div>
+                                </td>
+                                <td class="border border-blue-700 p-2 text-center">
+                                    <div class="space-y-1">
+                                        {% for assignment in faculty.assignments.all %}
+                                            <div class="text-xs bg-blue-50 rounded px-1 py-0.5">{{ assignment.year_section }}</div>
+                                        {% empty %}
+                                            <span class="text-gray-500 text-xs">-</span>
+                                        {% endfor %}
+                                    </div>
+                                </td>
+                                <td class="border border-blue-700 p-2 text-center">
+                                    <div class="space-y-1">
+                                        {% for assignment in faculty.assignments.all %}
+                                            <div class="text-xs bg-blue-50 rounded px-1 py-0.5">{{ assignment.semester }}</div>
+                                        {% empty %}
+                                            <span class="text-gray-500 text-xs">-</span>
+                                        {% endfor %}
+                                    </div>
+                                </td>
                                 <td class="border border-blue-700 p-2 text-center whitespace-nowrap">
                                     <span class="px-2 py-1 rounded-lg text-xs font-medium
-                                        {% if faculty.status == 'Deactivated' %}
+                                        {% if faculty.faculty_status == 'Deactivated' %}
                                             bg-red-500/20 text-red-700
-                                        {% elif faculty.status == 'Completed' %}
+                                        {% elif faculty.faculty_status == 'Completed' %}
                                             bg-yellow-500/20 text-yellow-700
                                         {% else %}
                                             bg-green-500/20 text-green-700
                                         {% endif %}">
-                                        {{ faculty.status }}
+                                        {{ faculty.faculty_status }}
                                     </span>
                                 </td>
                                 <td class="border border-blue-500 p-2 text-center whitespace-nowrap">
@@ -363,91 +388,124 @@
     {% for faculty in faculties %}
     <div id="editFacultyModal-{{ faculty.faculty_id }}" 
          class="fixed inset-0 flex items-center justify-center bg-gray-900/80 z-100 hidden">
-        <div class="bg-white p-8 rounded-2xl shadow-2xl w-[36rem] relative border border-gray-100">
+        <div class="bg-white p-8 rounded-2xl shadow-2xl w-[50rem] relative border border-gray-100 max-h-[90vh] overflow-y-auto">
             <div class="mb-6">
                 <h2 class="text-xl font-semibold text-gray-800">Edit Faculty</h2>
-                <p class="text-gray-500 text-sm mt-1">Update faculty information</p>
+                <p class="text-gray-500 text-sm mt-1">Update faculty information and assignments</p>
+                <div class="h-1 w-20 bg-blue-600 mt-4 rounded-full"></div>
             </div>
             
-            <form method="POST" action="{% url 'edit_faculty' faculty.faculty_id %}" class="space-y-6">
+            <form id="editFacultyForm-{{ faculty.faculty_id }}" method="POST" action="{% url 'edit_faculty' faculty.faculty_id %}" class="space-y-6">
                 {% csrf_token %}
                 <input type="hidden" name="faculty_id" value="{{ faculty.faculty_id }}">
+                <input type="hidden" name="assignments" id="editAssignmentsData-{{ faculty.faculty_id }}" value="[]">
                 
-                <div class="grid grid-cols-2 gap-4">
+                <div class="grid grid-cols-2 gap-6">
+                    <!-- Faculty ID (Read-only) -->
+                    <div class="relative group">
+                        <label class="block text-sm font-semibold mb-2 text-gray-700">
+                            Faculty ID
+                        </label>
+                        <input type="text" value="{{ faculty.faculty_id }}" readonly
+                               class="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-gray-600 cursor-not-allowed">
+                    </div>
+
                     <!-- First Name -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+                    <div class="relative group">
+                        <label class="block text-sm font-semibold mb-2 text-gray-700">
+                            First Name <span class="text-red-500 text-xs">*</span>
+                        </label>
                         <input type="text" name="first_name" 
                                value="{{ faculty.first_name|default_if_none:'' }}"
-                               class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200" 
-                               placeholder="Enter first name">
+                               class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200" 
+                               placeholder="Enter first name" required>
                     </div>
                     
                     <!-- Last Name -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+                    <div class="relative group">
+                        <label class="block text-sm font-semibold mb-2 text-gray-700">
+                            Last Name <span class="text-red-500 text-xs">*</span>
+                        </label>
                         <input type="text" name="last_name" 
                                value="{{ faculty.last_name|default_if_none:'' }}"
-                               class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200" 
-                               placeholder="Enter last name">
+                               class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200" 
+                               placeholder="Enter last name" required>
                     </div>
                     
                     <!-- Middle Initial -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Middle Initial</label>
+                    <div class="relative group">
+                        <label class="block text-sm font-semibold mb-2 text-gray-700">
+                            Middle Initial
+                        </label>
                         <input type="text" name="middle_initial" 
                                value="{{ faculty.middle_initial|default_if_none:'' }}"
-                               class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200" 
+                               class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200" 
                                placeholder="Enter middle initial">
                     </div>
-                    
-                    <!-- Program -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Program</label>
-                        <select name="program" 
-                                class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200">
-                            <option value="Computer Science" {% if faculty.program == "Computer Science" %}selected{% endif %}>
-                                Computer Science
-                            </option>
-                            <option value="Information Technology" {% if faculty.program == "Information Technology" %}selected{% endif %}>
-                                Information Technology
-                            </option>
-                        </select>
+                </div>
+
+                <!-- Assignments Section -->
+                <div class="border-t pt-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-semibold text-gray-800">Program Assignments</h3>
+                        <button type="button" onclick="addEditAssignment('{{ faculty.faculty_id }}')" 
+                                class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                            + Add Assignment
+                        </button>
                     </div>
                     
-                    <!-- Year & Section -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Year & Section</label>
-                        <input type="text" name="year_section" 
-                               value="{{ faculty.year_section|default_if_none:'' }}"
-                               class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200" 
-                               placeholder="Enter year & section">
-                    </div>
-                    
-                    <!-- Semester -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Semester</label>
-                        <select name="semester" 
-                                class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200">
-                            <option value="1st Semester" {% if faculty.semester == "1st Semester" %}selected{% endif %}>
-                                1st Semester
-                            </option>
-                            <option value="2nd Semester" {% if faculty.semester == "2nd Semester" %}selected{% endif %}>
-                                2nd Semester
-                            </option>
-                        </select>
+                    <div id="editAssignmentsList-{{ faculty.faculty_id }}" class="space-y-4">
+                        <!-- Existing assignments will be loaded here -->
+                        {% for assignment in faculty.assignments.all %}
+                        <div class="assignment-item bg-gray-50 p-4 rounded-lg border" data-index="{{ forloop.counter0 }}">
+                            <div class="flex justify-between items-center mb-3">
+                                <h4 class="font-medium text-gray-700">Assignment {{ forloop.counter }}</h4>
+                                <button type="button" onclick="removeEditAssignment('{{ faculty.faculty_id }}', {{ forloop.counter0 }})" 
+                                        class="text-red-600 hover:text-red-800 transition-colors">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                    </svg>
+                                </button>
+                            </div>
+                            <div class="grid grid-cols-3 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Program</label>
+                                    <select class="assignment-program w-full px-3 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500" required>
+                                        <option value="">Select Program</option>
+                                        <option value="Computer Science" {% if assignment.program == "Computer Science" %}selected{% endif %}>Computer Science</option>
+                                        <option value="Information Technology" {% if assignment.program == "Information Technology" %}selected{% endif %}>Information Technology</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Year & Section</label>
+                                    <input type="text" class="assignment-year-section w-full px-3 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500" 
+                                           placeholder="e.g. 3A" value="{{ assignment.year_section }}" required>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Semester</label>
+                                    <select class="assignment-semester w-full px-3 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500" required>
+                                        <option value="">Select Semester</option>
+                                        <option value="1st Semester" {% if assignment.semester == "1st Semester" %}selected{% endif %}>1st Semester</option>
+                                        <option value="2nd Semester" {% if assignment.semester == "2nd Semester" %}selected{% endif %}>2nd Semester</option>
+                                        <option value="Summer" {% if assignment.semester == "Summer" %}selected{% endif %}>Summer</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <input type="hidden" class="assignment-id" value="{{ assignment.id }}">
+                        </div>
+                        {% endfor %}
                     </div>
                 </div>
                 
                 <!-- Action Buttons -->
-                <div class="flex justify-end items-center space-x-3 mt-8 pt-6 border-t border-gray-100">
+                <div class="flex justify-end items-center space-x-4 mt-8 pt-6 border-t border-gray-100">
                     <button type="button"
                             onclick="closeEditFacultyModal('{{ faculty.faculty_id }}')"
-                            class="px-6 py-2.5 rounded-xl border border-gray-300 text-gray-600 hover:bg-gray-50 transition-all duration-200">
+                            class="px-6 py-2.5 rounded-xl border-2 border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-all duration-200">
                         Cancel
                     </button>
                     <button type="submit"
-                            class="px-6 py-2.5 rounded-xl bg-blue-500 text-white hover:bg-blue-600 transition-all duration-200">
+                            class="px-6 py-2.5 rounded-xl bg-blue-600 text-white hover:bg-blue-700 transform hover:scale-[1.02] transition-all duration-200">
                         Save Changes
                     </button>
                 </div>

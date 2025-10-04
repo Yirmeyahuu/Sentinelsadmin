@@ -15,7 +15,7 @@ urlpatterns = [
     path("archive/<str:faculty_id>/", views.Faculty_Archive, name="archive_faculty"),
     path('archived-faculty/delete/<str:faculty_id>/', views.delete_archived_faculty, name='delete_archived_faculty'),
 
-    path("restore/<str:faculty_id>/", views.restore_faculty, name="restore_faculty"),
+    path('restore-faculty/<str:faculty_id>/', views.restore_faculty, name='restore_faculty'),
     path('faculty/edit/<str:faculty_id>/', views.edit_faculty, name='edit_faculty'),
     path('faculty/move/', views.move_faculty, name='move_faculty'),
     path('Faculty-status/', views.Faculty_Status, name='Faculty_status'),

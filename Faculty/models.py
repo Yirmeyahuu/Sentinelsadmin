@@ -6,16 +6,12 @@ class Faculty(models.Model):
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
     middle_initial = models.CharField(max_length=10, blank=True)
-    program = models.CharField(max_length=100)
-    year_section = models.CharField(max_length=20)
-    semester = models.CharField(max_length=20)
     password = models.CharField(max_length=128)
     faculty_status = models.CharField(
         max_length=20,
         choices=[('Continuing', 'Continuing'), ('Completed', 'Completed')],
         default='Continuing'
     )
-    # Add this field to track if password has been changed from default
     password_changed = models.BooleanField(default=False)
     password_changed_at = models.DateTimeField(null=True, blank=True)
 
@@ -37,20 +33,44 @@ class Faculty(models.Model):
     class Meta:
         db_table = 'Faculty'
 
+# Add this new model
+class FacultyAssignment(models.Model):
+    PROGRAM_CHOICES = [
+        ('Computer Science', 'Computer Science'),
+        ('Information Technology', 'Information Technology'),
+    ]
+    
+    SEMESTER_CHOICES = [
+        ('1st Semester', '1st Semester'),
+        ('2nd Semester', '2nd Semester'),
+        ('Summer', 'Summer'),
+    ]
+    
+    faculty = models.ForeignKey(Faculty, on_delete=models.CASCADE, related_name='assignments')
+    program = models.CharField(max_length=50, choices=PROGRAM_CHOICES)
+    year_section = models.CharField(max_length=20)
+    semester = models.CharField(max_length=20, choices=SEMESTER_CHOICES)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        db_table = 'Faculty_Assignment'
+        unique_together = ['faculty', 'program', 'year_section', 'semester']
+    
+    def __str__(self):
+        return f"{self.faculty.faculty_id} - {self.program} {self.year_section} ({self.semester})"
+
 class ArchivedFaculty(models.Model):
     faculty_id = models.CharField(max_length=50, primary_key=True)
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
     middle_initial = models.CharField(max_length=10, blank=True)
-    program = models.CharField(max_length=100)
-    year_section = models.CharField(max_length=20)
-    semester = models.CharField(max_length=20)
+    faculty_status = models.CharField(max_length=20, default='Archived')
     archived_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"{self.faculty_id} - {self.first_name} {self.last_name}"
+    assignments_data = models.JSONField(default=list, blank=True)
 
     class Meta:
-        db_table = 'ArchivedFaculty'
-        verbose_name_plural = "Archived Faculty"
+        db_table = 'Archived_Faculty'
 
+    def __str__(self):
+        return f"Archived: {self.faculty_id} - {self.first_name} {self.last_name}"
