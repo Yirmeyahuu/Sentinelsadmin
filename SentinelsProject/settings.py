@@ -13,7 +13,6 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-#SECRET_KEY = 'django-insecure-ktfkhd0zkk(f8q_vzlivj(_xjx(gvu91t-%vl=6$ud+t2q$+o+'
 SECRET_KEY = os.getenv("SECRET_KEY")
 
 
@@ -126,12 +125,6 @@ else:
     }
 
 
-
-if os.environ.get('RENDER'):
-    # Skip problematic migrations on Render
-    MIGRATION_MODULES = {
-        'Student': 'Student.migrations_render',
-    }
     
     # Create the directory and copy migrations without the problematic one
     # This can be done via build script
