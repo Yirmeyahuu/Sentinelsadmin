@@ -124,6 +124,17 @@ else:
             'PORT': os.getenv('DB_PORT', '5432'),
         }
     }
+
+
+
+if os.environ.get('RENDER'):
+    # Skip problematic migrations on Render
+    MIGRATION_MODULES = {
+        'Student': 'Student.migrations_render',
+    }
+    
+    # Create the directory and copy migrations without the problematic one
+    # This can be done via build script
 #postgresql://sentinels_db_user:yAkAHRMXpXdOFOyqNSeTk0f2rAXj7gKd@dpg-d3d3tqjipnbc73failq0-a/sentinels_db
 #
 #POSTGRESQL DATABASE ON RENDER
