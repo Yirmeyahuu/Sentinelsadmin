@@ -1,29 +1,54 @@
 from django.db import models
-from Faculty.models import Faculty
+from Faculty.models import Faculty, FacultyAssignment
 
 class Student(models.Model):
     student_id = models.CharField(max_length=50, primary_key=True)
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
     middle_initial = models.CharField(max_length=10, blank=True)
-    program = models.CharField(max_length=100, blank=True)
-    year_section = models.CharField(max_length=20, blank=True)
-    semester = models.CharField(max_length=20, blank=True)
+    
+    # Keep old faculty field temporarily for data migration
+    faculty = models.ForeignKey(
+        Faculty, 
+        on_delete=models.CASCADE, 
+        related_name='students_old',
+        null=True,
+        blank=True
+    )
+    
+    # Add new faculty_assignment field
+    faculty_assignment = models.ForeignKey(
+        FacultyAssignment, 
+        on_delete=models.CASCADE, 
+        related_name='students',
+        null=True,
+        blank=True
+    )
+    
     student_status = models.CharField(
         max_length=20,
         choices=[('Registered', 'Registered'), ('Completed', 'Completed'), ('Drop-out', 'Drop-out')],
         default='Registered'
     )
     password = models.CharField(max_length=128)
-    
 
-    faculty = models.ForeignKey(
-        Faculty, 
-        on_delete=models.CASCADE, 
-        related_name='students',
-        null=True,
-        blank=True
-    )
+    @property
+    def program(self):
+        if self.faculty_assignment:
+            return self.faculty_assignment.program
+        return getattr(self.faculty, 'program', '')
+    
+    @property
+    def year_section(self):
+        if self.faculty_assignment:
+            return self.faculty_assignment.year_section
+        return getattr(self.faculty, 'year_section', '')
+    
+    @property
+    def semester(self):
+        if self.faculty_assignment:
+            return self.faculty_assignment.semester
+        return getattr(self.faculty, 'semester', '')
 
     def __str__(self):
         return f"{self.student_id} - {self.first_name} {self.last_name}"
@@ -32,7 +57,6 @@ class Student(models.Model):
         db_table = 'Students'
 
 class ArchivedStudent(models.Model):
-    # We use a separate AutoField for the primary key, but keep student_id for identification.
     student_id = models.CharField(max_length=50, primary_key=True)
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
@@ -41,10 +65,7 @@ class ArchivedStudent(models.Model):
     program = models.CharField(max_length=100, blank=True)
     year_section = models.CharField(max_length=20, blank=True)
     semester = models.CharField(max_length=20, blank=True)
-
-
-    # Store a reference to the faculty, but allow it to be null
-    # in case the original faculty record is ever deleted.
+    
     faculty = models.ForeignKey(
         Faculty, 
         on_delete=models.SET_NULL, 
@@ -56,14 +77,12 @@ class ArchivedStudent(models.Model):
     archived_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.student_id} - {self.first_name} {self.last_name}"
+        return f"Archived: {self.student_id} - {self.first_name} {self.last_name}"
     
     class Meta:
-        db_table = 'ArchivedStudents'
-        verbose_name_plural = "Archived Students"
+        db_table = 'Archived_Students'
 
 class PendingStudent(models.Model):
-    # This model holds student data before it's verified by a faculty member.
     student_id = models.CharField(max_length=50, primary_key=True)
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
@@ -74,15 +93,15 @@ class PendingStudent(models.Model):
     
     password = models.CharField(max_length=128)
     
-    # Timestamp for when the registration was submitted
     submitted_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"Pending: {self.student_id} - {self.first_name} {self.last_name}"
 
     class Meta:
-        db_table = 'PendingStudents'
-        verbose_name_plural = "Pending Students"
+        db_table = 'Pending_Students'
+
+# Keep your Task and StudentTaskProgress models as they were...
 
 class Task(models.Model):
     """Represents a single, definable task in the game."""

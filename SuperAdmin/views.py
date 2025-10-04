@@ -3,7 +3,7 @@ from django.contrib import messages
 import firebase_admin
 from firebase_admin import credentials, firestore
 from django.contrib.auth.hashers import make_password
-from Faculty.models import Faculty, ArchivedFaculty
+from Faculty.models import Faculty, ArchivedFaculty, FacultyAssignment
 from django.http import JsonResponse
 from django.templatetags.static import static
 from Login.decorators import superadmin_required
@@ -25,6 +25,9 @@ from django.core.files.base import ContentFile
 from openpyxl import load_workbook
 from django.http import HttpResponse
 
+from django.db.models import Prefetch
+
+
 
 
 
@@ -43,11 +46,11 @@ def Superadmin_Home(request):
     # Total faculty (PostgreSQL)
     total_faculty = Faculty.objects.filter(faculty_status='Continuing').count()
 
-    # Computer Science students (PostgreSQL)
-    cs_students_count = Student.objects.filter(student_status='Registered', faculty__program='Computer Science').count()
+    # Computer Science students (PostgreSQL) - UPDATED
+    cs_students_count = Student.objects.filter(student_status='Registered', faculty_assignment__program='Computer Science').count()
 
-    # Information Technology students (PostgreSQL)
-    it_students_count = Student.objects.filter(student_status='Registered', faculty__program='Information Technology').count()
+    # Information Technology students (PostgreSQL) - UPDATED
+    it_students_count = Student.objects.filter(student_status='Registered', faculty_assignment__program='Information Technology').count()
 
     # Task maps for each tier (same as Faculty_Home)
     novice_tasks = [
@@ -156,57 +159,34 @@ def Superadmin_Home(request):
     else:
         # Normal request: return the full page
         return render(request, 'Home/superadmin-home.html', context)
+    
+
 # This is the Faculty list page
 @superadmin_required
 def Faculty_list(request):
-
-    # Total students (PostgreSQL)
     total_students = Student.objects.filter(student_status='Registered').count()
-
-    # Total faculty (PostgreSQL)
     total_faculty = Faculty.objects.filter(faculty_status='Continuing').count()
+    cs_students_count = Student.objects.filter(student_status='Registered', faculty_assignment__program='Computer Science').count()
+    it_students_count = Student.objects.filter(student_status='Registered', faculty_assignment__program='Information Technology').count()
 
-    # Computer Science students (PostgreSQL)
-    cs_students_count = Student.objects.filter(student_status='Registered', faculty__program='Computer Science').count()
-
-    # Information Technology students (PostgreSQL)
-    it_students_count = Student.objects.filter(student_status='Registered', faculty__program='Information Technology').count()
-
-    # Only fetch faculty with status 'Continuing'
-    continuing_faculties = Faculty.objects.filter(faculty_status='Continuing').values(
-        'faculty_id', 'first_name', 'middle_initial', 'last_name',
-        'program', 'year_section', 'semester'
+    faculty_query = Faculty.objects.filter(faculty_status='Continuing').prefetch_related(
+        Prefetch('assignments', queryset=FacultyAssignment.objects.filter(is_active=True))
     )
-    # Add status field for template compatibility
-    continuing_faculties = [
-        {**dict(faculty), 'status': 'Continuing'} for faculty in continuing_faculties
-    ]
 
     search_query = request.GET.get('search', '').strip().lower()
-
-    # Server-side search (only on continuing faculty)
     if search_query:
-        faculties = [
-            f for f in continuing_faculties
-            if search_query in str(f.get('first_name', '')).lower()
-            or search_query in str(f.get('last_name', '')).lower()
-            or search_query in str(f.get('faculty_id', '')).lower()
-            or search_query in str(f.get('program', '')).lower()
-        ]
-    else:
-        faculties = continuing_faculties
+        faculty_query = faculty_query.filter(
+            Q(first_name__icontains=search_query) |
+            Q(last_name__icontains=search_query) |
+            Q(faculty_id__icontains=search_query) |
+            Q(assignments__program__icontains=search_query)
+        ).distinct()
 
-    faculties = sorted(
-        faculties,
-        key=lambda s: str(s.get('first_name', '')).lower()
-    )
+    faculty_query = faculty_query.order_by('first_name')
 
-    # Pagination
     page_number = request.GET.get('page', 1)
-    paginator = Paginator(faculties, 8)  # 8 faculty per page
+    paginator = Paginator(faculty_query, 8)
     page_obj = paginator.get_page(page_number)
-
-    faculty_count = Faculty.objects.count()  # Now from PostgreSQL
 
     context = {
         "faculties": page_obj.object_list,
@@ -223,58 +203,99 @@ def Faculty_list(request):
         return render(request, 'Faculty/contents/faculty-list-content.html', context)
     else:
         return render(request, 'Faculty/faculty-list.html', context)
+    
+
 # This is the Faculty add process
 @superadmin_required
 def add_faculty(request):
     if request.method == "POST":
+        # Add debugging
+        print("=== DEBUG ADD FACULTY ===")
+        print(f"POST data: {dict(request.POST)}")
+        print(f"Assignments raw: {request.POST.get('assignments', 'NO ASSIGNMENTS KEY')}")
+        
         form = AddFacultyForm(request.POST)
         if form.is_valid():
-            faculty_data = form.cleaned_data
-            # Set a default password (hashed). You can change this logic as needed.
-            default_password = "welcomeadmin"
-            hashed_password = make_password(default_password)
-            Faculty.objects.create(
-                faculty_id=faculty_data["faculty_id"],
-                first_name=faculty_data["first_name"],
-                last_name=faculty_data["last_name"],
-                middle_initial=faculty_data["middle_initial"],
-                program=faculty_data["program"],
-                year_section=faculty_data["year_section"],
-                semester=faculty_data["semester"],
-                password=hashed_password,
-            )
-            messages.success(request, "Faculty added successfully!")
-            return redirect("FacultyList")
+            print(f"Form cleaned data: {form.cleaned_data}")
+            print(f"Assignments after cleaning: {form.cleaned_data.get('assignments', 'NO ASSIGNMENTS')}")
+            
+            try:
+                with transaction.atomic():
+                    faculty = form.save()
+                    messages.success(request, f"Faculty {faculty.faculty_id} added successfully!")
+                    return redirect("FacultyList")
+            except Exception as e:
+                print(f"Error during save: {str(e)}")
+                messages.error(request, f"Error adding faculty: {str(e)}")
         else:
-            # Render the faculty list page with errors and open the modal
-            faculties = Faculty.objects.all()
-            context = {
-                "faculties": faculties,
-                "form": form,
-                "show_add_modal": True,
-            }
-            return render(request, 'Faculty/faculty-list.html', context)
+            print(f"Form errors: {form.errors}")
+            error_messages = []
+            for field, errors in form.errors.items():
+                for error in errors:
+                    error_messages.append(f"{field}: {error}")
+            messages.error(request, "; ".join(error_messages))
+            
+        return redirect("FacultyList")
     else:
         return redirect("FacultyList")
+
 # This is the Faculty edit process
 @superadmin_required
 def edit_faculty(request, faculty_id):
     faculty = get_object_or_404(Faculty, faculty_id=faculty_id)
 
     if request.method == "POST":
+        # Update basic faculty information
         faculty.first_name = request.POST.get("first_name")
         faculty.last_name = request.POST.get("last_name")
         faculty.middle_initial = request.POST.get("middle_initial")
-        faculty.program = request.POST.get("program")
-        faculty.year_section = request.POST.get("year_section")
-        faculty.semester = request.POST.get("semester")
         faculty.save()
 
-        messages.success(request, "Faculty details updated successfully!")
-        return redirect("FacultyList")  # or your faculty list page name
+        # Handle assignments
+        assignments_data = request.POST.get("assignments", "[]")
+        try:
+            assignments = json.loads(assignments_data)
+            
+            # Get existing assignments
+            existing_assignments = {str(a.id): a for a in faculty.assignments.all()}
+            processed_ids = set()
+            
+            # Process each assignment from the form
+            for assignment_data in assignments:
+                if 'id' in assignment_data and assignment_data['id']:
+                    # Update existing assignment
+                    assignment_id = str(assignment_data['id'])
+                    if assignment_id in existing_assignments:
+                        assignment = existing_assignments[assignment_id]
+                        assignment.program = assignment_data['program']
+                        assignment.year_section = assignment_data['year_section']
+                        assignment.semester = assignment_data['semester']
+                        assignment.save()
+                        processed_ids.add(assignment_id)
+                else:
+                    # Create new assignment
+                    FacultyAssignment.objects.create(
+                        faculty=faculty,
+                        program=assignment_data['program'],
+                        year_section=assignment_data['year_section'],
+                        semester=assignment_data['semester']
+                    )
+            
+            # Delete assignments that were removed
+            for assignment_id, assignment in existing_assignments.items():
+                if assignment_id not in processed_ids:
+                    assignment.delete()
+                    
+        except json.JSONDecodeError:
+            messages.error(request, "Invalid assignments data.")
+            return redirect("FacultyList")
 
-    # If you want to render a separate edit page (not used in modal pattern)
+        messages.success(request, "Faculty details updated successfully!")
+        return redirect("FacultyList")
+
     return render(request, "Admin/EditFaculty.html", {"faculty": faculty})
+
+
 # This is the Faculty delete process
 @superadmin_required
 @require_POST
@@ -289,6 +310,8 @@ def delete_archived_faculty(request, faculty_id):
         messages.error(request, f"An error occurred: {e}")
         
     return redirect('Faculty_Archived')
+
+
 # This is the Student Archive process
 @superadmin_required
 @require_POST
@@ -296,30 +319,40 @@ def delete_archived_student(request, student_id):
     db.collection("Archived Students").document(student_id).delete()
     messages.success(request, "Archived student deleted permanently.")
     return redirect('superadmin_student_archived')
+
+
 # This is the Faculty Archive process
 @superadmin_required
 def Faculty_Archive(request, faculty_id):
-    """Move faculty member to ArchivedFaculty table in PostgreSQL"""
+    """Move faculty member to ArchivedFaculty table"""
     try:
-        faculty = Faculty.objects.get(faculty_id=faculty_id)
-        # Create archived faculty record
-        ArchivedFaculty.objects.create(
-            faculty_id=faculty.faculty_id,
-            first_name=faculty.first_name,
-            last_name=faculty.last_name,
-            middle_initial=faculty.middle_initial,
-            program=faculty.program,
-            year_section=faculty.year_section,
-            semester=faculty.semester,
-            faculty_status='Archived'
-            # Add other fields as needed
-        )
-        faculty.delete()
-        messages.success(request, "Faculty member has been archived successfully!")
+        with transaction.atomic():
+            faculty = Faculty.objects.get(faculty_id=faculty_id)
+            
+            assignments = list(faculty.assignments.filter(is_active=True).values(
+                'program', 'year_section', 'semester'
+            ))
+            
+            ArchivedFaculty.objects.create(
+                faculty_id=faculty.faculty_id,
+                first_name=faculty.first_name,
+                last_name=faculty.last_name,
+                middle_initial=faculty.middle_initial,
+                faculty_status='Archived',
+                assignments_data=assignments
+            )
+            
+            faculty.delete()
+            messages.success(request, "Faculty member has been archived successfully!")
+            
     except Faculty.DoesNotExist:
         messages.error(request, "Faculty member not found.")
+    except Exception as e:
+        messages.error(request, f"Error archiving faculty: {str(e)}")
 
     return redirect("FacultyList")
+
+
 # This is the Student Archive process
 @superadmin_required
 def Superadmin_Student_Archive(request):
@@ -385,29 +418,45 @@ def Archived_faculty_list(request):
     if request.headers.get('HX-Request'):
         return render(request, 'Faculty/contents/faculty-archived-content.html', context)
     return render(request, 'Faculty/faculty-archived.html', context)
+
+
 # This is the Faculty restore process
 @superadmin_required
 def restore_faculty(request, faculty_id):
     try:
-        archived_faculty = ArchivedFaculty.objects.get(faculty_id=faculty_id)
-        # Move to Faculty table
-        Faculty.objects.create(
-            faculty_id=archived_faculty.faculty_id,
-            first_name=archived_faculty.first_name,
-            last_name=archived_faculty.last_name,
-            middle_initial=archived_faculty.middle_initial,
-            program=archived_faculty.program,
-            year_section=archived_faculty.year_section,
-            semester=archived_faculty.semester,
-            password='',  # Set a default or handle as needed
-            faculty_status='Continuing'
-        )
-        archived_faculty.delete()
-        messages.success(request, "Faculty member has been restored successfully!")
+        with transaction.atomic():
+            archived_faculty = ArchivedFaculty.objects.get(faculty_id=faculty_id)
+            
+            faculty = Faculty.objects.create(
+                faculty_id=archived_faculty.faculty_id,
+                first_name=archived_faculty.first_name,
+                last_name=archived_faculty.last_name,
+                middle_initial=archived_faculty.middle_initial,
+                password=make_password("welcomeadmin"),
+                faculty_status='Continuing'
+            )
+            
+            for assignment_data in archived_faculty.assignments_data:
+                FacultyAssignment.objects.create(
+                    faculty=faculty,
+                    program=assignment_data['program'],
+                    year_section=assignment_data['year_section'],
+                    semester=assignment_data['semester'],
+                    is_active=True
+                )
+            
+            archived_faculty.delete()
+            messages.success(request, "Faculty member has been restored successfully!")
+            
     except ArchivedFaculty.DoesNotExist:
         messages.error(request, "Faculty member not found in archive.")
+    except Exception as e:
+        messages.error(request, f"Error restoring faculty: {str(e)}")
 
-    return redirect("archive-page")
+    return redirect("Faculty_Archived")
+
+
+
 #This is the activity page for the superadmin
 def Superadmin_activity_page(request):
     activities_novice = [
@@ -524,11 +573,11 @@ def Superadmin_Student_Status(request):
     # Total students (PostgreSQL)
     total_students = Student.objects.filter(student_status='Registered').count()
 
-    # Computer Science students (PostgreSQL)
-    cs_students_count = Student.objects.filter(student_status='Registered', faculty__program='Computer Science').count()
+    # Computer Science students (PostgreSQL) - UPDATED
+    cs_students_count = Student.objects.filter(student_status='Registered', faculty_assignment__program='Computer Science').count()
 
-    # Information Technology students (PostgreSQL)
-    it_students_count = Student.objects.filter(student_status='Registered', faculty__program='Information Technology').count()
+    # Information Technology students (PostgreSQL) - UPDATED
+    it_students_count = Student.objects.filter(student_status='Registered', faculty_assignment__program='Information Technology').count()
 
 
     # Get filter parameters from the request
@@ -538,12 +587,11 @@ def Superadmin_Student_Status(request):
     semester_filter = request.GET.get('semester', 'all')
     search_query = request.GET.get('search', '').strip()
 
-    # Start with a base query for all students, pre-fetching faculty data
-    students_query = Student.objects.select_related('faculty').all()
+    # Start with a base query for all students, pre-fetching faculty_assignment data - UPDATED
+    students_query = Student.objects.select_related('faculty_assignment__faculty').all()
 
-    # Apply filters based on user selection
+    # Apply filters based on user selection - UPDATED
     if status_filter != 'all':
-        # Map the filter value to the model's choices
         status_map = {
             'registered': 'Registered',
             'completed': 'Completed',
@@ -553,13 +601,13 @@ def Superadmin_Student_Status(request):
             students_query = students_query.filter(student_status=status_map[status_filter])
 
     if program_filter != 'all':
-        students_query = students_query.filter(faculty__program=program_filter)
+        students_query = students_query.filter(faculty_assignment__program=program_filter)
     
     if year_section_filter != 'all':
-        students_query = students_query.filter(faculty__year_section=year_section_filter)
+        students_query = students_query.filter(faculty_assignment__year_section=year_section_filter)
         
     if semester_filter != 'all':
-        students_query = students_query.filter(faculty__semester=semester_filter)
+        students_query = students_query.filter(faculty_assignment__semester=semester_filter)
 
     if search_query:
         students_query = students_query.filter(
@@ -568,8 +616,8 @@ def Superadmin_Student_Status(request):
             Q(student_id__icontains=search_query)
         )
 
-    # Get unique year sections for the filter dropdown
-    year_sections = sorted(list(Faculty.objects.values_list('year_section', flat=True).distinct()))
+    # Get unique year sections for the filter dropdown - UPDATED
+    year_sections = sorted(list(FacultyAssignment.objects.values_list('year_section', flat=True).distinct()))
 
     # Order the results
     students_query = students_query.order_by('last_name', 'first_name')
@@ -600,6 +648,7 @@ def Superadmin_Student_Status(request):
         return render(request, 'Students/contents/superadmin-student-status-content.html', context)
     else:
         return render(request, 'Students/superadmin-student-status.html', context)
+    
 # This is the Faculty Status page
 @superadmin_required
 def Faculty_Status(request):
@@ -607,14 +656,14 @@ def Faculty_Status(request):
     # Total students (PostgreSQL)
     total_students = Student.objects.filter(student_status='Registered').count()
 
-    # Total faculty (PostgreSQL)
-    total_faculty = Faculty.objects.filter(faculty_status='Continuing').count()
+    # Total faculty (PostgreSQL) - Include both Continuing and Completed
+    total_faculty = Faculty.objects.filter(faculty_status__in=['Continuing', 'Completed']).count()
 
-    # Computer Science students (PostgreSQL)
-    cs_students_count = Student.objects.filter(student_status='Registered', faculty__program='Computer Science').count()
+    # Computer Science students (PostgreSQL) - UPDATED
+    cs_students_count = Student.objects.filter(student_status='Registered', faculty_assignment__program='Computer Science').count()
 
-    # Information Technology students (PostgreSQL)
-    it_students_count = Student.objects.filter(student_status='Registered', faculty__program='Information Technology').count()
+    # Information Technology students (PostgreSQL) - UPDATED
+    it_students_count = Student.objects.filter(student_status='Registered', faculty_assignment__program='Information Technology').count()
 
     status_filter = request.GET.get('status', 'all')
     program_filter = request.GET.get('program', 'all')
@@ -622,38 +671,43 @@ def Faculty_Status(request):
     semester_filter = request.GET.get('semester', 'all')
     search_query = request.GET.get('search', '').strip().lower()
 
-    # Fetch all faculty from PostgreSQL
-    faculties = Faculty.objects.all()
+    # Fetch all faculty from PostgreSQL with assignments - Include both Continuing and Completed
+    faculties = Faculty.objects.filter(faculty_status__in=['Continuing', 'Completed']).prefetch_related(
+        Prefetch('assignments', queryset=FacultyAssignment.objects.filter(is_active=True))
+    )
 
     # Apply status filter
     if status_filter != 'all':
-        faculties = faculties.filter(faculty_status=status_filter)
+        if status_filter == 'continuing':
+            faculties = faculties.filter(faculty_status='Continuing')
+        elif status_filter == 'completed':
+            faculties = faculties.filter(faculty_status='Completed')
 
-    # Apply program filter
+    # Apply program filter - UPDATED
     if program_filter != 'all':
-        faculties = faculties.filter(program=program_filter)
+        faculties = faculties.filter(assignments__program=program_filter).distinct()
 
-    # Apply year_section filter
+    # Apply year_section filter - UPDATED
     if year_section_filter != 'all':
-        faculties = faculties.filter(year_section=year_section_filter)
+        faculties = faculties.filter(assignments__year_section=year_section_filter).distinct()
 
-    # Apply semester filter
+    # Apply semester filter - UPDATED
     if semester_filter != 'all':
-        faculties = faculties.filter(semester=semester_filter)
+        faculties = faculties.filter(assignments__semester=semester_filter).distinct()
 
-    # Apply search filter
+    # Apply search filter - UPDATED
     if search_query:
         faculties = faculties.filter(
-            models.Q(first_name__icontains=search_query) |
-            models.Q(last_name__icontains=search_query) |
-            models.Q(faculty_id__icontains=search_query) |
-            models.Q(program__icontains=search_query)
-        )
+            Q(first_name__icontains=search_query) |
+            Q(last_name__icontains=search_query) |
+            Q(faculty_id__icontains=search_query) |
+            Q(assignments__program__icontains=search_query)
+        ).distinct()
 
-    # Gather unique values for dropdowns
-    year_sections = sorted(set(faculties.values_list('year_section', flat=True)))
-    programs = sorted(set(faculties.values_list('program', flat=True)))
-    semesters = sorted(set(faculties.values_list('semester', flat=True)))
+    # Gather unique values for dropdowns - UPDATED
+    year_sections = sorted(set(FacultyAssignment.objects.filter(is_active=True).values_list('year_section', flat=True)))
+    programs = sorted(set(FacultyAssignment.objects.filter(is_active=True).values_list('program', flat=True)))
+    semesters = sorted(set(FacultyAssignment.objects.filter(is_active=True).values_list('semester', flat=True)))
 
     # Sort alphabetically by first name
     faculties = faculties.order_by('first_name')
@@ -686,6 +740,9 @@ def Faculty_Status(request):
         return render(request, 'Faculty/contents/faculty-status-content.html', context)
     else:
         return render(request, 'Faculty/faculty-status.html', context)
+    
+
+
 # This is the Faculty move process
 @superadmin_required
 @require_POST
@@ -711,32 +768,46 @@ def move_faculty(request):
 
             # Case 2: Restoring from Archive to Active
             elif destination in ["continuing", "completed"] and archived_faculty:
-                Faculty.objects.create(
+                # Create the faculty record
+                restored_faculty = Faculty.objects.create(
                     faculty_id=archived_faculty.faculty_id,
                     first_name=archived_faculty.first_name,
                     last_name=archived_faculty.last_name,
                     middle_initial=archived_faculty.middle_initial,
-                    program=archived_faculty.program,
-                    year_section=archived_faculty.year_section,
-                    semester=archived_faculty.semester,
-                    password='',  # A new password should be set upon restoration
+                    password=make_password("welcomeadmin"),  # Set default password
                     faculty_status=destination.capitalize()
                 )
+                
+                # Restore assignments from archived data
+                if archived_faculty.assignments_data:
+                    for assignment_data in archived_faculty.assignments_data:
+                        FacultyAssignment.objects.create(
+                            faculty=restored_faculty,
+                            program=assignment_data.get('program', ''),
+                            year_section=assignment_data.get('year_section', ''),
+                            semester=assignment_data.get('semester', ''),
+                            is_active=True
+                        )
+                
                 archived_faculty.delete()
-                messages.success(request, f"Faculty restored to '{destination.capitalize()}' status.")
+                messages.success(request, f"Faculty restored to '{destination.capitalize()}' status with all assignments.")
 
             # Case 3: Moving from Active to Archive (Deactivating)
             elif destination == "archive" and faculty:
+                # Collect assignment data before archiving
+                assignments = list(faculty.assignments.filter(is_active=True).values(
+                    'program', 'year_section', 'semester'
+                ))
+                
                 ArchivedFaculty.objects.create(
                     faculty_id=faculty.faculty_id,
                     first_name=faculty.first_name,
                     last_name=faculty.last_name,
                     middle_initial=faculty.middle_initial,
-                    program=faculty.program,
-                    year_section=faculty.year_section,
-                    semester=faculty.semester
+                    faculty_status='Archived',
+                    assignments_data=assignments
                 )
-                faculty.delete()
+                faculty.delete()  # This will cascade delete the assignments too
                 messages.success(request, "Faculty has been archived (deactivated) successfully.")
             
             # Case 4: Already in archive
@@ -751,6 +822,8 @@ def move_faculty(request):
 
     referer = request.META.get('HTTP_REFERER', 'Faculty_list')
     return redirect(referer)
+
+
 # This is the Student List page
 @superadmin_required
 def Superadmin_Student_List(request):
@@ -758,12 +831,11 @@ def Superadmin_Student_List(request):
     # Total students (PostgreSQL)
     total_students = Student.objects.filter(student_status='Registered').count()
 
-    # Computer Science students (PostgreSQL)
-    cs_students_count = Student.objects.filter(student_status='Registered', faculty__program='Computer Science').count()
+    # Computer Science students (PostgreSQL) - UPDATED
+    cs_students_count = Student.objects.filter(student_status='Registered', faculty_assignment__program='Computer Science').count()
 
-    # Information Technology students (PostgreSQL)
-    it_students_count = Student.objects.filter(student_status='Registered', faculty__program='Information Technology').count()
-
+    # Information Technology students (PostgreSQL) - UPDATED
+    it_students_count = Student.objects.filter(student_status='Registered', faculty_assignment__program='Information Technology').count()
 
     # Get filter parameters
     selected_program = request.GET.get('program', 'all')
@@ -771,16 +843,16 @@ def Superadmin_Student_List(request):
     selected_semester = request.GET.get('semester', 'all')
     search_query = request.GET.get('search', '').strip()
 
-    # Base query: all students with related faculty data to prevent N+1 queries
-    students_query = Student.objects.select_related('faculty').filter(student_status='Registered')
+    # Base query: all students with related faculty_assignment data - UPDATED
+    students_query = Student.objects.select_related('faculty_assignment__faculty').filter(student_status='Registered')
 
-    # Apply filters using Django ORM
+    # Apply filters using Django ORM - UPDATED
     if selected_program != 'all':
-        students_query = students_query.filter(faculty__program=selected_program)
+        students_query = students_query.filter(faculty_assignment__program=selected_program)
     if selected_year_section != 'all':
-        students_query = students_query.filter(faculty__year_section=selected_year_section)
+        students_query = students_query.filter(faculty_assignment__year_section=selected_year_section)
     if selected_semester != 'all':
-        students_query = students_query.filter(faculty__semester=selected_semester)
+        students_query = students_query.filter(faculty_assignment__semester=selected_semester)
     
     if search_query:
         students_query = students_query.filter(

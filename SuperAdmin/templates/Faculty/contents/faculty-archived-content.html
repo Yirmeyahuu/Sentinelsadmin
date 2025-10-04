@@ -47,9 +47,7 @@
                             <tr class="bg-blue-800 text-white rounded-lg">
                                 <th class="border border-blue-700 p-2">Faculty ID</th>
                                 <th class="border border-blue-700 p-2">Full Name</th>
-                                <th class="border border-blue-700 p-2">Program</th>
-                                <th class="border border-blue-700 p-2">Year & Section</th>
-                                <th class="border border-blue-700 p-2">Semester</th>
+                                <th class="border border-blue-700 p-2">Assignments</th>
                                 <th class="border border-blue-700 p-2">Status</th>
                                 <th class="border border-blue-700 p-2">Archived On</th>
                                 <th class="border border-blue-700 p-2">Actions</th>
@@ -62,22 +60,33 @@
                                     <td class="border border-blue-700 p-2 text-center whitespace-nowrap">
                                         {{ faculty.first_name }} {{ faculty.middle_initial }} {{ faculty.last_name }}
                                     </td>
-                                    <td class="border border-blue-700 p-2 text-center whitespace-nowrap">{{ faculty.program }}</td>
-                                    <td class="border border-blue-700 p-2 text-center whitespace-nowrap">{{ faculty.year_section }}</td>
-                                    <td class="border border-blue-700 p-2 text-center whitespace-nowrap">{{ faculty.semester }}</td>
+                                    <td class="border border-blue-700 p-2 text-center">
+                                        <div class="space-y-1">
+                                            {% if faculty.assignments_data %}
+                                                {% for assignment in faculty.assignments_data %}
+                                                    <div class="bg-blue-50 rounded px-2 py-1 text-xs">
+                                                        <span class="font-medium">{{ assignment.program }}</span> - 
+                                                        <span>{{ assignment.year_section }}</span> 
+                                                        <span class="text-gray-600">({{ assignment.semester }})</span>
+                                                    </div>
+                                                {% endfor %}
+                                            {% else %}
+                                                <span class="text-gray-500 text-xs">No assignments</span>
+                                            {% endif %}
+                                        </div>
+                                    </td>
                                     <td class="border border-blue-700 p-2 text-center whitespace-nowrap">
-                                        <span class="px-2 py-1 bg-red-100 text-red-700 rounded-full text-sm">Deactivated</span>
+                                        <span class="px-2 py-1 bg-red-100 text-red-700 rounded-full text-sm">Archived</span>
                                     </td>
                                     <td class="border border-blue-700 p-2 text-center whitespace-nowrap">
                                         {{ faculty.archived_at|date:"Y-m-d" }}
                                     </td>
                                     <td class="border border-blue-700 p-2 text-center">
                                         <div class="flex items-center justify-center space-x-3">
-                                            <!-- Move Modal Icon -->
-                                            <button onclick="openMoveFacultyModal('{{ faculty.faculty_id }}')" class="text-blue-900 hover:text-blue-400 transition-all cursor-pointer" title="Move">
-                                                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24">
-                                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                        d="M18 14v4.833A1.166 1.166 0 0 1 16.833 20H5.167A1.167 1.167 0 0 1 4 18.833V7.167A1.166 1.166 0 0 1 5.167 6h4.618m4.447-2H20v5.768m-7.889 2.121 7.778-7.778"/>
+                                            <!-- Restore Button -->
+                                            <button onclick="openRestoreFacultyModal('{{ faculty.faculty_id }}')" class="text-green-700 hover:text-green-500 transition-all cursor-pointer" title="Restore">
+                                                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                                                 </svg>
                                             </button>
                                             <!-- Delete Icon -->
@@ -94,7 +103,7 @@
                                 </tr>
                             {% empty %}
                                 <tr>
-                                    <td colspan="8" class="text-center border border-blue-700 p-4 bg-gray-100 text-blue-500">No archived users yet.</td>
+                                    <td colspan="6" class="text-center border border-blue-700 p-4 bg-gray-100 text-blue-500">No archived users yet.</td>
                                 </tr>
                             {% endfor %}
                         </tbody>
@@ -104,3 +113,58 @@
         </div>
     </div>
 </div>
+
+<!-- Restore Faculty Modals -->
+{% for faculty in archived_faculties %}
+<div id="restoreFacultyModal-{{ faculty.faculty_id }}" 
+     class="fixed inset-0 flex items-center justify-center bg-gray-900/80 z-[99999] hidden"
+     style="z-index: 99999;">
+    <div class="bg-white p-6 rounded-2xl shadow-2xl w-[32rem] relative border border-gray-100"
+         style="z-index: 100000;">
+        <div class="mb-4">
+            <h2 class="text-lg font-semibold text-gray-800">Restore Faculty</h2>
+            <p class="text-gray-500 text-xs mt-1">Are you sure you want to restore this faculty member?</p>
+            <div class="h-1 w-16 bg-green-600 mt-3 rounded-full"></div>
+        </div>
+        
+        <div class="bg-gray-50 p-3 rounded-lg mb-4">
+            <div class="grid grid-cols-2 gap-4 mb-2">
+                <p class="text-sm"><strong>Faculty ID:</strong> {{ faculty.faculty_id }}</p>
+                <p class="text-sm"><strong>Name:</strong> {{ faculty.first_name }} {{ faculty.middle_initial }} {{ faculty.last_name }}</p>
+            </div>
+            <div class="mt-2">
+                <strong class="text-sm">Assignments:</strong>
+                <div class="space-y-1 mt-1 max-h-24 overflow-y-auto">
+                    {% if faculty.assignments_data %}
+                        <div class="grid grid-cols-1 gap-1">
+                            {% for assignment in faculty.assignments_data %}
+                                <div class="text-xs bg-blue-50 rounded px-2 py-1 flex justify-between">
+                                    <span class="font-medium">{{ assignment.program }}</span>
+                                    <span class="text-gray-600">{{ assignment.year_section }} - {{ assignment.semester }}</span>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <span class="text-gray-500 text-xs">No assignments</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <form method="POST" action="{% url 'restore_faculty' faculty.faculty_id %}">
+            {% csrf_token %}
+            <div class="flex justify-end items-center space-x-3">
+                <button type="button"
+                        onclick="closeRestoreFacultyModal('{{ faculty.faculty_id }}')"
+                        class="px-4 py-2 rounded-xl border-2 border-gray-300 text-gray-700 text-sm hover:bg-gray-50 hover:border-gray-400 transition-all duration-200">
+                    Cancel
+                </button>
+                <button type="submit"
+                        class="px-4 py-2 rounded-xl bg-green-600 text-white text-sm hover:bg-green-700 transform hover:scale-[1.02] transition-all duration-200">
+                    Restore Faculty
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endfor %}
