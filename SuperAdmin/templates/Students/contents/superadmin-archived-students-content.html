@@ -75,7 +75,7 @@
                                                 </svg>
                                             </button>
                                             <!-- Delete Icon -->
-                                            <form method="post" action="{% url 'delete_archived_student' student.student_id %}" style="display:inline;">
+                                            <form method="post" action="{% url 'superadmin_delete_archived_student' student.student_id %}" style="display:inline;">
                                                 {% csrf_token %}
                                                 <button type="submit" class="text-red-700 hover:text-red-500 transition-all cursor-pointer" title="Delete" onclick="return confirm('Delete this student permanently?');">
                                                     <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24">

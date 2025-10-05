@@ -10,7 +10,7 @@ from django.views.decorators.csrf import csrf_exempt
 from Login.decorators import faculty_required
 from django.core.paginator import Paginator
 from django.templatetags.static import static
-from Faculty.models import Faculty
+from Faculty.models import Faculty, FacultyAssignment
 from Student.models import Student, PendingStudent, Task, StudentTaskProgress, ArchivedStudent
 from django.db.models import Q
 from django.db import transaction
@@ -1062,23 +1062,38 @@ def Faculty_activity_page(request):
     else:
         return render(request, 'Activities/Faculty-Activity-List.html', context)
     
-# This is the accept student process of Faculty
 @faculty_required
 def accept_student(request, student_id):
-    faculty = get_object_or_404(Faculty, faculty_id=request.user.username)
+    # Get faculty using session instead of request.user.username
+    faculty_id = request.session.get('faculty_id')
+    if not faculty_id:
+        messages.error(request, "Session expired. Please login again.")
+        return redirect('sentinels_login')
+        
+    faculty = get_object_or_404(Faculty, faculty_id=faculty_id)
     pending_student = get_object_or_404(PendingStudent, student_id=student_id)
 
     try:
-        # Create the student in PostgreSQL
+        # Find the appropriate faculty assignment for this student
+        faculty_assignment = FacultyAssignment.objects.filter(
+            faculty=faculty,
+            program=pending_student.program,
+            year_section=pending_student.year_section,
+            semester=pending_student.semester,
+            is_active=True
+        ).first()
+        
+        if not faculty_assignment:
+            messages.error(request, "No matching active assignment found for this student's program and section.")
+            return redirect('verify-students')
+
+        # Create the student in PostgreSQL with faculty_assignment
         new_student = Student.objects.create(
             student_id=pending_student.student_id,
             first_name=pending_student.first_name,
             last_name=pending_student.last_name,
             middle_initial=pending_student.middle_initial,
-            faculty=faculty,
-            program=pending_student.program,
-            year_section=pending_student.year_section,
-            semester=pending_student.semester,
+            faculty_assignment=faculty_assignment,  # Use faculty_assignment instead of faculty
             student_status='Registered',
             password=pending_student.password
         )
@@ -1108,6 +1123,8 @@ def accept_student(request, student_id):
         messages.error(request, f"An error occurred while accepting the student: {e}")
 
     return redirect('verify-students')
+
+
 # This is the reject student process of Faculty
 @faculty_required
 def reject_student(request, student_id):
@@ -1191,11 +1208,14 @@ def edit_faculty_account(request):
             print(f"Error updating profile: {e}")
 
     return redirect("faculty-account")
+
+
 # This is the upload faculty profile image process
 def handle_image_upload(image):
     # Implement your image upload logic
     pass
-# This is the move student process of Faculty
+
+#This is the move student process of Faculty
 @faculty_required
 def move_student(request):
     if request.method == "POST":
@@ -1244,9 +1264,14 @@ def move_student(request):
             messages.error(request, "Student not found.")
             return redirect("faculty-student-list")
 
-        # Get faculty for PostgreSQL operations
+        # Get faculty using session
+        faculty_id = request.session.get('faculty_id')
+        if not faculty_id:
+            messages.error(request, "Session expired. Please login again.")
+            return redirect('sentinels_login')
+            
         try:
-            faculty = Faculty.objects.get(faculty_id=request.user.username)
+            faculty = Faculty.objects.get(faculty_id=faculty_id)
         except Faculty.DoesNotExist:
             messages.error(request, "Faculty profile not found.")
             return redirect("faculty-student-list")
@@ -1263,6 +1288,20 @@ def move_student(request):
             try:
                 # Check if student exists in ArchivedStudent table
                 archived_student = ArchivedStudent.objects.get(student_id=student_id)
+                
+                # Find the appropriate faculty assignment for restoration
+                faculty_assignment = FacultyAssignment.objects.filter(
+                    faculty=faculty,
+                    program=archived_student.program,
+                    year_section=archived_student.year_section,
+                    semester=archived_student.semester,
+                    is_active=True
+                ).first()
+                
+                if not faculty_assignment:
+                    messages.error(request, "No matching active assignment found for this student's program and section.")
+                    return redirect("faculty-student-list")
+                
                 # Restore student from archive to active Student table
                 Student.objects.create(
                     student_id=archived_student.student_id,
@@ -1270,10 +1309,7 @@ def move_student(request):
                     last_name=archived_student.last_name,
                     middle_initial=archived_student.middle_initial,
                     password=archived_student.password,  # Password only in PostgreSQL
-                    program=archived_student.program,
-                    year_section=archived_student.year_section,
-                    semester=archived_student.semester,
-                    faculty=archived_student.faculty,
+                    faculty_assignment=faculty_assignment,  # Use faculty_assignment instead of faculty
                     student_status='Registered'  # Status only in PostgreSQL
                 )
                 # Remove from archived table
@@ -1290,7 +1326,7 @@ def move_student(request):
         elif destination == "completed":
             # Move to Completed Students in Firebase (no status stored)
             db.collection("Completed Students").document(student_id).set(student_data)
-            if found_collection != "Completed Students":
+            if found_collection != "Completed Students" and student:
                 student.delete()
                 
             # Update PostgreSQL Student status only
@@ -1304,7 +1340,7 @@ def move_student(request):
         elif destination == "dropout":
             # Move to Drop-out Students in Firebase (no status stored)
             db.collection("Drop-out Students").document(student_id).set(student_data)
-            if found_collection != "Drop-out Students":
+            if found_collection != "Drop-out Students" and student:
                 student.delete()
                 
             # Update PostgreSQL Student status only
@@ -1328,9 +1364,9 @@ def move_student(request):
                     last_name=postgres_student.last_name,
                     middle_initial=postgres_student.middle_initial,
                     password=postgres_student.password,  # Password only in PostgreSQL
-                    program=postgres_student.program,
-                    year_section=postgres_student.year_section,
-                    semester=postgres_student.semester,
+                    program=postgres_student.program,  # This uses the property from faculty_assignment
+                    year_section=postgres_student.year_section,  # This uses the property from faculty_assignment
+                    semester=postgres_student.semester,  # This uses the property from faculty_assignment
                     faculty=faculty,
                 )
                 
@@ -2234,18 +2270,32 @@ def download_student_excel_template(request):
     return response
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+@faculty_required
+def faculty_delete_archived_student(request, student_id):
+    if request.method == 'POST':
+        try:
+            # Get the archived student
+            archived_student = ArchivedStudent.objects.get(student_id=student_id)
+            
+            # Get faculty from session to verify ownership
+            faculty_id = request.session.get('faculty_id')
+            faculty = Faculty.objects.get(faculty_id=faculty_id)
+            
+            # Check if this archived student belongs to the current faculty
+            if archived_student.faculty != faculty:
+                messages.error(request, "You don't have permission to delete this student.")
+                return redirect('faculty-student-list')
+            
+            # Delete the archived student permanently
+            archived_student.delete()
+            
+            messages.success(request, f"Student {student_id} has been permanently deleted from the archive.")
+            
+        except ArchivedStudent.DoesNotExist:
+            messages.error(request, "Archived student not found.")
+        except Faculty.DoesNotExist:
+            messages.error(request, "Faculty profile not found.")
+        except Exception as e:
+            messages.error(request, f"An error occurred: {str(e)}")
+    
+    return redirect('faculty-student-list')

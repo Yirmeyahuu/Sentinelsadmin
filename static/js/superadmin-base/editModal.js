@@ -28,8 +28,8 @@ function addEditAssignment(facultyId) {
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Year & Section</label>
-                    <input type="text" class="assignment-year-section w-full px-3 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500" 
-                           placeholder="e.g. 3A" required>
+                    <input type="text" class="assignment-year-section w-full px-3 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500 uppercase text-center" 
+                           placeholder="3A" maxlength="2" required oninput="formatFacultyYearSection(this)">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Semester</label>

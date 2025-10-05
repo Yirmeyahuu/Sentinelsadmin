@@ -66,14 +66,25 @@
                                     <td class="border border-blue-700 p-2 text-center whitespace-nowrap">{{ student.semester }}</td>
                                     <td class="border border-blue-700 p-2 text-center whitespace-nowrap">{{ student.archived_at|date:"Y-m-d" }}</td>
                                     <td class="border border-blue-700 p-2 text-center">
-                                        <!-- Move Button -->
-                                        <button onclick="event.stopPropagation(); openMoveStudentModal('{{ student.student_id }}')"
-                                                class="text-blue-900 hover:text-blue-400 transition-all cursor-pointer"
-                                                title="Move Student">
-                                            <svg class="w-6 h-6" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 14v4.833A1.166 1.166 0 0 1 16.833 20H5.167A1.167 1.167 0 0 1 4 18.833V7.167A1.166 1.166 0 0 1 5.167 6h4.618m4.447-2H20v5.768m-7.889 2.121 7.778-7.778"/>
-                                            </svg>
-                                        </button>
+                                        <div class="flex items-center justify-center space-x-3">
+                                            <!-- Move Button -->
+                                            <button onclick="event.stopPropagation(); openMoveStudentModal('{{ student.student_id }}')"
+                                                    class="text-blue-900 hover:text-blue-400 transition-all cursor-pointer"
+                                                    title="Move Student">
+                                                <svg class="w-6 h-6" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 14v4.833A1.166 1.166 0 0 1 16.833 20H5.167A1.167 1.167 0 0 1 4 18.833V7.167A1.166 1.166 0 0 1 5.167 6h4.618m4.447-2H20v5.768m-7.889 2.121 7.778-7.778"/>
+                                                </svg>
+                                            </button>
+                                            <!-- Delete Button -->
+                                            <form method="post" action="{% url 'faculty_delete_archived_student' student.student_id %}" style="display:inline;">
+                                                {% csrf_token %}
+                                                <button type="submit" class="text-red-700 hover:text-red-500 transition-all cursor-pointer" title="Delete Permanently" onclick="return confirm('Delete this student permanently? This action cannot be undone.');">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24">
+                                                        <g fill="currentColor"><path d="M3 6.524c0-.395.327-.714.73-.714h4.788c.006-.842.098-1.995.932-2.793A3.68 3.68 0 0 1 12 2a3.68 3.68 0 0 1 2.55 1.017c.834.798.926 1.951.932 2.793h4.788c.403 0 .73.32.73.714a.722.722 0 0 1-.73.714H3.73A.722.722 0 0 1 3 6.524Z"/><path fill-rule="evenodd" d="M11.596 22h.808c2.783 0 4.174 0 5.08-.886c.904-.886.996-2.34 1.181-5.246l.267-4.187c.1-1.577.15-2.366-.303-2.866c-.454-.5-1.22-.5-2.753-.5H8.124c-1.533 0-2.3 0-2.753.5c-.454.5-.404 1.289-.303 2.866l.267 4.188c.185 2.906.277 4.36 1.182 5.245c.905.886 2.296.886 5.079.886Zm-1.35-9.812c-.04-.433-.408-.75-.82-.707c-.413.044-.713.43-.672.865l.5 5.263c.04.434.408.75.82.707c.413-.044.713-.43-.672-.864l-.5-5.264Zm4.329-.707c.412.044.713.43.671.865l-.5 5.263c-.04.434-.409.75-.82.707c-.413-.044-.713-.43-.672-.864l.5-5.264c.04-.433.409-.75.82-.707Z" clip-rule="evenodd"/></g>
+                                                    </svg>
+                                                </button>
+                                            </form>
+                                        </div>
                                     </td>
                                 </tr>
                             {% empty %}

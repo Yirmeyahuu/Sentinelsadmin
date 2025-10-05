@@ -24,7 +24,7 @@ urlpatterns = [
     path('Student-list/', views.Superadmin_Student_List, name='student-list'),
     path('student/move/', views.superadmin_move_student, name='move_student'),
     path("Student-Archived/", views.Superadmin_Student_Archive, name="superadmin_student_archived"),
-    path('archived-student/delete/<str:student_id>/', views.delete_archived_student, name='delete_archived_student'),
+    path('archived-student/delete/<str:student_id>/', views.superadmin_delete_archived_student, name='superadmin_delete_archived_student'),
 
 
     path('faculty/export-csv/', views.export_faculty_csv, name='export_faculty_csv'),
@@ -32,5 +32,7 @@ urlpatterns = [
     path('faculty/download-template/', views.download_faculty_csv_template, name='download_faculty_csv_template'),
     path('faculty/export-excel/', views.export_faculty_excel, name='export_faculty_excel'),
     path('faculty/download-excel-template/', views.download_faculty_excel_template, name='download_faculty_excel_template'),
+
+    path('check-faculty-id/', views.check_faculty_id, name='check_faculty_id'),
     
 ]

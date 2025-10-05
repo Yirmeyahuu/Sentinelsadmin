@@ -478,6 +478,9 @@
   .z-\[99999\] {
     z-index: 99999;
   }
+  .col-span-1 {
+    grid-column: span 1 / span 1;
+  }
   .container {
     width: 100%;
   }
@@ -3735,6 +3738,12 @@
   .focus\:ring-gray-500:focus {
     --tw-ring-color: var(--color-gray-500);
   }
+  .focus\:ring-green-500:focus {
+    --tw-ring-color: var(--color-green-500);
+  }
+  .focus\:ring-red-500:focus {
+    --tw-ring-color: var(--color-red-500);
+  }
   .focus\:ring-rose-500:focus {
     --tw-ring-color: var(--color-rose-500);
   }
@@ -3770,6 +3779,16 @@
   }
   .active\:transform:active {
     transform: var(--tw-rotate-x) var(--tw-rotate-y) var(--tw-rotate-z) var(--tw-skew-x) var(--tw-skew-y);
+  }
+  @media (width >= 40rem) {
+    .sm\:col-span-1 {
+      grid-column: span 1 / span 1;
+    }
+  }
+  @media (width >= 40rem) {
+    .sm\:col-span-2 {
+      grid-column: span 2 / span 2;
+    }
   }
   @media (width >= 40rem) {
     .sm\:mb-0 {
@@ -3888,6 +3907,16 @@
     }
   }
   @media (width >= 64rem) {
+    .lg\:col-span-2 {
+      grid-column: span 2 / span 2;
+    }
+  }
+  @media (width >= 64rem) {
+    .lg\:col-span-5 {
+      grid-column: span 5 / span 5;
+    }
+  }
+  @media (width >= 64rem) {
     .lg\:h-20 {
       height: calc(var(--spacing) * 20);
     }
@@ -3905,6 +3934,11 @@
   @media (width >= 64rem) {
     .lg\:grid-cols-4 {
       grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+  @media (width >= 64rem) {
+    .lg\:grid-cols-12 {
+      grid-template-columns: repeat(12, minmax(0, 1fr));
     }
   }
   @media (width >= 80rem) {

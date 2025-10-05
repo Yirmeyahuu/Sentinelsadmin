@@ -385,42 +385,46 @@
         <form id="facultyForm" action="{% url 'add_faculty' %}" method="POST" class="space-y-6">
             {% csrf_token %}
             <input type="hidden" name="assignments" id="assignmentsData" value="[]">
-            
             <div class="grid grid-cols-2 gap-6">
-                <!-- Faculty ID -->
                 <div class="relative group">
                     <label class="block text-sm font-semibold mb-2 text-gray-700">
                         Faculty ID <span class="text-red-500 text-xs">*</span>
                     </label>
                     <input type="text" name="faculty_id" placeholder="Enter Faculty ID"
-                           class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200" required>
+                           class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200" 
+                           required onblur="checkFacultyIdAvailability(this.value)">
+                    <!-- Message container for faculty ID validation -->
+                    <div id="faculty-id-message" class="text-sm mt-1 hidden"></div>
                 </div>
-
+            
                 <!-- First Name -->
                 <div class="relative group">
                     <label class="block text-sm font-semibold mb-2 text-gray-700">
                         First Name <span class="text-red-500 text-xs">*</span>
                     </label>
                     <input type="text" name="first_name" placeholder="Enter First Name"
-                           class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200" required>
+                           class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200" 
+                           required oninput="formatFacultyName(this)">
                 </div>
-
+            
                 <!-- Last Name -->
                 <div class="relative group">
                     <label class="block text-sm font-semibold mb-2 text-gray-700">
                         Last Name <span class="text-red-500 text-xs">*</span>
                     </label>
                     <input type="text" name="last_name" placeholder="Enter Last Name"
-                           class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200" required>
+                           class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200" 
+                           required oninput="formatFacultyName(this)">
                 </div>
-
+            
                 <!-- Middle Initial -->
                 <div class="relative group">
                     <label class="block text-sm font-semibold mb-2 text-gray-700">
                         Middle Initial
                     </label>
-                    <input type="text" name="middle_initial" placeholder="Enter Middle Initial"
-                           class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200">
+                    <input type="text" name="middle_initial" placeholder="M." maxlength="2"
+                           class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 uppercase text-center"
+                           oninput="formatFacultyMiddleInitial(this)">
                 </div>
             </div>
 

@@ -185,7 +185,7 @@ def Faculty_list(request):
     faculty_query = faculty_query.order_by('first_name')
 
     page_number = request.GET.get('page', 1)
-    paginator = Paginator(faculty_query, 8)
+    paginator = Paginator(faculty_query, 6)
     page_obj = paginator.get_page(page_number)
 
     context = {
@@ -312,12 +312,27 @@ def delete_archived_faculty(request, faculty_id):
     return redirect('Faculty_Archived')
 
 
-# This is the Student Archive process
 @superadmin_required
 @require_POST
-def delete_archived_student(request, student_id):
-    db.collection("Archived Students").document(student_id).delete()
-    messages.success(request, "Archived student deleted permanently.")
+def superadmin_delete_archived_student(request, student_id):
+    try:
+        # Delete from Django database (ArchivedStudent model)
+        archived_student = ArchivedStudent.objects.get(student_id=student_id)
+        archived_student.delete()
+        
+        # Also delete from Firestore if it exists there
+        try:
+            db.collection("Archived Students").document(student_id).delete()
+        except Exception as firestore_error:
+            # Log the error but don't fail the operation
+            print(f"Firestore deletion error: {firestore_error}")
+        
+        messages.success(request, "Archived student deleted permanently.")
+    except ArchivedStudent.DoesNotExist:
+        messages.error(request, "Archived student not found in database.")
+    except Exception as e:
+        messages.error(request, f"Error deleting student: {str(e)}")
+    
     return redirect('superadmin_student_archived')
 
 
@@ -388,6 +403,8 @@ def Superadmin_Student_Archive(request):
         return render(request, 'Students/contents/superadmin-archived-students-content.html', context)
     else:
         return render(request, 'Students/superadmin-archived-students.html', context)
+
+
 # This is the Faculty Archive list page
 @superadmin_required
 def Archived_faculty_list(request):
@@ -566,6 +583,8 @@ def Superadmin_activity_page(request):
         return render(request, 'Activities/contents/Superadmin-Activity-List-content.html', context)
     else:
         return render(request, 'Activities/Superadmin-Activity-List.html', context)
+
+
 # This is the Student Status page
 @superadmin_required
 def Superadmin_Student_Status(request):
@@ -623,7 +642,7 @@ def Superadmin_Student_Status(request):
     students_query = students_query.order_by('last_name', 'first_name')
 
     # Pagination
-    paginator = Paginator(students_query, 12)
+    paginator = Paginator(students_query, 6)
     page_number = request.GET.get('page', 1)
     page_obj = paginator.get_page(page_number)
 
@@ -714,7 +733,7 @@ def Faculty_Status(request):
 
     # Pagination
     page_number = request.GET.get('page', 1)
-    paginator = Paginator(faculties, 12)
+    paginator = Paginator(faculties, 6)
     page_obj = paginator.get_page(page_number)
 
     context = {
@@ -885,6 +904,8 @@ def Superadmin_Student_List(request):
         return render(request, 'Students/contents/superadmin-student-list-content.html', context)
     else:
         return render(request, 'Students/superadmin-student-list.html', context)
+
+
 # This is the Game Trigger update process
 @superadmin_required
 @csrf_exempt
@@ -911,6 +932,8 @@ def update_game_trigger(request):
         )
         return JsonResponse({'success': True})
     return JsonResponse({'success': False, 'error': 'Invalid request'})
+
+
 # This is the Tier Lock update process
 @superadmin_required
 @csrf_exempt
@@ -935,6 +958,8 @@ def update_tier_lock(request):
         db.collection("Game Triggers").document(doc_name).set(update_data, merge=True)
         return JsonResponse({'success': True})
     return JsonResponse({'success': False, 'error': 'Invalid request'})
+
+
 # This is the Student Move process
 @superadmin_required
 def superadmin_move_student(request):
@@ -1009,10 +1034,9 @@ def superadmin_move_student(request):
 
 
 
-# CSV Export for Faculty
 @superadmin_required
 def export_faculty_csv(request):
-    """Export faculty data to CSV file"""
+    """Export faculty data to CSV file with multiple assignments"""
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="faculty_export.csv"'
     
@@ -1029,26 +1053,42 @@ def export_faculty_csv(request):
         'Status'
     ])
     
-    # Write faculty data
-    faculties = Faculty.objects.all().order_by('faculty_id')
+    # Write faculty data with multiple assignments
+    faculties = Faculty.objects.prefetch_related('assignments').all().order_by('faculty_id')
     for faculty in faculties:
-        writer.writerow([
-            faculty.faculty_id,
-            faculty.first_name,
-            faculty.last_name,
-            faculty.middle_initial or '',
-            faculty.program,
-            faculty.year_section,
-            faculty.semester,
-            faculty.faculty_status
-        ])
+        assignments = faculty.assignments.all()
+        if assignments:
+            # Write one row per assignment
+            for assignment in assignments:
+                writer.writerow([
+                    faculty.faculty_id,
+                    faculty.first_name,
+                    faculty.last_name,
+                    faculty.middle_initial or '',
+                    assignment.program,
+                    assignment.year_section,
+                    assignment.semester,
+                    faculty.faculty_status
+                ])
+        else:
+            # Faculty with no assignments
+            writer.writerow([
+                faculty.faculty_id,
+                faculty.first_name,
+                faculty.last_name,
+                faculty.middle_initial or '',
+                '',
+                '',
+                '',
+                faculty.faculty_status
+            ])
     
     return response
 
 # Excel Export for Faculty
 @superadmin_required
 def export_faculty_excel(request):
-    """Export faculty data to Excel file"""
+    """Export faculty data to Excel file with multiple assignments"""
     from openpyxl import Workbook
     from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
     from django.http import HttpResponse
@@ -1090,32 +1130,59 @@ def export_faculty_excel(request):
         cell.border = thin_border
     
     # Get faculty data and add to worksheet
-    faculties = Faculty.objects.all().order_by('faculty_id')
-    for row, faculty in enumerate(faculties, 2):
-        data = [
-            faculty.faculty_id,
-            faculty.first_name,
-            faculty.last_name,
-            faculty.middle_initial or '',
-            faculty.program,
-            faculty.year_section,
-            faculty.semester,
-            faculty.faculty_status
-        ]
-        
-        for col, value in enumerate(data, 1):
-            cell = ws.cell(row=row, column=col, value=value)
-            cell.border = thin_border
-            cell.alignment = Alignment(horizontal="center", vertical="center")
+    faculties = Faculty.objects.prefetch_related('assignments').all().order_by('faculty_id')
+    row = 2
+    
+    for faculty in faculties:
+        assignments = faculty.assignments.all()
+        if assignments:
+            # Write one row per assignment
+            for assignment in assignments:
+                data = [
+                    faculty.faculty_id,
+                    faculty.first_name,
+                    faculty.last_name,
+                    faculty.middle_initial or '',
+                    assignment.program,
+                    assignment.year_section,
+                    assignment.semester,
+                    faculty.faculty_status
+                ]
+                
+                for col, value in enumerate(data, 1):
+                    cell = ws.cell(row=row, column=col, value=value)
+                    cell.border = thin_border
+                    cell.alignment = Alignment(horizontal="center", vertical="center")
+                    
+                    # Add status color coding
+                    if col == 8:  # Status column
+                        if value == 'Completed':
+                            cell.fill = PatternFill(start_color="FFF2CC", end_color="FFF2CC", fill_type="solid")
+                        elif value == 'Deactivated':
+                            cell.fill = PatternFill(start_color="FFCCCC", end_color="FFCCCC", fill_type="solid")
+                        else:  # Continuing
+                            cell.fill = PatternFill(start_color="E8F5E8", end_color="E8F5E8", fill_type="solid")
+                
+                row += 1
+        else:
+            # Faculty with no assignments
+            data = [
+                faculty.faculty_id,
+                faculty.first_name,
+                faculty.last_name,
+                faculty.middle_initial or '',
+                '',
+                '',
+                '',
+                faculty.faculty_status
+            ]
             
-            # Add status color coding
-            if col == 8:  # Status column
-                if value == 'Completed':
-                    cell.fill = PatternFill(start_color="FFF2CC", end_color="FFF2CC", fill_type="solid")
-                elif value == 'Deactivated':
-                    cell.fill = PatternFill(start_color="FFCCCC", end_color="FFCCCC", fill_type="solid")
-                else:  # Continuing
-                    cell.fill = PatternFill(start_color="E8F5E8", end_color="E8F5E8", fill_type="solid")
+            for col, value in enumerate(data, 1):
+                cell = ws.cell(row=row, column=col, value=value)
+                cell.border = thin_border
+                cell.alignment = Alignment(horizontal="center", vertical="center")
+            
+            row += 1
     
     # Auto-adjust column widths
     for column in ws.columns:
@@ -1142,27 +1209,53 @@ def export_faculty_excel(request):
 # CSV Import for Faculty
 @superadmin_required
 def import_faculty_csv(request):
-    """Import faculty data from CSV file"""
+    """Import faculty data from CSV or Excel file with multiple assignments"""
     if request.method == 'POST' and request.FILES.get('csv_file'):
-        csv_file = request.FILES['csv_file']
+        uploaded_file = request.FILES['csv_file']
+        
+        # Get file extension
+        file_extension = uploaded_file.name.split('.')[-1].lower()
         
         # Validate file type
-        if not csv_file.name.endswith('.csv'):
-            messages.error(request, 'Please upload a CSV file.')
+        if file_extension not in ['csv', 'xlsx', 'xls']:
+            messages.error(request, 'Please upload a CSV or Excel file (.csv, .xlsx, .xls).')
             return redirect('FacultyList')
         
         try:
-            # Read CSV file
-            file_data = csv_file.read().decode('utf-8')
-            io_string = io.StringIO(file_data)
-            csv_reader = csv.DictReader(io_string)
-            
             success_count = 0
             error_count = 0
             errors = []
+            faculty_data = {}  # To group assignments by faculty_id
             
-            # Process each row
-            for row_num, row in enumerate(csv_reader, start=2):  # Start at 2 for header
+            # Process based on file type
+            if file_extension == 'csv':
+                # Handle CSV file
+                file_data = uploaded_file.read().decode('utf-8')
+                io_string = io.StringIO(file_data)
+                reader = csv.DictReader(io_string)
+                rows = list(reader)
+            else:
+                # Handle Excel file (.xlsx or .xls)
+                workbook = load_workbook(uploaded_file, read_only=True)
+                worksheet = workbook.active
+                
+                # Get header row (first row)
+                headers = []
+                for cell in worksheet[1]:
+                    headers.append(cell.value)
+                
+                # Convert Excel data to dictionary format
+                rows = []
+                for row in worksheet.iter_rows(min_row=2, values_only=True):
+                    if any(row):  # Skip empty rows
+                        row_dict = {}
+                        for i, value in enumerate(row):
+                            if i < len(headers) and headers[i]:
+                                row_dict[headers[i]] = str(value) if value is not None else ''
+                        rows.append(row_dict)
+            
+            # Group rows by faculty_id
+            for row_num, row in enumerate(rows, start=2):
                 try:
                     faculty_id = row.get('Faculty ID', '').strip()
                     first_name = row.get('First Name', '').strip()
@@ -1174,52 +1267,90 @@ def import_faculty_csv(request):
                     status = row.get('Status', 'Continuing').strip()
                     
                     # Validate required fields
-                    if not all([faculty_id, first_name, last_name, program, year_section, semester]):
-                        errors.append(f'Row {row_num}: Missing required fields')
+                    if not faculty_id:
+                        errors.append(f'Row {row_num}: Faculty ID is required')
                         error_count += 1
                         continue
                     
-                    # Validate program
-                    if program not in ['Computer Science', 'Information Technology']:
-                        errors.append(f'Row {row_num}: Invalid program "{program}"')
+                    if not all([first_name, last_name]) and faculty_id not in faculty_data:
+                        errors.append(f'Row {row_num}: First Name and Last Name are required for new faculty')
                         error_count += 1
                         continue
                     
-                    # Validate status
-                    if status not in ['Continuing', 'Completed']:
-                        status = 'Continuing'  # Default to Continuing
+                    # Initialize faculty data if not exists
+                    if faculty_id not in faculty_data:
+                        faculty_data[faculty_id] = {
+                            'first_name': first_name,
+                            'last_name': last_name,
+                            'middle_initial': middle_initial,
+                            'status': status if status in ['Continuing', 'Completed'] else 'Continuing',
+                            'assignments': []
+                        }
                     
-                    # Check if faculty already exists
-                    if Faculty.objects.filter(faculty_id=faculty_id).exists():
-                        errors.append(f'Row {row_num}: Faculty ID "{faculty_id}" already exists')
-                        error_count += 1
-                        continue
-                    
-                    # Create faculty
-                    default_password = "welcomeadmin"
-                    hashed_password = make_password(default_password)
-                    
-                    Faculty.objects.create(
-                        faculty_id=faculty_id,
-                        first_name=first_name,
-                        last_name=last_name,
-                        middle_initial=middle_initial,
-                        program=program,
-                        year_section=year_section,
-                        semester=semester,
-                        password=hashed_password,
-                        faculty_status=status
-                    )
-                    success_count += 1
+                    # Add assignment if program data is provided
+                    if program and year_section and semester:
+                        # Validate program
+                        if program not in ['Computer Science', 'Information Technology']:
+                            errors.append(f'Row {row_num}: Invalid program "{program}"')
+                            error_count += 1
+                            continue
+                        
+                        faculty_data[faculty_id]['assignments'].append({
+                            'program': program,
+                            'year_section': year_section,
+                            'semester': semester
+                        })
                     
                 except Exception as e:
                     errors.append(f'Row {row_num}: {str(e)}')
                     error_count += 1
                     continue
             
+            # Create/Update faculty with their assignments
+            for faculty_id, data in faculty_data.items():
+                try:
+                    with transaction.atomic():
+                        # Check if faculty already exists
+                        faculty, created = Faculty.objects.get_or_create(
+                            faculty_id=faculty_id,
+                            defaults={
+                                'first_name': data['first_name'],
+                                'last_name': data['last_name'],
+                                'middle_initial': data['middle_initial'],
+                                'password': make_password("welcomeadmin"),
+                                'faculty_status': data['status']
+                            }
+                        )
+                        
+                        if created:
+                            success_count += 1
+                            
+                            # Create assignments for new faculty
+                            for assignment_data in data['assignments']:
+                                FacultyAssignment.objects.create(
+                                    faculty=faculty,
+                                    program=assignment_data['program'],
+                                    year_section=assignment_data['year_section'],
+                                    semester=assignment_data['semester']
+                                )
+                        else:
+                            # Faculty exists, add new assignments (avoid duplicates)
+                            for assignment_data in data['assignments']:
+                                assignment, created = FacultyAssignment.objects.get_or_create(
+                                    faculty=faculty,
+                                    program=assignment_data['program'],
+                                    year_section=assignment_data['year_section'],
+                                    semester=assignment_data['semester']
+                                )
+                                
+                except Exception as e:
+                    errors.append(f'Faculty {faculty_id}: {str(e)}')
+                    error_count += 1
+                    continue
+            
             # Show results
             if success_count > 0:
-                messages.success(request, f'Successfully imported {success_count} faculty members.')
+                messages.success(request, f'Successfully imported {success_count} faculty members from {file_extension.upper()} file.')
             
             if error_count > 0:
                 error_message = f'{error_count} rows had errors:\n' + '\n'.join(errors[:10])  # Show first 10 errors
@@ -1228,19 +1359,19 @@ def import_faculty_csv(request):
                 messages.error(request, error_message)
                 
         except Exception as e:
-            messages.error(request, f'Error processing CSV file: {str(e)}')
+            messages.error(request, f'Error processing {file_extension.upper()} file: {str(e)}')
     
     return redirect('FacultyList')
 
 # Download CSV Template
 @superadmin_required
 def download_faculty_csv_template(request):
-    """Download a CSV template for faculty import"""
+    """Download a CSV template for faculty import with multiple assignments"""
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="faculty_import_template.csv"'
     
     writer = csv.writer(response)
-    # Write CSV header with sample data
+    # Write CSV header
     writer.writerow([
         'Faculty ID',
         'First Name', 
@@ -1252,17 +1383,17 @@ def download_faculty_csv_template(request):
         'Status'
     ])
     
-    # Add sample row as example
-    writer.writerow([
-        'F2024001',
-        'John',
-        'Doe',
-        'A',
-        'Computer Science',
-        '1A',
-        '1st Semester',
-        'Continuing'
-    ])
+    # Add sample data showing multiple assignments for same faculty
+    sample_data = [
+        ['F2024001', 'John', 'Doe', 'A.', 'Computer Science', '1A', '1st Semester', 'Continuing'],
+        ['F2024001', '', '', '', 'Computer Science', '2A', '1st Semester', ''],
+        ['F2024001', '', '', '', 'Information Technology', '1B', '2nd Semester', ''],
+        ['F2024002', 'Jane', 'Smith', 'B.', 'Information Technology', '3A', '1st Semester', 'Continuing'],
+        ['F2024002', '', '', '', 'Information Technology', '4A', '2nd Semester', ''],
+    ]
+    
+    for row in sample_data:
+        writer.writerow(row)
     
     return response
 
@@ -1385,7 +1516,7 @@ def download_faculty_csv_template(request):
 
 @superadmin_required
 def download_faculty_excel_template(request):
-    """Download an Excel template for faculty import"""
+    """Download an Excel template for faculty import with multiple assignments"""
     from openpyxl import Workbook
     from openpyxl.styles import Font, PatternFill, Alignment
     from django.http import HttpResponse
@@ -1419,20 +1550,18 @@ def download_faculty_excel_template(request):
         cell.fill = header_fill
         cell.alignment = header_alignment
     
-    # Add sample data
+    # Add sample data showing multiple assignments
     sample_data = [
-        'F2024001',
-        'John',
-        'Doe',
-        'A',
-        'Computer Science',
-        '1A',
-        '1st Semester',
-        'Continuing'
+        ['F2024001', 'John', 'Doe', 'A.', 'Computer Science', '1A', '1st Semester', 'Continuing'],
+        ['F2024001', '', '', '', 'Computer Science', '2A', '1st Semester', ''],
+        ['F2024001', '', '', '', 'Information Technology', '1B', '2nd Semester', ''],
+        ['F2024002', 'Jane', 'Smith', 'B.', 'Information Technology', '3A', '1st Semester', 'Continuing'],
+        ['F2024002', '', '', '', 'Information Technology', '4A', '2nd Semester', ''],
     ]
     
-    for col, value in enumerate(sample_data, 1):
-        ws.cell(row=2, column=col, value=value)
+    for row_idx, row_data in enumerate(sample_data, 2):
+        for col, value in enumerate(row_data, 1):
+            ws.cell(row=row_idx, column=col, value=value)
     
     # Add instructions in a separate sheet
     instructions_ws = wb.create_sheet("Instructions")
@@ -1441,17 +1570,24 @@ def download_faculty_excel_template(request):
         ["", ""],
         ["Required Columns:", ""],
         ["Faculty ID", "Unique identifier for the faculty member (Required)"],
-        ["First Name", "Faculty member's first name (Required)"],
-        ["Last Name", "Faculty member's last name (Required)"],
+        ["First Name", "Faculty member's first name (Required for first row of each faculty)"],
+        ["Last Name", "Faculty member's last name (Required for first row of each faculty)"],
         ["Middle Initial", "Faculty member's middle initial (Optional)"],
-        ["Program", "Must be 'Computer Science' or 'Information Technology' (Required)"],
-        ["Year Section", "Year and section (e.g., '1A', '2B') (Required)"],
-        ["Semester", "Semester (e.g., '1st Semester', '2nd Semester') (Required)"],
+        ["Program", "Must be 'Computer Science' or 'Information Technology' (Required for assignments)"],
+        ["Year Section", "Year and section (e.g., '1A', '2B') (Required for assignments)"],
+        ["Semester", "Semester (e.g., '1st Semester', '2nd Semester') (Required for assignments)"],
         ["Status", "Either 'Continuing' or 'Completed' (Optional - defaults to 'Continuing')"],
+        ["", ""],
+        ["Multiple Assignments:", ""],
+        ["• Each faculty can have multiple program assignments", ""],
+        ["• Use the same Faculty ID for multiple rows", ""],
+        ["• Only fill First Name, Last Name, Middle Initial, and Status in the first row", ""],
+        ["• Leave personal info columns empty for additional assignment rows", ""],
+        ["• Each assignment row must have Program, Year Section, and Semester", ""],
         ["", ""],
         ["Important Notes:", ""],
         ["• All imported faculty will have the default password 'welcomeadmin'", ""],
-        ["• Existing Faculty IDs will be skipped", ""],
+        ["• Existing Faculty IDs will have new assignments added", ""],
         ["• Make sure to follow the exact column names as shown in the template", ""],
         ["• Remove the sample data before importing your actual data", ""],
     ]
@@ -1488,3 +1624,21 @@ def download_faculty_excel_template(request):
     return response
 
 
+@superadmin_required
+def check_faculty_id(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            faculty_id = data.get('faculty_id', '').strip()
+            
+            # Check if faculty ID exists in either Faculty or ArchivedFaculty tables
+            exists = (
+                Faculty.objects.filter(faculty_id=faculty_id).exists() or 
+                ArchivedFaculty.objects.filter(faculty_id=faculty_id).exists()
+            )
+            
+            return JsonResponse({'exists': exists})
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=400)
+    
+    return JsonResponse({'error': 'Invalid request method'}, status=405)

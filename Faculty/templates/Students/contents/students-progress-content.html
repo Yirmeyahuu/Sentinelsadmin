@@ -19,7 +19,7 @@
                     <div class="flex items-center justify-between relative z-10">
                         <div>
                             {% if faculty_assignments %}
-                                <p class="text-blue-100 text-sm font-medium mb-1">
+                                <p class="text-blue-100 text-lg font-medium mb-1">
                                     {% for assignment in faculty_assignments %}
                                         {{ assignment.program }}{% if not forloop.last %}, {% endif %}
                                     {% endfor %}
