@@ -5,4 +5,5 @@ urlpatterns = [
     path('Registration/', views.StudentRegister, name='student_register'),
     path('Success/', views.RegisterSuccess, name='register_success'),
     path('check-student-id/', views.check_student_id, name='check_student_id'),
+    path('check-faculty-assignment/', views.check_faculty_assignment, name='check_faculty_assignment'),
 ]

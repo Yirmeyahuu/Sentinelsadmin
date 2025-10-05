@@ -126,6 +126,8 @@
                                 placeholder="3A"
                                 oninput="formatYearSection(this)">
                         </div>
+                        <!-- Message container for year section validation -->
+                        <div id="year-section-message" class="text-sm mt-1 hidden"></div>
                     </div>
                     
                     <!-- Semester -->
@@ -149,6 +151,8 @@
                                 </svg>
                             </span>
                         </div>
+                        <!-- Message container for semester validation -->
+                        <div id="semester-message" class="text-sm mt-1 hidden"></div>
                     </div>
                 </div>
 
@@ -214,15 +218,53 @@ function formatYearSection(input) {
 }
 
 // Form validation on submit
-document.getElementById('registrationForm').addEventListener('submit', function(e) {
+document.getElementById('registrationForm').addEventListener('submit', async function(e) {
+    e.preventDefault(); // Always prevent default first
+    
     const firstName = document.getElementById('first_name').value.trim();
     const lastName = document.getElementById('last_name').value.trim();
     const middleInitial = document.getElementById('middle_initial').value.trim();
     const yearSection = document.getElementById('year_section').value.trim();
+    const program = document.getElementById('program').value;
+    const semester = document.getElementById('semester').value;
     
     let errors = [];
     
-    // Validate first name and last name (should contain only letters and spaces)
+    // MANDATORY faculty assignment validation first
+    if (program && yearSection && semester) {
+        try {
+            const response = await fetch('/Student/check-faculty-assignment/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                },
+                body: JSON.stringify({
+                    program: program,
+                    year_section: yearSection,
+                    semester: semester
+                })
+            });
+            
+            const data = await response.json();
+            if (!data.faculty_exists) {
+                errors.push('❌ Cannot register: No Faculty assigned to this program, year section, and semester. Please contact your instructor first.');
+                
+                // Also update UI to show error
+                const yearSectionField = document.getElementById('year_section');
+                const semesterField = document.getElementById('semester');
+                yearSectionField.classList.add('border-red-500', 'focus:ring-red-500');
+                semesterField.classList.add('border-red-500', 'focus:ring-red-500');
+            }
+        } catch (error) {
+            console.error('Error validating faculty assignment:', error);
+            errors.push('❌ Unable to validate faculty assignment. Please check your internet connection and try again.');
+        }
+    } else {
+        errors.push('❌ Please select Program, Year & Section, and Semester before submitting.');
+    }
+    
+    // Other existing validations
     if (!firstName.match(/^[A-Za-z\s]+$/)) {
         errors.push('First name should contain only letters and spaces.');
     }
@@ -231,20 +273,22 @@ document.getElementById('registrationForm').addEventListener('submit', function(
         errors.push('Last name should contain only letters and spaces.');
     }
     
-    // Validate middle initial (should be exactly one letter followed by a period)
     if (!middleInitial.match(/^[A-Z]\.$/)) {
         errors.push('Middle initial should be a single letter followed by a period (e.g., "M.").');
     }
     
-    // Validate year and section (should be exactly one digit 1-4 followed by one letter)
     if (!yearSection.match(/^[1-4][A-Z]$/)) {
         errors.push('Year and Section should be a number (1-4) followed by a capital letter (e.g., "3A").');
     }
     
+    // Only submit if no errors
     if (errors.length > 0) {
-        e.preventDefault();
-        alert('Please fix the following errors:\n\n' + errors.join('\n'));
+        alert('⚠️ Registration cannot proceed:\n\n' + errors.join('\n\n'));
+        return false;
     }
+    
+    // If all validations pass, submit the form
+    this.submit();
 });
 
 
@@ -287,5 +331,97 @@ function createMessageDiv() {
     messageDiv.classList.remove('hidden'); // Show the div
     return messageDiv;
 }
+
+
+
+async function validateFacultyAssignment() {
+    const program = document.getElementById('program').value;
+    const yearSection = document.getElementById('year_section').value;
+    const semester = document.getElementById('semester').value;
+    
+    if (!program || !yearSection || !semester) {
+        // Clear messages and styling when fields are incomplete
+        clearFacultyValidationMessages();
+        return;
+    }
+    
+    try {
+        const response = await fetch('/Student/check-faculty-assignment/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: JSON.stringify({
+                program: program,
+                year_section: yearSection,
+                semester: semester
+            })
+        });
+        
+        const data = await response.json();
+        const yearSectionField = document.getElementById('year_section');
+        const semesterField = document.getElementById('semester');
+        const yearSectionMessage = document.getElementById('year-section-message');
+        const semesterMessage = document.getElementById('semester-message');
+        
+        if (!data.faculty_exists) {
+            // Add error styling
+            yearSectionField.classList.add('border-red-500', 'focus:ring-red-500');
+            yearSectionField.classList.remove('border-gray-300', 'focus:ring-blue-500');
+            semesterField.classList.add('border-red-500', 'focus:ring-red-500');
+            semesterField.classList.remove('border-gray-300', 'focus:ring-blue-500');
+            
+            // Show error messages
+            yearSectionMessage.className = 'text-red-500 text-sm mt-1';
+            yearSectionMessage.textContent = 'No Faculty registered for this combination.';
+            yearSectionMessage.classList.remove('hidden');
+            
+            semesterMessage.className = 'text-red-500 text-sm mt-1';
+            semesterMessage.textContent = 'Please contact your instructor.';
+            semesterMessage.classList.remove('hidden');
+        } else {
+            // Remove error styling and show success
+            yearSectionField.classList.remove('border-red-500', 'focus:ring-red-500');
+            yearSectionField.classList.add('border-green-500', 'focus:ring-green-500');
+            semesterField.classList.remove('border-red-500', 'focus:ring-red-500');
+            semesterField.classList.add('border-green-500', 'focus:ring-green-500');
+            
+            // Show success messages
+            yearSectionMessage.className = 'text-green-500 text-sm mt-1';
+            yearSectionMessage.textContent = 'Faculty available for this section.';
+            yearSectionMessage.classList.remove('hidden');
+            
+            semesterMessage.className = 'text-green-500 text-sm mt-1';
+            semesterMessage.textContent = 'Valid semester selection.';
+            semesterMessage.classList.remove('hidden');
+        }
+    } catch (error) {
+        console.error('Error checking faculty assignment:', error);
+        clearFacultyValidationMessages();
+    }
+}
+
+// Helper function to clear validation messages
+function clearFacultyValidationMessages() {
+    const yearSectionField = document.getElementById('year_section');
+    const semesterField = document.getElementById('semester');
+    const yearSectionMessage = document.getElementById('year-section-message');
+    const semesterMessage = document.getElementById('semester-message');
+    
+    // Reset field styling
+    yearSectionField.classList.remove('border-red-500', 'focus:ring-red-500', 'border-green-500', 'focus:ring-green-500');
+    yearSectionField.classList.add('border-gray-300', 'focus:ring-blue-500');
+    semesterField.classList.remove('border-red-500', 'focus:ring-red-500', 'border-green-500', 'focus:ring-green-500');
+    semesterField.classList.add('border-gray-300', 'focus:ring-blue-500');
+    
+    // Hide messages
+    yearSectionMessage.classList.add('hidden');
+    semesterMessage.classList.add('hidden');
+}
+
+document.getElementById('program').addEventListener('change', validateFacultyAssignment);
+document.getElementById('year_section').addEventListener('input', validateFacultyAssignment);
+document.getElementById('semester').addEventListener('change', validateFacultyAssignment);
 </script>
 {% endblock content %}

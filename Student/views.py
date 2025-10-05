@@ -7,6 +7,7 @@ from firebase_admin import firestore
 from .models import PendingStudent, Student
 from django.http import JsonResponse
 import json
+from django.views.decorators.csrf import csrf_exempt
 
 # Firestore database instance
 from SentinelsProject.firebase_config import db
@@ -42,6 +43,19 @@ def StudentRegister(request):
 
         # Server-side validation and formatting
         try:
+            # FIRST: Check faculty assignment before any other processing
+            faculty_assignment = FacultyAssignment.objects.filter(
+                program=program,
+                year_section=year_section,
+                semester=semester,
+                is_active=True,
+                faculty__faculty_status='Continuing'
+            ).first()
+            
+            if not faculty_assignment:
+                messages.error(request, "Registration failed: No Faculty registered for the selected program, year section, and semester. Please contact your instructor.")
+                return redirect('student_register')
+
             # Format names (proper case)
             import re
             first_name = ' '.join(word.capitalize() for word in re.sub(r'[^a-zA-Z\s]', '', first_name).split())
@@ -65,23 +79,22 @@ def StudentRegister(request):
             if not first_name or not last_name:
                 messages.error(request, "First name and last name are required.")
                 return redirect('student_register')
-            
-            faculty_assignment = FacultyAssignment.objects.filter(
-                program=program,
-                year_section=year_section,
-                semester=semester,
-                is_active=True,
-                faculty__faculty_status='Continuing'
-            ).first()
-            
-            if not faculty_assignment:
-                messages.error(request, "Registration failed: No active class found for the selected program, year, and semester.")
-                return redirect('student_register')
 
             # Check if student is already pending or registered
             if PendingStudent.objects.filter(student_id=student_id).exists() or Student.objects.filter(student_id=student_id).exists():
                  messages.error(request, f"Student ID '{student_id}' is already registered or pending approval.")
                  return redirect('student_register')
+
+            # DOUBLE-CHECK: Verify faculty assignment still exists before creating student
+            if not FacultyAssignment.objects.filter(
+                program=program,
+                year_section=year_section,
+                semester=semester,
+                is_active=True,
+                faculty__faculty_status='Continuing'
+            ).exists():
+                messages.error(request, "Registration failed: Faculty assignment no longer available. Please contact your instructor.")
+                return redirect('student_register')
 
             # Create a new PendingStudent instance with formatted data
             PendingStudent.objects.create(
@@ -107,3 +120,31 @@ def StudentRegister(request):
 
 def RegisterSuccess(request):
     return render(request, 'StudentRegistration/register-success.html')
+
+
+
+@csrf_exempt
+def check_faculty_assignment(request):
+    if request.method == 'POST':
+        try:
+            import json
+            data = json.loads(request.body)
+            program = data.get('program')
+            year_section = data.get('year_section')
+            semester = data.get('semester')
+            
+            # Check if faculty assignment exists
+            faculty_exists = FacultyAssignment.objects.filter(
+                program=program,
+                year_section=year_section,
+                semester=semester,
+                is_active=True,
+                faculty__faculty_status='Continuing'
+            ).exists()
+            
+            return JsonResponse({'faculty_exists': faculty_exists})
+            
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=400)
+    
+    return JsonResponse({'error': 'Invalid request method'}, status=405)
