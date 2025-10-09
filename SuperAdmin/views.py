@@ -60,10 +60,12 @@ def Superadmin_Home(request):
         "Novice_Task_4_(Defeat Rootkit)"
     ]
     junior_tasks = [
-        "Junior_Task_1(Domain Research)",
-        "Junior_Task_2(Analyze Email)",
+        "Junior_Task_1(Collect Books",
+        "Junior_Task_2(QNA)",
         "Junior_Task_3(Security Policy)", 
         "Junior_Task_4(Social Engineering)"
+        "Junior_Task_5()"
+        "Junior_Task_6()"
     ]
     senior_tasks = [
         "Senior_Task_1(Threat Landscape)",
@@ -209,11 +211,6 @@ def Faculty_list(request):
 @superadmin_required
 def add_faculty(request):
     if request.method == "POST":
-        # Add debugging
-        print("=== DEBUG ADD FACULTY ===")
-        print(f"POST data: {dict(request.POST)}")
-        print(f"Assignments raw: {request.POST.get('assignments', 'NO ASSIGNMENTS KEY')}")
-        
         form = AddFacultyForm(request.POST)
         if form.is_valid():
             print(f"Form cleaned data: {form.cleaned_data}")

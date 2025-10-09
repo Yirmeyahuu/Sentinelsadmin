@@ -7,13 +7,6 @@ window.closeArchiveModal = function() {
     document.getElementById('archiveModal').classList.add('hidden');
 };
 
-// Add Student Modal
-window.openStudentModal = function() {
-    document.getElementById('modal').classList.remove('hidden');
-};
-window.closeStudentModal = function() {
-    document.getElementById('modal').classList.add('hidden');
-};
 
 
 // Student Modal Functions

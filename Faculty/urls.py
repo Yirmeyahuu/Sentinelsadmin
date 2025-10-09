@@ -9,6 +9,7 @@ urlpatterns = [
     #URLS FOR STUDENT MANAGEMENT PAGE
     path("Student-list/", views.student_list, name="faculty-student-list"),
     path("add/", views.add_student, name="add_student"),
+    path("check-student-id/", views.check_student_id, name="check_student_id"),
     path("Archived-Students/", views.archived_students_list_page, name="archived_students_list"),
     path('edit/<str:student_id>/', views.edit_student, name='edit_student'),
     path('Verify-students/', views.Verify_Student, name='verify-students'),

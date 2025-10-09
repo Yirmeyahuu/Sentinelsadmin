@@ -74,6 +74,7 @@ class ArchivedStudent(models.Model):
         blank=True
     )
     
+    
     archived_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

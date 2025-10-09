@@ -5,7 +5,7 @@ from django.views.decorators.http import require_POST
 from firebase_admin import firestore   
 from django.http import JsonResponse
 import json
-from .forms import AddStudentForm
+from Faculty.forms import AddStudentForm
 from django.views.decorators.csrf import csrf_exempt
 from Login.decorators import faculty_required
 from django.core.paginator import Paginator
@@ -25,6 +25,8 @@ from openpyxl import load_workbook, Workbook
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from django.http import HttpResponse
 from django.contrib.auth.hashers import make_password
+
+from django.urls import reverse
 
 # Firestore database instance
 from SentinelsProject.firebase_config import db
@@ -212,14 +214,6 @@ def Faculty_home(request):
     # Sort leaderboard by total points descending
     leaderboard_students = sorted(leaderboard_students, key=lambda x: x["points"], reverse=True)[:10]
 
-    # --- Firestore Logic (Notifications & Deadlines) ---
-    notifications_ref = db.collection("Notifications").order_by("timestamp", direction=firestore.Query.DESCENDING)
-    notifications = []
-    for doc in notifications_ref.stream():
-        notif = doc.to_dict()
-        notif['id'] = doc.id
-        notifications.append(notif)
-    unseen_count = sum(1 for notif in notifications if not notif.get('seen', False))
 
     # FIX: Use Philippine timezone instead of system timezone
     philippine_tz = pytz.timezone('Asia/Manila')
@@ -314,8 +308,6 @@ def Faculty_home(request):
         "it_students": it_students_count,
         "calendar_days": calendar_days,
         "almost_due_tasks": almost_due_tasks,
-        "notifications": notifications,
-        "unseen_count": unseen_count,
         "current_month": current_date.strftime('%B'),
         "current_year": current_date.year,
         "current_month_year": current_date.strftime('%B %Y'),
@@ -502,23 +494,14 @@ def student_list(request):
     paginator = Paginator(students_query, 8) # 8 students per page
     page_obj = paginator.get_page(page_number)
 
-    # --- Notifications (still from Firestore as per existing logic) ---
-    notifications_ref = db.collection("Notifications").order_by("timestamp", direction=firestore.Query.DESCENDING)
-    notifications = []
-    for doc in notifications_ref.stream():
-        notif = doc.to_dict()
-        notif['id'] = doc.id
-        notifications.append(notif)
-    # --- End of Firestore logic ---
 
     context = {
         "students": page_obj,
         "faculty_data": faculty,
-        "faculty_assignments": faculty_assignments,  # Add assignments to context
+        "faculty_assignments": faculty_assignments,
         "total_users": total_users,
         "cs_students": cs_students_count,
         "it_students": it_students_count,
-        "notifications": notifications,
         "program_total": program_total,
         "section_total": section_total,
         "search_query": search_query,
@@ -717,61 +700,93 @@ def student_progress(request):
     
 
 # This is the add student process of Faculty
+
 @faculty_required
 def add_student(request):
+    print(f"=== ADD STUDENT VIEW CALLED ===")
+    print(f"Method: {request.method}")
+    print(f"POST data: {request.POST}")
+    
     if request.method == "POST":
-        form = AddStudentForm(request.POST)
+        # Get faculty from session
+        faculty_id = request.session.get('faculty_id')
+        if not faculty_id:
+            messages.error(request, "Session expired. Please login again.")
+            return redirect('sentinels_login')
+        
+        try:
+            faculty = Faculty.objects.get(faculty_id=faculty_id)
+            print(f"Faculty found: {faculty.faculty_id}")
+        except Faculty.DoesNotExist:
+            messages.error(request, "Faculty profile not found.")
+            return redirect('faculty-student-list')
+
+        form = AddStudentForm(request.POST, faculty=faculty)
+        
         if form.is_valid():
-            student_id = form.cleaned_data["student_id"]
-            first_name = form.cleaned_data["first_name"]
-            last_name = form.cleaned_data["last_name"]
-            middle_initial = form.cleaned_data["middle_initial"]
-
-            # Get faculty's assigned program, year_section, and semester
-            faculty = Faculty.objects.get(faculty_id=request.user.username)
-            program = faculty.program
-            year_section = faculty.year_section
-            semester = faculty.semester
-
-            # Create the new student in PostgreSQL
-            Student.objects.create(
-                student_id=student_id,
-                first_name=first_name,
-                last_name=last_name,
-                middle_initial=middle_initial,
-                faculty=faculty,
-                program=program,
-                year_section=year_section,
-                semester=semester,
-                student_status='Registered'
-            )
-
-            # Prepare the data for Firestore
-            firestore_data = {
-                'student_id': student_id,
-                'first_name': first_name,
-                'last_name': last_name,
-                'middle_initial': middle_initial,
-                'program': program,
-                'year_section': year_section,
-                'semester': semester,
-            }
-
-            # Also create a corresponding document in Firestore with student details
+            print("Form is valid")
             try:
-                db.collection('Registered_Students').document(student_id).set(firestore_data)
+                # Use atomic transaction to ensure both PostgreSQL and Firestore succeed or fail together
+                with transaction.atomic():
+                    student = form.save()
+                    print(f"Student saved to PostgreSQL: {student.student_id}")
+                    
+                    # Create Firestore record
+                    firestore_data = {
+                        'student_id': student.student_id,
+                        'first_name': student.first_name,
+                        'last_name': student.last_name,
+                        'middle_initial': student.middle_initial,
+                        'program': student.faculty_assignment.program,
+                        'year_section': student.faculty_assignment.year_section,
+                        'semester': student.faculty_assignment.semester,
+                    }
+                    
+                    try:
+                        db.collection('Registered_Students').document(student.student_id).set(firestore_data)
+                        print(f"Firestore record created for {student.student_id}")
+                    except Exception as firestore_error:
+                        print(f"Firestore error: {firestore_error}")
+                        # Re-raise to trigger transaction rollback
+                        raise firestore_error
+                    
+                messages.success(request, f"Student {student.student_id} added successfully!")
+                print("Student addition completed successfully")
+                
             except Exception as e:
-                messages.error(request, f"Student added to database, but failed to create Firestore record: {e}")
-
-            messages.success(request, f"Student {student_id} added successfully!")
-            return redirect("faculty-student-list")
+                messages.error(request, f"Error adding student: {str(e)}")
+                print(f"Error during save: {str(e)}")
+                
+            return redirect('faculty-student-list')
         else:
-            context = {
-                "form": form,
-                "show_add_modal": True,
-            }
-            return render(request, "Students/contents/student-list-content.html", context)
-    return redirect("faculty-student-list")
+            print(f"Form errors: {form.errors}")
+            # Display form errors
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f"{field}: {error}")
+            return redirect('faculty-student-list')
+    else:
+        print("Not a POST request, redirecting")
+        return redirect('faculty-student-list')
+
+
+
+
+# Add check student ID endpoint
+@faculty_required
+def check_student_id(request):
+    if request.method == "POST":
+        import json
+        try:
+            data = json.loads(request.body)
+            student_id = data.get('student_id', '')
+            exists = Student.objects.filter(student_id=student_id).exists()
+            return JsonResponse({'exists': exists})
+        except Exception as e:
+            return JsonResponse({'exists': False, 'error': str(e)})
+    return JsonResponse({'exists': False})
+
+
 # This is the edit student process of Faculty
 @faculty_required
 def edit_student(request, student_id):
@@ -1136,15 +1151,8 @@ def reject_student(request, student_id):
         messages.error(request, f"An error occurred while rejecting the student: {e}")
 
     return redirect('verify-students')
-# This is the mark all notifications as read process of Faculty
-@require_POST
-@faculty_required
-def mark_all_notifications_read(request):
-    notifications_ref = db.collection("Notifications")
-    for notif in notifications_ref.stream():
-        notif.reference.update({"seen": True})
-    messages.success(request, "All notifications marked as read.")
-    return redirect(request.META.get('HTTP_REFERER', '/'))
+
+
 
 # This is the faculty account page
 @faculty_required
@@ -2298,4 +2306,4 @@ def faculty_delete_archived_student(request, student_id):
         except Exception as e:
             messages.error(request, f"An error occurred: {str(e)}")
     
-    return redirect('faculty-student-list')
+    return redirect('archived_students_list')

@@ -70,7 +70,7 @@ class Migration(migrations.Migration):
                 ('middle_initial', models.CharField(blank=True, max_length=10)),
                 ('student_status', models.CharField(choices=[('Registered', 'Registered'), ('Completed', 'Completed'), ('Drop-out', 'Drop-out')], default='Registered', max_length=20)),
                 ('password', models.CharField(max_length=128)),
-                ('faculty', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='students_old', to='Faculty.faculty')),
+                ('faculty', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='students_old', to='Faculty.faculty')),
                 ('faculty_assignment', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='students', to='Faculty.facultyassignment')),
             ],
             options={
