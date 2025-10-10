@@ -9,7 +9,7 @@ window.closeArchiveModal = function() {
 
 
 
-// Student Modal Functions
+// Student Edit Modal Functions
 window.openEditModal = function(studentId) {
     const modal = document.getElementById(`editStudentModal-${studentId}`);
     if (modal) {
