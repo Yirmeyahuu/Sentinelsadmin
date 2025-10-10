@@ -619,9 +619,6 @@
   .block {
     display: block;
   }
-  .contents {
-    display: contents;
-  }
   .flex {
     display: flex;
   }
@@ -630,9 +627,6 @@
   }
   .hidden {
     display: none;
-  }
-  .inline {
-    display: inline;
   }
   .inline-block {
     display: inline-block;
@@ -829,9 +823,6 @@
   }
   .w-\[50rem\] {
     width: 50rem;
-  }
-  .w-\[1200px\] {
-    width: 1200px;
   }
   .w-auto {
     width: auto;

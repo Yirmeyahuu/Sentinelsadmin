@@ -3,14 +3,15 @@
     document.title = "SENTINELS | Home";
 </script>
 
-<div class="p-0 pb-6 px-6 flex justify-center">
-    <div class="w-full max-w-8xl flex space-x-6 mx-auto">
-        <div class="flex-1 flex flex-col items-center">
-            <div class="flex flex-col items-center w-[1200px]">
+<!-- Main Container -->
+<div class="flex flex-col min-h-screen ml-20">
+    <!-- Dashboard Cards Container -->
+    <div class="px-6 mb-8">
+        <div class="max-w-[calc(100%-80px)] mx-auto">
                 <!-- Dashboard Cards Row -->
                 <div class="flex space-x-6 w-full">
                     <!-- Total Students Card -->
-                    <div class="relative group bg-gradient-to-br from-blue-500 to-blue-700 shadow-xl rounded-2xl p-6 w-72 transition-all duration-300 hover:shadow-2xl hover:-translate-y-1">
+                    <div class="flex-1 min-w-[260px] relative group bg-gradient-to-br from-blue-500 to-blue-700 shadow-xl rounded-2xl p-6 transition-all duration-300 hover:shadow-2xl hover:-translate-y-1">
                         <!-- Decorative Blur Effect -->
                         <div class="absolute top-0 right-0 w-32 h-32 transform translate-x-16 -translate-y-16">
                             <div class="absolute inset-0 bg-blue-400 opacity-50 blur-3xl rounded-full"></div>
@@ -31,7 +32,7 @@
                     </div>
                 
                     <!-- Total Faculty Card -->
-                    <div class="relative group bg-gradient-to-br from-indigo-500 to-indigo-700 shadow-xl rounded-2xl p-6 w-72 transition-all duration-300 hover:shadow-2xl hover:-translate-y-1">
+                    <div class="flex-1 min-w-[260px] relative group bg-gradient-to-br from-indigo-500 to-indigo-700 shadow-xl rounded-2xl p-6 transition-all duration-300 hover:shadow-2xl hover:-translate-y-1">
                         <div class="absolute top-0 right-0 w-32 h-32 transform translate-x-16 -translate-y-16">
                             <div class="absolute inset-0 bg-indigo-400 opacity-50 blur-3xl rounded-full"></div>
                         </div>
@@ -50,7 +51,7 @@
                     </div>
                 
                     <!-- CS Students Card -->
-                    <div class="relative group bg-gradient-to-br from-amber-500 to-amber-700 shadow-xl rounded-2xl p-6 w-72 transition-all duration-300 hover:shadow-2xl hover:-translate-y-1">
+                    <div class="flex-1 min-w-[260px] relative group bg-gradient-to-br from-amber-500 to-amber-700 shadow-xl rounded-2xl p-6 transition-all duration-300 hover:shadow-2xl hover:-translate-y-1">
                         <div class="absolute top-0 right-0 w-32 h-32 transform translate-x-16 -translate-y-16">
                             <div class="absolute inset-0 bg-amber-400 opacity-50 blur-3xl rounded-full"></div>
                         </div>
@@ -68,7 +69,7 @@
                     </div>
                 
                     <!-- IT Students Card -->
-                    <div class="relative group bg-gradient-to-br from-rose-500 to-rose-700 shadow-xl rounded-2xl p-6 w-72 transition-all duration-300 hover:shadow-2xl hover:-translate-y-1">
+                    <div class="flex-1 min-w-[260px] relative group bg-gradient-to-br from-rose-500 to-rose-700 shadow-xl rounded-2xl p-6 transition-all duration-300 hover:shadow-2xl hover:-translate-y-1">
                         <div class="absolute top-0 right-0 w-32 h-32 transform translate-x-16 -translate-y-16">
                             <div class="absolute inset-0 bg-rose-400 opacity-50 blur-3xl rounded-full"></div>
                         </div>
@@ -141,10 +142,6 @@
                         <canvas id="programLineChart" height="80"></canvas>
                     </div>
                 </div>
-
-                <!-- You can add tables or charts below, similar to faculty-home.html -->
-                <!-- Example: Recent Students, Recent Faculty, Activity Progress, etc. -->
-            </div>
         </div>
     </div>
 </div>

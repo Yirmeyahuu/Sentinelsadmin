@@ -586,6 +586,12 @@ def Superadmin_activity_page(request):
 @superadmin_required
 def Superadmin_Student_Status(request):
 
+    # Total Faculty (PostgreSQL)
+    total_faculty = Faculty.objects.filter(faculty_status='Continuing').count()
+
+    # Total Faculty (PostgreSQL)
+    total_faculty = Faculty.objects.filter(faculty_status='Continuing').count()
+
     # Total students (PostgreSQL)
     total_students = Student.objects.filter(student_status='Registered').count()
 
@@ -595,36 +601,23 @@ def Superadmin_Student_Status(request):
     # Information Technology students (PostgreSQL) - UPDATED
     it_students_count = Student.objects.filter(student_status='Registered', faculty_assignment__program='Information Technology').count()
 
-
-    # Get filter parameters from the request
-    status_filter = request.GET.get('status', 'all')
-    program_filter = request.GET.get('program', 'all')
-    year_section_filter = request.GET.get('year_section', 'all')
-    semester_filter = request.GET.get('semester', 'all')
+    # Get filter parameters
+    selected_program = request.GET.get('program', 'all')
+    selected_year_section = request.GET.get('year_section', 'all')
+    selected_semester = request.GET.get('semester', 'all')
     search_query = request.GET.get('search', '').strip()
 
-    # Start with a base query for all students, pre-fetching faculty_assignment data - UPDATED
-    students_query = Student.objects.select_related('faculty_assignment__faculty').all()
+    # Base query: all students with related faculty_assignment data - UPDATED
+    students_query = Student.objects.select_related('faculty_assignment__faculty').filter(student_status='Registered')
 
-    # Apply filters based on user selection - UPDATED
-    if status_filter != 'all':
-        status_map = {
-            'registered': 'Registered',
-            'completed': 'Completed',
-            'dropout': 'Drop-out'
-        }
-        if status_filter in status_map:
-            students_query = students_query.filter(student_status=status_map[status_filter])
-
-    if program_filter != 'all':
-        students_query = students_query.filter(faculty_assignment__program=program_filter)
+    # Apply filters using Django ORM - UPDATED
+    if selected_program != 'all':
+        students_query = students_query.filter(faculty_assignment__program=selected_program)
+    if selected_year_section != 'all':
+        students_query = students_query.filter(faculty_assignment__year_section=selected_year_section)
+    if selected_semester != 'all':
+        students_query = students_query.filter(faculty_assignment__semester=selected_semester)
     
-    if year_section_filter != 'all':
-        students_query = students_query.filter(faculty_assignment__year_section=year_section_filter)
-        
-    if semester_filter != 'all':
-        students_query = students_query.filter(faculty_assignment__semester=semester_filter)
-
     if search_query:
         students_query = students_query.filter(
             Q(first_name__icontains=search_query) |
@@ -632,11 +625,6 @@ def Superadmin_Student_Status(request):
             Q(student_id__icontains=search_query)
         )
 
-    # Get unique year sections for the filter dropdown - UPDATED
-    year_sections = sorted(list(FacultyAssignment.objects.values_list('year_section', flat=True).distinct()))
-
-    # Order the results
-    students_query = students_query.order_by('last_name', 'first_name')
 
     # Pagination
     paginator = Paginator(students_query, 6)
@@ -644,19 +632,18 @@ def Superadmin_Student_Status(request):
     page_obj = paginator.get_page(page_number)
 
     context = {
-        "students": page_obj,
-        "status_filter": status_filter,
-        "program_filter": program_filter,
-        "year_section_filter": year_section_filter,
-        "semester_filter": semester_filter,
-        "year_sections": year_sections,
-        "search_query": search_query,
-        "page_obj": page_obj,
-        "paginator": paginator,
-        "cs_students": cs_students_count,
-        "it_students": it_students_count,
+        'students': page_obj,
         'total_students': total_students,
         'active_count': total_students,
+        'selected_program': selected_program,
+        'selected_year_section': selected_year_section,
+        'selected_semester': selected_semester,
+        'search_query': search_query,
+        'page_obj': page_obj,
+        'paginator': paginator,
+        "cs_students": cs_students_count,
+        "it_students": it_students_count,
+        "total_faculty" : total_faculty,
 
     }
 
@@ -844,6 +831,9 @@ def move_faculty(request):
 @superadmin_required
 def Superadmin_Student_List(request):
 
+    # Total Faculty (PostgreSQL)
+    total_faculty = Faculty.objects.filter(faculty_status='Continuing').count()
+
     # Total students (PostgreSQL)
     total_students = Student.objects.filter(student_status='Registered').count()
 
@@ -895,6 +885,7 @@ def Superadmin_Student_List(request):
         'paginator': paginator,
         "cs_students": cs_students_count,
         "it_students": it_students_count,
+        "total_faculty" : total_faculty,
     }
     
     if request.headers.get('HX-Request'):
