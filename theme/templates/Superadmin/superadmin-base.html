@@ -382,7 +382,7 @@
             <div class="h-1 w-20 bg-blue-600 mt-4 rounded-full"></div>
         </div>
 
-        <form id="facultyForm" action="{% url 'add_faculty' %}" method="POST" class="space-y-6">
+        <form id="facultyForm"   method="POST" class="space-y-6">
             {% csrf_token %}
             <input type="hidden" name="assignments" id="assignmentsData" value="[]">
             <div class="grid grid-cols-2 gap-6">
