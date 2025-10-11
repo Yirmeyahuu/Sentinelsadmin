@@ -491,7 +491,7 @@ def student_list(request):
 
     # Pagination
     page_number = request.GET.get('page', 1)
-    paginator = Paginator(students_query, 6) # 5 students per page
+    paginator = Paginator(students_query, 10) # 5 students per page
     page_obj = paginator.get_page(page_number)
 
 

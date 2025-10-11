@@ -381,9 +381,6 @@
   .top-1\/2 {
     top: calc(1/2 * 100%);
   }
-  .top-2 {
-    top: calc(var(--spacing) * 2);
-  }
   .top-3 {
     top: calc(var(--spacing) * 3);
   }
@@ -1220,9 +1217,6 @@
     border-top-left-radius: var(--radius-2xl);
     border-top-right-radius: var(--radius-2xl);
   }
-  .rounded-tl-4xl {
-    border-top-left-radius: var(--radius-4xl);
-  }
   .rounded-tl-xl {
     border-top-left-radius: var(--radius-xl);
   }
@@ -1731,14 +1725,6 @@
   @supports (color: color-mix(in lab, red, red)) {
     .bg-gray-900\/60 {
       background-color: color-mix(in oklab, var(--color-gray-900) 60%, transparent);
-    }
-  }
-  .bg-gray-900\/70 {
-    background-color: color-mix(in srgb, oklch(21% 0.034 264.665) 70%, transparent);
-  }
-  @supports (color: color-mix(in lab, red, red)) {
-    .bg-gray-900\/70 {
-      background-color: color-mix(in oklab, var(--color-gray-900) 70%, transparent);
     }
   }
   .bg-gray-900\/75 {
