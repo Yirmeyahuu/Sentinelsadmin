@@ -1,3 +1,5 @@
+//GAME ACTIVATION/DEACTIVATE BUTTONS
+
 function getCookie(name) {
     let cookieValue = null;
     if (document.cookie && document.cookie !== '') {

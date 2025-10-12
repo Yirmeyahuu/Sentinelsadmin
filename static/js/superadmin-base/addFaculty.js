@@ -1,3 +1,17 @@
+// Add Faculty Modal
+window.openAddFacultyModal = function() {
+    document.getElementById("addFacultyModal").classList.remove("hidden");
+    document.body.classList.add("overflow-hidden");
+
+};
+
+window.closeAddFacultyModal = function() {
+    document.getElementById("addFacultyModal").classList.add("hidden");
+    document.body.classList.remove("overflow-hidden");
+};
+
+
+// This check the input of Faculty information
 function formatFacultyName(input) {
     let value = input.value;
     // Remove any non-letter characters and convert to proper case

@@ -166,14 +166,30 @@ def Superadmin_Home(request):
 # This is the Faculty list page
 @superadmin_required
 def Faculty_list(request):
+
     total_students = Student.objects.filter(student_status='Registered').count()
     total_faculty = Faculty.objects.filter(faculty_status='Continuing').count()
     cs_students_count = Student.objects.filter(student_status='Registered', faculty_assignment__program='Computer Science').count()
     it_students_count = Student.objects.filter(student_status='Registered', faculty_assignment__program='Information Technology').count()
 
+    # Get filter values from request
+    program_filter = request.GET.get('program', 'all')
+    year_section_filter = request.GET.get('year_section', 'all')
+    semester_filter = request.GET.get('semester', 'all')
+
     faculty_query = Faculty.objects.filter(faculty_status='Continuing').prefetch_related(
         Prefetch('assignments', queryset=FacultyAssignment.objects.filter(is_active=True))
     )
+
+    # Dropdown filters for Program, Year & Section, and Semster
+    if program_filter != 'all':
+        faculty_query = faculty_query.filter(assignments__program=program_filter).distinct()
+    
+    if year_section_filter != 'all':
+        faculty_query = faculty_query.filter(assignments__year_section=year_section_filter).distinct()
+    
+    if semester_filter != 'all':
+        faculty_query = faculty_query.filter(assignments__semester=semester_filter).distinct()
 
     search_query = request.GET.get('search', '').strip().lower()
     if search_query:
@@ -184,10 +200,16 @@ def Faculty_list(request):
             Q(assignments__program__icontains=search_query)
         ).distinct()
 
+    # Get unique sections for the filter dropdown
+    sections = FacultyAssignment.objects.filter(
+        is_active=True,
+        faculty__faculty_status='Continuing'
+    ).values_list('year_section', flat=True).distinct().order_by('year_section')
+
     faculty_query = faculty_query.order_by('first_name')
 
     page_number = request.GET.get('page', 1)
-    paginator = Paginator(faculty_query, 6)
+    paginator = Paginator(faculty_query, 8)
     page_obj = paginator.get_page(page_number)
 
     context = {
@@ -199,6 +221,10 @@ def Faculty_list(request):
         "search_query": request.GET.get('search', ''),
         "page_obj": page_obj,
         "paginator": paginator,
+        "program_filter": program_filter,
+        "year_section_filter": year_section_filter,
+        "semester_filter": semester_filter,
+        "sections": sections,
     }
 
     if request.headers.get('HX-Request'):
@@ -365,15 +391,14 @@ def Faculty_Archive(request, faculty_id):
     return redirect("FacultyList")
 
 
-# This is the Student Archive process
 @superadmin_required
 def Superadmin_Student_Archive(request):
+
     search_query = request.GET.get('search', '').strip()
 
-    # Base query for archived students, pre-fetching related faculty data
-    archived_students_query = ArchivedStudent.objects.select_related('faculty').all()
+    # Base query for archived students with faculty_assignment and faculty relationships
+    archived_students_query = ArchivedStudent.objects.select_related('faculty_assignment')
 
-    # Apply search filter if a query is provided
     if search_query:
         archived_students_query = archived_students_query.filter(
             Q(first_name__icontains=search_query) |
@@ -381,11 +406,8 @@ def Superadmin_Student_Archive(request):
             Q(student_id__icontains=search_query)
         )
     
-    # Order by the date they were archived
-    archived_students_query = archived_students_query.order_by('-archived_at')
-
     # Pagination
-    paginator = Paginator(archived_students_query, 10) # 10 students per page
+    paginator = Paginator(archived_students_query, 10)
     page_number = request.GET.get('page', 1)
     page_obj = paginator.get_page(page_number)
 
@@ -398,8 +420,7 @@ def Superadmin_Student_Archive(request):
 
     if request.headers.get('HX-Request'):
         return render(request, 'Students/contents/superadmin-archived-students-content.html', context)
-    else:
-        return render(request, 'Students/superadmin-archived-students.html', context)
+    return render(request, 'Students/superadmin-archived-students.html', context)
 
 
 # This is the Faculty Archive list page
@@ -585,38 +606,38 @@ def Superadmin_activity_page(request):
 # This is the Student Status page
 @superadmin_required
 def Superadmin_Student_Status(request):
-
-    # Total Faculty (PostgreSQL)
+    # Total Faculty 
     total_faculty = Faculty.objects.filter(faculty_status='Continuing').count()
-
-    # Total Faculty (PostgreSQL)
-    total_faculty = Faculty.objects.filter(faculty_status='Continuing').count()
-
-    # Total students (PostgreSQL)
-    total_students = Student.objects.filter(student_status='Registered').count()
-
-    # Computer Science students (PostgreSQL) - UPDATED
+    # Computer Science students
     cs_students_count = Student.objects.filter(student_status='Registered', faculty_assignment__program='Computer Science').count()
-
-    # Information Technology students (PostgreSQL) - UPDATED
+    # Information Technology students
     it_students_count = Student.objects.filter(student_status='Registered', faculty_assignment__program='Information Technology').count()
 
-    # Get filter parameters
+   # Get all filter parameters
     selected_program = request.GET.get('program', 'all')
     selected_year_section = request.GET.get('year_section', 'all')
     selected_semester = request.GET.get('semester', 'all')
+    selected_status = request.GET.get('status', 'all')
     search_query = request.GET.get('search', '').strip()
 
-    # Base query: all students with related faculty_assignment data - UPDATED
-    students_query = Student.objects.select_related('faculty_assignment__faculty').filter(student_status='Registered')
+    # Base query with related faculty data
+    students_query = Student.objects.select_related('faculty_assignment')
 
-    # Apply filters using Django ORM - UPDATED
+    # Count statistics
+    total_students = Student.objects.count()
+    registered_count = Student.objects.filter(student_status='Registered').count()
+    completed_count = Student.objects.filter(student_status='Completed').count()
+    dropout_count = Student.objects.filter(student_status='Drop-out').count()
+
+    # Apply filters
     if selected_program != 'all':
         students_query = students_query.filter(faculty_assignment__program=selected_program)
     if selected_year_section != 'all':
         students_query = students_query.filter(faculty_assignment__year_section=selected_year_section)
     if selected_semester != 'all':
         students_query = students_query.filter(faculty_assignment__semester=selected_semester)
+    if selected_status != 'all':
+        students_query = students_query.filter(student_status=selected_status)
     
     if search_query:
         students_query = students_query.filter(
@@ -625,25 +646,32 @@ def Superadmin_Student_Status(request):
             Q(student_id__icontains=search_query)
         )
 
+    # Get distinct sections for the filter dropdown
+    sections = Student.objects.values_list(
+        'faculty_assignment__year_section', flat=True
+    ).distinct().order_by('faculty_assignment__year_section')
+
 
     # Pagination
-    paginator = Paginator(students_query, 6)
+    paginator = Paginator(students_query, 10)
     page_number = request.GET.get('page', 1)
     page_obj = paginator.get_page(page_number)
 
     context = {
         'students': page_obj,
-        'total_students': total_students,
-        'active_count': total_students,
+        'sections': sections,
         'selected_program': selected_program,
         'selected_year_section': selected_year_section,
         'selected_semester': selected_semester,
+        'selected_status': selected_status,
         'search_query': search_query,
-        'page_obj': page_obj,
-        'paginator': paginator,
+        'total_students': total_students,
+        'active_count': total_students,
         "cs_students": cs_students_count,
         "it_students": it_students_count,
         "total_faculty" : total_faculty,
+        'page_obj': page_obj,
+        'paginator': paginator,
 
     }
 
@@ -658,14 +686,12 @@ def Faculty_Status(request):
 
     # Total students (PostgreSQL)
     total_students = Student.objects.filter(student_status='Registered').count()
-
     # Total faculty (PostgreSQL) - Include both Continuing and Completed
     total_faculty = Faculty.objects.filter(faculty_status__in=['Continuing', 'Completed']).count()
-
-    # Computer Science students (PostgreSQL) - UPDATED
+    # Computer Science students (PostgreSQL)
     cs_students_count = Student.objects.filter(student_status='Registered', faculty_assignment__program='Computer Science').count()
 
-    # Information Technology students (PostgreSQL) - UPDATED
+    # Information Technology students (PostgreSQL)
     it_students_count = Student.objects.filter(student_status='Registered', faculty_assignment__program='Information Technology').count()
 
     status_filter = request.GET.get('status', 'all')
@@ -675,32 +701,31 @@ def Faculty_Status(request):
     search_query = request.GET.get('search', '').strip().lower()
 
     # Fetch all faculty from PostgreSQL with assignments - Include both Continuing and Completed
-    faculties = Faculty.objects.filter(faculty_status__in=['Continuing', 'Completed']).prefetch_related(
+    faculty_query = Faculty.objects.filter(
+        faculty_status__in=['Continuing', 'Completed', 'Deactivated']
+    ).prefetch_related(
         Prefetch('assignments', queryset=FacultyAssignment.objects.filter(is_active=True))
     )
 
     # Apply status filter
     if status_filter != 'all':
-        if status_filter == 'continuing':
-            faculties = faculties.filter(faculty_status='Continuing')
-        elif status_filter == 'completed':
-            faculties = faculties.filter(faculty_status='Completed')
+        faculty_query = faculty_query.filter(faculty_status=status_filter)
 
     # Apply program filter - UPDATED
     if program_filter != 'all':
-        faculties = faculties.filter(assignments__program=program_filter).distinct()
+        faculty_query = faculty_query.filter(assignments__program=program_filter).distinct()
 
     # Apply year_section filter - UPDATED
     if year_section_filter != 'all':
-        faculties = faculties.filter(assignments__year_section=year_section_filter).distinct()
+        faculty_query = faculty_query.filter(assignments__year_section=year_section_filter).distinct()
 
     # Apply semester filter - UPDATED
     if semester_filter != 'all':
-        faculties = faculties.filter(assignments__semester=semester_filter).distinct()
+        faculty_query = faculty_query.filter(assignments__semester=semester_filter).distinct()
 
     # Apply search filter - UPDATED
     if search_query:
-        faculties = faculties.filter(
+        faculty_query = faculty_query.filter(
             Q(first_name__icontains=search_query) |
             Q(last_name__icontains=search_query) |
             Q(faculty_id__icontains=search_query) |
@@ -708,16 +733,17 @@ def Faculty_Status(request):
         ).distinct()
 
     # Gather unique values for dropdowns - UPDATED
-    year_sections = sorted(set(FacultyAssignment.objects.filter(is_active=True).values_list('year_section', flat=True)))
-    programs = sorted(set(FacultyAssignment.objects.filter(is_active=True).values_list('program', flat=True)))
-    semesters = sorted(set(FacultyAssignment.objects.filter(is_active=True).values_list('semester', flat=True)))
+    sections = FacultyAssignment.objects.filter(
+        is_active=True,
+        faculty__faculty_status='Continuing'
+    ).values_list('year_section', flat=True).distinct().order_by('year_section')
 
     # Sort alphabetically by first name
-    faculties = faculties.order_by('first_name')
+    faculty_query = faculty_query.order_by('first_name')
 
     # Pagination
     page_number = request.GET.get('page', 1)
-    paginator = Paginator(faculties, 6)
+    paginator = Paginator(faculty_query, 8)
     page_obj = paginator.get_page(page_number)
 
     context = {
@@ -726,9 +752,7 @@ def Faculty_Status(request):
         "program_filter": program_filter,
         "year_section_filter": year_section_filter,
         "semester_filter": semester_filter,
-        "programs": programs,
-        "year_sections": year_sections,
-        "semesters": semesters,
+        "sections": sections,
         "search_query": request.GET.get('search', ''),
         "page_obj": page_obj,
         "paginator": paginator,
@@ -827,32 +851,31 @@ def move_faculty(request):
     return redirect(referer)
 
 
-# This is the Student List page
 @superadmin_required
 def Superadmin_Student_List(request):
-
-    # Total Faculty (PostgreSQL)
+    # Total Faculty 
     total_faculty = Faculty.objects.filter(faculty_status='Continuing').count()
-
-    # Total students (PostgreSQL)
-    total_students = Student.objects.filter(student_status='Registered').count()
-
-    # Computer Science students (PostgreSQL) - UPDATED
+    # Computer Science students
     cs_students_count = Student.objects.filter(student_status='Registered', faculty_assignment__program='Computer Science').count()
-
-    # Information Technology students (PostgreSQL) - UPDATED
+    # Information Technology students
     it_students_count = Student.objects.filter(student_status='Registered', faculty_assignment__program='Information Technology').count()
 
-    # Get filter parameters
+    # Get all filter parameters
     selected_program = request.GET.get('program', 'all')
     selected_year_section = request.GET.get('year_section', 'all')
     selected_semester = request.GET.get('semester', 'all')
     search_query = request.GET.get('search', '').strip()
 
-    # Base query: all students with related faculty_assignment data - UPDATED
-    students_query = Student.objects.select_related('faculty_assignment__faculty').filter(student_status='Registered')
+    # Base query with related faculty data
+    students_query = Student.objects.select_related('faculty_assignment')
 
-    # Apply filters using Django ORM - UPDATED
+    # Count statistics
+    total_students = Student.objects.count()
+    registered_count = Student.objects.filter(student_status='Registered').count()
+    completed_count = Student.objects.filter(student_status='Completed').count()
+    dropout_count = Student.objects.filter(student_status='Drop-out').count()
+
+    # Apply filters
     if selected_program != 'all':
         students_query = students_query.filter(faculty_assignment__program=selected_program)
     if selected_year_section != 'all':
@@ -867,31 +890,35 @@ def Superadmin_Student_List(request):
             Q(student_id__icontains=search_query)
         )
 
+    # Get distinct sections for the filter dropdown
+    sections = Student.objects.values_list(
+        'faculty_assignment__year_section', flat=True
+    ).distinct().order_by('faculty_assignment__year_section')
 
     # Pagination
-    paginator = Paginator(students_query, 10)  # 10 students per page
+    paginator = Paginator(students_query, 10)
     page_number = request.GET.get('page', 1)
     page_obj = paginator.get_page(page_number)
 
     context = {
         'students': page_obj,
-        'total_students': total_students,
-        'active_count': total_students, # 'Registered' students are considered active
+        'sections': sections,
         'selected_program': selected_program,
         'selected_year_section': selected_year_section,
         'selected_semester': selected_semester,
         'search_query': search_query,
-        'page_obj': page_obj,
-        'paginator': paginator,
+        'total_students': total_students,
+        'active_count': total_students,
         "cs_students": cs_students_count,
         "it_students": it_students_count,
         "total_faculty" : total_faculty,
+        'page_obj': page_obj,
+        'paginator': paginator,
     }
     
     if request.headers.get('HX-Request'):
         return render(request, 'Students/contents/superadmin-student-list-content.html', context)
-    else:
-        return render(request, 'Students/superadmin-student-list.html', context)
+    return render(request, 'Students/superadmin-student-list.html', context)
 
 
 # This is the Game Trigger update process
@@ -979,13 +1006,13 @@ def superadmin_move_student(request):
                         student.save()
                         messages.success(request, f"Student status updated to {new_status}.")
                     elif archived_student:
-                        # Student is archived, so restore to active table
+                        # Student is archived, so restore to active table with faculty_assignment
                         Student.objects.create(
                             student_id=archived_student.student_id,
                             first_name=archived_student.first_name,
                             last_name=archived_student.last_name,
                             middle_initial=archived_student.middle_initial,
-                            faculty=archived_student.faculty,
+                            faculty_assignment=archived_student.faculty_assignment,
                             student_status=new_status
                         )
                         archived_student.delete()
@@ -994,13 +1021,16 @@ def superadmin_move_student(request):
                 # Destination is the archive
                 elif destination == "archive":
                     if student:
-                        # Move from active to archive
+                        # Move from active to archive with faculty_assignment
                         ArchivedStudent.objects.create(
                             student_id=student.student_id,
                             first_name=student.first_name,
                             last_name=student.last_name,
                             middle_initial=student.middle_initial,
-                            faculty=student.faculty
+                            faculty_assignment=student.faculty_assignment,
+                            program=student.faculty_assignment.program if student.faculty_assignment else '',
+                            year_section=student.faculty_assignment.year_section if student.faculty_assignment else '',
+                            semester=student.faculty_assignment.semester if student.faculty_assignment else ''
                         )
                         student.delete()
                         messages.success(request, "Student moved to Archive successfully.")
@@ -1029,7 +1059,7 @@ def export_faculty_csv(request):
     response['Content-Disposition'] = 'attachment; filename="faculty_export.csv"'
     
     writer = csv.writer(response)
-    # Write CSV header
+    # Write CSV header with Status
     writer.writerow([
         'Faculty ID',
         'First Name', 
@@ -1038,7 +1068,7 @@ def export_faculty_csv(request):
         'Program',
         'Year Section',
         'Semester',
-        'Status'
+        'Status'  # Keep Status in export
     ])
     
     # Write faculty data with multiple assignments
@@ -1056,7 +1086,7 @@ def export_faculty_csv(request):
                     assignment.program,
                     assignment.year_section,
                     assignment.semester,
-                    faculty.faculty_status
+                    faculty.faculty_status  # Keep Status in export
                 ])
         else:
             # Faculty with no assignments
@@ -1068,25 +1098,23 @@ def export_faculty_csv(request):
                 '',
                 '',
                 '',
-                faculty.faculty_status
+                faculty.faculty_status  # Keep Status in export
             ])
     
     return response
 
-# Excel Export for Faculty
 @superadmin_required
 def export_faculty_excel(request):
     """Export faculty data to Excel file with multiple assignments"""
     from openpyxl import Workbook
     from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
-    from django.http import HttpResponse
     
     # Create workbook and worksheet
     wb = Workbook()
     ws = wb.active
     ws.title = "Faculty Export"
     
-    # Define headers
+    # Define headers with Status
     headers = [
         'Faculty ID',
         'First Name', 
@@ -1095,7 +1123,7 @@ def export_faculty_excel(request):
         'Program',
         'Year Section',
         'Semester',
-        'Status'
+        'Status'  # Keep Status in export
     ]
     
     # Style for headers
@@ -1134,7 +1162,7 @@ def export_faculty_excel(request):
                     assignment.program,
                     assignment.year_section,
                     assignment.semester,
-                    faculty.faculty_status
+                    faculty.faculty_status  # Keep Status in export
                 ]
                 
                 for col, value in enumerate(data, 1):
@@ -1142,7 +1170,7 @@ def export_faculty_excel(request):
                     cell.border = thin_border
                     cell.alignment = Alignment(horizontal="center", vertical="center")
                     
-                    # Add status color coding
+                    # Status color coding
                     if col == 8:  # Status column
                         if value == 'Completed':
                             cell.fill = PatternFill(start_color="FFF2CC", end_color="FFF2CC", fill_type="solid")
@@ -1162,7 +1190,7 @@ def export_faculty_excel(request):
                 '',
                 '',
                 '',
-                faculty.faculty_status
+                faculty.faculty_status  # Keep Status in export
             ]
             
             for col, value in enumerate(data, 1):
@@ -1194,9 +1222,9 @@ def export_faculty_excel(request):
     wb.save(response)
     return response
 
-# CSV Import for Faculty
+#  Import for Faculty
 @superadmin_required
-def import_faculty_csv(request):
+def import_faculty(request):
     """Import faculty data from CSV or Excel file with multiple assignments"""
     if request.method == 'POST' and request.FILES.get('csv_file'):
         uploaded_file = request.FILES['csv_file']
@@ -1217,22 +1245,15 @@ def import_faculty_csv(request):
             
             # Process based on file type
             if file_extension == 'csv':
-                # Handle CSV file
                 file_data = uploaded_file.read().decode('utf-8')
                 io_string = io.StringIO(file_data)
                 reader = csv.DictReader(io_string)
                 rows = list(reader)
             else:
-                # Handle Excel file (.xlsx or .xls)
                 workbook = load_workbook(uploaded_file, read_only=True)
                 worksheet = workbook.active
                 
-                # Get header row (first row)
-                headers = []
-                for cell in worksheet[1]:
-                    headers.append(cell.value)
-                
-                # Convert Excel data to dictionary format
+                headers = [cell.value for cell in worksheet[1]]
                 rows = []
                 for row in worksheet.iter_rows(min_row=2, values_only=True):
                     if any(row):  # Skip empty rows
@@ -1252,7 +1273,6 @@ def import_faculty_csv(request):
                     program = row.get('Program', '').strip()
                     year_section = row.get('Year Section', '').strip()
                     semester = row.get('Semester', '').strip()
-                    status = row.get('Status', 'Continuing').strip()
                     
                     # Validate required fields
                     if not faculty_id:
@@ -1271,7 +1291,6 @@ def import_faculty_csv(request):
                             'first_name': first_name,
                             'last_name': last_name,
                             'middle_initial': middle_initial,
-                            'status': status if status in ['Continuing', 'Completed'] else 'Continuing',
                             'assignments': []
                         }
                     
@@ -1306,7 +1325,7 @@ def import_faculty_csv(request):
                                 'last_name': data['last_name'],
                                 'middle_initial': data['middle_initial'],
                                 'password': make_password("welcomeadmin"),
-                                'faculty_status': data['status']
+                                'faculty_status': 'Continuing'  # Default status
                             }
                         )
                         
@@ -1324,7 +1343,7 @@ def import_faculty_csv(request):
                         else:
                             # Faculty exists, add new assignments (avoid duplicates)
                             for assignment_data in data['assignments']:
-                                assignment, created = FacultyAssignment.objects.get_or_create(
+                                FacultyAssignment.objects.get_or_create(
                                     faculty=faculty,
                                     program=assignment_data['program'],
                                     year_section=assignment_data['year_section'],
@@ -1341,7 +1360,7 @@ def import_faculty_csv(request):
                 messages.success(request, f'Successfully imported {success_count} faculty members from {file_extension.upper()} file.')
             
             if error_count > 0:
-                error_message = f'{error_count} rows had errors:\n' + '\n'.join(errors[:10])  # Show first 10 errors
+                error_message = f'{error_count} rows had errors:\n' + '\n'.join(errors[:10])
                 if len(errors) > 10:
                     error_message += f'\n... and {len(errors) - 10} more errors.'
                 messages.error(request, error_message)
@@ -1351,7 +1370,6 @@ def import_faculty_csv(request):
     
     return redirect('FacultyList')
 
-# Download CSV Template
 @superadmin_required
 def download_faculty_csv_template(request):
     """Download a CSV template for faculty import with multiple assignments"""
@@ -1367,17 +1385,16 @@ def download_faculty_csv_template(request):
         'Middle Initial',
         'Program',
         'Year Section',
-        'Semester',
-        'Status'
+        'Semester'
     ])
     
     # Add sample data showing multiple assignments for same faculty
     sample_data = [
-        ['F2024001', 'John', 'Doe', 'A.', 'Computer Science', '1A', '1st Semester', 'Continuing'],
-        ['F2024001', '', '', '', 'Computer Science', '2A', '1st Semester', ''],
-        ['F2024001', '', '', '', 'Information Technology', '1B', '2nd Semester', ''],
-        ['F2024002', 'Jane', 'Smith', 'B.', 'Information Technology', '3A', '1st Semester', 'Continuing'],
-        ['F2024002', '', '', '', 'Information Technology', '4A', '2nd Semester', ''],
+        ['F2024001', 'John', 'Doe', 'A.', 'Computer Science', '1A', '1st Semester'],
+        ['F2024001', '', '', '', 'Computer Science', '2A', '1st Semester'],
+        ['F2024001', '', '', '', 'Information Technology', '1B', '2nd Semester'],
+        ['F2024002', 'Jane', 'Smith', 'B.', 'Information Technology', '3A', '1st Semester'],
+        ['F2024002', '', '', '', 'Information Technology', '4A', '2nd Semester']
     ]
     
     for row in sample_data:
@@ -1385,129 +1402,11 @@ def download_faculty_csv_template(request):
     
     return response
 
-
-    """Import faculty data from CSV or Excel file"""
-    if request.method == 'POST' and request.FILES.get('csv_file'):
-        uploaded_file = request.FILES['csv_file']
-        
-        # Get file extension
-        file_extension = uploaded_file.name.split('.')[-1].lower()
-        
-        # Validate file type
-        if file_extension not in ['csv', 'xlsx', 'xls']:
-            messages.error(request, 'Please upload a CSV or Excel file (.csv, .xlsx, .xls).')
-            return redirect('FacultyList')
-        
-        try:
-            success_count = 0
-            error_count = 0
-            errors = []
-            
-            # Process based on file type
-            if file_extension == 'csv':
-                # Handle CSV file
-                file_data = uploaded_file.read().decode('utf-8')
-                io_string = io.StringIO(file_data)
-                reader = csv.DictReader(io_string)
-                rows = list(reader)
-            else:
-                # Handle Excel file (.xlsx or .xls)
-                workbook = load_workbook(uploaded_file, read_only=True)
-                worksheet = workbook.active
-                
-                # Get header row (first row)
-                headers = []
-                for cell in worksheet[1]:
-                    headers.append(cell.value)
-                
-                # Convert Excel data to dictionary format
-                rows = []
-                for row in worksheet.iter_rows(min_row=2, values_only=True):
-                    if any(row):  # Skip empty rows
-                        row_dict = {}
-                        for i, value in enumerate(row):
-                            if i < len(headers) and headers[i]:
-                                row_dict[headers[i]] = str(value) if value is not None else ''
-                        rows.append(row_dict)
-            
-            # Process each row
-            for row_num, row in enumerate(rows, start=2):  # Start at 2 for header
-                try:
-                    faculty_id = row.get('Faculty ID', '').strip()
-                    first_name = row.get('First Name', '').strip()
-                    last_name = row.get('Last Name', '').strip()
-                    middle_initial = row.get('Middle Initial', '').strip()
-                    program = row.get('Program', '').strip()
-                    year_section = row.get('Year Section', '').strip()
-                    semester = row.get('Semester', '').strip()
-                    status = row.get('Status', 'Continuing').strip()
-                    
-                    # Validate required fields
-                    if not all([faculty_id, first_name, last_name, program, year_section, semester]):
-                        errors.append(f'Row {row_num}: Missing required fields')
-                        error_count += 1
-                        continue
-                    
-                    # Validate program
-                    if program not in ['Computer Science', 'Information Technology']:
-                        errors.append(f'Row {row_num}: Invalid program "{program}"')
-                        error_count += 1
-                        continue
-                    
-                    # Validate status
-                    if status not in ['Continuing', 'Completed']:
-                        status = 'Continuing'  # Default to Continuing
-                    
-                    # Check if faculty already exists
-                    if Faculty.objects.filter(faculty_id=faculty_id).exists():
-                        errors.append(f'Row {row_num}: Faculty ID "{faculty_id}" already exists')
-                        error_count += 1
-                        continue
-                    
-                    # Create faculty
-                    default_password = "welcomeadmin"
-                    hashed_password = make_password(default_password)
-                    
-                    Faculty.objects.create(
-                        faculty_id=faculty_id,
-                        first_name=first_name,
-                        last_name=last_name,
-                        middle_initial=middle_initial,
-                        program=program,
-                        year_section=year_section,
-                        semester=semester,
-                        password=hashed_password,
-                        faculty_status=status
-                    )
-                    success_count += 1
-                    
-                except Exception as e:
-                    errors.append(f'Row {row_num}: {str(e)}')
-                    error_count += 1
-                    continue
-            
-            # Show results
-            if success_count > 0:
-                messages.success(request, f'Successfully imported {success_count} faculty members from {file_extension.upper()} file.')
-            
-            if error_count > 0:
-                error_message = f'{error_count} rows had errors:\n' + '\n'.join(errors[:10])  # Show first 10 errors
-                if len(errors) > 10:
-                    error_message += f'\n... and {len(errors) - 10} more errors.'
-                messages.error(request, error_message)
-                
-        except Exception as e:
-            messages.error(request, f'Error processing {file_extension.upper()} file: {str(e)}')
-    
-    return redirect('FacultyList')
-
-
 @superadmin_required
 def download_faculty_excel_template(request):
     """Download an Excel template for faculty import with multiple assignments"""
     from openpyxl import Workbook
     from openpyxl.styles import Font, PatternFill, Alignment
-    from django.http import HttpResponse
     
     # Create workbook and worksheet
     wb = Workbook()
@@ -1522,8 +1421,7 @@ def download_faculty_excel_template(request):
         'Middle Initial',
         'Program',
         'Year Section',
-        'Semester',
-        'Status'
+        'Semester'
     ]
     
     # Style for headers
@@ -1540,16 +1438,17 @@ def download_faculty_excel_template(request):
     
     # Add sample data showing multiple assignments
     sample_data = [
-        ['F2024001', 'John', 'Doe', 'A.', 'Computer Science', '1A', '1st Semester', 'Continuing'],
-        ['F2024001', '', '', '', 'Computer Science', '2A', '1st Semester', ''],
-        ['F2024001', '', '', '', 'Information Technology', '1B', '2nd Semester', ''],
-        ['F2024002', 'Jane', 'Smith', 'B.', 'Information Technology', '3A', '1st Semester', 'Continuing'],
-        ['F2024002', '', '', '', 'Information Technology', '4A', '2nd Semester', ''],
+        ['F2024001', 'John', 'Doe', 'A.', 'Computer Science', '1A', '1st Semester'],
+        ['F2024001', '', '', '', 'Computer Science', '2A', '1st Semester'],
+        ['F2024001', '', '', '', 'Information Technology', '1B', '2nd Semester'],
+        ['F2024002', 'Jane', 'Smith', 'B.', 'Information Technology', '3A', '1st Semester'],
+        ['F2024002', '', '', '', 'Information Technology', '4A', '2nd Semester']
     ]
     
     for row_idx, row_data in enumerate(sample_data, 2):
         for col, value in enumerate(row_data, 1):
-            ws.cell(row=row_idx, column=col, value=value)
+            cell = ws.cell(row=row_idx, column=col, value=value)
+            cell.alignment = Alignment(horizontal="center", vertical="center")
     
     # Add instructions in a separate sheet
     instructions_ws = wb.create_sheet("Instructions")
@@ -1564,12 +1463,11 @@ def download_faculty_excel_template(request):
         ["Program", "Must be 'Computer Science' or 'Information Technology' (Required for assignments)"],
         ["Year Section", "Year and section (e.g., '1A', '2B') (Required for assignments)"],
         ["Semester", "Semester (e.g., '1st Semester', '2nd Semester') (Required for assignments)"],
-        ["Status", "Either 'Continuing' or 'Completed' (Optional - defaults to 'Continuing')"],
         ["", ""],
         ["Multiple Assignments:", ""],
         ["• Each faculty can have multiple program assignments", ""],
         ["• Use the same Faculty ID for multiple rows", ""],
-        ["• Only fill First Name, Last Name, Middle Initial, and Status in the first row", ""],
+        ["• Only fill First Name, Last Name, and Middle Initial in the first row", ""],
         ["• Leave personal info columns empty for additional assignment rows", ""],
         ["• Each assignment row must have Program, Year Section, and Semester", ""],
         ["", ""],
