@@ -17,9 +17,18 @@ window.initFacultyHomeChart = function() {
     console.log('Faculty Chart Data:', { noviceData, juniorData, seniorData }); // Debug log
     
     const tierData = {
-        Novice: { labels: ['Task 1', 'Task 2', 'Task 3', 'Task 4'], data: noviceData },
-        Junior: { labels: ['Task 1', 'Task 2', 'Task 3', 'Task 4'], data: juniorData },
-        Senior: { labels: ['Task 1', 'Task 2', 'Task 3', 'Task 4'], data: seniorData }
+        Novice: { 
+            labels: ['Task 1', 'Task 2', 'Task 3', 'Task 4'], 
+            data: noviceData 
+        },
+        Junior: { 
+            labels: ['Task 1', 'Task 2', 'Task 3', 'Task 4', 'Task 5', 'Task 6'], 
+            data: juniorData 
+        },
+        Senior: { 
+            labels: ['Task 1', 'Task 2', 'Task 3', 'Task 4', 'Task 5', 'Task 6'], 
+            data: seniorData 
+        }
     };
     let currentTier = 'All';
     let chartInstance;

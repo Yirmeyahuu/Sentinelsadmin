@@ -55,23 +55,27 @@ def Superadmin_Home(request):
     # Task maps for each tier (same as Faculty_Home)
     novice_tasks = [
         "Novice_Task_1(Collect Books)",
-        "Novice_Task_2(Collect USB)", 
+        "Novice_Task_2(Collect USB)",
         "Novice_Task_3(QNA)",
         "Novice_Task_4_(Defeat Rootkit)"
     ]
+
     junior_tasks = [
-        "Junior_Task_1(Collect Books",
+        "Junior_Task_1(Collect Books)",
         "Junior_Task_2(QNA)",
-        "Junior_Task_3(Security Policy)", 
-        "Junior_Task_4(Social Engineering)"
-        "Junior_Task_5()"
-        "Junior_Task_6()"
+        "Junior_Task_3(Collect USB)",
+        "Junior_Task_4(Bellaso's QNA)",
+        "Junior_Task_5(QNA)",
+        "Junior_Task_6(Defeat Serpentix2)"
     ]
+
     senior_tasks = [
-        "Senior_Task_1(Threat Landscape)",
-        "Senior_Task_2(Malware Ontology)",
-        "Senior_Task_3(Incident Response)",
-        "Senior_Task_4(AI Malware)"
+        "Senior_Task_1(Collect Books)",
+        "Senior_Task_2(QNA)",
+        "Senior_Task_3(Collect USB)",
+        "Senior_Task_4(QNA)",
+        "Senior_Task_5(QNA)",
+        "Senior_Task_6(Defeat Rootkit2)"
     ]
 
     # Initialize tier completion counters

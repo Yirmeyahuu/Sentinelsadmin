@@ -130,28 +130,34 @@ def Faculty_home(request):
     # --- Task Progress for Charts (from Firebase) ---
     # Initialize counters
     novice_task_counts = [0, 0, 0, 0]
-    junior_task_counts = [0, 0, 0, 0]
-    senior_task_counts = [0, 0, 0, 0]
+    junior_task_counts = [0, 0, 0, 0, 0, 0]
+    senior_task_counts = [0, 0, 0, 0, 0, 0]
     leaderboard_students = []
 
     # Task maps for each tier
     novice_tasks = [
         "Novice_Task_1(Collect Books)",
-        "Novice_Task_2(Collect USB)", 
+        "Novice_Task_2(Collect USB)",
         "Novice_Task_3(QNA)",
         "Novice_Task_4_(Defeat Rootkit)"
     ]
+
     junior_tasks = [
-        "Junior_Task_1(Domain Research)",
-        "Junior_Task_2(Analyze Email)",
-        "Junior_Task_3(Security Policy)", 
-        "Junior_Task_4(Social Engineering)"
+        "Junior_Task_1(Collect Books)",
+        "Junior_Task_2(QNA)",
+        "Junior_Task_3(Collect USB)",
+        "Junior_Task_4(Bellaso's QNA)",
+        "Junior_Task_5(QNA)",
+        "Junior_Task_6(Defeat Serpentix2)"
     ]
+
     senior_tasks = [
-        "Senior_Task_1(Threat Landscape)",
-        "Senior_Task_2(Malware Ontology)",
-        "Senior_Task_3(Incident Response)",
-        "Senior_Task_4(AI Malware)"
+        "Senior_Task_1(Collect Books)",
+        "Senior_Task_2(QNA)",
+        "Senior_Task_3(Collect USB)",
+        "Senior_Task_4(QNA)",
+        "Senior_Task_5(QNA)",
+        "Senior_Task_6(Defeat Rootkit2)"
     ]
 
     # Process each assignment's Firebase data
@@ -195,7 +201,7 @@ def Faculty_home(request):
                 task_data = student_data.get(task_key)
                 if task_data and isinstance(task_data, dict):
                     points = task_data.get("points", 0)
-                    if points > 0:  # Task completed
+                    if points > 0:
                         senior_task_counts[i] += 1
                         total_points += int(points)
             
@@ -453,18 +459,25 @@ def student_list(request):
     # --- Active/Inactive Students Logic (Firebase) ---
     # Define all task fields to check for activity
     task_fields = [
+        # Novice Tasks
         "Novice_Task_1(Collect Books)",
-        "Novice_Task_2(Collect USB)", 
+        "Novice_Task_2(Collect USB)",
         "Novice_Task_3(QNA)",
         "Novice_Task_4_(Defeat Rootkit)",
-        "Junior_Task_1(Domain Research)",
-        "Junior_Task_2(Analyze Email)",
-        "Junior_Task_3(Security Policy)", 
-        "Junior_Task_4(Social Engineering)",
-        "Senior_Task_1(Threat Landscape)",
-        "Senior_Task_2(Malware Ontology)",
-        "Senior_Task_3(Incident Response)",
-        "Senior_Task_4(AI Malware)"
+        # Junior Tasks
+        "Junior_Task_1(Collect Books)",
+        "Junior_Task_2(QNA)",
+        "Junior_Task_3(Collect USB)", 
+        "Junior_Task_4(Bellaso's QNA)",
+        "Junior_Task_5(QNA)",
+        "Junior_Task_6(Defeat Serpentix2)",
+        # Senior Tasks
+        "Senior_Task_1(Collect Books)",
+        "Senior_Task_2(QNA)",
+        "Senior_Task_3(Collect USB)",
+        "Senior_Task_4(QNA)",
+        "Senior_Task_5(QNA)",
+        "Senior_Task_6(Defeat Rootkit2)"
     ]
 
     active_students_count = 0
@@ -620,18 +633,25 @@ def student_progress(request):
     # --- Active/Inactive Students Logic (Firebase) ---
     # Define all task fields to check for activity
     task_fields = [
+        # Novice Tasks
         "Novice_Task_1(Collect Books)",
-        "Novice_Task_2(Collect USB)", 
+        "Novice_Task_2(Collect USB)",
         "Novice_Task_3(QNA)",
         "Novice_Task_4_(Defeat Rootkit)",
-        "Junior_Task_1(Domain Research)",
-        "Junior_Task_2(Analyze Email)",
-        "Junior_Task_3(Security Policy)", 
-        "Junior_Task_4(Social Engineering)",
-        "Senior_Task_1(Threat Landscape)",
-        "Senior_Task_2(Malware Ontology)",
-        "Senior_Task_3(Incident Response)",
-        "Senior_Task_4(AI Malware)"
+        # Junior Tasks
+        "Junior_Task_1(Collect Books)",
+        "Junior_Task_2(QNA)",
+        "Junior_Task_3(Collect USB)", 
+        "Junior_Task_4(Bellaso's QNA)",
+        "Junior_Task_5(QNA)",
+        "Junior_Task_6(Defeat Serpentix2)",
+        # Senior Tasks
+        "Senior_Task_1(Collect Books)",
+        "Senior_Task_2(QNA)",
+        "Senior_Task_3(Collect USB)",
+        "Senior_Task_4(QNA)",
+        "Senior_Task_5(QNA)",
+        "Senior_Task_6(Defeat Rootkit2)"
     ]
 
     active_students_count = 0
@@ -697,11 +717,45 @@ def student_progress(request):
         student_status='Registered'
     ).count()
 
+    # Calculate overall completion metrics (existing code)
+    total_students = program_total if program_total > 0 else 1  # Avoid division by zero
+    total_possible_completions = total_students * 3  # 3 tiers per student
+    total_completions = novice_completed_count + junior_completed_count + senior_completed_count
+    
+    # Calculate individual tier completion rates
+    novice_completion_rate = format((novice_completed_count / total_students * 100), '.1f')
+    junior_completion_rate = format((junior_completed_count / total_students * 100), '.1f')
+    senior_completion_rate = format((senior_completed_count / total_students * 100), '.1f')
+    
+    # Find top tier based on highest completion count (existing code)
+    tier_counts = {
+        'Novice': novice_completed_count,
+        'Junior': junior_completed_count,
+        'Senior': senior_completed_count
+    }
+    top_tier = max(tier_counts.items(), key=lambda x: x[1])[0] if any(tier_counts.values()) else '-'
+    
+    # Calculate average completion percentage (existing code)
+    average_completion = (total_completions / total_possible_completions * 100) if total_possible_completions > 0 else 0
+
+    # Get current time in Philippine timezone
+    philippine_tz = pytz.timezone('Asia/Manila')
+    current_time = timezone.now().astimezone(philippine_tz)
+    
+    # Format the last update time
+    last_update = current_time.strftime('%Y-%m-%d %H:%M:%S')
+
     context = {
         "faculty_data": faculty,
-        "faculty_assignments": faculty_assignments,  # Add assignments to context
+        "faculty_assignments": faculty_assignments,
         "section_total": students_in_section.count(),
-        "program_total": program_total,  # Add program total for dashboard cards
+        "program_total": program_total,
+        "last_update": last_update,
+        "average_completion": f"{average_completion:.1f}",
+        "novice_completion_rate": novice_completion_rate,
+        "junior_completion_rate": junior_completion_rate,
+        "senior_completion_rate": senior_completion_rate,
+        "top_tier": top_tier,
         "novice_count": novice_completed_count,
         "junior_count": junior_completed_count,
         "senior_count": senior_completed_count,
@@ -1537,12 +1591,32 @@ def novice_tier(request):
     selected_task = request.GET.get("task", "task1")
     selected_task_map = task_map.get(selected_task, "Novice_Task_1(Collect Books)")
 
+
+    # Get current time in Philippine timezone
+    philippine_tz = pytz.timezone('Asia/Manila')
+    current_time = timezone.now().astimezone(philippine_tz)
+    last_update = current_time.strftime('%Y-%m-%d %H:%M:%S')
+
+    # Get total students for completion rate calculation
+    total_students = Student.objects.filter(
+        faculty_assignment__in=faculty_assignments,
+        student_status='Registered'
+    ).count()
+
+
+    # Calculate task completion metrics
     novice_students = []
     leaderboard_students = []
+    completed_tasks = 0
+    total_points = 0
+    total_completed_tasks = 0  # Add this initialization
+    task_completion_stats = {task_id: 0 for task_id in task_map}
+    students_with_tasks = set() 
+    completed_all_tasks = 0
+    students_with_points = set()
 
     # Process each assignment's Firebase data
     for assignment in faculty_assignments:
-        # Query Firebase for students in this assignment's section
         students_query = db.collection("Registered_Students") \
             .where("program", "==", assignment.program) \
             .where("year_section", "==", assignment.year_section) \
@@ -1553,7 +1627,38 @@ def novice_tier(request):
             student = doc.to_dict()
             student_id = student.get("student_id", doc.id)
             
-            # For progress table (filtered by selected task)
+            # Process individual task data
+            student_total_points = 0
+            student_completed_tasks = 0
+            
+            for task_key in task_map.values():
+                task_data = student.get(task_key)
+                if task_data and isinstance(task_data, dict):
+                    points = int(task_data.get("points", 0))
+                    if points > 0:
+                        student_total_points += points
+                        student_completed_tasks += 1
+                        total_completed_tasks += 1
+
+            # Add to total points if student has any
+            if student_total_points > 0:
+                total_points += student_total_points
+                students_with_points.add(student_id)
+
+            # Add to leaderboard if has points
+            if student_total_points > 0:
+                leaderboard_students.append({
+                    "student_id": student_id,
+                    "first_name": student.get("first_name", ""),
+                    "last_name": student.get("last_name", ""),
+                    "points": student_total_points,
+                    "tasks_completed": student_completed_tasks,
+                    "completion_percentage": (student_completed_tasks / len(task_map)) * 100
+                })
+
+            # Add to progress table for selected task
+            selected_task = request.GET.get("task", "task1")
+            selected_task_map = task_map.get(selected_task)
             task_data = student.get(selected_task_map)
             if task_data:
                 novice_students.append({
@@ -1563,28 +1668,16 @@ def novice_tier(request):
                     "points": task_data.get("points", 0),
                     "total_time_completed": task_data.get("time_taken", ""),
                 })
-            
-            # For leaderboard (sum all tasks) - avoid duplicates
-            existing_student = next((s for s in leaderboard_students if s["student_id"] == student_id), None)
-            if not existing_student:
-                total_points = 0
-                for task_key in task_map.values():
-                    task = student.get(task_key)
-                    if task and isinstance(task, dict):
-                        total_points += int(task.get("points", 0))
-                if total_points > 0:
-                    leaderboard_students.append({
-                        "student_id": student_id,
-                        "first_name": student.get("first_name", ""),
-                        "last_name": student.get("last_name", ""),
-                        "points": total_points,
-                    })
 
-    # Sort leaderboard by total points descending
+    # Calculate stats for cards
+    active_students = len(students_with_points)
+    average_score = total_points / active_students if active_students > 0 else 0
+    completed_tasks_count = total_completed_tasks
+
+    # Sort leaderboard
     novice_leaderboard = sorted(
         leaderboard_students,
-        key=lambda x: x["points"],
-        reverse=True
+        key=lambda x: (-x["points"], -x["tasks_completed"])
     )
 
     context = {
@@ -1593,8 +1686,13 @@ def novice_tier(request):
         "faculty_data": faculty,
         "faculty_assignments": faculty_assignments,  # Add assignments to context
         "selected_task": selected_task,
+        "total_students": total_students,
+        "completed_tasks_count": completed_tasks_count,
+        "average_score": average_score,
+        "last_update": last_update,
+        "task_map": task_map,
     }
-    return render(request, 'Tier/Novice.html', context)
+    return render(request, 'Tier/Novice.html', context) 
 
 
 # This is the junior tier page of Faculty
@@ -1628,20 +1726,37 @@ def junior_tier(request):
 
     # Task map for filtering Junior tier tasks
     task_map = {
-        "task1": "Junior_Task_1(Domain Research)",
-        "task2": "Junior_Task_2(Analyze Email)",
-        "task3": "Junior_Task_3(Security Policy)",
-        "task4": "Junior_Task_4(Social Engineering)",
+        "task1": "Junior_Task_1(Collect Books)",
+        "task2": "Junior_Task_2(QNA)",
+        "task3": "Junior_Task_3(Collect USB)",
+        "task4": "Junior_Task_4(Bellaso's QNA)",
+        "task5": "Junior_Task_5(QNA)",
+        "task6": "Junior_Task_6(Defeat Serpentix2)",
     }
-    selected_task = request.GET.get("task", "task1")
-    selected_task_map = task_map.get(selected_task, "Junior_Task_1(Domain Research)")
+    
+    # Get current time in Philippine timezone
+    philippine_tz = pytz.timezone('Asia/Manila')
+    current_time = timezone.now().astimezone(philippine_tz)
+    last_update = current_time.strftime('%Y-%m-%d %H:%M:%S')
 
+    # Get total students for completion rate calculation
+    total_students = Student.objects.filter(
+        faculty_assignment__in=faculty_assignments,
+        student_status='Registered'
+    ).count()
+
+    # Initialize tracking variables
     junior_students = []
     leaderboard_students = []
+    completed_tasks = 0
+    total_points = 0
+    total_completed_tasks = 0
+    task_completion_stats = {task_id: 0 for task_id in task_map}
+    students_with_tasks = set()
+    students_with_points = set()
 
-    # Process each assignment's Firebase data
+    # Process Firebase data
     for assignment in faculty_assignments:
-        # Query Firebase for students in this assignment's section
         students_query = db.collection("Registered_Students") \
             .where("program", "==", assignment.program) \
             .where("year_section", "==", assignment.year_section) \
@@ -1652,7 +1767,38 @@ def junior_tier(request):
             student = doc.to_dict()
             student_id = student.get("student_id", doc.id)
             
-            # For progress table (filtered by selected task)
+            # Process individual task data
+            student_total_points = 0
+            student_completed_tasks = 0
+            
+            for task_key in task_map.values():
+                task_data = student.get(task_key)
+                if task_data and isinstance(task_data, dict):
+                    points = int(task_data.get("points", 0))
+                    if points > 0:
+                        student_total_points += points
+                        student_completed_tasks += 1
+                        total_completed_tasks += 1
+
+            # Add to total points if student has any
+            if student_total_points > 0:
+                total_points += student_total_points
+                students_with_points.add(student_id)
+
+            # Add to leaderboard if has points
+            if student_total_points > 0:
+                leaderboard_students.append({
+                    "student_id": student_id,
+                    "first_name": student.get("first_name", ""),
+                    "last_name": student.get("last_name", ""),
+                    "points": student_total_points,
+                    "tasks_completed": student_completed_tasks,
+                    "completion_percentage": (student_completed_tasks / len(task_map)) * 100
+                })
+
+            # Add to progress table for selected task
+            selected_task = request.GET.get("task", "task1")
+            selected_task_map = task_map.get(selected_task)
             task_data = student.get(selected_task_map)
             if task_data:
                 junior_students.append({
@@ -1662,36 +1808,29 @@ def junior_tier(request):
                     "points": task_data.get("points", 0),
                     "total_time_completed": task_data.get("time_taken", ""),
                 })
-            
-            # For leaderboard (sum all tasks) - avoid duplicates
-            existing_student = next((s for s in leaderboard_students if s["student_id"] == student_id), None)
-            if not existing_student:
-                total_points = 0
-                for task_key in task_map.values():
-                    task = student.get(task_key)
-                    if task and isinstance(task, dict):
-                        total_points += int(task.get("points", 0))
-                if total_points > 0:
-                    leaderboard_students.append({
-                        "student_id": student_id,
-                        "first_name": student.get("first_name", ""),
-                        "last_name": student.get("last_name", ""),
-                        "points": total_points,
-                    })
 
-    # Sort leaderboard by total points descending
+    # Calculate stats for cards
+    active_students = len(students_with_points)
+    average_score = total_points / active_students if active_students > 0 else 0
+    completed_tasks_count = total_completed_tasks
+
+    # Sort leaderboard
     junior_leaderboard = sorted(
         leaderboard_students,
-        key=lambda x: x["points"],
-        reverse=True
+        key=lambda x: (-x["points"], -x["tasks_completed"])
     )
 
     context = {
         "junior_students": junior_students,
         "junior_leaderboard": junior_leaderboard,
         "faculty_data": faculty,
-        "faculty_assignments": faculty_assignments,  # Add assignments to context
+        "faculty_assignments": faculty_assignments,
         "selected_task": selected_task,
+        "total_students": total_students,
+        "completed_tasks_count": completed_tasks_count,
+        "average_score": average_score,
+        "last_update": last_update,
+        "task_map": task_map,
     }
     return render(request, 'Tier/Junior.html', context)
 
@@ -1726,20 +1865,39 @@ def senior_tier(request):
 
     # Task map for filtering Senior tier tasks
     task_map = {
-        "task1": "Senior_Task_1(Threat Landscape)",
-        "task2": "Senior_Task_2(Malware Ontology)",
-        "task3": "Senior_Task_3(Incident Response)",
-        "task4": "Senior_Task_4(AI Malware)",
+        "task1": "Senior_Task_1(Collect Books)",
+        "task2": "Senior_Task_2(QNA)",
+        "task3": "Senior_Task_3(Collect USB)",
+        "task4": "Senior_Task_4(QNA)",
+        "task5": "Senior_Task_5(QNA)",
+        "task6": "Senior_Task_6(Defeat Rootkit2)",
     }
-    selected_task = request.GET.get("task", "task1")
-    selected_task_map = task_map.get(selected_task, "Senior_Task_1(Threat Landscape)")
+    
+    # Get current time in Philippine timezone
+    philippine_tz = pytz.timezone('Asia/Manila')
+    current_time = timezone.now().astimezone(philippine_tz)
+    last_update = current_time.strftime('%Y-%m-%d %H:%M:%S')
 
+    # Get total students for completion rate calculation
+    total_students = Student.objects.filter(
+        faculty_assignment__in=faculty_assignments,
+        student_status='Registered'
+    ).count()
+
+    # Initialize tracking variables
     senior_students = []
     leaderboard_students = []
+    completed_tasks = 0
+    total_points = 0
+    total_completed_tasks = 0
+    task_completion_stats = {task_id: 0 for task_id in task_map}
+    students_with_tasks = set()
+    students_with_points = set()
+    selected_task = request.GET.get("task", "task1")
+    selected_task_map = task_map.get(selected_task, task_map["task1"])
 
     # Process each assignment's Firebase data
     for assignment in faculty_assignments:
-        # Query Firebase for students in this assignment's section
         students_query = db.collection("Registered_Students") \
             .where("program", "==", assignment.program) \
             .where("year_section", "==", assignment.year_section) \
@@ -1750,6 +1908,19 @@ def senior_tier(request):
             student = doc.to_dict()
             student_id = student.get("student_id", doc.id)
             
+            # Process individual task data
+            student_total_points = 0
+            student_completed_tasks = 0
+            
+            for task_key in task_map.values():
+                task_data = student.get(task_key)
+                if task_data and isinstance(task_data, dict):
+                    points = int(task_data.get("points", 0))
+                    if points > 0:
+                        student_total_points += points
+                        student_completed_tasks += 1
+                        total_completed_tasks += 1
+
             # For progress table (filtered by selected task)
             task_data = student.get(selected_task_map)
             if task_data:
@@ -1760,36 +1931,46 @@ def senior_tier(request):
                     "points": task_data.get("points", 0),
                     "total_time_completed": task_data.get("time_taken", ""),
                 })
-            
-            # For leaderboard (sum all tasks) - avoid duplicates
-            existing_student = next((s for s in leaderboard_students if s["student_id"] == student_id), None)
-            if not existing_student:
-                total_points = 0
-                for task_key in task_map.values():
-                    task = student.get(task_key)
-                    if task and isinstance(task, dict):
-                        total_points += int(task.get("points", 0))
-                if total_points > 0:
-                    leaderboard_students.append({
-                        "student_id": student_id,
-                        "first_name": student.get("first_name", ""),
-                        "last_name": student.get("last_name", ""),
-                        "points": total_points,
-                    })
 
-    # Sort leaderboard by total points descending
+            # Add to total points if student has any
+            if student_total_points > 0:
+                total_points += student_total_points
+                students_with_points.add(student_id)
+
+            # Add to leaderboard if has points
+            if student_total_points > 0:
+                leaderboard_students.append({
+                    "student_id": student_id,
+                    "first_name": student.get("first_name", ""),
+                    "last_name": student.get("last_name", ""),
+                    "points": student_total_points,
+                    "tasks_completed": student_completed_tasks,
+                    "completion_percentage": (student_completed_tasks / len(task_map)) * 100
+                })
+
+
+    # Calculate stats for cards
+    active_students = len(students_with_points)
+    average_score = total_points / active_students if active_students > 0 else 0
+    completed_tasks_count = total_completed_tasks
+
+    # Sort leaderboard
     senior_leaderboard = sorted(
         leaderboard_students,
-        key=lambda x: x["points"],
-        reverse=True
+        key=lambda x: (-x["points"], -x["tasks_completed"])
     )
 
     context = {
         "senior_students": senior_students,
         "senior_leaderboard": senior_leaderboard,
         "faculty_data": faculty,
-        "faculty_assignments": faculty_assignments,  # Add assignments to context
+        "faculty_assignments": faculty_assignments,
         "selected_task": selected_task,
+        "total_students": total_students,
+        "completed_tasks_count": completed_tasks_count,
+        "average_score": average_score,
+        "last_update": last_update,
+        "task_map": task_map,
     }
     return render(request, 'Tier/Senior.html', context)
 
@@ -1894,18 +2075,25 @@ def faculty_student_status(request):
     # --- Active/Inactive Students Logic (Firebase) ---
     # Define all task fields to check for activity
     task_fields = [
+        # Novice Tasks
         "Novice_Task_1(Collect Books)",
-        "Novice_Task_2(Collect USB)", 
+        "Novice_Task_2(Collect USB)",
         "Novice_Task_3(QNA)",
         "Novice_Task_4_(Defeat Rootkit)",
-        "Junior_Task_1(Domain Research)",
-        "Junior_Task_2(Analyze Email)",
-        "Junior_Task_3(Security Policy)", 
-        "Junior_Task_4(Social Engineering)",
-        "Senior_Task_1(Threat Landscape)",
-        "Senior_Task_2(Malware Ontology)",
-        "Senior_Task_3(Incident Response)",
-        "Senior_Task_4(AI Malware)"
+        # Junior Tasks
+        "Junior_Task_1(Collect Books)",
+        "Junior_Task_2(QNA)",
+        "Junior_Task_3(Collect USB)", 
+        "Junior_Task_4(Bellaso's QNA)",
+        "Junior_Task_5(QNA)",
+        "Junior_Task_6(Defeat Serpentix2)",
+        # Senior Tasks
+        "Senior_Task_1(Collect Books)",
+        "Senior_Task_2(QNA)",
+        "Senior_Task_3(Collect USB)",
+        "Senior_Task_4(QNA)",
+        "Senior_Task_5(QNA)",
+        "Senior_Task_6(Defeat Rootkit2)"
     ]
 
     active_students_count = 0

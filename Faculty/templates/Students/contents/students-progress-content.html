@@ -117,96 +117,212 @@
     <!-- Main Content (Tier Progress Section) -->
     <div class="px-6">
         <div class="max-w-[calc(100%-80px)] mx-auto">
-            <div class="bg-gradient-to-br from-slate-50 to-blue-50 rounded-3xl shadow-2xl p-8">
-                <div class="flex items-center gap-3 mb-8">
-                    <div class="bg-gradient-to-br from-blue-500 to-blue-600 p-3 rounded-xl shadow-lg">
-                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                        </svg>
+            <div class="bg-white rounded-3xl shadow-lg border border-slate-100 p-8">
+                <!-- Section Header with Dropdown -->
+                <div class="flex items-center justify-between mb-10 pb-6 border-b border-slate-100">
+                    <div class="flex items-center gap-4">
+                        <div class="bg-blue-50 p-3 rounded-xl">
+                            <svg class="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h2 class="text-2xl font-bold text-slate-800">Tier Progress Overview</h2>
+                            <p class="text-slate-500 text-sm mt-1">Track student progression across competency tiers</p>
+                        </div>
                     </div>
-                    <h2 class="text-3xl font-bold text-gray-800 tracking-tight">Tier Progress Overview</h2>
+                    <select id="viewType" class="bg-slate-50 text-slate-600 text-sm rounded-lg px-4 py-2 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
+                        <option value="cards">Card View</option>
+                        <option value="chart">Chart View</option>
+                    </select>
                 </div>
-                
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    <!-- Novice Card -->
-                    <a href="{% url 'novice-tier' %}" class="group relative overflow-hidden bg-gradient-to-br from-cyan-500 to-cyan-600 shadow-xl rounded-2xl p-8 transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 hover:scale-105">
-                        <!-- Decorative Elements -->
-                        <div class="absolute top-0 right-0 w-32 h-32 transform translate-x-16 -translate-y-16">
-                            <div class="absolute inset-0 bg-cyan-300 opacity-40 blur-3xl rounded-full"></div>
-                        </div>
-                        <div class="absolute bottom-0 left-0 w-24 h-24 transform -translate-x-12 translate-y-12">
-                            <div class="absolute inset-0 bg-white opacity-20 blur-2xl rounded-full"></div>
-                        </div>
-                        
-                        <!-- Content -->
-                        <div class="relative z-10 text-center">
-                            <div class="bg-cyan-400/30 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
-                                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                                </svg>
-                            </div>
-                            <h3 class="text-xl font-bold text-white mb-2">Novice Tier</h3>
-                            <div class="text-5xl font-extrabold text-white mb-2 group-hover:scale-110 transition-transform">{{ novice_count }}</div>
-                            <p class="text-cyan-100 text-sm font-medium">Students Accomplished</p>
-                        </div>
-                        
-                        <!-- Hover Effect Overlay -->
-                        <div class="absolute inset-0 bg-gradient-to-br from-cyan-400/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl"></div>
-                    </a>
 
-                    <!-- Junior Card -->
-                    <a href="{% url 'junior-tier' %}" class="group relative overflow-hidden bg-gradient-to-br from-blue-500 to-blue-600 shadow-xl rounded-2xl p-8 transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 hover:scale-105">
-                        <!-- Decorative Elements -->
-                        <div class="absolute top-0 right-0 w-32 h-32 transform translate-x-16 -translate-y-16">
-                            <div class="absolute inset-0 bg-blue-300 opacity-40 blur-3xl rounded-full"></div>
+                <!-- Cards View -->
+                <div id="cardsView" class="space-y-6">
+                    <!-- Progress Summary -->
+                    <div class="flex gap-4 mb-8">
+                        <div class="text-center flex-1 p-4 bg-gradient-to-br bg-slate-50 to-slate-150/70 rounded-xl shadow-md rounded-xl">
+                            <p class="text-sm text-slate-500 mb-1">Total Students</p>
+                            <p class="text-2xl font-bold text-slate-800">{{ program_total }}</p>
                         </div>
-                        <div class="absolute bottom-0 left-0 w-24 h-24 transform -translate-x-12 translate-y-12">
-                            <div class="absolute inset-0 bg-white opacity-20 blur-2xl rounded-full"></div>
-                        </div>
-                        
-                        <!-- Content -->
-                        <div class="relative z-10 text-center">
-                            <div class="bg-blue-400/30 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
-                                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
-                                </svg>
-                            </div>
-                            <h3 class="text-xl font-bold text-white mb-2">Junior Tier</h3>
-                            <div class="text-5xl font-extrabold text-white mb-2 group-hover:scale-110 transition-transform">{{ junior_count }}</div>
-                            <p class="text-blue-100 text-sm font-medium">Students Accomplished</p>
+                        <div class="text-center flex-1 p-4 bg-gradient-to-br bg-slate-50 to-slate-150/70 rounded-xl shadow-md">
+                            <p class="text-sm text-slate-500 mb-1">Average Completion</p>
+                            <p class="text-2xl font-bold text-slate-800">{{ average_completion }}%</p>
                         </div>
                         
-                        <!-- Hover Effect Overlay -->
-                        <div class="absolute inset-0 bg-gradient-to-br from-blue-400/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl"></div>
-                    </a>
+                        <div class="text-center flex-1 p-4 bg-gradient-to-br bg-slate-50 to-slate-150/70 rounded-xl shadow-md rounded-xl">
+                            <p class="text-sm text-slate-500 mb-1">Top Tier</p>
+                            <p class="text-2xl font-bold text-slate-800">{{ top_tier }}</p>
+                        </div>
+                    </div>
 
-                    <!-- Senior Card -->
-                    <a href="{% url 'senior-tier' %}" class="group relative overflow-hidden bg-gradient-to-br from-indigo-500 to-purple-600 shadow-xl rounded-2xl p-8 transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 hover:scale-105">
-                        <!-- Decorative Elements -->
-                        <div class="absolute top-0 right-0 w-32 h-32 transform translate-x-16 -translate-y-16">
-                            <div class="absolute inset-0 bg-purple-300 opacity-40 blur-3xl rounded-full"></div>
+                    <!-- Tier Cards -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 ">
+                        <!-- Novice Card -->
+                        <div class="tier-card group " data-tier="novice" data-count="{{ novice_count }}">
+                            <a href="{% url 'novice-tier' %}" class="block p-6 bg-gradient-to-br bg-sky-500 to-sky-600 rounded-2xl border border-sky-400 hover:bg-sky-600 transition-all duration-300 hover:shadow-lg shadow-md ">
+                                <div class="flex items-center justify-between mb-4 ">
+                                    <div class="flex items-center gap-3">
+                                        <div class="p-2 bg-sky-400/30 rounded-lg">
+                                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                            </svg>
+                                        </div>
+                                        <h3 class="text-lg font-semibold text-white">Novice Tier</h3>
+                                    </div>
+                                    <span class="text-xs font-medium text-white bg-sky-400/30 px-2 py-1 rounded-full">T1</span>
+                                </div>
+
+                                <div class="space-y-4">
+                                    <div>
+                                        <div class="flex items-baseline gap-2">
+                                            <span class="text-3xl font-bold text-white">{{ novice_count }}</span>
+                                            <span class="text-sky-100">students</span>
+                                        </div>
+                                        <p class="text-sm text-sky-100 mt-1">Completed Requirements</p>
+                                    </div>
+
+                                    <div class="space-y-2">
+                                        <div class="space-y-2">
+                                            <div class="flex justify-between text-sm">
+                                                <span class="text-sky-100">Completion Rate</span>
+                                                <span class="text-white font-medium">{{ novice_completion_rate }}%</span>
+                                            </div>
+                                            <div class="h-2 bg-sky-400/20 rounded-full overflow-hidden">
+                                                <div class="h-full bg-white/70 transition-all duration-500" style="width: {{ novice_completion_rate }}%"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mt-6 flex items-center justify-between pt-4 border-t border-sky-400/30">
+                                    <div class="flex items-center gap-2 text-sm text-sky-100">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        <span class="last-updated" data-timestamp="{{ last_update }}">Updated 2m ago</span>
+                                    </div>
+                                    <button class="text-white hover:text-sky-100 text-sm font-medium group-hover:translate-x-1 transition-transform">
+                                        View Details →
+                                    </button>
+                                </div>
+                            </a>
                         </div>
-                        <div class="absolute bottom-0 left-0 w-24 h-24 transform -translate-x-12 translate-y-12">
-                            <div class="absolute inset-0 bg-white opacity-20 blur-2xl rounded-full"></div>
+                    
+                        <!-- Junior Card -->
+                        <div class="tier-card group" data-tier="junior" data-count="{{ junior_count }}">
+                            <a href="{% url 'junior-tier' %}" class="block p-6 shadow-md bg-gradient-to-br bg-cyan-500 to-cyan-600 rounded-2xl border border-cyan-400 hover:bg-cyan-600 transition-all duration-300 hover:shadow-lg">
+                                <div class="flex items-center justify-between mb-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="p-2 bg-cyan-400/30 rounded-lg">
+                                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                                            </svg>
+                                        </div>
+                                        <h3 class="text-lg font-semibold text-white">Junior Tier</h3>
+                                    </div>
+                                    <span class="text-xs font-medium text-white bg-cyan-400/30 px-2 py-1 rounded-full">T2</span>
+                                </div>
+                    
+                                <div class="space-y-4">
+                                    <div>
+                                        <div class="flex items-baseline gap-2">
+                                            <span class="text-3xl font-bold text-white">{{ junior_count }}</span>
+                                            <span class="text-white">students</span>
+                                        </div>
+                                        <p class="text-sm text-white mt-1">Completed Requirements</p>
+                                    </div>
+                    
+                                    <div class="space-y-2">
+                                        <div class="space-y-2">
+                                            <div class="flex justify-between text-sm">
+                                                <span class="text-white">Completion Rate</span>
+                                                <span class="text-white font-medium">{{ junior_completion_rate }}%</span>
+                                            </div>
+                                            <div class="h-2 bg-cyan-400/20 rounded-full overflow-hidden">
+                                                <div class="h-full bg-white/70 transition-all duration-500" style="width: {{ junior_completion_rate }}%"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                    
+                                <div class="mt-6 flex items-center justify-between pt-4 border-t border-slate-100">
+                                    <div class="flex items-center gap-2 text-sm text-white">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        <span class="last-updated" data-timestamp="{{ last_update }}">Updated 2m ago</span>
+                                    </div>
+                                    <button class="text-white text-sm font-medium">View Details →</button>
+                                </div>
+                            </a>
                         </div>
-                        
-                        <!-- Content -->
-                        <div class="relative z-10 text-center">
-                            <div class="bg-purple-400/30 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
-                                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-                                </svg>
-                            </div>
-                            <h3 class="text-xl font-bold text-white mb-2">Senior Tier</h3>
-                            <div class="text-5xl font-extrabold text-white mb-2 group-hover:scale-110 transition-transform">{{ senior_count }}</div>
-                            <p class="text-purple-100 text-sm font-medium">Students Accomplished</p>
+                    
+                        <!-- Senior Card -->
+                        <div class="tier-card group" data-tier="senior" data-count="{{ senior_count }}">
+                            <a href="{% url 'senior-tier' %}" class="block p-6 shadow-md bg-gradient-to-br bg-blue-500 to-blue-600 rounded-2xl border border-blue-400 hover:bg-blue-600 transition-all duration-300 hover:shadow-lg">
+                                <div class="flex items-center justify-between mb-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="p-2 bg-blue-400/30 rounded-lg">
+                                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                                            </svg>
+                                        </div>
+                                        <h3 class="text-lg font-semibold text-white">Senior Tier</h3>
+                                    </div>
+                                    <span class="text-xs font-medium text-white bg-blue-400/30 px-2 py-1 rounded-full">T3</span>
+                                </div>
+                    
+                                <div class="space-y-4">
+                                    <div>
+                                        <div class="flex items-baseline gap-2">
+                                            <span class="text-3xl font-bold text-white">{{ senior_count }}</span>
+                                            <span class="text-white">students</span>
+                                        </div>
+                                        <p class="text-sm text-white mt-1">Completed Requirements</p>
+                                    </div>
+                    
+                                    <div class="space-y-2">
+                                        <div class="flex justify-between text-sm">
+                                            <span class="text-white">Completion Rate</span>
+                                            <span class="text-white font-medium">{{ senior_completion_rate }}%</span>
+                                        </div>
+                                        <div class="h-2 bg-blue-400/20 rounded-full overflow-hidden">
+                                            <div class="h-full bg-white/70 transition-all duration-500" style="width: {{ senior_completion_rate }}%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                    
+                                <div class="mt-6 flex items-center justify-between pt-4 border-t border-slate-100">
+                                        <div class="flex items-center gap-2 text-sm text-white">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                            <span class="last-updated" data-timestamp="{{ last_update }}">Updated 2m ago</span>
+                                        </div>
+                                    <button class="text-white hover:text-purple-600 text-sm font-medium">View Details →</button>
+                                </div>
+                            </a>
                         </div>
-                        
-                        <!-- Hover Effect Overlay -->
-                        <div class="absolute inset-0 bg-gradient-to-br from-purple-400/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl"></div>
-                    </a>
+                    </div>
                 </div>
+            <!-- Chart View (Hidden by default) -->
+            <div id="chartView" class="hidden">
+                <canvas id="tierProgressChart" class="w-full h-[400px]"></canvas>
             </div>
         </div>
     </div>
 </div>
+
+
+<script>
+    // Pass Django template variables to JavaScript
+    window.tierProgressData = {
+        totalStudents: {{ program_total }},
+        tierData: {
+            novice: {{ novice_count }},
+            junior: {{ junior_count }},
+            senior: {{ senior_count }}
+        }
+    };
+</script>
