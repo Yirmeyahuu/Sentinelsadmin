@@ -12,7 +12,7 @@ from django.core.paginator import Paginator
 from django.templatetags.static import static
 from Faculty.models import Faculty, FacultyAssignment
 from Student.models import Student, PendingStudent, Task, StudentTaskProgress, ArchivedStudent
-from django.db.models import Q
+from django.db.models import Q, Count
 from django.db import transaction
 from datetime import datetime, timedelta
 import calendar as cal
@@ -30,6 +30,7 @@ from django.urls import reverse
 
 # Firestore database instance
 from SentinelsProject.firebase_config import db
+
 
 
 
@@ -358,7 +359,7 @@ def remove_deadline(request):
 # This is the student list of Faculty
 @faculty_required
 def student_list(request):
-    # Get the logged-in faculty member from PostgreSQL using session
+    # Get faculty using session
     faculty_id = request.session.get('faculty_id')
     if not faculty_id:
         messages.error(request, "Session expired. Please login again.")
@@ -381,39 +382,43 @@ def student_list(request):
             "total_users": 0,
             "cs_students": 0,
             "it_students": 0,
-            "notifications": [],
             "program_total": 0,
             "section_total": 0,
             "search_query": "",
             "active_students_count": 0,
             "inactive_students_count": 0,
+            "program_filter": "all",
+            "year_section_filter": "all",
+            "sections": [],
         }
-        if request.headers.get('HX-Request'):
-            return render(request, 'Students/contents/student-list-content.html', context)
-        else:
-            return render(request, 'Students/student-list.html', context)
+        return render(request, 'Students/student-list.html', context)
 
-    # Computer Science students (PostgreSQL) - Updated to use FacultyAssignment
-    cs_students_count = Student.objects.filter(
-        student_status='Registered', 
-        faculty_assignment__program='Computer Science',
-        faculty_assignment__is_active=True
-    ).count()
+    # Get filter values from request
+    program_filter = request.GET.get('program', 'all')
+    year_section_filter = request.GET.get('year_section', 'all')
     
-    # Information Technology students (PostgreSQL) - Updated to use FacultyAssignment
-    it_students_count = Student.objects.filter(
-        student_status='Registered', 
-        faculty_assignment__program='Information Technology',
-        faculty_assignment__is_active=True
-    ).count()
-    
-    # Base query for students assigned to this faculty's active assignments
+    # Get unique sections from faculty assignments
+    sections = faculty_assignments.values_list('year_section', flat=True).distinct()
+
+    # Base query for students
     students_query = Student.objects.filter(
         faculty_assignment__in=faculty_assignments, 
         student_status='Registered'
     )
 
-    # --- Server-side search ---
+    # Apply program filter
+    if program_filter != 'all':
+        students_query = students_query.filter(
+            faculty_assignment__program=program_filter
+        )
+
+    # Apply year section filter
+    if year_section_filter != 'all':
+        students_query = students_query.filter(
+            faculty_assignment__year_section=year_section_filter
+        )
+
+    # Apply search filter if exists
     search_query = request.GET.get('search', '').strip()
     if search_query:
         students_query = students_query.filter(
@@ -422,19 +427,27 @@ def student_list(request):
             Q(student_id__icontains=search_query)
         )
 
+    # Order results
     students_query = students_query.order_by('last_name', 'first_name')
 
-    # --- Calculate Counts from PostgreSQL ---
-    # Total students in the faculty's specific class/section
-    section_total = students_query.count()
+    # Calculate counts
+    cs_students_count = Student.objects.filter(
+        student_status='Registered', 
+        faculty_assignment__program='Computer Science',
+        faculty_assignment__is_active=True
+    ).count()
     
-    # Total students in all the faculty's active assignments
+    it_students_count = Student.objects.filter(
+        student_status='Registered', 
+        faculty_assignment__program='Information Technology',
+        faculty_assignment__is_active=True
+    ).count()
+
+    section_total = students_query.count()
     program_total = Student.objects.filter(
         faculty_assignment__in=faculty_assignments,
         student_status='Registered'
     ).count()
-
-    # Total registered students in the system
     total_users = Student.objects.filter(student_status='Registered').count()
 
     # --- Active/Inactive Students Logic (Firebase) ---
@@ -509,6 +522,9 @@ def student_list(request):
         "paginator": paginator,
         "active_students_count": active_students_count,
         "inactive_students_count": inactive_students_count,
+        "program_filter": program_filter,
+        "year_section_filter": year_section_filter,
+        "sections": sections,
     }
 
     if request.headers.get('HX-Request'):
@@ -791,43 +807,102 @@ def check_student_id(request):
 @faculty_required
 def edit_student(request, student_id):
     student = get_object_or_404(Student, student_id=student_id)
-
+    
     if request.method == "POST":
-        # Only update the fields that are present in the modal form
-        student.first_name = request.POST.get("first_name", student.first_name)
-        student.last_name = request.POST.get("last_name", student.last_name)
-        student.middle_initial = request.POST.get("middle_initial", student.middle_initial)
-        student.save()
-
-        # Also update the corresponding document in Firestore
         try:
-            firestore_data = {
-                'first_name': student.first_name,
-                'last_name': student.last_name,
-                'middle_initial': student.middle_initial,
-            }
-            db.collection('Registered_Students').document(student.student_id).update(firestore_data)
+            with transaction.atomic():
+                new_student_id = request.POST.get("student_id")
+                
+                # If student ID is changing 
+                if new_student_id != student_id:
+                    # Check if new ID is available
+                    if Student.objects.filter(student_id=new_student_id).exists():
+                        messages.error(request, "Student ID is already taken.")
+                        return redirect("faculty-student-list")
+                    
+                    try:
+                        # Update Firestore first
+                        firestore_data = {
+                            'student_id': new_student_id,
+                            'first_name': request.POST.get("first_name", student.first_name),
+                            'last_name': request.POST.get("last_name", student.last_name),
+                            'middle_initial': request.POST.get("middle_initial", student.middle_initial),
+                            'program': student.faculty_assignment.program,
+                            'year_section': student.faculty_assignment.year_section,
+                            'semester': student.faculty_assignment.semester,
+                        }
+                        
+                        # Delete old document and create new one
+                        old_doc = db.collection('Registered_Students').document(student_id)
+                        new_doc = db.collection('Registered_Students').document(new_student_id)
+                        
+                        new_doc.set(firestore_data)
+                        old_doc.delete()
+                        
+                        # Now update PostgreSQL
+                        # Update all fields in a single operation using filter and update
+                        Student.objects.filter(student_id=student_id).update(
+                            student_id=new_student_id,
+                            first_name=request.POST.get("first_name", student.first_name),
+                            last_name=request.POST.get("last_name", student.last_name),
+                            middle_initial=request.POST.get("middle_initial", student.middle_initial),
+                            faculty_assignment_id=request.POST.get("faculty_assignment_id", student.faculty_assignment_id)
+                        )
+                        
+                    except Exception as e:
+                        raise Exception(f"Update failed: {str(e)}")
+                
+                else:
+                    # Regular update without ID change
+                    Student.objects.filter(student_id=student_id).update(
+                        first_name=request.POST.get("first_name", student.first_name),
+                        last_name=request.POST.get("last_name", student.last_name),
+                        middle_initial=request.POST.get("middle_initial", student.middle_initial),
+                        faculty_assignment_id=request.POST.get("faculty_assignment_id", student.faculty_assignment_id)
+                    )
+                    
+                    # Update Firestore
+                    firestore_data = {
+                        'first_name': request.POST.get("first_name", student.first_name),
+                        'last_name': request.POST.get("last_name", student.last_name),
+                        'middle_initial': request.POST.get("middle_initial", student.middle_initial),
+                        'program': student.faculty_assignment.program,
+                        'year_section': student.faculty_assignment.year_section,
+                        'semester': student.faculty_assignment.semester,
+                    }
+                    db.collection('Registered_Students').document(student_id).update(firestore_data)
+
+                messages.success(request, "Student details updated successfully!")
+                
         except Exception as e:
-            messages.error(request, f"Student updated in database, but failed to update Firestore record: {e}")
+            messages.error(request, f"Error updating student: {str(e)}")
+            return redirect("faculty-student-list")
+            
+    return redirect("faculty-student-list")
 
 
-        messages.success(request, "Student details updated successfully!")
-        return redirect("faculty-student-list")
-        
-    # This part is for non-modal pages, which is fine to leave as is.
-    return render(request, "Students/edit_student.html", {"student": student})
 # This is the archived students list of Faculty
 @faculty_required
 def archived_students_list_page(request):
     """
     Displays a list of students archived by the currently logged-in faculty.
-    Handles search and HTMX requests.
+    Handles search and HTMX requests with pagination.
     """
-    # Get the Faculty profile by matching faculty_id with the user's username
-    faculty_profile = get_object_or_404(Faculty, faculty_id=request.user.username)
+    # Get faculty using session
+    faculty_id = request.session.get('faculty_id')
+    if not faculty_id:
+        messages.error(request, "Session expired. Please login again.")
+        return redirect('sentinels_login')
+
+    # Get the Faculty profile
+    try:
+        faculty = Faculty.objects.get(faculty_id=faculty_id)
+    except Faculty.DoesNotExist:
+        messages.error(request, "Faculty profile not found.")
+        return redirect('sentinels_login')
 
     # Base queryset for archived students belonging to this faculty
-    archived_students_query = ArchivedStudent.objects.filter(faculty=faculty_profile)
+    archived_students_query = ArchivedStudent.objects.filter(faculty=faculty)
 
     # Handle search functionality
     search_query = request.GET.get('search', '').strip()
@@ -839,9 +914,17 @@ def archived_students_list_page(request):
             Q(program__icontains=search_query)
         )
 
+    # Pagination
+    paginator = Paginator(archived_students_query.order_by('-archived_at'), 10)  # 10 items per page
+    page_number = request.GET.get('page', 1)
+    page_obj = paginator.get_page(page_number)
+
     context = {
-        "archived_students": archived_students_query.order_by('-archived_at'),
+        "archived_students": page_obj,
+        "faculty_data": faculty,
         "search_query": search_query,
+        "paginator": paginator,
+        "page_obj": page_obj,
     }
 
     # Handle HTMX requests for partial page updates
@@ -880,10 +963,8 @@ def Verify_Student(request):
             return render(request, 'Students/contents/students-verify-list-content.html', context)
         else:
             return render(request, 'Students/students-verify-list.html', context)
-
-    # Build query for pending students that match ANY of the faculty's active assignments
-    from django.db.models import Q
     
+    # Build query for pending students that match ANY of the faculty's active assignments
     assignment_filters = Q()
     for assignment in faculty_assignments:
         assignment_filters |= Q(
@@ -897,20 +978,28 @@ def Verify_Student(request):
         assignment_filters
     ).order_by('submitted_at')
 
-    # --- Server-side search ---
+    # Apply search filter
     search_query = request.GET.get('search', '').strip()
     if search_query:
         pending_students_query = pending_students_query.filter(
             Q(first_name__icontains=search_query) |
             Q(last_name__icontains=search_query) |
-            Q(student_id__icontains=search_query)
+            Q(student_id__icontains=search_query) |
+            Q(program__icontains=search_query)
         )
+
+    # Pagination
+    paginator = Paginator(pending_students_query, 10)  # 10 items per page
+    page_number = request.GET.get('page', 1)
+    page_obj = paginator.get_page(page_number)
 
     context = {
         "faculty_data": faculty,
-        "faculty_assignments": faculty_assignments,  # Add assignments to context
-        "verify_students": pending_students_query,
+        "faculty_assignments": faculty_assignments,
+        "verify_students": page_obj,
         "search_query": search_query,
+        "paginator": paginator,
+        "page_obj": page_obj,
     }
 
     if request.headers.get('HX-Request'):
@@ -1707,11 +1796,7 @@ def senior_tier(request):
 # This is the faculty student status page
 @faculty_required
 def faculty_student_status(request):
-    """
-    Displays all students assigned to the logged-in faculty,
-    with options to filter by their status (e.g., Registered, Completed, Drop-out).
-    """
-    # Get the logged-in faculty member from PostgreSQL using session
+    # Get faculty using session
     faculty_id = request.session.get('faculty_id')
     if not faculty_id:
         messages.error(request, "Session expired. Please login again.")
@@ -1724,16 +1809,21 @@ def faculty_student_status(request):
         return redirect('sentinels_login')
 
     # Get active assignments for this faculty
-    faculty_assignments = faculty.assignments.filter(is_active=True)
+    faculty_assignments = faculty.assignments.filter(is_active=True).annotate(
+        student_count=Count('students', filter=Q(students__student_status='Registered'))
+    )
     
     if not faculty_assignments.exists():
-        messages.warning(request, "No active assignments found for your account.")
         context = {
             "students": [],
             "faculty_data": faculty,
             "faculty_assignments": [],
             "search_query": "",
             "status_filter": "all",
+            "selected_program": "all",
+            "selected_year_section": "all",
+            "selected_semester": "all",
+            "sections": [],
             "cs_students": 0,
             "it_students": 0,
             "program_total": 0,
@@ -1741,54 +1831,40 @@ def faculty_student_status(request):
             "active_students_count": 0,
             "inactive_students_count": 0,
         }
-        if request.headers.get('HX-Request'):
-            return render(request, 'Students/contents/student-status-content.html', context)
-        else:
-            return render(request, 'Students/student-status.html', context)
+        return render(request, 'Students/student-status.html', context)
 
-    # Computer Science students (PostgreSQL) - Updated to use FacultyAssignment
-    cs_students_count = Student.objects.filter(
-        student_status='Registered', 
-        faculty_assignment__program='Computer Science',
-        faculty_assignment__is_active=True
-    ).count()
-    
-    # Information Technology students (PostgreSQL) - Updated to use FacultyAssignment
-    it_students_count = Student.objects.filter(
-        student_status='Registered', 
-        faculty_assignment__program='Information Technology',
-        faculty_assignment__is_active=True
-    ).count()
-    
-    # Total students in all the faculty's active assignments (only Registered)
-    program_total = Student.objects.filter(
-        faculty_assignment__in=faculty_assignments,
-        student_status='Registered'
-    ).count()
-    
-    # Total students in the faculty's specific assignments (only Registered)
-    section_total = Student.objects.filter(
-        faculty_assignment__in=faculty_assignments, 
-        student_status='Registered'
-    ).count()
-
-    # Get filter and search parameters from the request
-    status_filter = request.GET.get('status', 'all').lower()
+    # Get filter values from request
+    selected_program = request.GET.get('program', 'all')
+    selected_year_section = request.GET.get('year_section', 'all')
+    selected_semester = request.GET.get('semester', 'all')
+    selected_status = request.GET.get('status', 'all').lower()
     search_query = request.GET.get('search', '').strip()
 
-    # Base query now fetches ALL students assigned to this faculty's assignments
+    # Get unique sections from faculty assignments
+    sections = faculty_assignments.values_list('year_section', flat=True).distinct()
+
+    # Base query for students
     students_query = Student.objects.filter(faculty_assignment__in=faculty_assignments)
 
-    # Apply status filter based on selection
-    if status_filter == 'completed':
-        students_query = students_query.filter(student_status='Completed')
-    elif status_filter in ['drop-out', 'dropout']:
-        students_query = students_query.filter(student_status='Drop-out')
-    elif status_filter == 'registered':
-        students_query = students_query.filter(student_status='Registered')
-    # If 'all', no status filter is applied.
+    # Apply filters
+    if selected_program != 'all':
+        students_query = students_query.filter(faculty_assignment__program=selected_program)
 
-    # Apply search filter across multiple fields
+    if selected_year_section != 'all':
+        students_query = students_query.filter(faculty_assignment__year_section=selected_year_section)
+
+    if selected_semester != 'all':
+        students_query = students_query.filter(faculty_assignment__semester=selected_semester)
+
+    # Apply status filter
+    if selected_status == 'completed':
+        students_query = students_query.filter(student_status='Completed')
+    elif selected_status in ['drop-out', 'dropout']:
+        students_query = students_query.filter(student_status='Drop-out')
+    elif selected_status == 'registered':
+        students_query = students_query.filter(student_status='Registered')
+
+    # Apply search filter
     if search_query:
         students_query = students_query.filter(
             Q(first_name__icontains=search_query) |
@@ -1796,8 +1872,24 @@ def faculty_student_status(request):
             Q(student_id__icontains=search_query)
         )
 
-    # Order the results for consistent display
-    students_query = students_query.order_by('last_name', 'first_name')
+    # Calculate counts
+    cs_students_count = Student.objects.filter(
+        student_status='Registered', 
+        faculty_assignment__program='Computer Science',
+        faculty_assignment__is_active=True
+    ).count()
+    
+    it_students_count = Student.objects.filter(
+        student_status='Registered', 
+        faculty_assignment__program='Information Technology',
+        faculty_assignment__is_active=True
+    ).count()
+
+    section_total = students_query.count()
+    program_total = Student.objects.filter(
+        faculty_assignment__in=faculty_assignments,
+        student_status='Registered'
+    ).count()
 
     # --- Active/Inactive Students Logic (Firebase) ---
     # Define all task fields to check for activity
@@ -1862,9 +1954,13 @@ def faculty_student_status(request):
     context = {
         "students": page_obj,
         "faculty_data": faculty,
-        "faculty_assignments": faculty_assignments,  # Add assignments to context
+        "faculty_assignments": faculty_assignments,
         "search_query": search_query,
-        "status_filter": status_filter, # Pass filter to template
+        "selected_status": selected_status,
+        "selected_program": selected_program,
+        "selected_year_section": selected_year_section,
+        "selected_semester": selected_semester,
+        "sections": sections,
         "page_obj": page_obj,
         "paginator": paginator,
         "cs_students": cs_students_count,

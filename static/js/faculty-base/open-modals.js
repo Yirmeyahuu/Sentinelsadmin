@@ -8,25 +8,6 @@ window.closeArchiveModal = function() {
 };
 
 
-
-// Student Edit Modal Functions
-window.openEditModal = function(studentId) {
-    const modal = document.getElementById(`editStudentModal-${studentId}`);
-    if (modal) {
-        modal.classList.remove('hidden');
-        document.body.classList.add('overflow-hidden');
-    }
-};
-
-window.closeEditModal = function(studentId) {
-    const modal = document.getElementById(`editStudentModal-${studentId}`);
-    if (modal) {
-        modal.classList.add('hidden');
-        document.body.classList.remove('overflow-hidden');
-    }
-};
-
-
 // Move Student Modal
 window.openMoveStudentModal = function(studentId) {
     document.getElementById("move-student-id").value = studentId;

@@ -1215,7 +1215,7 @@ def export_faculty_excel(request):
     
     # Create response
     response = HttpResponse(
-        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        content_type='application/vnd.openxWmlformats-officedocument.spreadsheetml.sheet'
     )
     response['Content-Disposition'] = 'attachment; filename="faculty_export.xlsx"'
     
