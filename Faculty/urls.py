@@ -13,8 +13,10 @@ urlpatterns = [
     path("Archived-Students/", views.archived_students_list_page, name="archived_students_list"),
     path('edit/<str:student_id>/', views.edit_student, name='edit_student'),
     path('Verify-students/', views.Verify_Student, name='verify-students'),
+    path('Student-Data/', views.studentData, name='student-data'),
     path('Student-status/', views.faculty_student_status, name='faculty-student-status'),
     path('delete-archived-student/<str:student_id>/', views.faculty_delete_archived_student, name='faculty_delete_archived_student'),
+    path('student-data/modal/<str:student_id>/', views.studentDataModal, name='student-data-modal'),
 
     path('accept-student/<str:student_id>/', views.accept_student, name='accept_student'),
     path('reject-student/<str:student_id>/', views.reject_student, name='reject_student'),

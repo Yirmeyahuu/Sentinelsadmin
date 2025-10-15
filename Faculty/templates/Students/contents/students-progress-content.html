@@ -114,6 +114,7 @@
         </div>
     </div>
 
+
     <!-- Main Content (Tier Progress Section) -->
     <div class="px-6">
         <div class="max-w-[calc(100%-80px)] mx-auto">
@@ -304,6 +305,19 @@
                                 </div>
                             </a>
                         </div>
+                    </div>
+                    <!-- View All Student Data Link Section -->
+                    <div class="flex justify-center mt-8 mb-12">
+                        <a href="{% url 'student-data' %}" 
+                           class="group relative inline-flex items-center justify-center px-8 py-4 rounded-xl bg-gradient-to-br from-blue-500 to-blue-700 text-white font-semibold text-md shadow-lg hover:shadow-xl transition-all duration-200 hover:-translate-y-1">
+                            <span class="absolute inset-0 bg-white/20 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity"></span>
+                            <div class="flex items-center space-x-3">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                                <span>View All Student Data</span>
+                            </div>
+                        </a>
                     </div>
                 </div>
             <!-- Chart View (Hidden by default) -->

@@ -34,6 +34,7 @@ from SentinelsProject.firebase_config import db
 
 
 
+
 # This is the save deadline of Activity process
 @csrf_exempt
 @faculty_required
@@ -2762,3 +2763,237 @@ def faculty_delete_archived_student(request, student_id):
             messages.error(request, f"An error occurred: {str(e)}")
     
     return redirect('archived_students_list')
+
+@faculty_required
+def studentData(request):
+    # Get faculty using session
+    faculty_id = request.session.get('faculty_id')
+    if not faculty_id:
+        messages.error(request, "Session expired. Please login again.")
+        return redirect('sentinels_login')  
+    
+    try:
+        faculty = Faculty.objects.prefetch_related('assignments').get(faculty_id=faculty_id)
+    except Faculty.DoesNotExist:
+        messages.error(request, "Faculty profile not found.")
+        return redirect('sentinels_login')
+
+    # Get active assignments for this faculty
+    faculty_assignments = faculty.assignments.filter(is_active=True)
+    
+    if not faculty_assignments.exists():
+        context = {
+            "faculty_data": faculty,
+            "total_students": 0,
+            "average_completion": 0,
+            "active_students": 0,
+            "inactive_students": 0,
+            "students": []
+        }
+        return render(request, 'Students/studentData.html', context)
+
+    # Get total students count
+    total_students = Student.objects.filter(
+        faculty_assignment__in=faculty_assignments,
+        student_status='Registered'
+    ).count()
+
+    search_query = request.GET.get('search', '').strip()
+
+    # Get students for table display
+    students = Student.objects.filter(
+        faculty_assignment__in=faculty_assignments,
+        student_status='Registered'
+    ).order_by('last_name')
+
+    # Apply search filter
+    if search_query:
+        students = students.filter(
+            Q(student_id__icontains=search_query) |
+            Q(first_name__icontains=search_query) |
+            Q(last_name__icontains=search_query)
+        )
+
+    
+
+
+    # Firebase task completion check
+    task_fields = [
+        # Novice Tasks
+        "Novice_Task_1(Collect Books)", "Novice_Task_2(Collect USB)",
+        "Novice_Task_3(QNA)", "Novice_Task_4_(Defeat Rootkit)",
+        # Junior Tasks
+        "Junior_Task_1(Collect Books)", "Junior_Task_2(QNA)",
+        "Junior_Task_3(Collect USB)", "Junior_Task_4(Bellaso's QNA)",
+        "Junior_Task_5(QNA)", "Junior_Task_6(Defeat Serpentix2)",
+        # Senior Tasks
+        "Senior_Task_1(Collect Books)", "Senior_Task_2(QNA)",
+        "Senior_Task_3(Collect USB)", "Senior_Task_4(QNA)",
+        "Senior_Task_5(QNA)", "Senior_Task_6(Defeat Rootkit2)"
+    ]
+
+    total_tasks = len(task_fields)
+    total_completed_tasks = 0
+    active_students = 0
+    inactive_students = 0
+    # Enhanced student data with task information
+    enhanced_students = []
+
+    # Check Firebase for each student's activity
+    for student in students:
+        try:
+            doc_ref = db.collection('Registered_Students').document(student.student_id).get()
+            if doc_ref.exists:
+                student_data = doc_ref.to_dict()
+                completed_tasks = 0
+                task_details = {
+                    'novice': {},
+                    'junior': {},
+                    'senior': {}
+                }
+                
+                # Count completed tasks and organize task data by tier
+                for task_field in task_fields:
+                    if task_field in student_data and isinstance(student_data[task_field], dict):
+                        task_info = student_data[task_field]
+                        points = task_info.get("points", 0)
+                        
+                        if points > 0:
+                            completed_tasks += 1
+                            total_completed_tasks += 1
+                            
+                        # Categorize task by tier
+                        if task_field.startswith("Novice"):
+                            task_details['novice'][task_field] = {
+                                'points': points,
+                                'completedAt': task_info.get('completedAt'),
+                                'time_taken': task_info.get('time_taken', '')
+                            }
+                        elif task_field.startswith("Junior"):
+                            task_details['junior'][task_field] = {
+                                'points': points,
+                                'completedAt': task_info.get('completedAt'),
+                                'time_taken': task_info.get('time_taken', '')
+                            }
+                        elif task_field.startswith("Senior"):
+                            task_details['senior'][task_field] = {
+                                'points': points,
+                                'completedAt': task_info.get('completedAt'),
+                                'time_taken': task_info.get('time_taken', '')
+                            }
+
+                # Update student status
+                if completed_tasks > 0:
+                    active_students += 1
+                else:
+                    inactive_students += 1
+
+                # Add enhanced student data
+                enhanced_students.append({
+                    'student': student,
+                    'task_details': task_details,
+                    'completed_tasks': completed_tasks,
+                    'total_points': sum(task['points'] for tier in task_details.values() 
+                                     for task in tier.values())
+                })
+            else:
+                inactive_students += 1
+                enhanced_students.append({
+                    'student': student,
+                    'task_details': {'novice': {}, 'junior': {}, 'senior': {}},
+                    'completed_tasks': 0,
+                    'total_points': 0
+                })
+                
+        except Exception as e:
+            print(f"Error checking Firebase for student {student.student_id}: {e}")
+            inactive_students += 1
+            enhanced_students.append({
+                'student': student,
+                'task_details': {'novice': {}, 'junior': {}, 'senior': {}},
+                'completed_tasks': 0,
+                'total_points': 0
+            })
+
+    # Calculate average completion
+    average_completion = (total_completed_tasks / (total_students * total_tasks) * 100) if total_students > 0 else 0
+
+    context = {
+        "search_query": search_query,
+        "faculty_data": faculty,
+        "total_students": total_students,
+        "average_completion": f"{average_completion:.1f}",
+        "active_students": active_students,
+        "inactive_students": inactive_students,
+        "students": enhanced_students,
+        "task_fields": task_fields,
+    }
+
+    if request.headers.get('HX-Request'):
+        return render(request, 'Students/contents/studentData-content.html', context)
+    else:
+        return render(request, 'Students/studentData.html', context)
+    
+
+@faculty_required
+def studentDataModal(request, student_id):
+    try:
+        # Get student data from Firebase
+        doc_ref = db.collection('Registered_Students').document(student_id).get()
+        
+        if not doc_ref.exists:
+            return JsonResponse({'error': 'Student data not found'}, status=404)
+        
+        student_data = doc_ref.to_dict()
+        
+        # Organize task data by tier
+        task_details = {
+            'novice': {},
+            'junior': {},
+            'senior': {}
+        }
+
+        # Define task fields
+        task_fields = [
+            # Novice Tasks
+            "Novice_Task_1(Collect Books)",
+            "Novice_Task_2(Collect USB)",
+            "Novice_Task_3(QNA)",
+            "Novice_Task_4_(Defeat Rootkit)",
+            # Junior Tasks
+            "Junior_Task_1(Collect Books)",
+            "Junior_Task_2(QNA)",
+            "Junior_Task_3(Collect USB)",
+            "Junior_Task_4(Bellaso's QNA)",
+            "Junior_Task_5(QNA)",
+            "Junior_Task_6(Defeat Serpentix2)",
+            # Senior Tasks
+            "Senior_Task_1(Collect Books)",
+            "Senior_Task_2(QNA)",
+            "Senior_Task_3(Collect USB)",
+            "Senior_Task_4(QNA)",
+            "Senior_Task_5(QNA)",
+            "Senior_Task_6(Defeat Rootkit2)"
+        ]
+
+        # Process task data
+        for task_field in task_fields:
+            if task_field in student_data and isinstance(student_data[task_field], dict):
+                task_info = student_data[task_field]
+                tier = 'novice' if 'Novice' in task_field else 'junior' if 'Junior' in task_field else 'senior'
+                task_details[tier][task_field] = {
+                    'points': task_info.get('points', 0),
+                    'completedAt': task_info.get('completedAt'),
+                    'time_taken': task_info.get('time_taken', '')
+                }
+
+        context = {
+            'student_id': student_id,
+            'task_details': task_details
+        }
+
+        return JsonResponse(context)
+        
+    except Exception as e:
+        print(f"Error fetching modal data for student {student_id}: {e}")
+        return JsonResponse({'error': str(e)}, status=500)

@@ -1,0 +1,242 @@
+{% load json_filters %}
+
+<script>
+    document.title = "SENTINELS | Student Data";
+</script>
+
+
+<!-- Main Container with Left Margin -->
+<div class="flex flex-col min-h-screen ml-20">
+    <!-- Dashboard Cards Container -->
+    <div class="px-6 mb-8">
+        <div class="max-w-[calc(100%-80px)] mx-auto">
+            <!-- Dashboard Cards Row -->
+            <div class="flex space-x-6 w-full">
+                <!-- Total Students Card -->
+                <div class="flex-1 min-w-[280px] relative group bg-gradient-to-br from-blue-500 to-blue-700 shadow-xl rounded-2xl p-6 transition-all duration-300 hover:shadow-2xl hover:-translate-y-1">
+                    <div class="absolute top-0 right-0 w-32 h-32 transform translate-x-16 -translate-y-16">
+                        <div class="absolute inset-0 bg-blue-400 opacity-50 blur-3xl rounded-full"></div>
+                    </div>
+                    <div class="flex items-center justify-between relative z-10">
+                        <div>
+                            <p class="text-blue-100 text-sm font-medium mb-1">Total Students</p>
+                            <h3 class="text-4xl font-bold text-white">{{ total_students }}</h3>
+                            <p class="text-blue-200 text-xs mt-1">Registered Students</p>
+                        </div>
+                        <div class="bg-blue-400/30 p-3 rounded-xl">
+                            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Average Completion Card -->
+                <div class="flex-1 min-w-[280px] relative group bg-gradient-to-br from-emerald-500 to-emerald-700 shadow-xl rounded-2xl p-6 transition-all duration-300 hover:shadow-2xl hover:-translate-y-1">
+                    <div class="absolute top-0 right-0 w-32 h-32 transform translate-x-16 -translate-y-16">
+                        <div class="absolute inset-0 bg-emerald-400 opacity-50 blur-3xl rounded-full"></div>
+                    </div>
+                    <div class="flex items-center justify-between relative z-10">
+                        <div>
+                            <p class="text-emerald-100 text-sm font-medium mb-1">Average Completion</p>
+                            <h3 class="text-4xl font-bold text-white">{{ average_completion }}%</h3>
+                            <p class="text-emerald-200 text-xs mt-1">Task Completion</p>
+                        </div>
+                        <div class="bg-emerald-400/30 p-3 rounded-xl">
+                            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Active Students Card -->
+                <div class="flex-1 min-w-[280px] relative group bg-gradient-to-br from-cyan-500 to-cyan-700 shadow-xl rounded-2xl p-6 transition-all duration-300 hover:shadow-2xl hover:-translate-y-1">
+                    <div class="absolute top-0 right-0 w-32 h-32 transform translate-x-16 -translate-y-16">
+                        <div class="absolute inset-0 bg-cyan-400 opacity-50 blur-3xl rounded-full"></div>
+                    </div>
+                    <div class="flex items-center justify-between relative z-10">
+                        <div>
+                            <p class="text-cyan-100 text-sm font-medium mb-1">Active Students</p>
+                            <h3 class="text-4xl font-bold text-white">{{ active_students }}</h3>
+                            <p class="text-cyan-200 text-xs mt-1">Currently Active</p>
+                        </div>
+                        <div class="bg-cyan-400/30 p-3 rounded-xl">
+                            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Inactive Students Card -->
+                <div class="flex-1 min-w-[280px] relative group bg-gradient-to-br from-rose-500 to-rose-700 shadow-xl rounded-2xl p-6 transition-all duration-300 hover:shadow-2xl hover:-translate-y-1">
+                    <div class="absolute top-0 right-0 w-32 h-32 transform translate-x-16 -translate-y-16">
+                        <div class="absolute inset-0 bg-rose-400 opacity-50 blur-3xl rounded-full"></div>
+                    </div>
+                    <div class="flex items-center justify-between relative z-10">
+                        <div>
+                            <p class="text-rose-100 text-sm font-medium mb-1">Inactive Students</p>
+                            <h3 class="text-4xl font-bold text-white">{{ inactive_students }}</h3>
+                            <p class="text-rose-200 text-xs mt-1">Not Active</p>
+                        </div>
+                        <div class="bg-rose-400/30 p-3 rounded-xl">
+                            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="px-6 mb-4">
+        <div class="max-w-[calc(100%-80px)] mx-auto">
+            <a href="{% url 'student-progress' %}" 
+               class="inline-flex items-center text-blue-600 hover:text-blue-600/60 transition-colors duration-200">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                </svg>
+                <span class="text-sm font-medium">Back to Progress</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Content Section -->
+    <div class="px-6">
+        <div class="max-w-[calc(100%-80px)] mx-auto">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Survey Pie Chart -->
+                <div class="bg-white rounded-2xl shadow-lg border border-slate-100 p-6 h-[600px]">
+                    <div class="flex items-center gap-4 mb-6">
+                        <div class="bg-blue-50 p-3 rounded-xl">
+                            <svg class="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h2 class="text-xl font-bold text-slate-800">Survey Results</h2>
+                            <p class="text-slate-500 text-sm">Perception on Traditional Approach of learning Cybersecurity Fundamentals</p>
+                        </div>
+                    </div>
+                    <div class="h-[calc(100%-88px)]"> <!-- 88px accounts for header height -->
+                        <canvas id="surveyPieChart" class="w-full h-full"></canvas>
+                    </div>
+                </div>
+
+                <!-- Student List Container -->
+                <div class="bg-white rounded-2xl shadow-lg border border-slate-100 overflow-hidden flex flex-col h-[600px]">
+                    <!-- Header Section (Fixed) -->
+                    <div class="p-6 border-b border-slate-100 flex-shrink-0">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <h2 class="text-xl font-bold text-slate-800">Student List</h2>
+                                <p class="text-slate-500 text-sm">Registered students overview</p>
+                            </div>
+                            <span class="px-3 py-1 text-sm text-slate-600 bg-slate-100 rounded-full">
+                                {{ students|length }} Students
+                            </span>
+                        </div>
+                        <!-- Search Bar -->
+                        <div class="relative">
+                            <input 
+                                type="text" 
+                                id="studentSearch" 
+                                placeholder="Search by ID or Name..."
+                                class="w-full px-4 py-2 pr-10 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
+                                value="{{ search_query }}"
+                            >
+                            <div class="absolute inset-y-0 right-0 flex items-center pr-3">
+                                <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Table Section (Scrollable) -->
+                    <div class="flex-1 overflow-y-auto">
+                        <table class="min-w-full divide-y divide-sky-200">
+                            <thead class="bg-gradient-to-r from-sky-50 to-sky-100 sticky top-0">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-sky-700 uppercase tracking-wider">Student</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-sky-700 uppercase tracking-wider">Student ID</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-sky-700 uppercase tracking-wider">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-sky-100">
+                                {% for student in students %}
+                                <tr class="hover:bg-sky-50 transition-colors duration-150">
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <div class="w-10 h-10 bg-gradient-to-br from-sky-400 to-blue-500 rounded-full flex items-center justify-center">
+                                                <span class="text-sm font-medium text-white">
+                                                    {{ student.student.first_name|first }}{{ student.student.last_name|first }}
+                                                </span>
+                                            </div>
+                                            <div class="ml-4">
+                                                <div class="text-sm font-medium text-sky-900">
+                                                    {{ student.student.first_name }} {{ student.student.last_name }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm font-mono text-sky-800">{{ student.student.student_id }}</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <button 
+                                            onclick="viewDetails('{{ student.student.student_id }}')"
+                                            data-student-id="{{ student.student.student_id }}"
+                                            class="inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-full text-white bg-sky-600 hover:bg-sky-700 transition-colors duration-200">
+                                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                            </svg>
+                                            View Details
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div> 
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Student Task Data Modal Container -->
+<div id="studentTaskDataModalContainer" hx-swap-oob="true">
+    <div id="studentTaskDataModal" hx-swap-oob="true" class="fixed inset-0 flex items-center justify-center bg-gray-900/80 backdrop-blur-sm z-[9999] hidden transition-opacity duration-300">
+        <div class="relative bg-white rounded-2xl shadow-xl max-w-4xl w-full mx-4 min-h-[500px]">
+            <div class="p-6">
+                <!-- Modal Header -->
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-xl font-bold text-slate-800">Student Task Details</h2>
+                    <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 transition-colors duration-200">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Tier Filter -->
+                <div class="flex space-x-2 mb-6">
+                    <button onclick="switchTier('novice')" class="px-4 py-2 rounded-lg text-sm font-medium bg-sky-100 text-sky-700 hover:bg-sky-200 active-tier">Novice</button>
+                    <button onclick="switchTier('junior')" class="px-4 py-2 rounded-lg text-sm font-medium bg-slate-100 text-slate-600 hover:bg-slate-200">Junior</button>
+                    <button onclick="switchTier('senior')" class="px-4 py-2 rounded-lg text-sm font-medium bg-slate-100 text-slate-600 hover:bg-slate-200">Senior</button>
+                </div>
+
+                <!-- Chart Container -->
+                <div class="h-[400px] w-full">
+                    <canvas id="studentTaskChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
