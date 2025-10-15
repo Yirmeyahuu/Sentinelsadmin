@@ -377,7 +377,7 @@
                     </div>
                 
                     <!-- Footer / View All Link -->
-                    <a href="#" class="relative z-10 flex items-center justify-center mt-6 text-sm text-sky-200 hover:text-white transition-all duration-200 group">
+                    <a href="{% url 'student-progress' %}" class="relative z-10 flex items-center justify-center mt-6 text-sm text-sky-200 hover:text-white transition-all duration-200 group">
                         <span>View Complete Leaderboard</span>
                         <svg xmlns="http://www.w3.org/2000/svg" 
                              class="h-4 w-4 ml-2 transform group-hover:translate-x-1 transition-transform duration-200" 
@@ -474,7 +474,7 @@
                             </svg>
                             <h3 class="text-base font-semibold text-gray-800">Almost Due</h3>
                         </div>
-                        <a href="#" class="text-xs text-sky-600 hover:text-sky-700 font-medium transition-colors duration-200">
+                        <a href="{% url 'faculty-activity-page' %}" class="text-xs text-sky-600 hover:text-sky-700 font-medium transition-colors duration-200">
                             View all
                         </a>
                     </div>
@@ -495,6 +495,78 @@
                         {% endfor %}
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Deadline Information Modal -->
+<div id="openDeadlineInfoModalContainer" hx-swap-oob="true">
+    <div id="deadlineInfoModal" 
+        class="fixed inset-0 bg-gray-900/90 backdrop-blur-sm flex items-center justify-center z-[9999] opacity-0 pointer-events-none transition-all duration-200">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full mx-4 transform scale-95 transition-all duration-300">
+            <!-- Modal Content -->
+            <div class="p-8 space-y-6">
+                <!-- Title and Tier Section -->
+                <div class="space-y-4">
+                    <h3 class="text-2xl font-bold text-gray-900" id="deadlineTitle"></h3>
+                    <div class="inline-flex items-center space-x-2">
+                        <span id="deadlineTier" class="px-4 py-1.5 rounded-full text-sm font-semibold"></span>
+                    </div>
+                </div>
+
+                <!-- Deadline Time Section -->
+                <div class="flex items-start space-x-4 bg-sky-50 p-4 rounded-2xl border border-sky-100">
+                    <div class="p-2 bg-sky-100 rounded-xl">
+                        <svg class="w-6 h-6 text-sky-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" 
+                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-semibold text-sky-900 mb-1">Deadline</h4>
+                        <p class="text-base font-medium text-sky-800" id="deadlineDate"></p>
+                        <p class="text-sm text-sky-600" id="deadlineTime"></p>
+                    </div>
+                </div>
+
+                <!-- Late Completions Section -->
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between">
+                        <h4 class="text-base font-semibold text-gray-900">Late Submissions</h4>
+                        <span class="px-2.5 py-1 bg-rose-50 text-rose-700 text-xs font-medium rounded-lg">
+                            After Deadline
+                        </span>
+                    </div>
+                    
+                    <!-- Late Completions List -->
+                    <div id="lateCompletionsList" class="space-y-3 max-h-[240px] overflow-y-auto pr-2 
+                        scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-gray-50">
+                        <!-- Default "No late submissions" state -->
+                        <div class="flex flex-col items-center justify-center py-8 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200">
+                            <div class="p-3 bg-gray-100 rounded-xl mb-3">
+                                <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" 
+                                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                            </div>
+                            <p class="text-sm font-medium text-gray-500">
+                                No student completed the task late
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="px-8 pb-8">
+                <button onclick="closeDeadlineInfoModal()" 
+                        class="w-full px-6 py-3 bg-sky-600 text-white rounded-xl hover:bg-sky-500 
+                            transition-all duration-200 font-medium text-sm focus:outline-none 
+                            focus:ring-2 focus:ring-gray-900 focus:ring-offset-2">
+                    Close Deadline Details
+                </button>
             </div>
         </div>
     </div>

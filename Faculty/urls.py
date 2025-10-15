@@ -29,6 +29,7 @@ urlpatterns = [
     path("Activity-list/", views.Faculty_activity_page, name='faculty-activity-page'),
     path('save-activity-deadline/', views.saveActivityDeadline, name='save-activity-deadline'),
     path('remove-deadline/', views.remove_deadline, name='remove-deadline'), 
+    path('get-late-completions/<str:task_title>/', views.get_late_completions, name='get-late-completions'),
 
     
     #URLS FOR STUDENT DASHBOARD

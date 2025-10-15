@@ -41,20 +41,11 @@
         <!-- Activities Grid -->
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {% for activity in activities_novice %}
-            <div class="group relative bg-gradient-to-br from-sky-700/60 to-sky-600 rounded-2xl shadow-lg overflow-hidden 
+            <div class="group relative bg-gradient-to-br from-blue-700/60 to-blue-600 rounded-2xl shadow-lg overflow-hidden 
                         transition-all duration-300 hover:shadow-2xl hover:-translate-y-1
-                        border border-sky-500/30 backdrop-blur-sm
-                        {% if activity.isLock %}cursor-not-allowed{% else %}cursor-pointer{% endif %}"
+                        border border-sky-500/30 backdrop-blur-sm"
                  data-tier="Novice" 
-                 data-title="{{ activity.title }}"
-                 {% if activity.isLock %}
-                    onclick="facultyTierLockedAlert(event)"
-                 {% else %}
-                    onclick="openFacultyActivityDeadlineModal(
-                        `{{ activity.title|escapejs }}`,
-                        `{{ activity.description|default:''|escapejs }}`,
-                        `{{ activity.tier|default:'Novice' }}`)"
-                 {% endif %}>
+                 data-title="{{ activity.title }}">
                 
                 <!-- Activity Image Container -->
                 <div class="relative h-48 overflow-hidden">
@@ -81,27 +72,63 @@
                         {{ activity.title }}
                     </h3>
     
-                    <!-- Deadline Badge -->
+                    <!-- Deadline Section -->
                     {% if activity.deadline_date %}
-                    <div class="mt-2 p-2 bg-yellow-100 rounded-lg border border-yellow-300">
-                        <div class="flex justify-between items-center">
-                            <div>
-                                <p class="text-sm font-medium text-yellow-800">Deadline Set:</p>
-                                <p class="text-xs text-yellow-700">{{ activity.deadline_date }} at {{ activity.deadline_time }}</p>
+                    <div class="bg-gradient-to-r from-amber-50 to-yellow-50 rounded-lg border border-amber-200 shadow-sm p-3">
+                        <div class="flex items-start space-x-2">
+                            <div class="mt-0.5">
+                                <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
                             </div>
-                            <button 
-                                onclick="removeActivityDeadline('{{ activity.title|escapejs }}')"
-                                class="text-red-600 hover:text-red-800 text-xs font-medium">
-                                Remove
-                            </button>
+                            <div class="flex-1">
+                                <p class="text-xs font-medium text-amber-800">Deadline Set</p>
+                                <p class="text-xs text-amber-700 mt-0.5">{{ activity.deadline_date }} at {{ activity.deadline_time }}</p>
+                            </div>
                         </div>
                     </div>
+                    {% endif %}
+
+                    <!-- Deadline Action Button -->
+                    {% if activity.isLock %}
+                    <button 
+                        onclick="facultyTierLockedAlert(event)"
+                        class="w-full inline-flex items-center justify-center px-4 py-2.5 text-sm font-medium text-gray-400 bg-gray-100 
+                               rounded-lg cursor-not-allowed opacity-60"
+                        disabled>
+                        <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                            <path fill-rule="evenodd" d="M8 10V7a4 4 0 1 1 8 0v3h1a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h1Zm2-3a2 2 0 1 1 4 0v3h-4V7Zm2 6a1 1 0 0 1 1 1v3a1 1 0 1 1-2 0v-3a1 1 0 0 1 1-1Z"/>
+                        </svg>
+                        Tier Locked
+                    </button>
                     {% else %}
-                        <div class="flex items-center space-x-2">
-                            <span class="px-3 py-1 bg-sky-800/50 rounded-full text-sm text-sky-100/70 border border-sky-500/30">
-                                No deadline set
-                            </span>
-                        </div>
+                        {% if activity.deadline_date %}
+                        <button 
+                            onclick="confirmDeadlineRemoval(event, '{{ activity.title|escapejs }}')"
+                            class="w-full inline-flex items-center justify-center px-4 py-2.5 text-sm font-medium text-red-700 bg-red-100 
+                                   rounded-lg hover:bg-red-200 transition-all duration-200 shadow-sm hover:shadow-md">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                            </svg>
+                            Remove Deadline
+                        </button>
+                        {% else %}
+                        <button 
+                            onclick="openFacultyActivityDeadlineModal(
+                                '{{ activity.title|escapejs }}',
+                                '{{ activity.description|default:''|escapejs }}',
+                                '{{ activity.tier|default:'Novice' }}')"
+                            class="w-full inline-flex items-center justify-center px-4 py-2.5 text-sm font-medium text-white bg-sky-400 
+                                   rounded-lg hover:bg-sky-500 transition-all duration-200 shadow-sm hover:shadow-md cursor-pointer">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            Set Deadline
+                        </button>
+                        {% endif %}
                     {% endif %}
     
                     <!-- Progress Section -->
@@ -157,20 +184,11 @@
         <!-- Activities Grid -->
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {% for activity in activities_junior %}
-            <div class="group relative bg-gradient-to-br from-sky-700/60 to-sky-600 rounded-2xl shadow-lg overflow-hidden 
+            <div class="group relative bg-gradient-to-br from-blue-700/60 to-blue-600 rounded-2xl shadow-lg overflow-hidden 
                         transition-all duration-300 hover:shadow-2xl hover:-translate-y-1
-                        border border-sky-500/30 backdrop-blur-sm
-                        {% if activity.isLock %}cursor-not-allowed{% else %}cursor-pointer{% endif %}"
+                        border border-sky-500/30 backdrop-blur-sm"
                  data-tier="Junior" 
-                 data-title="{{ activity.title }}"
-                 {% if activity.isLock %}
-                    onclick="facultyTierLockedAlert(event)"
-                 {% else %}
-                    onclick="openFacultyActivityDeadlineModal(
-                        `{{ activity.title|escapejs }}`,
-                        `{{ activity.description|default:''|escapejs }}`,
-                        `{{ activity.tier|default:'Junior' }}`)"
-                 {% endif %}>
+                 data-title="{{ activity.title }}">
                 
                 <!-- Activity Image Container -->
                 <div class="relative h-48 overflow-hidden">
@@ -199,27 +217,63 @@
                     
                     <p class="text-sm text-sky-200">{{ activity.subject }}</p>
     
-                    <!-- Deadline Badge -->
+                    <!-- Deadline Section -->
                     {% if activity.deadline_date %}
-                    <div class="mt-2 p-2 bg-yellow-100 rounded-lg border border-yellow-300">
-                        <div class="flex justify-between items-center">
-                            <div>
-                                <p class="text-sm font-medium text-yellow-800">Deadline Set:</p>
-                                <p class="text-xs text-yellow-700">{{ activity.deadline_date }} at {{ activity.deadline_time }}</p>
+                    <div class="bg-gradient-to-r from-amber-50 to-yellow-50 rounded-lg border border-amber-200 shadow-sm p-3">
+                        <div class="flex items-start space-x-2">
+                            <div class="mt-0.5">
+                                <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
                             </div>
-                            <button 
-                                onclick="removeActivityDeadline('{{ activity.title|escapejs }}')"
-                                class="text-red-600 hover:text-red-800 text-xs font-medium">
-                                Remove
-                            </button>
+                            <div class="flex-1">
+                                <p class="text-xs font-medium text-amber-800">Deadline Set</p>
+                                <p class="text-xs text-amber-700 mt-0.5">{{ activity.deadline_date }} at {{ activity.deadline_time }}</p>
+                            </div>
                         </div>
                     </div>
+                    {% endif %}
+
+                    <!-- Deadline Action Button -->
+                    {% if activity.isLock %}
+                    <button 
+                        onclick="facultyTierLockedAlert(event)"
+                        class="w-full inline-flex items-center justify-center px-4 py-2.5 text-sm font-medium text-gray-400 bg-gray-100 
+                               rounded-lg cursor-not-allowed opacity-60"
+                        disabled>
+                        <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                            <path fill-rule="evenodd" d="M8 10V7a4 4 0 1 1 8 0v3h1a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h1Zm2-3a2 2 0 1 1 4 0v3h-4V7Zm2 6a1 1 0 0 1 1 1v3a1 1 0 1 1-2 0v-3a1 1 0 0 1 1-1Z"/>
+                        </svg>
+                        Tier Locked
+                    </button>
                     {% else %}
-                        <div class="flex items-center space-x-2">
-                            <span class="px-3 py-1 bg-sky-800/50 rounded-full text-sm text-sky-100/70 border border-sky-500/30">
-                                No deadline set
-                            </span>
-                        </div>
+                        {% if activity.deadline_date %}
+                        <button 
+                            onclick="confirmDeadlineRemoval(event, '{{ activity.title|escapejs }}')"
+                            class="w-full inline-flex items-center justify-center px-4 py-2.5 text-sm font-medium text-red-700 bg-red-100 
+                                   rounded-lg hover:bg-red-200 transition-all duration-200 shadow-sm hover:shadow-md">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                            </svg>
+                            Remove Deadline
+                        </button>
+                        {% else %}
+                        <button 
+                            onclick="openFacultyActivityDeadlineModal(
+                                '{{ activity.title|escapejs }}',
+                                '{{ activity.description|default:''|escapejs }}',
+                                '{{ activity.tier|default:'Junior' }}')"
+                            class="w-full inline-flex items-center justify-center px-4 py-2.5 text-sm font-medium text-white bg-sky-400
+                                   rounded-lg hover:bg-sky-500 transition-all duration-200 shadow-sm hover:shadow-md">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            Set Deadline
+                        </button>
+                        {% endif %}
                     {% endif %}
     
                     <!-- Progress Section -->
@@ -275,20 +329,11 @@
         <!-- Activities Grid -->
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {% for activity in activities_senior %}
-            <div class="group relative bg-gradient-to-br from-sky-700/60 to-sky-600 rounded-2xl shadow-lg overflow-hidden 
+            <div class="group relative bg-gradient-to-br from-blue-700/60 to-blue-600 rounded-2xl shadow-lg overflow-hidden 
                         transition-all duration-300 hover:shadow-2xl hover:-translate-y-1
-                        border border-sky-500/30 backdrop-blur-sm
-                        {% if activity.isLock %}cursor-not-allowed{% else %}cursor-pointer{% endif %}"
+                        border border-sky-500/30 backdrop-blur-sm"
                  data-tier="Senior" 
-                 data-title="{{ activity.title }}"
-                 {% if activity.isLock %}
-                    onclick="facultyTierLockedAlert(event)"
-                 {% else %}
-                    onclick="openFacultyActivityDeadlineModal(
-                        `{{ activity.title|escapejs }}`,
-                        `{{ activity.description|default:''|escapejs }}`,
-                        `{{ activity.tier|default:'Senior' }}`)"
-                 {% endif %}>
+                 data-title="{{ activity.title }}">
                 
                 <!-- Activity Image Container -->
                 <div class="relative h-48 overflow-hidden">
@@ -317,27 +362,63 @@
                     
                     <p class="text-sm text-sky-200">{{ activity.subject }}</p>
     
-                    <!-- Deadline Badge -->
+                    <!-- Deadline Section -->
                     {% if activity.deadline_date %}
-                    <div class="mt-2 p-2 bg-yellow-100 rounded-lg border border-yellow-300">
-                        <div class="flex justify-between items-center">
-                            <div>
-                                <p class="text-sm font-medium text-yellow-800">Deadline Set:</p>
-                                <p class="text-xs text-yellow-700">{{ activity.deadline_date }} at {{ activity.deadline_time }}</p>
+                    <div class="bg-gradient-to-r from-amber-50 to-yellow-50 rounded-lg border border-amber-200 shadow-sm p-3">
+                        <div class="flex items-start space-x-2">
+                            <div class="mt-0.5">
+                                <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
                             </div>
-                            <button 
-                                onclick="removeActivityDeadline('{{ activity.title|escapejs }}')"
-                                class="text-red-600 hover:text-red-800 text-xs font-medium">
-                                Remove
-                            </button>
+                            <div class="flex-1">
+                                <p class="text-xs font-medium text-amber-800">Deadline Set</p>
+                                <p class="text-xs text-amber-700 mt-0.5">{{ activity.deadline_date }} at {{ activity.deadline_time }}</p>
+                            </div>
                         </div>
                     </div>
+                    {% endif %}
+
+                    <!-- Deadline Action Button -->
+                    {% if activity.isLock %}
+                    <button 
+                        onclick="facultyTierLockedAlert(event)"
+                        class="w-full inline-flex items-center justify-center px-4 py-2.5 text-sm font-medium text-gray-400 bg-gray-100 
+                               rounded-lg cursor-not-allowed opacity-60"
+                        disabled>
+                        <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                            <path fill-rule="evenodd" d="M8 10V7a4 4 0 1 1 8 0v3h1a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h1Zm2-3a2 2 0 1 1 4 0v3h-4V7Zm2 6a1 1 0 0 1 1 1v3a1 1 0 1 1-2 0v-3a1 1 0 0 1 1-1Z"/>
+                        </svg>
+                        Tier Locked
+                    </button>
                     {% else %}
-                        <div class="flex items-center space-x-2">
-                            <span class="px-3 py-1 bg-sky-800/50 rounded-full text-sm text-sky-100/70 border border-sky-500/30">
-                                No deadline set
-                            </span>
-                        </div>
+                        {% if activity.deadline_date %}
+                        <button 
+                            onclick="confirmDeadlineRemoval(event, '{{ activity.title|escapejs }}')"
+                            class="w-full inline-flex items-center justify-center px-4 py-2.5 text-sm font-medium text-red-700 bg-red-100 
+                                   rounded-lg hover:bg-red-200 transition-all duration-200 shadow-sm hover:shadow-md">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                            </svg>
+                            Remove Deadline
+                        </button>
+                        {% else %}
+                        <button 
+                            onclick="openFacultyActivityDeadlineModal(
+                                '{{ activity.title|escapejs }}',
+                                '{{ activity.description|default:''|escapejs }}',
+                                '{{ activity.tier|default:'Senior' }}')"
+                            class="w-full inline-flex items-center justify-center px-4 py-2.5 text-sm font-medium text-white bg-sky-400 
+                                   rounded-lg hover:bg-sky-500 transition-all duration-200 shadow-sm hover:shadow-md">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            Set Deadline
+                        </button>
+                        {% endif %}
                     {% endif %}
     
                     <!-- Progress Section -->
@@ -355,6 +436,127 @@
                 </div>
             </div>
             {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- Confirm Remove Deadline Modal -->
+<div id="removeDeadlineModalContainer" hx-swap-oob="true">
+    <div id="removeDeadlineModal" class="hidden fixed inset-0 z-[9999]">
+        <!-- Enhanced Backdrop with blur -->
+        <div class="fixed inset-0 bg-gray-900/90 backdrop-blur-xs transition-all duration-300"></div>
+        
+        <!-- Modal Content -->
+        <div class="fixed inset-0 z-10 overflow-y-auto">
+            <div class="flex min-h-full items-center justify-center p-4 text-center">
+                <!-- Enhanced Modal Card -->
+                <div class="relative transform overflow-hidden rounded-3xl bg-white shadow-2xl transition-all duration-300 w-full max-w-lg
+                           border-2 border-red-100 animate-[slideUp_0.3s_ease-out]">
+                    <!-- Content Container -->
+                    <div class="relative bg-gradient-to-br from-white to-red-50/30 px-6 py-8 sm:px-8 sm:py-10">
+                        <!-- Icon and Content Section -->
+                        <div class="sm:flex sm:items-start">
+                            <!-- Enhanced Animated Icon -->
+                            <div class="mx-auto flex-shrink-0 flex items-center justify-center h-16 w-16 sm:h-14 sm:w-14 rounded-2xl 
+                                       bg-gradient-to-br from-red-100 to-red-200 sm:mx-0 
+                                       shadow-lg shadow-red-200/50 animate-[pulse_2s_ease-in-out_infinite]">
+                                <svg class="h-8 w-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" 
+                                          d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                                </svg>
+                            </div>
+                            
+                            <!-- Text Content -->
+                            <div class="mt-4 text-center sm:ml-6 sm:mt-0 sm:text-left flex-1">
+                                <h3 class="text-2xl font-bold leading-tight text-gray-900 mb-3">
+                                    Remove Deadline
+                                </h3>
+                                <div class="mt-3 space-y-2">
+                                    <p class="text-sm text-gray-600 leading-relaxed">
+                                        Are you sure you want to remove the deadline for
+                                    </p>
+                                    <div class="inline-flex items-center px-4 py-2 rounded-xl bg-gradient-to-r from-red-50 to-orange-50 
+                                               border border-red-200 shadow-sm">
+                                        <svg class="w-4 h-4 text-red-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                        </svg>
+                                        <span id="activityTitle" class="font-semibold text-red-700 text-sm"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Divider -->
+                        <div class="mt-6 mb-6 border-t border-gray-200"></div>
+                        
+                        <!-- Enhanced Action Buttons -->
+                        <div class="flex flex-col-reverse sm:flex-row sm:justify-end gap-3">
+                            <!-- Cancel Button -->
+                            <button type="button" 
+                                    onclick="closeDeadlineModal()"
+                                    class="group relative inline-flex items-center justify-center px-6 py-3 
+                                           text-sm font-semibold text-gray-700 bg-white
+                                           rounded-xl shadow-sm ring-1 ring-inset ring-gray-300
+                                           hover:bg-gray-50 hover:shadow-md hover:ring-gray-400
+                                           transition-all duration-200 transform hover:scale-[1.02]
+                                           focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                                <svg class="w-4 h-4 mr-2 transition-transform group-hover:rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                </svg>
+                                Cancel
+                            </button>
+                            
+                            <!-- Remove Button -->
+                            <button type="button" 
+                                    onclick="executeDeadlineRemoval()"
+                                    class="group relative inline-flex items-center justify-center px-6 py-3 
+                                           text-sm font-semibold text-white
+                                           bg-red-500
+                                           rounded-xl shadow-lg hover:bg-red-400
+                                           transition-all duration-150 transform hover:scale-[1.02]
+                                           focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500
+                                           overflow-hidden">
+                                
+                                <svg class="w-4 h-4 mr-2 transition-transform group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                </svg>
+                                <span class="relative">Remove Deadline</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Set Deadline -->
+<div id="setDeadlineModalContainer" hx-swap-oob="true">
+    <!-- Faculty Activity Deadline Modal -->
+    <div id="facultyActivityDeadlineModal" class="fixed inset-0 flex items-center justify-center bg-gray-900/80 z-100 hidden">
+        <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-2xl z-10 relative border-2 border-blue-500/20">
+            <h2 class="text-2xl font-bold text-blue-700 mb-2 text-center" id="facultyActivityDeadlineTitle"></h2>
+            <div class="h-1 bg-gradient-to-r from-blue-600 via-blue-400 to-blue-600 mb-4 rounded-full shadow-lg"></div>
+            <p class="text-gray-700 text-justify mb-6" id="facultyActivityDeadlineDescription"></p>
+            <form id="facultyDeadlineForm" onsubmit="submitFacultyDeadline(event)">
+                <div class="flex gap-4 mb-6">
+                    <div class="flex-1">
+                        <label class="block text-blue-700 font-semibold mb-1">Deadline Date</label>
+                        <input type="date" name="deadline_date" id="facultyDeadlineDate" class="w-full border border-blue-300 rounded-lg p-2" required>
+                    </div>
+                    <div class="flex-1">
+                        <label class="block text-blue-700 font-semibold mb-1">Deadline Time</label>
+                        <input type="time" name="deadline_time" id="facultyDeadlineTime" class="w-full border border-blue-300 rounded-lg p-2" required>
+                    </div>
+                </div>
+                <div class="flex justify-end border-t border-blue-200 pt-4">
+                    <button type="button" onclick="closeFacultyActivityDeadlineModal()" class="bg-gray-500 text-white px-6 py-2 rounded-xl mr-2 hover:bg-gray-700 transition">Cancel</button>
+                    <button type="submit" class="bg-blue-700 text-white px-6 py-2 rounded-xl hover:bg-blue-900 transition">Set Deadline</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>

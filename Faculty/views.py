@@ -34,46 +34,6 @@ from SentinelsProject.firebase_config import db
 
 
 
-
-# This is the save deadline of Activity process
-@csrf_exempt
-@faculty_required
-def saveActivityDeadline(request):
-    if request.method == "POST":
-        try:
-            data = json.loads(request.body)
-            faculty_id = request.user.username
-            title = data.get('title')
-            tier = data.get('tier')
-            date = data.get('date')
-            time = data.get('time')
-            
-            # Add faculty validation
-            try:
-                faculty = Faculty.objects.get(faculty_id=faculty_id)
-            except Faculty.DoesNotExist:
-                return JsonResponse({'status': 'error', 'message': 'Faculty profile not found.'})
-                
-        except Exception as e:
-            return JsonResponse({'status': 'error', 'message': str(e)})
-
-        try:
-            db.collection('Activity Deadlines').document(faculty_id).set({
-                title: {
-                    'tier': tier,
-                    'title': title,
-                    'deadline_date': date,
-                    'deadline_time': time,
-                    'created_at': firestore.SERVER_TIMESTAMP
-                }
-            }, merge=True)
-            return JsonResponse({'status': 'success', 'message': 'Deadline set successfully!'})
-        except Exception as e:
-            return JsonResponse({'status': 'error', 'message': f'Failed to save deadline: {str(e)}'})
-            
-    return JsonResponse({'status': 'error', 'message': 'Invalid request'})
-
-
 # This is the Faculty homepage
 @faculty_required
 def Faculty_home(request):
@@ -334,34 +294,7 @@ def Faculty_home(request):
         return render(request, 'Home/faculty-home.html', context)
     
 
-# This is the remove deadline of Activity process
-@csrf_exempt
-@faculty_required
-def remove_deadline(request):
-    if request.method == "POST":
-        title = request.POST.get('title')
-        faculty_id = request.user.username
-        
-        # Add faculty validation
-        try:
-            faculty = Faculty.objects.get(faculty_id=faculty_id)
-        except Faculty.DoesNotExist:
-            messages.error(request, "Faculty profile not found.")
-            return redirect('login')
-        
-        if title and faculty_id:
-            try:
-                # Remove the specific deadline field from the faculty's document
-                db.collection('Activity Deadlines').document(faculty_id).update({
-                    title: firestore.DELETE_FIELD
-                })
-                messages.success(request, f"Deadline for '{title}' removed successfully.")
-            except Exception as e:
-                messages.error(request, f"Failed to remove deadline: {str(e)}")
-        else:
-            messages.error(request, "Missing title or faculty information.")
-    
-    return redirect(request.META.get('HTTP_REFERER', 'faculty-activity-page'))
+
 
 # This is the student list of Faculty
 @faculty_required
@@ -690,12 +623,8 @@ def student_progress(request):
             print(f"Error checking Firebase for student {student_id}: {e}")
             inactive_students_count += 1
     
-    # --- End of Sync Logic ---
 
     # --- Final Counts from PostgreSQL ---
-    # Now that data is synced, we can query PostgreSQL efficiently.
-    # This counts students who have at least one progress record in a given tier.
-    # Since we only add records upon full tier completion, this is accurate.
     
     novice_completed_count = Student.objects.filter(
         faculty_assignment__in=faculty_assignments, 
@@ -730,10 +659,46 @@ def student_progress(request):
     
     # Find top tier based on highest completion count (existing code)
     tier_counts = {
-        'Novice': novice_completed_count,
-        'Junior': junior_completed_count,
-        'Senior': senior_completed_count
+        'Novice': 0,
+        'Junior': 0,
+        'Senior': 0
     }
+
+    # Get the highest tier and the student who achieved it
+    top_tier_student = {
+        'name': '-',
+        'tier': '-'
+    }
+
+    # Query Firestore for all students under this faculty's assignments
+    for assignment in faculty_assignments:
+        students_ref = db.collection('Registered_Students')\
+            .where('program', '==', assignment.program)\
+            .where('year_section', '==', assignment.year_section)\
+            .where('semester', '==', assignment.semester)\
+            .stream()
+
+        # Priority order of tiers (highest to lowest)
+        tier_priority = ['Senior', 'Junior', 'Novice']
+
+        for student in students_ref:
+            student_data = student.to_dict()
+            student_name = f"{student_data.get('first_name', '')} {student_data.get('last_name', '')}"
+            
+            # Check each tier's completion
+            for tier in tier_priority:
+                if student_data.get(f'{tier}_isComplete', False):
+                    tier_counts[tier] += 1
+                    # Update top student if this is a higher tier
+                    if top_tier_student['tier'] == '-' or \
+                       tier_priority.index(tier) < tier_priority.index(top_tier_student['tier']):
+                        top_tier_student = {
+                            'name': student_name,
+                            'tier': tier
+                        }
+                    break  # Only count highest completed tier per student
+
+    # Get the top tier based on completion counts
     top_tier = max(tier_counts.items(), key=lambda x: x[1])[0] if any(tier_counts.values()) else '-'
     
     # Calculate average completion percentage (existing code)
@@ -757,6 +722,7 @@ def student_progress(request):
         "junior_completion_rate": junior_completion_rate,
         "senior_completion_rate": senior_completion_rate,
         "top_tier": top_tier,
+        'top_tier_student': top_tier_student,
         "novice_count": novice_completed_count,
         "junior_count": junior_completed_count,
         "senior_count": senior_completed_count,
@@ -1175,38 +1141,60 @@ def Faculty_activity_page(request):
     # Get activity deadlines from Firestore - Use faculty_id directly
     deadlines_doc = db.collection('Activity Deadlines').document(faculty_id).get()
     activity_deadlines = {}
+    
     if deadlines_doc.exists:
         deadlines_data = deadlines_doc.to_dict()
+        # Map Firebase tasks to display titles
+        task_to_display = {
+            "Junior_Task_1(Collect Books)": "Junior Task 1",
+            "Junior_Task_2(QNA)": "Junior Task 1",
+            "Junior_Task_3(Collect USB)": "Junior Task 2",
+            "Junior_Task_4(Bellaso's QNA)": "Junior Task 2",
+            "Junior_Task_5(QNA)": "Junior Task 3",
+            "Junior_Task_6(Defeat Serpentix2)": "Junior Boss Battle",
+            "Senior_Task_1(Collect Books)": "Senior Task 1",
+            "Senior_Task_2(QNA)": "Senior Task 1",
+            "Senior_Task_3(Collect USB)": "Senior Task 2",
+            "Senior_Task_4(QNA)": "Senior Task 2",
+            "Senior_Task_5(QNA)": "Senior Task 3",
+            "Senior_Task_6(Defeat Rootkit2)": "Senior Boss Battle"
+        }
+        
+        # Process each deadline entry
         for key, deadline_data in deadlines_data.items():
-            if isinstance(deadline_data, dict) and 'title' in deadline_data:
-                activity_deadlines[deadline_data['title']] = {
-                    'deadline_date': deadline_data.get('deadline_date'),
-                    'deadline_time': deadline_data.get('deadline_time')
-                }
+            if isinstance(deadline_data, dict):
+                display_title = task_to_display.get(key) or deadline_data.get('display_title')
+                if display_title:
+                    # Use the first deadline found for combined tasks
+                    if display_title not in activity_deadlines:
+                        activity_deadlines[display_title] = {
+                            'deadline_date': deadline_data.get('deadline_date'),
+                            'deadline_time': deadline_data.get('deadline_time')
+                        }
     
-    # Add isLock and deadline info to each activity
+    # Add isLock and deadline info to each activity (update this section)
     for activity in activities_novice:
         activity['isLock'] = lock_states.get('Novice', True)
         deadline_info = activity_deadlines.get(activity['title'], {})
         activity['deadline_date'] = deadline_info.get('deadline_date')
         activity['deadline_time'] = deadline_info.get('deadline_time')
-        activity['progress'] = 0  # You can calculate this from Firebase if needed
+        activity['progress'] = 0
         
     for activity in activities_junior:
         activity['isLock'] = lock_states.get('Junior', True)
         deadline_info = activity_deadlines.get(activity['title'], {})
         activity['deadline_date'] = deadline_info.get('deadline_date')
         activity['deadline_time'] = deadline_info.get('deadline_time')
-        activity['progress'] = 0  # You can calculate this from Firebase if needed
-        activity['subject'] = 'Cybersecurity'  # Add subject for Junior/Senior tasks
+        activity['progress'] = 0
+        activity['subject'] = 'Cybersecurity'
         
     for activity in activities_senior:
         activity['isLock'] = lock_states.get('Senior', True)
         deadline_info = activity_deadlines.get(activity['title'], {})
         activity['deadline_date'] = deadline_info.get('deadline_date')
         activity['deadline_time'] = deadline_info.get('deadline_time')
-        activity['progress'] = 0  # You can calculate this from Firebase if needed
-        activity['subject'] = 'Advanced Cybersecurity'  # Add subject for Junior/Senior tasks
+        activity['progress'] = 0
+        activity['subject'] = 'Advanced Cybersecurity'
 
     context = {
         "faculty_data": faculty_data,
@@ -2166,7 +2154,6 @@ def faculty_student_status(request):
         return render(request, 'Students/student-status.html', context)
 
 
-
 # CSV Export for Students
 @faculty_required
 def export_student_csv(request):
@@ -2940,6 +2927,7 @@ def studentDataModal(request, student_id):
     try:
         # Get student data from Firebase
         doc_ref = db.collection('Registered_Students').document(student_id).get()
+        faculty_id = request.session.get('faculty_id')
         
         if not doc_ref.exists:
             return JsonResponse({'error': 'Student data not found'}, status=404)
@@ -2987,9 +2975,33 @@ def studentDataModal(request, student_id):
                     'time_taken': task_info.get('time_taken', '')
                 }
 
+        # Get deadlines for this faculty
+        deadlines_doc = db.collection('Activity Deadlines').document(faculty_id).get()
+        deadlines_data = deadlines_doc.to_dict() if deadlines_doc.exists else {}
+        
+        # Task completion and deadline status
+        late_completions = []
+        
+        # Process each task with deadline
+        for task_key, deadline_info in deadlines_data.items():
+            task_data = student_data.get(task_key)
+            if task_data and isinstance(task_data, dict):
+                deadline_date = deadline_info.get('deadline_date')
+                deadline_time = deadline_info.get('deadline_time')
+                
+                if check_late_completions(task_data, deadline_date, deadline_time):
+                    late_completions.append({
+                        'task_name': task_key,
+                        'deadline': f"{deadline_date} {deadline_time}",
+                        'completed_at': task_data['completed_at'].strftime('%Y-%m-%d %H:%M'),
+                        'points': task_data.get('points', 0)
+                    })
+
         context = {
             'student_id': student_id,
-            'task_details': task_details
+            'task_details': task_details,
+            'student_name': f"{student_data.get('first_name', '')} {student_data.get('last_name', '')}",
+            'late_completions': sorted(late_completions, key=lambda x: x['completed_at']),
         }
 
         return JsonResponse(context)
@@ -2997,3 +3009,334 @@ def studentDataModal(request, student_id):
     except Exception as e:
         print(f"Error fetching modal data for student {student_id}: {e}")
         return JsonResponse({'error': str(e)}, status=500)
+    
+
+
+@csrf_exempt
+@faculty_required
+def saveActivityDeadline(request):
+    if request.method == "POST":
+        try:
+            print("=== SAVE DEADLINE DEBUG ===")
+            print(f"Raw request body: {request.body}")
+            
+            data = json.loads(request.body)
+            print(f"Parsed data: {data}")
+            
+            faculty_id = request.session.get('faculty_id')
+            print(f"Faculty ID from session: {faculty_id}")
+            
+            if not faculty_id:
+                print("ERROR: No faculty_id in session")
+                return JsonResponse({
+                    'status': 'error', 
+                    'message': 'Session expired. Please login again.'
+                })
+            
+            title = data.get('title')
+            tier = data.get('tier')
+            date = data.get('date')
+            time = data.get('time')
+            
+            print(f"Extracted - Title: {title}, Tier: {tier}, Date: {date}, Time: {time}")
+            
+            # Add faculty validation
+            try:
+                faculty = Faculty.objects.get(faculty_id=faculty_id)
+                print(f"Faculty found: {faculty.faculty_id}")
+            except Faculty.DoesNotExist:
+                print(f"ERROR: Faculty not found for ID: {faculty_id}")
+                return JsonResponse({
+                    'status': 'error', 
+                    'message': 'Faculty profile not found.'
+                })
+
+            # Map combined tasks to their individual Firebase task keys
+            task_mapping = {
+                # Novice tasks
+                'Novice Task 1': [
+                    "Novice_Task_1(Collect Books)",
+                ],
+                'Novice Task 2': [
+                    "Novice_Task_2(Collect USB)",
+                ],
+                'Novice Task 3': [
+                    "Novice_Task_3(QNA)"
+                ],
+                'Novice Boss Battle': [
+                    "Novice_Task_4(Defeat Rootkit)"
+                ],
+                # Junior tasks
+                'Junior Task 1': [
+                    "Junior_Task_1(Collect Books)",
+                    "Junior_Task_2(QNA)"
+                ],
+                'Junior Task 2': [
+                    "Junior_Task_3(Collect USB)",
+                    "Junior_Task_4(Bellaso's QNA)"
+                ],
+                'Junior Task 3': [
+                    "Junior_Task_5(QNA)"
+                ],
+                'Junior Boss Battle': [
+                    "Junior_Task_6(Defeat Serpentix2)"
+                ],
+                # Senior tasks
+                'Senior Task 1': [
+                    "Senior_Task_1(Collect Books)",
+                    "Senior_Task_2(QNA)"
+                ],
+                'Senior Task 2': [
+                    "Senior_Task_3(Collect USB)",
+                    "Senior_Task_4(QNA)"
+                ],
+                'Senior Task 3': [
+                    "Senior_Task_5(QNA)"
+                ],
+                'Senior Boss Battle': [
+                    "Senior_Task_6(Defeat Rootkit2)"
+                ]
+            }
+
+            # Get the Firebase task keys for the selected activity
+            firebase_tasks = task_mapping.get(title, [])
+            print(f"Firebase tasks to create: {firebase_tasks}")
+            
+            if not firebase_tasks:
+                print(f"ERROR: No mapping found for title: {title}")
+                return JsonResponse({
+                    'status': 'error', 
+                    'message': f'Invalid task title: {title}'
+                })
+
+            # Create deadline data for each Firebase task
+            deadline_data = {}
+            for task_key in firebase_tasks:
+                deadline_data[task_key] = {
+                    'tier': tier,
+                    'title': task_key,
+                    'deadline_date': date,
+                    'deadline_time': time,
+                    'created_at': firestore.SERVER_TIMESTAMP,
+                    'display_title': title
+                }
+            
+            print(f"Deadline data to save: {deadline_data}")
+
+            # Save all deadlines in a single operation
+            print(f"Saving to Firestore collection 'Activity Deadlines' document '{faculty_id}'")
+            db.collection('Activity Deadlines').document(faculty_id).set(
+                deadline_data, 
+                merge=True
+            )
+            
+            print("SUCCESS: Deadline saved to Firestore")
+            print("=== END DEBUG ===")
+            
+            return JsonResponse({
+                'status': 'success', 
+                'message': f'Deadline set successfully for {title}!'
+            })
+
+        except json.JSONDecodeError as e:
+            print(f"JSON DECODE ERROR: {str(e)}")
+            return JsonResponse({
+                'status': 'error', 
+                'message': f'Invalid JSON data: {str(e)}'
+            })
+        except Exception as e:
+            print(f"GENERAL ERROR in saveActivityDeadline: {str(e)}")
+            print(f"Error type: {type(e).__name__}")
+            import traceback
+            print(f"Traceback: {traceback.format_exc()}")
+            return JsonResponse({
+                'status': 'error', 
+                'message': f'Failed to save deadline: {str(e)}'
+            })
+            
+    print("ERROR: Not a POST request")
+    return JsonResponse({'status': 'error', 'message': 'Invalid request'})
+
+
+# This is the remove deadline of Activity process
+@csrf_exempt
+@faculty_required
+def remove_deadline(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            title = data.get('title')
+            
+            faculty_id = request.session.get('faculty_id')
+            
+            if not faculty_id:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'Session expired. Please login again.'
+                })
+            
+            # Add faculty validation
+            try:
+                faculty = Faculty.objects.get(faculty_id=faculty_id)
+            except Faculty.DoesNotExist:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'Faculty profile not found.'
+                })
+            
+            if title and faculty_id:
+                # Map display title to Firebase task keys
+                task_mapping = {
+                    # Novice tasks
+                    'Novice Task 1': [
+                        "Novice_Task_1(Collect Books)",
+                    ],
+                    'Novice Task 2': [
+                        "Novice_Task_2(Collect USB)",
+                    ],
+                    'Novice Task 3': [
+                        "Novice_Task_3(QNA)"
+                    ],
+                    'Novice Boss Battle': [
+                        "Novice_Task_4(Defeat Rootkit)"
+                    ],
+                    # Junior tasks
+                    'Junior Task 1': [
+                        "Junior_Task_1(Collect Books)",
+                        "Junior_Task_2(QNA)"
+                    ],
+                    'Junior Task 2': [
+                        "Junior_Task_3(Collect USB)",
+                        "Junior_Task_4(Bellaso's QNA)"
+                    ],
+                    'Junior Task 3': [
+                        "Junior_Task_5(QNA)"
+                    ],
+                    'Junior Boss Battle': [
+                        "Junior_Task_6(Defeat Serpentix2)"
+                    ],
+                    # Senior tasks
+                    'Senior Task 1': [
+                        "Senior_Task_1(Collect Books)",
+                        "Senior_Task_2(QNA)"
+                    ],
+                    'Senior Task 2': [
+                        "Senior_Task_3(Collect USB)",
+                        "Senior_Task_4(QNA)"
+                    ],
+                    'Senior Task 3': [
+                        "Senior_Task_5(QNA)"
+                    ],
+                    'Senior Boss Battle': [
+                        "Senior_Task_6(Defeat Rootkit2)"
+                    ]
+                }
+
+                firebase_tasks = task_mapping.get(title, [])
+                
+                if firebase_tasks:
+                    # Remove each Firebase task key
+                    update_data = {}
+                    for task_key in firebase_tasks:
+                        update_data[task_key] = firestore.DELETE_FIELD
+                    
+                    db.collection('Activity Deadlines').document(faculty_id).update(update_data)
+                    
+                    return JsonResponse({
+                        'status': 'success',
+                        'message': f'Deadline for "{title}" removed successfully.'
+                    })
+                else:
+                    return JsonResponse({
+                        'status': 'error',
+                        'message': 'Invalid task title.'
+                    })
+            else:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'Missing title or faculty information.'
+                })
+                
+        except Exception as e:
+            print(f"Error in remove_deadline: {str(e)}")
+            return JsonResponse({
+                'status': 'error',
+                'message': f'Failed to remove deadline: {str(e)}'
+            })
+    
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
+
+
+def check_late_completions(task_data, deadline_date, deadline_time):
+    """Check if task was completed after deadline"""
+    if not task_data or not deadline_date or not deadline_time:
+        return False
+        
+    try:
+        # Combine deadline date and time
+        deadline_str = f"{deadline_date} {deadline_time}"
+        deadline = datetime.strptime(deadline_str, '%Y-%m-%d %H:%M')
+        
+        # Get completion timestamp
+        completed_at = task_data.get('completed_at')
+        if not completed_at:
+            return False
+            
+        # Convert completion timestamp to datetime
+        completion_time = datetime.fromtimestamp(completed_at.timestamp())
+        
+        # Task is late if completed after deadline
+        return completion_time > deadline
+    except:
+        return False
+
+
+@faculty_required
+def get_late_completions(request, task_title):
+    try:
+        faculty_id = request.session.get('faculty_id')
+        
+        # Get deadline info for this task
+        deadline_doc = db.collection('Activity Deadlines').document(faculty_id).get()
+        if not deadline_doc.exists:
+            return JsonResponse({'late_completions': []})
+            
+        deadline_data = deadline_doc.to_dict()
+        
+        # Get all students' data
+        students_ref = db.collection('Registered_Students').where('faculty_id', '==', faculty_id).stream()
+        
+        late_completions = []
+        for student in students_ref:
+            student_data = student.to_dict()
+            
+            # Check each task that matches the display title
+            for task_key, deadline_info in deadline_data.items():
+                if deadline_info.get('display_title') == task_title:
+                    task_data = student_data.get(task_key)
+                    if task_data and isinstance(task_data, dict):
+                        # Check if completion was late
+                        if check_late_completions(task_data, 
+                                                deadline_info.get('deadline_date'),
+                                                deadline_info.get('deadline_time')):
+                            late_completions.append({
+                                'student_name': f"{student_data.get('first_name', '')} {student_data.get('last_name', '')}",
+                                'student_id': student_data.get('student_id', ''),
+                                'completed_at': task_data['completed_at'].strftime('%Y-%m-%d %H:%M'),
+                                'points': task_data.get('points', 0)
+                            })
+        
+        return JsonResponse({'late_completions': late_completions})
+        
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+
+
+
+
+
+
+
+

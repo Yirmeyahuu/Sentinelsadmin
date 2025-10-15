@@ -40,7 +40,7 @@
 
     <!-- Scripts for external Javascript-->
     <script src="{% static 'js/faculty-base/content-animate.js' %}" defer></script>
-    <script src="{% static 'js/faculty-base/open-modals.js' %}" defer></script>
+    <script src="{% static 'js/faculty-base/activityDeadlineModal.js' %}" defer></script>
     <script src="{% static 'js/faculty-base/sidebar.js' %}" defer></script>
     <script src="{% static 'js/faculty-base/importStudent.js' %}" defer></script>
     <script src="{% static 'js/faculty-base/editStudentModal.js' %}" defer></script>
@@ -50,10 +50,14 @@
     <script src="{% static 'js/faculty-base/progressChart.js' %}" defer></script>
     <script src="{% static 'js/faculty-base/traditionalPieChart.js' %}" defer></script>
     <script src="{% static 'js/faculty-base/search.js' %}" defer></script>
+    <script src="{% static 'js/faculty-base/openDeadlineModal.js' %}" defer></script>
+    <script src="{% static 'js/faculty-base/removeDeadlineModal.js' %}" defer></script>
+    <script src="{% static 'js/faculty-base/editProfileModal.js' %}" defer></script>
+    <script src="{% static 'js/faculty-base/logoutModal.js' %}" defer></script>
+    <script src="{% static 'js/faculty-base/moveFacultyModal.js' %}" defer></script>
     <script src="{% static 'js/faculty-base/help.js' %}" defer></script>
     <script src="{% static 'js/faculty-base/charts.js' %}" defer></script>
     <script src="{% static 'js/faculty-base/sticky-container.js' %}" defer></script>
-
 
 
 
@@ -126,33 +130,14 @@
 
 <div id="studentTaskDataModalContainer"></div>
 
+<div id="openDeadlineInfoModalContainer"></div>
+
+<div id="removeDeadlineModalContainer"></div>
+
+<div id="setDeadlineModalContainer"></div>
 
 
 
-<!-- Faculty Activity Deadline Modal -->
-<div id="facultyActivityDeadlineModal" class="fixed inset-0 flex items-center justify-center bg-gray-900/80 z-100 hidden">
-    <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-2xl z-10 relative border-2 border-blue-500/20">
-        <h2 class="text-2xl font-bold text-blue-700 mb-2 text-center" id="facultyActivityDeadlineTitle"></h2>
-        <div class="h-1 bg-gradient-to-r from-blue-600 via-blue-400 to-blue-600 mb-4 rounded-full shadow-lg"></div>
-        <p class="text-gray-700 text-justify mb-6" id="facultyActivityDeadlineDescription"></p>
-        <form id="facultyDeadlineForm" onsubmit="submitFacultyDeadline(event)">
-            <div class="flex gap-4 mb-6">
-                <div class="flex-1">
-                    <label class="block text-blue-700 font-semibold mb-1">Deadline Date</label>
-                    <input type="date" name="deadline_date" id="facultyDeadlineDate" class="w-full border border-blue-300 rounded-lg p-2" required>
-                </div>
-                <div class="flex-1">
-                    <label class="block text-blue-700 font-semibold mb-1">Deadline Time</label>
-                    <input type="time" name="deadline_time" id="facultyDeadlineTime" class="w-full border border-blue-300 rounded-lg p-2" required>
-                </div>
-            </div>
-            <div class="flex justify-end border-t border-blue-200 pt-4">
-                <button type="button" onclick="closeFacultyActivityDeadlineModal()" class="bg-gray-500 text-white px-6 py-2 rounded-xl mr-2 hover:bg-gray-700 transition">Cancel</button>
-                <button type="submit" class="bg-blue-700 text-white px-6 py-2 rounded-xl hover:bg-blue-900 transition">Set Deadline</button>
-            </div>
-        </form>
-    </div>
-</div>
 
 
 
