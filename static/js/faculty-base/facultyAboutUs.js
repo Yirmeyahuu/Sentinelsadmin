@@ -1,14 +1,14 @@
 // Floating "About Us" Button
-window.initAboutUsButton = function() {
+window.initFacultyAboutUsButton = function() {
     // Remove existing button if any
-    const existingBtn = document.getElementById('aboutUsFloatBtn');
+    const existingBtn = document.getElementById('facultyAboutUsFloatBtn');
     if (existingBtn) {
         existingBtn.remove();
     }
 
     // Create button element
     const btn = document.createElement('div');
-    btn.id = 'aboutUsFloatBtn';
+    btn.id = 'facultyAboutUsFloatBtn';
     btn.className = 'fixed bottom-20 right-6 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-full shadow-lg cursor-pointer transition-all duration-300 hover:scale-105 z-50';
     btn.innerHTML = `
         <div class="flex items-center space-x-2 group">
@@ -30,12 +30,12 @@ window.initAboutUsButton = function() {
 
 // Auto-initialize About Us button when page loads
 document.addEventListener('DOMContentLoaded', function() {
-    window.initAboutUsButton();
+    window.initFacultyAboutUsButton();
 });
 
 // Reinitialize after HTMX swaps (if needed)
 document.addEventListener('htmx:afterSwap', function() {
     setTimeout(() => {
-        window.initAboutUsButton();
+        window.initFacultyAboutUsButton();
     }, 100);
 });

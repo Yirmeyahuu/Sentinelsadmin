@@ -35,6 +35,6 @@ urlpatterns = [
 
     path('check-faculty-id/', views.check_faculty_id, name='check_faculty_id'),
 
-    path('Developers/', views.devinnovateSection, name='superadmin-developers-section'),
+    path('Developers/', views.superadminDevinnovateSection, name='superadmin-developers-section'),
     
 ]

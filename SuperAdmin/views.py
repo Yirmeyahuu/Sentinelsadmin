@@ -497,6 +497,7 @@ def restore_faculty(request, faculty_id):
 
 
 #This is the activity page for the superadmin
+@superadmin_required
 def Superadmin_activity_page(request):
     activities_novice = [
         {
@@ -1536,13 +1537,13 @@ def check_faculty_id(request):
 
 
 @superadmin_required
-def devinnovateSection(request):
+def superadminDevinnovateSection(request):
     if request.headers.get('HX-Request'):
         # HTMX request: return only the main content
-        return render(request, 'Devinnovate/contents/devinnovate-content.html')
+        return render(request, 'Devinnovate/contents/superadmin-devinnovate-content.html')
     else:
         # Normal request: return the full page
-        return render(request, 'Devinnovate/devinnovate.html')
+        return render(request, 'Devinnovate/superadmin-devinnovate.html')
 
 
 

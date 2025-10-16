@@ -294,8 +294,6 @@ def Faculty_home(request):
         return render(request, 'Home/faculty-home.html', context)
     
 
-
-
 # This is the student list of Faculty
 @faculty_required
 def student_list(request):
@@ -737,7 +735,6 @@ def student_progress(request):
     
 
 # This is the add student process of Faculty
-
 @faculty_required
 def add_student(request):
     print(f"=== ADD STUDENT VIEW CALLED ===")
@@ -805,8 +802,6 @@ def add_student(request):
     else:
         print("Not a POST request, redirecting")
         return redirect('faculty-student-list')
-
-
 
 
 # Add check student ID endpoint
@@ -3267,6 +3262,7 @@ def remove_deadline(request):
     return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
 
 
+@faculty_required
 def check_late_completions(task_data, deadline_date, deadline_time):
     """Check if task was completed after deadline"""
     if not task_data or not deadline_date or not deadline_time:
@@ -3334,7 +3330,7 @@ def get_late_completions(request, task_title):
 
 
 @faculty_required
-def devinnovateSection(request):
+def facultyDevinnovateSection(request):
     # --- PostgreSQL Data Fetching ---
     try:
         # Get faculty_id from session instead of request.user.username
@@ -3360,10 +3356,10 @@ def devinnovateSection(request):
 
     if request.headers.get('HX-Request'):
         # HTMX request: return only the main content
-        return render(request, 'Devinnovate/contents/devinnovate-content.html', context)
+        return render(request, 'Devinnovate/contents/faculty-devinnovate-content.html', context)
     else:
         # Normal request: return the full page
-        return render(request, 'Devinnovate/devinnovate.html', context)
+        return render(request, 'Devinnovate/faculty-devinnovate.html', context)
 
 
 

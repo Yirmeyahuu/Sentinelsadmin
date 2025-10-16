@@ -1908,9 +1908,6 @@
   .bg-indigo-600 {
     background-color: var(--color-indigo-600);
   }
-  .bg-indigo-700 {
-    background-color: var(--color-indigo-700);
-  }
   .bg-orange-100 {
     background-color: var(--color-orange-100);
   }
@@ -3472,11 +3469,6 @@
   }
   .group-focus-within\:text-blue-500:is(:where(.group):focus-within *) {
     color: var(--color-blue-500);
-  }
-  @media (hover: hover) {
-    .group-hover\:inline:is(:where(.group):hover *) {
-      display: inline;
-    }
   }
   @media (hover: hover) {
     .group-hover\:translate-x-1:is(:where(.group):hover *) {

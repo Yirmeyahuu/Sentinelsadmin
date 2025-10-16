@@ -51,5 +51,5 @@ urlpatterns = [
 
 
     # Developers Section
-    path('Developers/', views.devinnovateSection, name="devinnovate-section")
+    path('Developers/', views.facultyDevinnovateSection, name="devinnovate-section")
 ]
