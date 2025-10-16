@@ -200,24 +200,24 @@
 </div>
 
 <!-- Logout Confirmation Modal -->
-<div id="logoutModal" class="fixed inset-0 flex items-center justify-center bg-gray-900/80 z-100 hidden">
+<div id="logoutModal" class="fixed inset-0 flex items-center justify-center backdrop-blur-xs bg-gray-900/80 z-[9999] hidden">
     <!-- Modal Content -->
-    <div class="bg-white p-6 rounded-lg shadow-lg w-96 text-center relative z-10">
+    <div class="bg-white p-6 rounded-3xl shadow-lg w-96 text-center relative z-10">
         <h2 class="text-lg font-bold text-gray-800 mb-4">Confirm Logout</h2>
         <p class="text-gray-600 mb-6">Are you sure you want to logout?</p>
         <!-- Logout Form (POST Request) -->
         <form id="logoutForm" method="POST" action="{% url 'faculty_logout' %}">
             {% csrf_token %}
             <div class="flex justify-center space-x-4">
-                <button type="button" 
-                    onclick="closeLogoutModal()" 
-                    class="text-white bg-red-500 hover:bg-red-600 focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-3me-2 mb-2">
-                    Cancel
-                </button>
-                <button type="submit" 
-                    class="text-white bg-blue-500 hover:bg-blue-600 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-3 me-2 mb-2">
-                    Logout
-                </button>
+                    <button type="button" 
+                        onclick="closeLogoutModal()" 
+                        class="text-sky-500 hover:text-white border-2 border-sky-500 bg-white hover:bg-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-300 font-medium rounded-xl text-sm px-5 py-3 me-2 mb-2 cursor-pointer">
+                        Cancel
+                    </button>
+                    <button type="submit" 
+                        class="text-rose-500 hover:text-white border-2 border-rose-500 bg-white hover:bg-rose-500 focus:ring-2 focus:ring-red-300 font-medium rounded-xl text-sm px-5 py-3 me-2 mb-2 cursor-pointer">
+                        Logout
+                    </button>
             </div>
         </form>
     </div>

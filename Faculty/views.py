@@ -3333,8 +3333,37 @@ def get_late_completions(request, task_title):
 
 
 
+@faculty_required
+def devinnovateSection(request):
+    # --- PostgreSQL Data Fetching ---
+    try:
+        # Get faculty_id from session instead of request.user.username
+        faculty_id = request.session.get('faculty_id')
+        if not faculty_id:
+            messages.error(request, "Session expired. Please login again.")
+            return redirect('sentinels_login')
+            
+        faculty = Faculty.objects.prefetch_related('assignments').get(faculty_id=faculty_id)
+        
+        # Get active assignments for this faculty
+        faculty_assignments = faculty.assignments.filter(is_active=True)
+        
+    except Faculty.DoesNotExist:
+        messages.error(request, "Faculty profile not found.")
+        return redirect('sentinels_login')
+    
 
+    context = {
+        "faculty_data": faculty,
+        "faculty_assignments": faculty_assignments,
+    }
 
+    if request.headers.get('HX-Request'):
+        # HTMX request: return only the main content
+        return render(request, 'Devinnovate/contents/devinnovate-content.html', context)
+    else:
+        # Normal request: return the full page
+        return render(request, 'Devinnovate/devinnovate.html', context)
 
 
 

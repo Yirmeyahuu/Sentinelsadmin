@@ -48,4 +48,8 @@ urlpatterns = [
     path('students/import/', views.import_student, name='import_student'),
     path('students/template/csv/', views.download_student_csv_template, name='download_student_csv_template'),
     path('students/template/excel/', views.download_student_excel_template, name='download_student_excel_template'),
+
+
+    # Developers Section
+    path('Developers/', views.devinnovateSection, name="devinnovate-section")
 ]

@@ -1,0 +1,196 @@
+{% load static %}
+<script>
+    document.title = "SENTINELS | Developers";
+</script>
+
+<div class="min-h-screen py-8 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+    <!-- Decorative Gradient Backgrounds -->
+    <div class="absolute inset-0 pointer-events-none z-0">
+        <!-- Top Left Gradient Blob -->
+        <div class="absolute top-32 left-24 w-96 h-96 bg-gradient-to-br from-sky-300 via-blue-200 to-transparent opacity-80 rounded-full blur-3xl"></div>
+        <!-- Bottom Right Gradient Blob -->
+        <div class="absolute bottom-32 right-32 w-[32rem] h-[32rem] bg-gradient-to-tr from-rose-300 via-blue200 to-transparent opacity-80 rounded-full blur-3xl"></div>
+        <!-- Center Faint Gradient -->
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 w-[60vw] h-[40vh] bg-gradient-to-r from-orange-600 via-blue-200 to-pink-100 opacity-40 rounded-full blur-2xl"></div>
+    </div>
+    <div class="max-w-7xl mx-auto relative z-10">
+        <!-- Header Section -->
+        <div class="text-center mb-26">
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+                Meet the Team
+            </h1>
+            <div class="w-24 h-1 bg-blue-600 mx-auto mb-6"></div>
+            <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+                The brilliant minds behind SENTINELS, dedicated to innovation and excellence
+            </p>
+        </div>
+
+        <!-- Sliding Photos & Team Description Section -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center mb-46">
+            <!-- Left: Team Description -->
+            <div class="flex flex-col justify-center h-full px-2">
+                <h2 class="text-2xl md:text-3xl font-bold text-center text-gray-900 mb-4">About Our Team</h2>
+                <p class="text-gray-700 text-justify md:text-lg leading-relaxed">
+                We are leveraging our group's expertise in design and development to create an engaging and highly effective platform. This application aims to transform often complex and dry cybersecurity concepts into interactive, game-like challenges that foster rapid skill development and superior practical knowledge retention. By integrating core principles of game design—such as progressive difficulty, immediate feedback, and competitive elements—we are building a system where learners aren't just passively consuming information, but are actively solving problems and making decisions in a risk-free, simulated environment. Ultimately, our goal is to close the skills gap in the industry by making cybersecurity education more accessible, motivating, and directly applicable to real-world scenarios, ensuring that learners are not only knowledgeable but also job-ready.
+                </p>
+            </div>
+            <!-- Right: Sliding Photos -->
+            <div class="relative w-full h-96 md:h-[28rem] flex items-center justify-center overflow-hidden">
+                <div id="team-slider" class="w-full h-full rounded-xl shadow-lg bg-gray-200 flex items-center justify-center">
+                    <img id="slider-img" src="{% static 'assets/img/profiles/group/group1.webp' %}" alt="Team Photo" class="object-cover w-full h-full rounded-xl transition-all duration-700"'">
+                </div>
+                <!-- Slider Controls -->
+                <button id="prev-btn" class="absolute left-2 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-80 hover:bg-blue-600 hover:text-white rounded-full p-2 shadow transition-colors duration-200">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+                    </svg>
+                </button>
+                <button id="next-btn" class="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-80 hover:bg-blue-600 hover:text-white rounded-full p-2 shadow transition-colors duration-200">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Developers Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-24">
+            <!-- Team Member Card 1 -->
+            <div class="bg-gradient-to-br from-sky-400 to-sky-600 rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden transform hover:-translate-y-1 flex items-center p-6 gap-4">
+                <img src="{% static 'assets/img/profiles/team/poy.webp' %}" alt="John Doe" class="w-20 h-20 rounded-full object-cover ring-2 ring-sky-100" onerror="this.src='{% static 'images/default-avatar.png' %}'">
+                <div class="flex-grow">
+                    <h2 class="text-xl font-bold text-white mb-1">Jeremiah P. Pantaras</h2>
+                    <p class="text-base text-white italic mb-1">"Poypoy"</p>
+                    <div class="inline-block bg-sky-100 text-sky-800 px-3 py-0.5 rounded-full text-xs font-semibold mb-2">
+                        Lead Web Developer/Project Manager
+                    </div>
+                    <p class="text-white text-sm italic">
+                        "Code is poetry written in logic."
+                    </p>
+                </div>
+            </div>
+            <!-- Team Member Card 2 -->
+            <div class="bg-gradient-to-br from-teal-400 to-teal-500 rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden transform hover:-translate-y-1 flex items-center p-6 gap-4">
+                <img src="{% static 'assets/img/profiles/team/bon.webp' %}" alt="Jane Smith" class="w-20 h-20 rounded-full object-cover ring-2 ring-teal-100" onerror="this.src='{% static 'images/default-avatar.png' %}'">
+                <div class="flex-grow">
+                    <h2 class="text-xl font-bold text-white mb-1">John Eric G. Bayer</h2>
+                    <p class="text-base text-white italic mb-1">"Bonbon"</p>
+                    <div class="inline-block bg-teal-100 text-teal-800 px-3 py-0.5 rounded-full text-xs font-semibold mb-2">
+                        System Analyst
+                    </div>
+                    <p class="text-white text-sm italic">
+                        "Design is not just what it looks like, it's how it works."
+                    </p>
+                </div>
+            </div>
+            <!-- Team Member Card 3 -->
+            <div class="bg-gradient-to-br from-rose-400 to-rose-500 rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden transform hover:-translate-y-1 flex items-center p-6 gap-4">
+                <img src="{% static 'assets/img/profiles/team/charles.webp' %}" alt="Mike Johnson" class="w-20 h-20 rounded-full object-cover ring-2 ring-rose-100" onerror="this.src='{% static 'images/default-avatar.png' %}'">
+                <div class="flex-grow">
+                    <h2 class="text-xl font-bold text-white mb-1">Joseph Charles A. Roque</h2>
+                    <p class="text-base text-white italic mb-1">"Charles"</p>
+                    <div class="inline-block bg-rose-100 text-rose-800 px-3 py-0.5 rounded-full text-xs font-semibold mb-2">
+                        Lead Game Developer
+                    </div>
+                    <p class="text-white text-sm italic">
+                        "First, solve the problem. Then, write the code."
+                    </p>
+                </div>
+            </div>
+            <!-- Team Member Card 4 -->
+            <div class="bg-gradient-to-br from-orange-400 to-orange-500 rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden transform hover:-translate-y-1 flex items-center p-6 gap-4">
+                <img src="{% static 'assets/img/profiles/team/roy.webp' %}" alt="Anna Lee" class="w-20 h-20 rounded-full object-cover ring-2 ring-orange-100" onerror="this.src='{% static 'images/default-avatar.png' %}'">
+                <div class="flex-grow">
+                    <h2 class="text-xl font-bold text-white mb-1">Wenard Roy F. Barrera</h2>
+                    <p class="text-base text-white italic mb-1">"Roy"</p>
+                    <div class="inline-block bg-orange-100 text-orange-800 px-3 py-0.5 rounded-full text-xs font-semibold mb-2">
+                        Frontend Developer/Assistant Programmer
+                    </div>
+                    <p class="text-white text-sm italic">
+                        "Simplicity is the soul of efficiency."
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Adviser Card (separated) -->
+        <div class="flex justify-center mb-16">
+            <div class="bg-gradient-to-br from-yellow-400 to-yellow-500 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden transform hover:-translate-y-1 flex items-center p-8 gap-6 max-w-lg w-full">
+                <img src="{% static 'assets/img/profiles/avatar-03.jpg' %}" alt="Prof. Samuel Cruz" class="w-24 h-24 rounded-full object-cover ring-4 ring-yellow-200" onerror="this.src='{% static 'images/default-avatar.png' %}'">
+                <div class="flex-grow">
+                    <h2 class="text-2xl font-bold text-white mb-1">Brian Steven G. Pajarillo</h2>
+                    <p class="text-base text-white italic mb-1">"Jhinwoo"</p>
+                    <div class="inline-block bg-yellow-100 text-yellow-800 px-4 py-1 rounded-full text-sm font-semibold mb-2">
+                        Team Adviser
+                    </div>
+                    <p class="text-white text-base italic">
+                        "Guiding innovation, inspiring excellence."
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Add smooth scroll animation on load
+    document.addEventListener('DOMContentLoaded', function() {
+        const cards = document.querySelectorAll('.bg-white');
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+        const observer = new IntersectionObserver(function(entries) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '0';
+                    entry.target.style.transform = 'translateY(20px)';
+                    setTimeout(() => {
+                        entry.target.style.transition = 'all 0.6s ease-out';
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }, 100);
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+        cards.forEach(card => {
+            observer.observe(card);
+        });
+    });
+</script>
+
+<script>
+    // Simple slider functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        const images = [
+            "{% static 'assets/img/profiles/group/group1.webp' %}",
+            "{% static 'assets/img/profiles/group/group2.webp' %}",
+            "{% static 'assets/img/profiles/group/group3.webp' %}"
+        ];
+        let current = 0;
+        const sliderImg = document.getElementById('slider-img');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+
+        function showImage(idx) {
+            sliderImg.src = images[idx];
+        }
+
+        prevBtn.addEventListener('click', function() {
+            current = (current - 1 + images.length) % images.length;
+            showImage(current);
+        });
+
+        nextBtn.addEventListener('click', function() {
+            current = (current + 1) % images.length;
+            showImage(current);
+        });
+
+        // Optional: Auto-slide every 5 seconds
+        setInterval(function() {
+            current = (current + 1) % images.length;
+            showImage(current);
+        }, 5000);
+    });
+</script>

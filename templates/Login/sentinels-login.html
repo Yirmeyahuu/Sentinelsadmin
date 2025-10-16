@@ -6,7 +6,7 @@
 <head>
     <meta charset="UTF-8">
     <title>{% block title %}SENTINELS | Login{% endblock %}</title>
-    <link rel="icon" href="{% static 'assets/img/SENTINELSLOGO.svg' %}">
+    <link rel="icon" href="{% static 'assets/img/Sentinels-logo.svg' %}">
     <script src="https://cdn.tailwindcss.com"></script>
 
     <!-- Basic Open Graph tags -->
@@ -54,6 +54,12 @@
 
     <!-- Right Section (Login Form) -->
     <div class="w-full md:w-1/2 lg:w-1/3 xl:w-1/3 min-h-screen bg-gradient-to-br from-slate-50 to-blue-100 flex items-center justify-center md:rounded-l-3xl overflow-hidden px-4 py-8 relative">
+        <!-- Top Left Gradient Blob -->
+        <div class="absolute top-36 left-24 w-96 h-96 bg-gradient-to-br from-sky-300 via-orange-400/60 to-transparent opacity-80 rounded-full blur-3xl"></div>
+        <!-- Bottom Right Gradient Blob -->
+        <div class="absolute bottom-32 right-32 w-[26rem] h-[26rem] bg-gradient-to-tr from-rose-500 via-rose-200 to-transparent opacity-80 rounded-full blur-3xl"></div>
+        <!-- Center Faint Gradient -->
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 w-[60vw] h-[40vh] bg-gradient-to-r from-sky-400 via-sky-500 to-pink-100 opacity-40 rounded-full blur-2xl"></div>
         <div class="bg-white/95 backdrop-blur-lg px-6 py-8 md:px-8 md:py-10 rounded-3xl w-full max-w-sm shadow-xl border border-white/30 relative overflow-hidden">
             <!-- Content with relative positioning to appear above gradient -->
             <div class="relative z-10">

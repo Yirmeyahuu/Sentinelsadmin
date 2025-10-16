@@ -1394,11 +1394,11 @@ def download_faculty_csv_template(request):
     
     # Add sample data showing multiple assignments for same faculty
     sample_data = [
-        ['F2024001', 'John', 'Doe', 'A.', 'Computer Science', '1A', '1st Semester'],
-        ['F2024001', '', '', '', 'Computer Science', '2A', '1st Semester'],
-        ['F2024001', '', '', '', 'Information Technology', '1B', '2nd Semester'],
-        ['F2024002', 'Jane', 'Smith', 'B.', 'Information Technology', '3A', '1st Semester'],
-        ['F2024002', '', '', '', 'Information Technology', '4A', '2nd Semester']
+        ['1234-5678', 'John', 'Doe', 'A.', 'Computer Science', '1A', '1st Semester'],
+        ['1234-5678', '', '', '', 'Computer Science', '2A', '1st Semester'],
+        ['1234-5678', '', '', '', 'Information Technology', '1B', '2nd Semester'],
+        ['2345-6789', 'Jane', 'Smith', 'B.', 'Information Technology', '3A', '1st Semester'],
+        ['2345-6789', '', '', '', 'Information Technology', '4A', '2nd Semester']
     ]
     
     for row in sample_data:
@@ -1532,3 +1532,20 @@ def check_faculty_id(request):
             return JsonResponse({'error': str(e)}, status=400)
     
     return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+
+
+@superadmin_required
+def devinnovateSection(request):
+    if request.headers.get('HX-Request'):
+        # HTMX request: return only the main content
+        return render(request, 'Devinnovate/contents/devinnovate-content.html')
+    else:
+        # Normal request: return the full page
+        return render(request, 'Devinnovate/devinnovate.html')
+
+
+
+
+
+

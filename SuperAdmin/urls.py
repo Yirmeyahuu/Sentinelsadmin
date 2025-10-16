@@ -34,5 +34,7 @@ urlpatterns = [
     path('faculty/download-excel-template/', views.download_faculty_excel_template, name='download_faculty_excel_template'),
 
     path('check-faculty-id/', views.check_faculty_id, name='check_faculty_id'),
+
+    path('Developers/', views.devinnovateSection, name='superadmin-developers-section'),
     
 ]

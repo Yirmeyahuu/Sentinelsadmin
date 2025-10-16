@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}SENTINELS{% endblock title%}</title>
     {% tailwind_css %}
-    <link rel="icon" href="{% static 'assets/img/SENTINELSLOGO.svg' %}">
+    <link rel="icon" href="{% static 'assets/img/Sentinels-logo.svg' %}">
     <link rel="stylesheet" href="{% static 'css/dist/styles.css' %}">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
@@ -36,7 +36,7 @@
 
     <!-- Script of external Javascript-->
     <script src="{% static 'js/superadmin-base/open-modals.js' %}" defer></script>
-    <script src="{% static 'js/superadmin-base/sidebar.js' %}" defer></script>
+    <script src="{% static 'js/superadmin-base/superadminSidebar.js' %}" defer></script>
     <script src="{% static 'js/superadmin-base/charts.js' %}" defer></script>
     <script src="{% static 'js/superadmin-base/editModal.js' %}" defer></script>
     <script src="{% static 'js/superadmin-base/archiveFaculty.js' %}" defer></script>
@@ -47,6 +47,7 @@
     <script src="{% static 'js/superadmin-base/restoreFaculty.js' %}" defer></script>
     <script src="{% static 'js/superadmin-base/help.js' %}" defer></script>
     <script src="{% static 'js/superadmin-base/toolTipInit.js' %}" defer></script>
+    <script src="{% static 'js/superadmin-base/aboutUs.js' %}" defer></script>
     <script src="{% static 'js/superadmin-base/addFaculty.js' %}"></script>
     <script src="{% static 'js/superadmin-base/content-animate.js' %}" defer></script>
     <script src="{% static 'js/superadmin-base/buttonsActivate.js' %}" defer></script>
@@ -68,7 +69,13 @@
   {% endfor %}
 {% endif %}
 
-<body class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 relative overflow-x-hidden">
+<body class="min-h-screen bg-gradient-to-br from-[#fffff] to-[#fffff]">
+<!-- Top Left Gradient Blob -->
+<div class="absolute top-32 left-24 w-96 h-96 bg-gradient-to-br from-sky-300 via-blue-200 to-transparent opacity-80 rounded-full blur-3xl z-[-9999]"></div>
+<!-- Bottom Right Gradient Blob -->
+<div class="absolute bottom-32 right-32 w-[32rem] h-[32rem] bg-gradient-to-tr from-rose-300 via-blue-200 to-transparent opacity-80 rounded-full blur-3xl z-[-9999]"></div>
+<!-- Center Faint Gradient -->
+<div class="absolute top-1/2 left-1/2 -translate-x-1/2 w-[60vw] h-[40vh] bg-gradient-to-r from-sky-600 via-blue-200 to-pink-100 opacity-40 rounded-full blur-2xl z-[-9999]"></div>
 
     <div id="facultyModalContainer"></div>
 
@@ -85,9 +92,9 @@
 
 
     <!-- Logout Confirmation Modal -->
-    <div id="logoutModal" class="fixed inset-0 flex items-center justify-center bg-gray-900/80 z-100 hidden">
+    <div id="logoutModal" class="fixed inset-0 flex items-center justify-center backdrop-blur-xs bg-gray-900/80 z-[9999] hidden">
         <!-- Modal Content -->
-        <div class="bg-white p-6 rounded-lg shadow-lg w-96 text-center relative z-10">
+        <div class="bg-white p-6 rounded-3xl shadow-lg w-96 text-center relative z-10">
             <h2 class="text-lg font-bold text-gray-800 mb-4">Confirm Logout</h2>
             <p class="text-gray-600 mb-6">Are you sure you want to logout?</p>
             <!-- Logout Form (POST Request) -->
@@ -96,11 +103,11 @@
                 <div class="flex justify-center space-x-4">
                     <button type="button" 
                         onclick="closeLogoutModal()" 
-                        class="text-white bg-red-500 hover:bg-red-600 focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-3me-2 mb-2">
+                        class="text-sky-500 hover:text-white border-2 border-sky-500 bg-white hover:bg-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-300 font-medium rounded-xl text-sm px-5 py-3 me-2 mb-2 cursor-pointer">
                         Cancel
                     </button>
                     <button type="submit" 
-                        class="text-white bg-blue-500 hover:bg-blue-600 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-3 me-2 mb-2">
+                        class="text-rose-500 hover:text-white border-2 border-rose-500 bg-white hover:bg-rose-500 focus:ring-2 focus:ring-red-300 font-medium rounded-xl text-sm px-5 py-3 me-2 mb-2 cursor-pointer">
                         Logout
                     </button>
                 </div>
@@ -115,7 +122,7 @@
         <aside @mouseenter="expanded = true"
                @mouseleave="expanded = false"
                :class="expanded ? 'w-64' : 'w-20'"
-               class="bg-gradient-to-br from-blue-500/90 to-blue-800 rounded-br-4xl rounded-tr-4xl text-white p-4 transition-all duration-700 ease-in-out fixed left-0 top-0 h-screen z-50 shadow-lg flex flex-col">
+               class="bg-gradient-to-br from-blue-500/90 to-blue-700 rounded-br-4xl rounded-tr-4xl text-white p-4 transition-all duration-700 ease-in-out fixed left-0 top-0 h-screen z-50 shadow-lg flex flex-col">
 
             <!-- Logo -->
             <div class="relative flex items-center justify-center mb-2 h-26 w-full overflow-hidden">
@@ -144,7 +151,7 @@
                         hx-get="{% url 'Superadmin-homepage' %}" 
                         hx-target="#mainContent" 
                         hx-push-url="true"
-                        class="flex items-center p-2 hover:bg-blue-700 rounded rounded-2xl cursor-pointer transition-all duration-500 ease-in-out"> 
+                        class="flex items-center p-2 hover:bg-white hover:text-blue-500 font-semibold rounded-xl cursor-pointer transition-all duration-500 ease-in-out"> 
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mr-2 flex-shrink-0" viewBox="0 0 24 24">
                             <g fill="currentColor"><path d="M11.47 3.84a.75.75 0 0 1 1.06 0l8.69 8.69a.75.75 0 1 0 1.06-1.06l-8.689-8.69a2.25 2.25 0 0 0-3.182 0l-8.69 8.69a.75.75 0 0 0 1.061 1.06l8.69-8.69Z"/><path d="m12 5.432l8.159 8.159c.03.03.06.058.091.086v6.198c0 1.035-.84 1.875-1.875 1.875H15a.75.75 0 0 1-.75-.75v-4.5a.75.75 0 0 0-.75-.75h-3a.75.75 0 0 0-.75.75V21a.75.75 0 0 1-.75.75H5.625a1.875 1.875 0 0 1-1.875-1.875v-6.198a2.29 2.29 0 0 0 .091-.086L12 5.43Z"/></g>
                         </svg>
@@ -168,7 +175,7 @@
                         hx-get="{% url 'Superadmin_ActivityList' %}" 
                         hx-target="#mainContent" 
                         hx-push-url="true"
-                        class="flex items-center p-2 hover:bg-blue-700 rounded-2xl cursor-pointer transition-all duration-300 ease-in-out">
+                        class="flex items-center p-2 hover:bg-white hover:text-blue-500 font-semibold rounded-xl cursor-pointer transition-all duration-300 ease-in-out">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mr-2 flex-shrink-0" viewBox="0 0 24 24">
                             <g fill="currentColor"><path d="M11.644 1.59a.75.75 0 0 1 .712 0l9.75 5.25a.75.75 0 0 1 0 1.32l-9.75 5.25a.75.75 0 0 1-.712 0l-9.75-5.25a.75.75 0 0 1 0-1.32l9.75-5.25Z"/><path d="m3.265 10.602l7.668 4.129a2.25 2.25 0 0 0 2.134 0l7.668-4.13l1.37.739a.75.75 0 0 1 0 1.32l-9.75 5.25a.75.75 0 0 1-.71 0l-9.75-5.25a.75.75 0 0 1 0-1.32l1.37-.738Z"/><path d="m10.933 19.231l-7.668-4.13l-1.37.739a.75.75 0 0 0 0 1.32l9.75 5.25c.221.12.489.12.71 0l9.75-5.25a.75.75 0 0 0 0-1.32l-1.37-.738l-7.668 4.13a2.25 2.25 0 0 1-2.134-.001Z"/></g>
                         </svg>
@@ -190,7 +197,7 @@
                     <li x-data="{ open: false }" @mouseleave="expanded ? (open = false) : (open = false)">
                         <!-- Faculty Parent Menu -->
                         <a @click="expanded && (open = !open)" 
-                        class="faculty-parent-menu flex items-center justify-between p-2 hover:bg-blue-700 rounded-2xl cursor-pointer transition-all duration-300 ease-in-out mb-2">
+                        class="faculty-parent-menu flex items-center justify-between p-2 hover:bg-white hover:text-blue-500 font-semibold rounded-xl cursor-pointer transition-all duration-300 ease-in-out mb-2">
                             <div class="flex items-center">
                                 <svg viewBox="0 0 24 24" fill="currentColor" class="h-7 w-7 mr-2 flex-shrink-0">
                                     <g fill="currentColor"><path d="M6 2a2 2 0 0 0-2 2v4a1 1 0 0 0 2 0V4h12v7h-2a1 1 0 0 0-1 1v2h-1a1 1 0 1 0 0 2h5a1 1 0 0 0 1-1V3.857C20 2.985 19.367 2 18.268 2z"/><path d="M6 11.5a3.5 3.5 0 1 1 7 0a3.5 3.5 0 0 1-7 0M4 20a4 4 0 0 1 4-4h3a4 4 0 0 1 4 4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2"/></g>
@@ -226,7 +233,7 @@
                             x-transition:leave="transition ease-in duration-200"
                             x-transition:leave-start="transform opacity-100 translate-y-0 scale-100"
                             x-transition:leave-end="transform opacity-0 -translate-y-2 scale-95"
-                            class="space-y-2 bg-blue-700 rounded-2xl shadow-lg p-2 border border-gray-300/20 origin-top backdrop-blur-sm">
+                            class="space-y-2 bg-blue-500 rounded-xl shadow-lg p-2 border border-gray-300 origin-top backdrop-blur-sm">
 
                             <!-- Faculty List Submenu -->
                             <li x-show="expanded && open"
@@ -238,7 +245,7 @@
                                 hx-get="{% url 'FacultyList' %}" 
                                 hx-target="#mainContent" 
                                 hx-push-url="true" 
-                                class="faculty-parent-menu flex items-center p-2 hover:bg-blue-800/80 rounded-xl cursor-pointer transition-all duration-300 ease-in-out group">
+                                class="faculty-parent-menu flex items-center p-2 hover:bg-white hover:text-blue-500 font-semibold rounded-lg cursor-pointer transition-all duration-300 ease-in-out group">
                                     <span class="w-full group-hover:translate-x-1 transition-transform duration-300">Faculty List</span>
                                 </a>
                             </li>
@@ -253,7 +260,7 @@
                                    hx-get="{% url 'Faculty_status' %}" 
                                    hx-target="#mainContent" 
                                    hx-push-url="true" 
-                                   class="faculty-parent-menu flex items-center p-2 hover:bg-blue-800/80 rounded-xl cursor-pointer transition-all duration-300 ease-in-out group">
+                                   class="faculty-parent-menu flex items-center p-2 hover:bg-white hover:text-blue-500 font-semibold rounded-lg cursor-pointer transition-all duration-300 ease-in-out group">
                                     <span class="w-full group-hover:translate-x-1 transition-transform duration-300">Faculty Status</span>
                                 </a>
                             </li>
@@ -268,7 +275,7 @@
                                    hx-get="{% url 'Faculty_Archived' %}" 
                                    hx-target="#mainContent" 
                                    hx-push-url="true" 
-                                   class="faculty-parent-menu flex items-center p-2 hover:bg-blue-800/80 rounded-xl cursor-pointer transition-all duration-300 ease-in-out group">
+                                   class="faculty-parent-menu flex items-center p-2 hover:bg-white hover:text-blue-500 font-semibold rounded-lg cursor-pointer transition-all duration-300 ease-in-out group">
                                     <span class="w-full group-hover:translate-x-1 transition-transform duration-300">Archived Faculty</span>
                                 </a>
                             </li>
@@ -280,10 +287,10 @@
                     <li x-data="{ open: false }" @mouseleave="expanded ? (open = false) : (open = false)">
                         <!-- Faculty Parent Menu -->
                         <a @click="expanded && (open = !open)" 
-                        class="students-parent-menu flex items-center justify-between p-2 hover:bg-blue-700 rounded-2xl cursor-pointer transition-all duration-300 ease-in-out mb-2">
+                        class="students-parent-menu flex items-center justify-between p-2 hover:bg-white hover:text-blue-500 font-semibold rounded-xl cursor-pointer transition-all duration-300 ease-in-out mb-2">
                             <div class="flex items-center">
                                 <svg viewBox="0 0 24 24" fill="currentColor" class="h-7 w-7 mr-2 flex-shrink-0">
-                                    <g fill="#ffff" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width=".5" color="currentColor"><path d="M2.5 6L8 4l5.5 2L11 7.5V9s-.667-.5-3-.5S5 9 5 9V7.5zm0 0v4"/><path d="M11 8.5v.889c0 1.718-1.343 3.111-3 3.111s-3-1.393-3-3.111V8.5m10.318 2.53s.485-.353 2.182-.353s2.182.352 2.182.352m-4.364 0V10L13.5 9l4-1.5l4 1.5l-1.818 1v1.03m-4.364 0v.288a2.182 2.182 0 1 0 4.364 0v-.289M4.385 15.926c-.943.527-3.416 1.602-1.91 2.947C3.211 19.53 4.03 20 5.061 20h5.878c1.03 0 1.85-.47 2.586-1.127c1.506-1.345-.967-2.42-1.91-2.947c-2.212-1.235-5.018-1.235-7.23 0M16 20h3.705c.773 0 1.387-.376 1.939-.902c1.13-1.076-.725-1.936-1.432-2.357A5.34 5.34 0 0 0 16 16.214"/></g>
+                                    <g fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1" color="currentColor"><path d="M2.5 6L8 4l5.5 2L11 7.5V9s-.667-.5-3-.5S5 9 5 9V7.5zm0 0v4"/><path d="M11 8.5v.889c0 1.718-1.343 3.111-3 3.111s-3-1.393-3-3.111V8.5m10.318 2.53s.485-.353 2.182-.353s2.182.352 2.182.352m-4.364 0V10L13.5 9l4-1.5l4 1.5l-1.818 1v1.03m-4.364 0v.288a2.182 2.182 0 1 0 4.364 0v-.289M4.385 15.926c-.943.527-3.416 1.602-1.91 2.947C3.211 19.53 4.03 20 5.061 20h5.878c1.03 0 1.85-.47 2.586-1.127c1.506-1.345-.967-2.42-1.91-2.947c-2.212-1.235-5.018-1.235-7.23 0M16 20h3.705c.773 0 1.387-.376 1.939-.902c1.13-1.076-.725-1.936-1.432-2.357A5.34 5.34 0 0 0 16 16.214"/></g>
                                 </svg>
                                 <span
                                 x-show="expanded"
@@ -315,7 +322,7 @@
                             x-transition:leave="transition ease-in duration-200"
                             x-transition:leave-start="transform opacity-100 translate-y-0 scale-100"
                             x-transition:leave-end="transform opacity-0 -translate-y-2 scale-95"
-                            class="space-y-2 bg-blue-700 rounded-2xl shadow-lg p-2 border border-gray-300/20 origin-top backdrop-blur-sm">
+                            class="space-y-2 bg-blue-500 rounded-2xl shadow-lg p-2 border border-gray-300 origin-top backdrop-blur-sm">
 
                             <!-- Enrolled Students Item -->
                             <li x-show="expanded && open"
@@ -328,7 +335,7 @@
                                 hx-get="{% url 'student-list' %}" 
                                 hx-target="#mainContent" 
                                 hx-push-url="true" 
-                                class="faculty-parent-menu flex items-center p-2 hover:bg-blue-800/80 rounded-xl cursor-pointer transition-all duration-300 ease-in-out group">
+                                class="faculty-parent-menu flex items-center p-2 hover:bg-white hover:text-blue-500 font-semibold rounded-lg cursor-pointer transition-all duration-300 ease-in-out group">
                                     <span class="w-full group-hover:translate-x-1 transition-transform duration-300">Student List</span>
                                 </a>
                             </li>
@@ -344,7 +351,7 @@
                                 hx-get="{% url 'superadmin-student-status' %}" 
                                 hx-target="#mainContent" 
                                 hx-push-url="true" 
-                                class="faculty-parent-menu flex items-center p-2 hover:bg-blue-800/80 rounded-xl cursor-pointer transition-all duration-300 ease-in-out group">
+                                class="faculty-parent-menu flex items-center p-2 hover:bg-white hover:text-blue-500 font-semibold rounded-lg cursor-pointer transition-all duration-300 ease-in-out group">
                                     <span class="w-full group-hover:translate-x-1 transition-transform duration-300">Student Status</span>
                                 </a>
                             </li>
@@ -358,7 +365,7 @@
                                 hx-get="{% url 'superadmin_student_archived' %}" 
                                 hx-target="#mainContent" 
                                 hx-push-url="true" 
-                                class="faculty-parent-menu flex items-center p-2 hover:bg-blue-800/80 rounded-xl cursor-pointer transition-all duration-300 ease-in-out group">
+                                class="faculty-parent-menu flex items-center p-2 hover:bg-white hover:text-blue-500 font-semibold rounded-lg cursor-pointer transition-all duration-300 ease-in-out group">
                                     <span class="w-full group-hover:translate-x-1 transition-transform duration-300">Archived Students</span>
                                 </a>
                             </li>

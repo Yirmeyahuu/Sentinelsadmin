@@ -31,12 +31,15 @@ def Sentinels_login_view(request):
             if user.is_superuser:
                 login(request, user)
                 request.session['user_type'] = 'superadmin'
+                messages.success(request, "You have successfully logged in.")
                 return redirect('Superadmin-homepage')
             else:
                 # Faculty authenticated via HybridFacultyBackend
                 login(request, user)
                 request.session['user_type'] = 'faculty'
                 request.session['faculty_id'] = username_or_id
+                faculty_name = user.get_full_name() or user.username
+                messages.success(request, f"Welcome, {faculty_name}! You have successfully logged in as faculty.")
 
                 return redirect('home-page')
 
