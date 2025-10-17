@@ -204,6 +204,49 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- Export, Import, Template Functionality -->
+                    <div class="bg-gradient-to-r from-sky-50 to-blue-50 p-6 rounded-2xl border-l-4 border-sky-500">
+                        <h4 class="font-bold text-sky-700 mb-4 flex items-center text-lg">
+                            <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M12 8V4a1 1 0 00-2 0v4H7l5 5 5-5h-3zM4 18a1 1 0 001 1h10a1 1 0 001-1v-2a1 1 0 10-2 0v1H6v-1a1 1 0 10-2 0v2z" clip-rule="evenodd"/>
+                            </svg>
+                            Export, Import & Template
+                        </h4>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-col items-center text-center">
+                                <div class="w-10 h-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mb-2">
+                                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M12 8V4a1 1 0 00-2 0v4H7l5 5 5-5h-3zM4 18a1 1 0 001 1h10a1 1 0 001-1v-2a1 1 0 10-2 0v1H6v-1a1 1 0 10-2 0v2z" clip-rule="evenodd"/>
+                                    </svg>
+                                </div>
+                                <span class="font-semibold text-gray-800">Export</span>
+                                <p class="text-sm text-gray-600 mt-1">Download the faculty list as an Excel or CSV file for reporting or backup.</p>
+                            </div>
+                            <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-col items-center text-center">
+                                <div class="w-10 h-10 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-2">
+                                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M8 12v4a1 1 0 002 0v-4h3l-5-5-5 5h3z" clip-rule="evenodd"/>
+                                    </svg>
+                                </div>
+                                <span class="font-semibold text-gray-800">Import</span>
+                                <p class="text-sm text-gray-600 mt-1">Upload an Excel or CSV file to add or update multiple faculty records at once.</p>
+                            </div>
+                            <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-col items-center text-center">
+                                <div class="w-10 h-10 bg-yellow-100 text-yellow-600 rounded-full flex items-center justify-center mb-2">
+                                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M4 3a1 1 0 000 2h12a1 1 0 100-2H4zm0 4a1 1 0 000 2h12a1 1 0 100-2H4zm0 4a1 1 0 000 2h12a1 1 0 100-2H4zm0 4a1 1 0 000 2h12a1 1 0 100-2H4z" clip-rule="evenodd"/>
+                                    </svg>
+                                </div>
+                                <span class="font-semibold text-gray-800">Template</span>
+                                <p class="text-sm text-gray-600 mt-1">Download a template file to ensure correct formatting for bulk import.</p>
+                            </div>
+                        </div>
+                        <div class="mt-3 text-xs text-gray-500">
+                            <span class="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-700 rounded-md font-medium mr-2">Tip</span>
+                            Use the template to avoid errors when importing new faculty data.
+                        </div>
+                    </div>
                     
                     <div class="bg-gradient-to-r from-pink-50 to-rose-50 p-6 rounded-2xl border-l-4 border-pink-500">
                         <h4 class="font-bold text-pink-700 mb-3 flex items-center text-lg">

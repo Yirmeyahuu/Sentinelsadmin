@@ -90,7 +90,7 @@ window.helpContentMap = {
                         <div class="flex items-center p-3 bg-white rounded-xl shadow-sm border border-gray-100">
                             <div class="w-8 h-8 bg-green-100 text-green-600 rounded-full flex items-center justify-center font-bold text-sm mr-4">N</div>
                             <div>
-                                <span class="font-semibold text-gray-800">Novice Tier:</span>
+                                <span class="font-semibold text-gray-800">Junior Tier:</span>
                                 <span class="text-gray-600 ml-2">Foundational activities for new students</span>
                             </div>
                         </div>
@@ -561,80 +561,316 @@ window.helpContentMap = {
             </div>
         `
     },
-        '/Faculty/account/': {
-        title: 'Faculty Account Help',
+        '/Faculty/Student-Data/': {
+        title: 'Student Data Help',
         content: `
             <div class="space-y-6">
-                <div class="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-2xl border-l-4 border-blue-500">
+                <div class="bg-gradient-to-r from-blue-50 to-cyan-50 p-6 rounded-2xl border-l-4 border-blue-500">
                     <h4 class="font-bold text-blue-700 mb-3 flex items-center text-lg">
                         <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"/>
                         </svg>
-                        Faculty Account Overview
+                        Student Data Overview
                     </h4>
-                    <p class="text-gray-700 leading-relaxed">Your personal dashboard providing a comprehensive overview of your students, activities, and teaching responsibilities.</p>
+                    <p class="text-gray-700 leading-relaxed">
+                        This page provides a comprehensive overview of all registered students, including their progress, activity completion rates, and current status. Use the dashboard cards for quick statistics and the table for detailed student information.
+                    </p>
                 </div>
-                
-                <div class="bg-gradient-to-r from-green-50 to-emerald-50 p-6 rounded-2xl border-l-4 border-green-500">
-                    <h4 class="font-bold text-green-700 mb-4 flex items-center text-lg">
+                <div class="bg-gradient-to-r from-emerald-50 to-teal-50 p-6 rounded-2xl border-l-4 border-emerald-500">
+                    <h4 class="font-bold text-emerald-700 mb-4 flex items-center text-lg">
                         <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                         </svg>
-                        Key Statistics
+                        Dashboard Cards
                     </h4>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-                            <div class="flex items-center">
-                                <div class="w-3 h-3 bg-blue-500 rounded-full mr-3"></div>
-                                <div>
-                                    <span class="font-semibold text-gray-800">Total Students:</span>
-                                    <p class="text-sm text-gray-600 mt-1">Number of students under your supervision</p>
-                                </div>
-                            </div>
+                            <span class="font-semibold text-gray-800">Total Students:</span>
+                            <p class="text-sm text-gray-600 mt-1">Shows the total number of registered students.</p>
                         </div>
                         <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-                            <div class="flex items-center">
-                                <div class="w-3 h-3 bg-indigo-500 rounded-full mr-3"></div>
-                                <div>
-                                    <span class="font-semibold text-gray-800">Active Activities:</span>
-                                    <p class="text-sm text-gray-600 mt-1">Currently available activities for students</p>
-                                </div>
-                            </div>
+                            <span class="font-semibold text-gray-800">Average Completion:</span>
+                            <p class="text-sm text-gray-600 mt-1">Displays the average percentage of completed tasks.</p>
                         </div>
                         <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-                            <div class="flex items-center">
-                                <div class="w-3 h-3 bg-amber-500 rounded-full mr-3"></div>
-                                <div>
-                                    <span class="font-semibold text-gray-800">Pending Verifications:</span>
-                                    <p class="text-sm text-gray-600 mt-1">Students awaiting verification or approval</p>
-                                </div>
-                            </div>
+                            <span class="font-semibold text-gray-800">Active Students:</span>
+                            <p class="text-sm text-gray-600 mt-1">Number of students currently active in the system.</p>
                         </div>
                         <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-                            <div class="flex items-center">
-                                <div class="w-3 h-3 bg-rose-500 rounded-full mr-3"></div>
-                                <div>
-                                    <span class="font-semibold text-gray-800">Recent Activity:</span>
-                                    <p class="text-sm text-gray-600 mt-1">Latest student submissions and updates</p>
-                                </div>
-                            </div>
+                            <span class="font-semibold text-gray-800">Inactive Students:</span>
+                            <p class="text-sm text-gray-600 mt-1">Number of students not currently active.</p>
                         </div>
                     </div>
                 </div>
-                
-                <div class="bg-gradient-to-r from-purple-50 to-violet-50 p-6 rounded-2xl border-l-4 border-purple-500">
-                    <h4 class="font-bold text-purple-700 mb-3 flex items-center text-lg">
+                <div class="bg-gradient-to-r from-cyan-50 to-blue-50 p-6 rounded-2xl border-l-4 border-cyan-500">
+                    <h4 class="font-bold text-cyan-700 mb-3 flex items-center text-lg">
                         <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z" />
-                            <path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                         </svg>
-                        Quick Actions
+                        Student List Table
                     </h4>
-                    <p class="text-gray-700 leading-relaxed">Access quick links to manage students, verify submissions, and track progress across all activity tiers.</p>
+                    <p class="text-gray-700 leading-relaxed">
+                        The table lists all students with their names, IDs, and quick actions. Use the search bar to filter students by name or ID. Click "View Details" to see individual student progress and task data.
+                    </p>
+                </div>
+                <div class="bg-gradient-to-r from-pink-50 to-rose-50 p-6 rounded-2xl border-l-4 border-pink-500">
+                    <h4 class="font-bold text-pink-700 mb-3 flex items-center text-lg">
+                        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                        </svg>
+                        Student Task Details Modal
+                    </h4>
+                    <p class="text-gray-700 leading-relaxed">
+                        Click "View Details" to open a modal showing the student's task completion by tier. Use the tier buttons to switch between Novice, Junior, and Senior tasks. The chart visualizes the student's progress.
+                    </p>
+                </div>
+                <div class="bg-gradient-to-r from-yellow-50 to-amber-50 p-6 rounded-2xl border-l-4 border-yellow-500">
+                    <h4 class="font-bold text-yellow-700 mb-3 flex items-center text-lg">
+                        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"/>
+                        </svg>
+                        Survey Results
+                    </h4>
+                    <p class="text-gray-700 leading-relaxed">
+                        The Survey Results chart displays the outcome of research conducted during the requirements gathering phase. It visualizes student perceptions on the traditional approach to learning Cybersecurity Fundamentals, helping inform improvements to the curriculum and teaching methods.
+                    </p>
                 </div>
             </div>
         `
-    }
+    },
+        '/Faculty/Tier/Novice/': {
+        title: 'Novice Tier Help',
+        content: `
+            <div class="space-y-6">
+                <div class="bg-gradient-to-r from-sky-50 to-blue-100 p-6 rounded-2xl border-l-4 border-sky-500">
+                    <h4 class="font-bold text-sky-700 mb-3 flex items-center text-lg">
+                        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                        </svg>
+                        Novice Tier Overview
+                    </h4>
+                    <p class="text-gray-700 leading-relaxed">
+                        The Novice Tier section displays student progress and performance for foundational activities. Use the dashboard cards for a quick summary and the table for detailed tracking of each student's completion, scores, and status.
+                    </p>
+                </div>
+                <div class="bg-gradient-to-r from-blue-50 to-emerald-50 p-6 rounded-2xl border-l-4 border-blue-500">
+                    <h4 class="font-bold text-blue-700 mb-4 flex items-center text-lg">
+                        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                        </svg>
+                        Dashboard Cards
+                    </h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                            <span class="font-semibold text-gray-800">Total Students:</span>
+                            <p class="text-sm text-gray-600 mt-1">Number of students in the Novice Tier.</p>
+                        </div>
+                        <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                            <span class="font-semibold text-gray-800">Tasks Completed:</span>
+                            <p class="text-sm text-gray-600 mt-1">Total tasks completed by all students.</p>
+                        </div>
+                        <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                            <span class="font-semibold text-gray-800">Average Score:</span>
+                            <p class="text-sm text-gray-600 mt-1">Average points earned per student.</p>
+                        </div>
+                        <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                            <span class="font-semibold text-gray-800">Last Updated:</span>
+                            <p class="text-sm text-gray-600 mt-1">Timestamp of the latest data update.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gradient-to-r from-sky-50 to-blue-100 p-6 rounded-2xl border-l-4 border-sky-500">
+                    <h4 class="font-bold text-sky-700 mb-3 flex items-center text-lg">
+                        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                        Progress Table & Filter
+                    </h4>
+                    <p class="text-gray-700 leading-relaxed">
+                        The progress table lists all students in the Novice Tier, showing their completion time, points, and status. Use the integrated filter to view performance for specific tasks.
+                    </p>
+                </div>
+                <div class="bg-gradient-to-r from-blue-50 to-purple-50 p-6 rounded-2xl border-l-4 border-purple-500">
+                    <h4 class="font-bold text-purple-700 mb-3 flex items-center text-lg">
+                        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                        </svg>
+                        Leaderboard
+                    </h4>
+                    <p class="text-gray-700 leading-relaxed">
+                        The leaderboard highlights top-performing students based on points earned in Novice Tier tasks. Use this to recognize achievement and encourage healthy competition.
+                    </p>
+                </div>
+                <div class="bg-gradient-to-r from-yellow-50 to-amber-50 p-6 rounded-2xl border-l-4 border-yellow-500">
+                    <h4 class="font-bold text-yellow-700 mb-3 flex items-center text-lg">
+                        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"/>
+                        </svg>
+                        Survey Results
+                    </h4>
+                    <p class="text-gray-700 leading-relaxed">
+                        The Survey Results chart visualizes findings from research conducted during the requirements gathering phase. It shows student perceptions of the traditional approach to learning Cybersecurity Fundamentals, providing valuable insights for curriculum improvement.
+                    </p>
+                </div>
+            </div>
+        `
+    },
+        '/Faculty/Tier/Junior/': {
+        title: 'Junior Tier Help',
+        content: `
+            <div class="space-y-6">
+                <div class="bg-gradient-to-r from-sky-50 to-blue-100 p-6 rounded-2xl border-l-4 border-sky-500">
+                    <h4 class="font-bold text-sky-700 mb-3 flex items-center text-lg">
+                        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                        </svg>
+                        Junior Tier Overview
+                    </h4>
+                    <p class="text-gray-700 leading-relaxed">
+                        The Junior Tier section displays student progress and performance for foundational activities. Use the dashboard cards for a quick summary and the table for detailed tracking of each student's completion, scores, and status.
+                    </p>
+                </div>
+                <div class="bg-gradient-to-r from-blue-50 to-emerald-50 p-6 rounded-2xl border-l-4 border-blue-500">
+                    <h4 class="font-bold text-blue-700 mb-4 flex items-center text-lg">
+                        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                        </svg>
+                        Dashboard Cards
+                    </h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                            <span class="font-semibold text-gray-800">Total Students:</span>
+                            <p class="text-sm text-gray-600 mt-1">Number of students in the Junior Tier.</p>
+                        </div>
+                        <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                            <span class="font-semibold text-gray-800">Tasks Completed:</span>
+                            <p class="text-sm text-gray-600 mt-1">Total tasks completed by all students.</p>
+                        </div>
+                        <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                            <span class="font-semibold text-gray-800">Average Score:</span>
+                            <p class="text-sm text-gray-600 mt-1">Average points earned per student.</p>
+                        </div>
+                        <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                            <span class="font-semibold text-gray-800">Last Updated:</span>
+                            <p class="text-sm text-gray-600 mt-1">Timestamp of the latest data update.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gradient-to-r from-sky-50 to-blue-100 p-6 rounded-2xl border-l-4 border-sky-500">
+                    <h4 class="font-bold text-sky-700 mb-3 flex items-center text-lg">
+                        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                        Progress Table & Filter
+                    </h4>
+                    <p class="text-gray-700 leading-relaxed">
+                        The progress table lists all students in the Junior Tier, showing their completion time, points, and status. Use the integrated filter to view performance for specific tasks.
+                    </p>
+                </div>
+                <div class="bg-gradient-to-r from-blue-50 to-purple-50 p-6 rounded-2xl border-l-4 border-purple-500">
+                    <h4 class="font-bold text-purple-700 mb-3 flex items-center text-lg">
+                        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                        </svg>
+                        Leaderboard
+                    </h4>
+                    <p class="text-gray-700 leading-relaxed">
+                        The leaderboard highlights top-performing students based on points earned in Junior Tier tasks. Use this to recognize achievement and encourage healthy competition.
+                    </p>
+                </div>
+                <div class="bg-gradient-to-r from-yellow-50 to-amber-50 p-6 rounded-2xl border-l-4 border-yellow-500">
+                    <h4 class="font-bold text-yellow-700 mb-3 flex items-center text-lg">
+                        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"/>
+                        </svg>
+                        Survey Results
+                    </h4>
+                    <p class="text-gray-700 leading-relaxed">
+                        The Survey Results chart visualizes findings from research conducted during the requirements gathering phase. It shows student perceptions of the traditional approach to learning Cybersecurity Fundamentals, providing valuable insights for curriculum improvement.
+                    </p>
+                </div>
+            </div>
+        `
+    },
+        '/Faculty/Tier/Senior/': {
+        title: 'Senior Tier Help',
+        content: `
+            <div class="space-y-6">
+                <div class="bg-gradient-to-r from-sky-50 to-blue-100 p-6 rounded-2xl border-l-4 border-sky-500">
+                    <h4 class="font-bold text-sky-700 mb-3 flex items-center text-lg">
+                        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                        </svg>
+                        Senior Tier Overview
+                    </h4>
+                    <p class="text-gray-700 leading-relaxed">
+                        The Senior Tier section displays student progress and performance for foundational activities. Use the dashboard cards for a quick summary and the table for detailed tracking of each student's completion, scores, and status.
+                    </p>
+                </div>
+                <div class="bg-gradient-to-r from-blue-50 to-emerald-50 p-6 rounded-2xl border-l-4 border-blue-500">
+                    <h4 class="font-bold text-blue-700 mb-4 flex items-center text-lg">
+                        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                        </svg>
+                        Dashboard Cards
+                    </h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                            <span class="font-semibold text-gray-800">Total Students:</span>
+                            <p class="text-sm text-gray-600 mt-1">Number of students in the Senior Tier.</p>
+                        </div>
+                        <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                            <span class="font-semibold text-gray-800">Tasks Completed:</span>
+                            <p class="text-sm text-gray-600 mt-1">Total tasks completed by all students.</p>
+                        </div>
+                        <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                            <span class="font-semibold text-gray-800">Average Score:</span>
+                            <p class="text-sm text-gray-600 mt-1">Average points earned per student.</p>
+                        </div>
+                        <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                            <span class="font-semibold text-gray-800">Last Updated:</span>
+                            <p class="text-sm text-gray-600 mt-1">Timestamp of the latest data update.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gradient-to-r from-sky-50 to-blue-100 p-6 rounded-2xl border-l-4 border-sky-500">
+                    <h4 class="font-bold text-sky-700 mb-3 flex items-center text-lg">
+                        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                        Progress Table & Filter
+                    </h4>
+                    <p class="text-gray-700 leading-relaxed">
+                        The progress table lists all students in the Senior Tier, showing their completion time, points, and status. Use the integrated filter to view performance for specific tasks.
+                    </p>
+                </div>
+                <div class="bg-gradient-to-r from-blue-50 to-purple-50 p-6 rounded-2xl border-l-4 border-purple-500">
+                    <h4 class="font-bold text-purple-700 mb-3 flex items-center text-lg">
+                        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                        </svg>
+                        Leaderboard
+                    </h4>
+                    <p class="text-gray-700 leading-relaxed">
+                        The leaderboard highlights top-performing students based on points earned in Senior Tier tasks. Use this to recognize achievement and encourage healthy competition.
+                    </p>
+                </div>
+                <div class="bg-gradient-to-r from-yellow-50 to-amber-50 p-6 rounded-2xl border-l-4 border-yellow-500">
+                    <h4 class="font-bold text-yellow-700 mb-3 flex items-center text-lg">
+                        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"/>
+                        </svg>
+                        Survey Results
+                    </h4>
+                    <p class="text-gray-700 leading-relaxed">
+                        The Survey Results chart visualizes findings from research conducted during the requirements gathering phase. It shows student perceptions of the traditional approach to learning Cybersecurity Fundamentals, providing valuable insights for curriculum improvement.
+                    </p>
+                </div>
+            </div>
+        `
+    },
 };
 
 // Initialize tooltip when page loads
