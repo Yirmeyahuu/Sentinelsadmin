@@ -80,7 +80,6 @@
                                 <th class="border border-blue-300 p-2">Year & Section</th>
                                 <th class="border border-blue-300 p-2">Semester</th>
                                 <th class="border border-blue-300 p-2">Faculty</th>
-                                <th class="border border-blue-300 p-2">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -118,16 +117,6 @@
                                         <span class="text-rose-600 font-medium ">N/A</span>
                                     {% endif %}
                                 </td>
-                                <td class="border border-blue-300 p-2 text-center">
-                                    <button onclick="openMoveStudentModal('{{ student.student_id }}')" 
-                                            class="text-gray-600 hover:text-blue-400 transition-all cursor-pointer" 
-                                            title="Move">
-                                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24">
-                                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M18 14v4.833A1.166 1.166 0 0 1 16.833 20H5.167A1.167 1.167 0 0 1 4 18.833V7.167A1.166 1.166 0 0 1 5.167 6h4.618m4.447-2H20v5.768m-7.889 2.121 7.778-7.778"/>
-                                        </svg>
-                                    </button>
-                                </td>
                             </tr>
                             {% empty %}
                             <tr>
@@ -140,33 +129,6 @@
                     </table>
                 </div>
             </div>
-        </div>
-    </div>
-</div>
-
-
-<!-- Move Student Modal -->
-<div id="moveStudentModalContainer" hx-swap-oob="true">
-    <div id="moveStudentModal" class="fixed inset-0 z-[9999] flex items-center bg-gray-900/80 backdrop-blur-xs justify-center hidden">\
-        <!-- Modal Content -->
-        <div class="relative bg-white p-6 rounded-3xl shadow-lg w-96 z-10">
-            <h2 class="text-lg font-bold text-gray-600 mb-4">Move Student</h2>
-            <form id="moveStudentForm" method="POST" action="{% url 'move_student' %}">
-                {% csrf_token %}
-                <input type="hidden" name="student_id" id="move-student-id">
-                <label class="block mb-2 text-gray-600">Move to:</label>
-                <select name="destination" id="move-student-destination" class="w-full p-2 border rounded-xl mb-8 text-gray-600 cursor-pointer" required>
-                    <option value="" disabled selected>Select destination</option>
-                    <option value="registered">Registered Students</option>
-                    <option value="completed">Completed Students</option>
-                    <option value="dropout">Drop-out Students</option>
-                    <option value="archive">Archive Student</option>
-                </select>
-                <div class="flex justify-end space-x-2">
-                    <button type="button" onclick="closeMoveStudentModal()" class="bg-white border border-rose-500 text-rose-500 hover:bg-rose-500 hover:text-white hover:border-white px-4 py-2 rounded-2xl cursor-pointer transition-all duration-200">Cancel</button>
-                    <button type="submit" class="bg-white border border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white hover:border-white px-6 py-2 rounded-2xl cursor-pointer  transition-all duration-200">Move</button>
-                </div>
-            </form>
         </div>
     </div>
 </div>

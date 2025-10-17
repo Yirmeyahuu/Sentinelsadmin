@@ -459,6 +459,8 @@ def Archived_faculty_list(request):
     return render(request, 'Faculty/faculty-archived.html', context)
 
 
+
+
 # This is the Faculty restore process
 @superadmin_required
 def restore_faculty(request, faculty_id):
@@ -872,7 +874,7 @@ def Superadmin_Student_List(request):
     search_query = request.GET.get('search', '').strip()
 
     # Base query with related faculty data
-    students_query = Student.objects.select_related('faculty_assignment')
+    students_query = Student.objects.select_related('faculty_assignment').filter(student_status='Registered')
 
     # Count statistics
     total_students = Student.objects.count()
@@ -997,17 +999,15 @@ def superadmin_move_student(request):
         student_id = request.POST.get("student_id")
         destination = request.POST.get("destination")
 
-        # Find the student in either the active or archived table
         student = Student.objects.filter(student_id=student_id).first()
         archived_student = ArchivedStudent.objects.filter(student_id=student_id).first()
 
         if not student and not archived_student:
-            messages.error(request, "Student not found.")
+            messages.error(request, "Error! Student not found")
             return redirect(request.META.get('HTTP_REFERER', 'Superadmin_Student_Status'))
 
         try:
             with transaction.atomic():
-                # Destination is one of the active statuses
                 if destination in ["registered", "completed", "dropout"]:
                     new_status = {
                         "registered": "Registered",
@@ -1016,18 +1016,13 @@ def superadmin_move_student(request):
                     }.get(destination)
 
                     if student:
-                        # Student is already active, just update status
                         student.student_status = new_status
                         student.save()
                         messages.success(request, f"Student status updated to {new_status}.")
                     elif archived_student:
-                        # Student is archived, so restore to active table.
-                        
-                        # Try to find a valid, active faculty assignment.
+                        # Try to find a valid, active faculty assignment
                         faculty_assignment = archived_student.faculty_assignment
-                        
-                        # If the direct link is gone or the assignment is inactive, find a new one.
-                        if not faculty_assignment or not faculty_assignment.is_active:
+                        if not faculty_assignment or not getattr(faculty_assignment, "is_active", True):
                             faculty_assignment = FacultyAssignment.objects.filter(
                                 program=archived_student.program,
                                 year_section=archived_student.year_section,
@@ -1035,52 +1030,26 @@ def superadmin_move_student(request):
                                 is_active=True
                             ).first()
 
+                        # Restore student to active table (even if faculty_assignment is None)
                         Student.objects.create(
                             student_id=archived_student.student_id,
                             first_name=archived_student.first_name,
                             last_name=archived_student.last_name,
                             middle_initial=archived_student.middle_initial,
-                            faculty_assignment=faculty_assignment,  # Use the found or existing assignment
+                            faculty_assignment=faculty_assignment,
                             student_status=new_status
                         )
                         archived_student.delete()
-                        
+
                         if faculty_assignment:
                             messages.success(request, f"Student restored to '{new_status}' and assigned to a faculty.")
                         else:
-                            # Use a warning if no assignment could be found
-                            messages.warning(request, f"Student restored to '{new_status}', but no active faculty assignment could be found for their section.")
-
-                # Destination is the archive
-                elif destination == "archive":
-                    if student:
-                        # Move from active to archive with faculty_assignment
-                        ArchivedStudent.objects.create(
-                            student_id=student.student_id,
-                            first_name=student.first_name,
-                            last_name=student.last_name,
-                            middle_initial=student.middle_initial,
-                            faculty_assignment=student.faculty_assignment,
-                            program=student.faculty_assignment.program if student.faculty_assignment else '',
-                            year_section=student.faculty_assignment.year_section if student.faculty_assignment else '',
-                            semester=student.faculty_assignment.semester if student.faculty_assignment else ''
-                        )
-                        student.delete()
-                        messages.success(request, "Student moved to Archive successfully.")
-                    elif archived_student:
-                        # Already in archive
-                        messages.info(request, "Student is already in the archive.")
-                
-                else:
-                    messages.error(request, "Invalid destination specified.")
-
+                            messages.warning(request, f"Student restored to '{new_status}', but no active faculty assignment could be found for their section. Please assign manually.")
         except Exception as e:
             messages.error(request, f"An error occurred: {e}")
 
-        # Redirect back to the page the user came from
         return redirect(request.META.get('HTTP_REFERER', 'Superadmin_Student_Status'))
 
-    # Redirect if not a POST request
     return redirect('Superadmin_Student_Status')
 
 

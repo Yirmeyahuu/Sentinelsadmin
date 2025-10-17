@@ -1488,6 +1488,9 @@
   .border-rose-200 {
     border-color: var(--color-rose-200);
   }
+  .border-rose-300 {
+    border-color: var(--color-rose-300);
+  }
   .border-rose-500 {
     border-color: var(--color-rose-500);
   }

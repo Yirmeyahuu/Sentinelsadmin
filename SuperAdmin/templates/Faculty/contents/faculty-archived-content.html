@@ -84,7 +84,7 @@
                                 <th class="border border-blue-300 p-2">Actions</th>
                             </tr>
                         </thead>
-                        <tbody id="facultyTableBody">
+                        <tbody id="facultyTableBody" class="border border-blue-300">
                             {% for faculty in archived_faculties %}
                                 <tr class="facultyRow text-gray-600 font-medium hover:bg-blue-200 transition text-md {% if forloop.counter0|divisibleby:2 %}bg-gray-100{% else %}bg-blue-50{% endif %}">
                                     <td class="border border-blue-300 p-2 text-center whitespace-nowrap">{{ faculty.faculty_id }}</td>
@@ -134,7 +134,7 @@
                                 </tr>
                             {% empty %}
                                 <tr>
-                                    <td colspan="6" class="text-center border border-blue-700 p-4 bg-gray-100 text-blue-500">No archived users yet.</td>
+                                    <td colspan="6" class="text-center border border-blue-300 p-4 bg-gray-100 text-blue-500">No archived users yet.</td>
                                 </tr>
                             {% endfor %}
                         </tbody>

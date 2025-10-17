@@ -93,12 +93,13 @@
                                     <td class="border border-blue-300 p-2 text-center whitespace-nowrap">{{ student.archived_at|date:"Y-m-d" }}</td>
                                     <td class="border border-blue-300 p-2 text-center">
                                         <div class="flex items-center justify-center space-x-3">
-                                            <!-- Move Button -->
-                                            <button onclick="event.stopPropagation(); openMoveStudentModal('{{ student.student_id }}')"
-                                                    class="text-gray-600 hover:text-blue-400 transition-all cursor-pointer"
-                                                    title="Move Student">
-                                                <svg class="w-6 h-6" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 14v4.833A1.166 1.166 0 0 1 16.833 20H5.167A1.167 1.167 0 0 1 4 18.833V7.167A1.166 1.166 0 0 1 5.167 6h4.618m4.447-2H20v5.768m-7.889 2.121 7.778-7.778"/>
+                                            <!-- Restore Button -->
+                                            <button 
+                                                onclick="openRestoreStudentModal('{{ student.student_id }}')" 
+                                                class="text-green-700 hover:text-green-500 transition-all cursor-pointer" 
+                                                title="Restore">
+                                                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                                                 </svg>
                                             </button>
                                             <!-- Delete Button -->
@@ -178,4 +179,30 @@
         </div>
     </div>
 </div>
+
+<!-- Restore Student Modal Here -->
+<div id="restoreStudentModalContainer" hx-swap-oob="true">
+    <div id="restoreStudentModal" class="fixed inset-0 flex items-center justify-center backdrop-blur-xs bg-gray-900/80 z-[9999] hidden">
+        <div class="bg-white p-6 rounded-2xl shadow-2xl w-[28rem] relative border border-gray-100">
+            <h2 class="text-lg font-semibold text-gray-800 mb-2">Restore Student</h2>
+            <p class="text-gray-500 text-xs mb-4">Are you sure you want to restore this student?</p>
+            <form id="restoreStudentForm" method="POST" action="{% url 'restore-student' %}">
+                {% csrf_token %}
+                <input type="hidden" name="student_id" id="restoreStudentId" value="">
+                <div class="flex justify-end items-center space-x-3 mt-4">
+                    <button type="button"
+                            onclick="closeRestoreStudentModal()"
+                            class="px-4 py-2 rounded-xl border-2 border-gray-300 text-gray-700 text-sm hover:bg-gray-50 hover:border-gray-400 transition-all duration-200">
+                        Cancel
+                    </button>
+                    <button type="submit"
+                            class="px-4 py-2 rounded-xl bg-green-600 text-white text-sm hover:bg-green-700 transform hover:scale-[1.02] transition-all duration-200">
+                        Restore Student
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 

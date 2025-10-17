@@ -17,6 +17,7 @@ urlpatterns = [
     path('Student-status/', views.faculty_student_status, name='faculty-student-status'),
     path('delete-archived-student/<str:student_id>/', views.faculty_delete_archived_student, name='faculty_delete_archived_student'),
     path('student-data/modal/<str:student_id>/', views.studentDataModal, name='student-data-modal'),
+    path('Restore-student/', views.restoreStudent, name ="restore-student"),
 
     path('accept-student/<str:student_id>/', views.accept_student, name='accept_student'),
     path('reject-student/<str:student_id>/', views.reject_student, name='reject_student'),

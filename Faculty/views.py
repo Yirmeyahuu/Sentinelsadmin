@@ -1491,30 +1491,29 @@ def move_student(request):
             messages.success(request, "Student moved to Drop-out Students successfully!")
             
         elif destination == "archive":
-            # Handle PostgreSQL archiving - MOVE student from Student table to ArchivedStudent table
             try:
                 # Get the student from PostgreSQL
                 postgres_student = Student.objects.get(student_id=student_id)
-                
-                # Create archived student record (includes password and status)
+                # Get faculty_assignment details
+                faculty_assignment = postgres_student.faculty_assignment
+
                 ArchivedStudent.objects.create(
                     student_id=postgres_student.student_id,
                     first_name=postgres_student.first_name,
                     last_name=postgres_student.last_name,
                     middle_initial=postgres_student.middle_initial,
-                    password=postgres_student.password,  # Password only in PostgreSQL
-                    program=postgres_student.program,  # This uses the property from faculty_assignment
-                    year_section=postgres_student.year_section,  # This uses the property from faculty_assignment
-                    semester=postgres_student.semester,  # This uses the property from faculty_assignment
-                    faculty=faculty,
+                    password=postgres_student.password,
+                    program=faculty_assignment.program if faculty_assignment else '',
+                    year_section=faculty_assignment.year_section if faculty_assignment else '',
+                    semester=faculty_assignment.semester if faculty_assignment else '',
+                    faculty=faculty_assignment.faculty if faculty_assignment else faculty,
+                    faculty_assignment=faculty_assignment if faculty_assignment else None,
                 )
-                
-                # DELETE the student from the Student table (moved, not copied)
+
                 postgres_student.delete()
-                
+
             except Student.DoesNotExist:
                 # If student doesn't exist in PostgreSQL, create archived record from Firestore data
-                # Note: No password available from Firestore, will need default or manual reset
                 ArchivedStudent.objects.create(
                     student_id=student_id,
                     first_name=student_data.get('first_name', ''),
@@ -1526,11 +1525,11 @@ def move_student(request):
                     semester=student_data.get('semester', ''),
                     faculty=faculty,
                 )
-            
+
             # Remove student from Firebase (no "Archived Students" collection needed)
             if found_collection and student:
                 student.delete()
-                
+
             messages.success(request, "Student moved to Archive successfully!")
             
         else:
@@ -1538,6 +1537,51 @@ def move_student(request):
             return redirect("faculty-student-list")
             
     return redirect(request.META.get('HTTP_REFERER', 'faculty-student-list'))
+
+
+@faculty_required
+@require_POST
+def restoreStudent(request):
+    student_id = request.POST.get('student_id')
+    try:
+        with transaction.atomic():
+            archived_student = ArchivedStudent.objects.get(student_id=student_id)
+            # Find a valid faculty assignment
+            faculty_assignment = FacultyAssignment.objects.filter(
+                program=archived_student.program,
+                year_section=archived_student.year_section,
+                semester=archived_student.semester,
+                is_active=True
+            ).first()
+            # Create in PostgreSQL
+            student = Student.objects.create(
+                student_id=archived_student.student_id,
+                first_name=archived_student.first_name,
+                last_name=archived_student.last_name,
+                middle_initial=archived_student.middle_initial,
+                faculty_assignment=faculty_assignment,
+                student_status='Registered'
+            )
+            # Create in Firestore
+            firestore_data = {
+                'student_id': student.student_id,
+                'first_name': student.first_name,
+                'last_name': student.last_name,
+                'middle_initial': student.middle_initial,
+                'program': faculty_assignment.program if faculty_assignment else archived_student.program,
+                'year_section': faculty_assignment.year_section if faculty_assignment else archived_student.year_section,
+                'semester': faculty_assignment.semester if faculty_assignment else archived_student.semester,
+            }
+            db.collection('Registered_Students').document(student.student_id).set(firestore_data)
+            # Remove from archive
+            archived_student.delete()
+            messages.success(request, "Student has been restored successfully!")
+    except ArchivedStudent.DoesNotExist:
+        messages.error(request, "Student not found in archive.")
+    except Exception as e:
+        messages.error(request, f"Error restoring student: {str(e)}")
+
+    return redirect('archived_students_list')
 
 
 # This is the novice tier page of Faculty
