@@ -121,6 +121,7 @@ def Faculty_home(request):
         "Senior_Task_6(Defeat Rootkit2)"
     ]
 
+
     # Process each assignment's Firebase data
     for assignment in faculty_assignments:
         # Query Firebase for students in this assignment's section
@@ -310,26 +311,29 @@ def student_list(request):
         return redirect('sentinels_login')
 
     # Get active assignments for this faculty
-    faculty_assignments = faculty.assignments.filter(is_active=True)
+    faculty_assignments = faculty.assignments.filter(is_active=True).annotate(
+        student_count=Count('students', filter=Q(students__student_status='Registered'))
+    )
     
     if not faculty_assignments.exists():
-        messages.warning(request, "No active assignments found for your account.")
         context = {
             "students": [],
             "faculty_data": faculty,
-            "total_users": 0,
+            "faculty_assignments": [],
+            "search_query": "",
+            "status_filter": "all",
+            "selected_program": "all",
+            "selected_year_section": "all",
+            "selected_semester": "all",
+            "sections": [],
             "cs_students": 0,
             "it_students": 0,
             "program_total": 0,
             "section_total": 0,
-            "search_query": "",
             "active_students_count": 0,
             "inactive_students_count": 0,
-            "program_filter": "all",
-            "year_section_filter": "all",
-            "sections": [],
         }
-        return render(request, 'Students/student-list.html', context)
+        return render(request, 'Students/student-status.html', context)
 
     # Get filter values from request
     program_filter = request.GET.get('program', 'all')

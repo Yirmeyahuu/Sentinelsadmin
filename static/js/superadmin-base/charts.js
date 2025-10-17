@@ -41,11 +41,11 @@ window.initSuperadminHomeChart = function() {
                 {
                     label: 'Information Technology',
                     data: itData,
-                    borderColor: '#ef4444',
-                    backgroundColor: 'rgba(239, 68, 68, 0.15)',
+                    borderColor: '#6366F1',
+                    backgroundColor: 'rgba(99, 102, 241, 0.15)',
                     tension: 0.4,
                     fill: true,
-                    pointBackgroundColor: '#ef4444',
+                    pointBackgroundColor: '#6366F1',
                     pointBorderColor: '#fff',
                     pointRadius: 6,
                     pointHoverRadius: 8,
@@ -58,6 +58,10 @@ window.initSuperadminHomeChart = function() {
                 legend: {
                     display: true,
                     labels: { color: '#3b82f6' }
+                },
+                neonGlow: {
+                    glowColor: undefined,
+                    glowBlur: 20
                 }
             },
             scales: {

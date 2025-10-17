@@ -2,8 +2,8 @@
 window.initFacultyHomeChart = function() {
     const tierColors = {
         Novice: { neonColor: '#0ff', neonFill: 'rgba(0,255,255,0.15)' },
-        Junior: { neonColor: '#ff00de', neonFill: 'rgba(255,0,222,0.15)' },
-        Senior: { neonColor: '#fff700', neonFill: 'rgba(255,247,0,0.15)' }
+        Junior: { neonColor: '#0ea5e9', neonFill: 'rgba(14, 165, 233, 0.15)' },
+        Senior: { neonColor: '#6366F1', neonFill: 'rgba(99, 102, 241, 0.15)' }
     };
 
     // Use dynamic data from Django - with better validation
@@ -157,7 +157,7 @@ window.initFacultyHomeChart = function() {
     }
 
     // Chart.js setup
-    const ctxElem = document.getElementById('noviceLineChart');
+    const ctxElem = document.getElementById('tierLineChart');
     if (ctxElem) {
         const ctx = ctxElem.getContext('2d');
         if (window.facultyHomeChartInstance) {
@@ -183,7 +183,7 @@ window.initFacultyHomeChart = function() {
                 plugins: {
                     legend: {
                         display: true,
-                        labels: { color: '#fff' }
+                        labels: { color: '#3b82f6' }
                     },
                     neonGlow: {
                         glowColor: undefined,
@@ -192,23 +192,29 @@ window.initFacultyHomeChart = function() {
                 },
                 scales: {
                     x: {
-                        ticks: { color: '#fff' },
-                        grid: { color: 'rgba(255,255,255,0.2)' }
+                        ticks: { color: '#3b82f6', font: { size: 14, weight: 'bold' } },
+                        grid: { 
+                            color: '#3b82f6',
+                            lineWidth: 1
+                        }
                     },
                     y: {
                         beginAtZero: true,
-                        title: { display: true, text: 'Students Accomplished', color: '#fff' },
+                        title: { display: true, text: 'Students Accomplishment', color: '#3b82f6', font: { size: 14, weight: 'bold' } },
                         min: 0,
-                        max: Math.max(maxValue, 5), // Ensure minimum scale of 5
+                        max: window.totalStudentCount || Math.max(maxValue + 5, 10),
                         ticks: {
-                            color: '#fff',
+                            color: '#3b82f6',
                             stepSize: 1,
                             precision: 0,
                             callback: function(value) {
                                 return Number.isInteger(value) ? value : null;
                             }
                         },
-                        grid: { color: 'rgba(255,255,255,0.2)' }
+                        grid: { 
+                            color: '#3b82f6',
+                            lineWidth: 1,
+                        }
                     }
                 }
             }
@@ -228,7 +234,7 @@ window.initFacultyHomeChart = function() {
 
 // Display chart on page load and after HTMX swaps
 function tryInitFacultyHomeChart() {
-    if (document.getElementById('noviceLineChart')) {
+    if (document.getElementById('tierLineChart')) {
         console.log('Initializing Faculty Home Chart'); // Debug log
         // Add a small delay to ensure the script tag has been processed
         setTimeout(() => {

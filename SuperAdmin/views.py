@@ -1021,17 +1021,35 @@ def superadmin_move_student(request):
                         student.save()
                         messages.success(request, f"Student status updated to {new_status}.")
                     elif archived_student:
-                        # Student is archived, so restore to active table with faculty_assignment
+                        # Student is archived, so restore to active table.
+                        
+                        # Try to find a valid, active faculty assignment.
+                        faculty_assignment = archived_student.faculty_assignment
+                        
+                        # If the direct link is gone or the assignment is inactive, find a new one.
+                        if not faculty_assignment or not faculty_assignment.is_active:
+                            faculty_assignment = FacultyAssignment.objects.filter(
+                                program=archived_student.program,
+                                year_section=archived_student.year_section,
+                                semester=archived_student.semester,
+                                is_active=True
+                            ).first()
+
                         Student.objects.create(
                             student_id=archived_student.student_id,
                             first_name=archived_student.first_name,
                             last_name=archived_student.last_name,
                             middle_initial=archived_student.middle_initial,
-                            faculty_assignment=archived_student.faculty_assignment,
+                            faculty_assignment=faculty_assignment,  # Use the found or existing assignment
                             student_status=new_status
                         )
                         archived_student.delete()
-                        messages.success(request, f"Student restored and moved to {new_status}.")
+                        
+                        if faculty_assignment:
+                            messages.success(request, f"Student restored to '{new_status}' and assigned to a faculty.")
+                        else:
+                            # Use a warning if no assignment could be found
+                            messages.warning(request, f"Student restored to '{new_status}', but no active faculty assignment could be found for their section.")
 
                 # Destination is the archive
                 elif destination == "archive":

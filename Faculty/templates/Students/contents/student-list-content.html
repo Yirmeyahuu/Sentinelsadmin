@@ -62,7 +62,7 @@
                 <div class="lg:col-span-8 bg-white rounded-2xl shadow-xl p-6">
                     <div class="flex items-center justify-between mb-6">
                         <h3 class="text-lg font-semibold text-gray-800">Class Assignments</h3>
-                        <span class="px-3 py-1 bg-blue-50 text-blue-600 rounded-lg text-sm font-medium">
+                        <span class="px-3 py-1 bg-blue-100 text-sky-600 rounded-lg text-sm font-medium">
                             {{ faculty_assignments|length }} Active Classes
                         </span>
                     </div>
@@ -103,13 +103,13 @@
     <!-- Main Content (Student Table) -->
     <div class="px-6">
         <div class="max-w-[calc(100%-80px)] mx-auto">
-            <div class="bg-gradient-to-br from-blue-700/70 to-blue-600 shadow-2xl rounded-2xl p-6">
+            <div class="bg-white shadow-2xl rounded-2xl p-6">
                 <!-- Table Header - Updated Layout -->
                 <div class="mb-4">
                     <!-- Title Section -->
                     <div class="mb-4">
-                        <h2 class="text-xl font-bold text-white">
-                            Registered Students - {{ faculty_data.program }} {{ faculty_data.year_section }}
+                        <h2 class="text-2xl p-2 text-center font-bold text-blue-500">
+                            Registered Students
                         </h2>
                     </div>
                     
@@ -184,7 +184,7 @@
                             </button>
                 
                             <!-- Add Button -->
-                            <button class="bg-gray-100 font-bold text-sm text-sky-500 px-3 py-2 shadow-lg rounded-xl hover:bg-sky-600 hover:text-gray-100 transition duration-150 cursor-pointer flex items-center gap-1" 
+                            <button class="bg-sky-500 font-bold text-sm text-white px-3 py-2 shadow-lg rounded-xl hover:bg-sky-600 hover:text-gray-100 transition duration-150 cursor-pointer flex items-center gap-1" 
                                     onclick="openStudentModal()">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                                     <path d="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z"/>
@@ -222,7 +222,7 @@
                             <form method="get" class="relative">
                                 <div class="relative group">
                                     <!-- Search Input Container -->
-                                    <div class="relative flex items-center bg-white rounded-xl shadow-lg border border-gray-200 hover:border-blue-300 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100 transition-all duration-300 h-[38px] min-w-[320px]">
+                                    <div class="relative flex items-center bg-white rounded-xl shadow-lg border border-gray-300 hover:border-blue-300 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100 transition-all duration-300 h-[38px] min-w-[320px]">
                                         <!-- Search Icon -->
                                         <div class="absolute left-3 flex items-center pointer-events-none">
                                             <svg class="w-4 h-4 text-gray-400 group-focus-within:text-blue-500 transition-colors duration-200" 
@@ -279,27 +279,27 @@
                 <div class="overflow-x-auto rounded-2xl shadow-xl w-full">
                     <table class="w-full border-separate border-spacing-0 rounded-lg">
                         <thead>
-                            <tr class="bg-blue-800 text-white">
-                                <th class="border border-blue-700 p-2">Student ID</th>
-                                <th class="border border-blue-700 p-2">Full Name</th>
-                                <th class="border border-blue-700 p-2">Program</th>
-                                <th class="border border-blue-700 p-2">Year & Section</th>
-                                <th class="border border-blue-700 p-2">Semester</th>
-                                <th class="border border-blue-700 p-2">Status</th>
-                                <th class="border border-blue-700 p-2">Actions</th>
+                            <tr class="bg-blue-500 backdrop-blur-sm text-white">
+                                <th class="border border-blue-300 p-2">Student ID</th>
+                                <th class="border border-blue-300 p-2">Full Name</th>
+                                <th class="border border-blue-300 p-2">Program</th>
+                                <th class="border border-blue-300 p-2">Year & Section</th>
+                                <th class="border border-blue-300 p-2">Semester</th>
+                                <th class="border border-blue-300 p-2">Status</th>
+                                <th class="border border-blue-300 p-2">Actions</th>
                             </tr>
                         </thead>
                         <tbody id="studentTableBody">
                             {% for student in students %}
-                            <tr class="studentRow text-blue-900 hover:bg-blue-200 transition text-md {% if forloop.counter0|divisibleby:2 %}bg-gray-100{% else %}bg-blue-100{% endif %}">
-                                <td class="border border-blue-700 p-2 text-center whitespace-nowrap">{{ student.student_id }}</td>
-                                <td class="border border-blue-700 p-2 text-center whitespace-nowrap">
+                            <tr class="studentRow text-gray-600 font-medium hover:bg-blue-200 transition text-md {% if forloop.counter0|divisibleby:2 %}bg-gray-100{% else %}bg-blue-50{% endif %}">
+                                <td class="border border-blue-300 p-2 text-center whitespace-nowrap">{{ student.student_id }}</td>
+                                <td class="border border-blue-300 p-2 text-center whitespace-nowrap">
                                     {{ student.first_name }} {{ student.middle_initial }} {{ student.last_name }}
                                 </td>
-                                <td class="border border-blue-700 p-2 text-center whitespace-nowrap">{{ student.program }}</td>
-                                <td class="border border-blue-700 p-2 text-center whitespace-nowrap">{{ student.year_section }}</td>
-                                <td class="border border-blue-700 p-2 text-center whitespace-nowrap">{{ student.semester }}</td>
-                                <td class="border border-blue-700 p-2 text-center whitespace-nowrap">
+                                <td class="border border-blue-300 p-2 text-center whitespace-nowrap">{{ student.program }}</td>
+                                <td class="border border-blue-300 p-2 text-center whitespace-nowrap">{{ student.year_section }}</td>
+                                <td class="border border-blue-300 p-2 text-center whitespace-nowrap">{{ student.semester }}</td>
+                                <td class="border border-blue-300 p-2 text-center whitespace-nowrap">
                                     <span class="px-3 py-1.5 rounded-lg text-xs font-medium inline-block min-w-[90px]
                                         {% if student.status == 'Drop-out' %}
                                             bg-red-500/20 text-red-700
@@ -311,11 +311,11 @@
                                         {{ student.status|default:"Registered" }}
                                     </span>
                                 </td>
-                                <td class="border border-blue-700 p-2 text-center whitespace-nowrap">
+                                <td class="border border-blue-300 p-2 text-center whitespace-nowrap">
                                     <div class="flex items-center justify-center space-x-3">
                                         <!-- Edit Student Button -->
                                         <button onclick="openEditModal('{{ student.student_id }}')"
-                                                class="text-blue-900 hover:text-blue-400 transition-all cursor-pointer"
+                                                class="text-gray-600 hover:text-blue-400 transition-all cursor-pointer"
                                                 title="Edit Student">
                                             <svg class="w-6 h-6" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
                                                 <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5.18 15.296c-1.258.738-4.555 2.243-2.547 4.126c.982.92 2.074 1.578 3.448 1.578h7.838c1.374 0 2.467-.658 3.447-1.578c2.009-1.883-1.288-3.389-2.546-4.126a9.61 9.61 0 0 0-9.64 0M14 7a4 4 0 1 1-8 0a4 4 0 0 1 8 0m5.622-2.434c.224-.243.335-.364.454-.434a.93.93 0 0 1 .931-.014c.12.067.236.184.466.42c.23.235.346.353.412.476a.99.99 0 0 1-.014.951c-.07.122-.188.236-.425.464l-2.82 2.717c-.45.433-.675.65-.956.76s-.589.1-1.206.085l-.084-.003c-.188-.005-.282-.007-.337-.069c-.054-.062-.047-.158-.032-.35l.008-.103c.042-.539.063-.808.168-1.05c.105-.243.287-.44.65-.833z" color="currentColor"/>
@@ -324,7 +324,7 @@
     
                                         <!-- Move Button -->
                                         <button onclick="event.stopPropagation(); openMoveStudentModal('{{ student.student_id }}')"
-                                                class="text-blue-900 hover:text-blue-400 transition-all cursor-pointer"
+                                                class="text-gray-600 hover:text-blue-400 transition-all cursor-pointer"
                                                 title="Move Student">
                                             <svg class="w-6 h-6" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
                                                 <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 14v4.833A1.166 1.166 0 0 1 16.833 20H5.167A1.167 1.167 0 0 1 4 18.833V7.167A1.166 1.166 0 0 1 5.167 6h4.618m4.447-2H20v5.768m-7.889 2.121 7.778-7.778"/>
@@ -335,7 +335,7 @@
                             </tr>
                             {% empty %}
                             <tr>
-                                <td colspan="7" class="text-center border border-blue-700 bg-gray-100 px-6 py-8 text-blue-500 text-sm">
+                                <td colspan="7" class="text-center border border-blue-700 bg-gray-100 px-6 py-8 text-gray-600 font-medium text-sm">
                                     No Student found.
                                 </td>
                             </tr>
@@ -496,12 +496,12 @@
     <div id="moveStudentModal" hx-swap-oob="true" class="fixed inset-0 flex items-center justify-center bg-gray-900/80 backdrop-blur-xs z-[9999] hidden transition-opacity duration-300">
         <!-- Modal Content -->
         <div class="relative bg-white p-6 rounded-3xl shadow-lg w-96">
-            <h2 class="text-lg font-bold text-blue-500 mb-4">Move Student</h2>
+            <h2 class="text-lg font-bold text-gray-600 mb-4">Move Student</h2>
             <form id="moveStudentForm" method="POST" action="{% url 'faculty_move_student' %}">
                 {% csrf_token %}
                 <input type="hidden" name="student_id" id="move-student-id">
-                <label class="block mb-2 text-blue-500">Move to:</label>
-                <select name="destination" id="move-student-destination" class="w-full p-2 border rounded-2xl mb-4 text-blue-500 cursor-pointer" required>
+                <label class="block mb-2 text-gray-600">Move to:</label>
+                <select name="destination" id="move-student-destination" class="w-full p-2 border rounded-xl mb-8 text-gray-600 cursor-pointer" required>
                     <option value="" disabled selected>Select destination</option>
                     <option value="registered">Registered Students</option>
                     <option value="completed">Completed Students</option>
@@ -509,8 +509,14 @@
                     <option value="archive">Archive Student</option>
                 </select>
                 <div class="flex justify-end space-x-2">
-                    <button type="button" onclick="closeMoveStudentModal()" class="bg-gray-300 text-gray-700 px-4 py-2 rounded-2xl cursor-pointer hover:bg-gray-200">Cancel</button>
-                    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-2xl cursor-pointer hover:bg-blue-500">Move</button>
+                    <button type="button" onclick="closeMoveStudentModal()" 
+                    class="bg-white border border-rose-500 text-rose-500 hover:bg-rose-500 hover:text-white hover:border-white px-4 py-2 rounded-xl cursor-pointer transition-all duration-200">
+                        Cancel
+                    </button>
+                    <button type="submit" 
+                    class="bg-white border border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white hover:border-white px-6 py-2 rounded-xl cursor-pointer  transition-all duration-200">
+                    Move
+                </button>
                 </div>
             </form>
         </div>
