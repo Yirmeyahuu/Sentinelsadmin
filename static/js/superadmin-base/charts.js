@@ -17,8 +17,7 @@ window.initSuperadminHomeChart = function() {
     // Calculate max value for better scaling
     const maxValue = Math.max(
         Math.max(...csData),
-        Math.max(...itData),
-        5 // Minimum scale
+        Math.max(...itData)
     );
 
     const ctx = chartElem.getContext('2d');
@@ -30,11 +29,11 @@ window.initSuperadminHomeChart = function() {
                 {
                     label: 'Computer Science',
                     data: csData,
-                    borderColor: '#f59e42',
-                    backgroundColor: 'rgba(245, 158, 66, 0.15)',
+                    borderColor: '#0ea5e9',
+                    backgroundColor: 'rgba(14, 165, 233, 0.15)',
                     tension: 0.4,
                     fill: true,
-                    pointBackgroundColor: '#f59e42',
+                    pointBackgroundColor: '#0ea5e9',
                     pointBorderColor: '#fff',
                     pointRadius: 6,
                     pointHoverRadius: 8,
@@ -58,28 +57,34 @@ window.initSuperadminHomeChart = function() {
             plugins: {
                 legend: {
                     display: true,
-                    labels: { color: '#fff' }
+                    labels: { color: '#3b82f6' }
                 }
             },
             scales: {
                 x: {
-                    ticks: { color: '#fff' },
-                    grid: { color: 'rgba(255,255,255,0.2)' }
+                    ticks: { color: '#3b82f6', font: { size: 14, weight: 'bold' } },
+                    grid: { 
+                        color: '#3b82f6',
+                        lineWidth: 1
+                    }
                 },
                 y: {
                     beginAtZero: true,
-                    title: { display: true, text: 'Students Completed', color: '#fff' },
+                    title: { display: true, text: 'Students Completed', color: '#3b82f6', font: { size: 14, weight: 'bold' } },
                     min: 0,
-                    max: Math.max(maxValue, 5),
+                    max: window.totalStudentCount || Math.max(maxValue + 5, 10),
                     ticks: {
-                        color: '#fff',
+                        color: '#3b82f6',
                         stepSize: 1,
                         precision: 0,
                         callback: function(value) {
                             return Number.isInteger(value) ? value : null;
                         }
                     },
-                    grid: { color: 'rgba(255,255,255,0.2)' }
+                    grid: { 
+                        color: '#3b82f6',
+                        lineWidth: 1
+                    }
                 }
             }
         }
@@ -118,11 +123,11 @@ window.initSuperadminHomeChart = function() {
                     {
                         label: 'Computer Science',
                         data: data.csData,
-                        borderColor: '#f59e42',
-                        backgroundColor: 'rgba(245, 158, 66, 0.15)',
+                        borderColor: '#0ea5e9',
+                        backgroundColor: 'rgba(14, 165, 233, 0.15)',
                         tension: 0.4,
                         fill: true,
-                        pointBackgroundColor: '#f59e42',
+                        pointBackgroundColor: '#0ea5e9',
                         pointBorderColor: '#fff',
                         pointRadius: 6,
                         pointHoverRadius: 8,
@@ -130,11 +135,11 @@ window.initSuperadminHomeChart = function() {
                     {
                         label: 'Information Technology',
                         data: data.itData,
-                        borderColor: '#ef4444',
-                        backgroundColor: 'rgba(239, 68, 68, 0.15)',
+                        borderColor: '#6366F1',
+                        backgroundColor: 'rgba(99, 102, 241, 0.15)',
                         tension: 0.4,
                         fill: true,
-                        pointBackgroundColor: '#ef4444',
+                        pointBackgroundColor: '#6366F1',
                         pointBorderColor: '#fff',
                         pointRadius: 6,
                         pointHoverRadius: 8,
@@ -148,11 +153,11 @@ window.initSuperadminHomeChart = function() {
                     {
                         label: 'Computer Science',
                         data: data.csData,
-                        borderColor: '#f59e42',
-                        backgroundColor: 'rgba(245, 158, 66, 0.15)',
+                        borderColor: '#0ea5e9',
+                        backgroundColor: 'rgba(14, 165, 233, 0.15)',
                         tension: 0.4,
                         fill: true,
-                        pointBackgroundColor: '#f59e42',
+                        pointBackgroundColor: '#0ea5e9',
                         pointBorderColor: '#fff',
                         pointRadius: 8,
                         pointHoverRadius: 10,
@@ -166,11 +171,11 @@ window.initSuperadminHomeChart = function() {
                     {
                         label: 'Information Technology',
                         data: data.itData,
-                        borderColor: '#ef4444',
-                        backgroundColor: 'rgba(239, 68, 68, 0.15)',
+                        borderColor: '#6366F1',
+                        backgroundColor: 'rgba(99, 102, 241, 0.15)',
                         tension: 0.4,
                         fill: true,
-                        pointBackgroundColor: '#ef4444',
+                        pointBackgroundColor: '#6366F1',
                         pointBorderColor: '#fff',
                         pointRadius: 8,
                         pointHoverRadius: 10,

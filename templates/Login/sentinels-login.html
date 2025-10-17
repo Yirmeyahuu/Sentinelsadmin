@@ -35,7 +35,7 @@
 <!-- Global Notification-->
 {% if messages %}
   {% for message in messages %}
-    <div id="django-message-{{ forloop.counter }}" class="p-4 mb-4 text-sm text-green-800 rounded-lg bg-green-50 fixed top-5 right-5 shadow-lg z-50">
+    <div id="django-message-{{ forloop.counter }}" class="p-4 mb-4 text-sm font-medium text-sky-800 backdrop-blur-lg rounded-lg bg-sky-200/80 border-2 border-sky-300/60 fixed top-5 right-5 shadow-lg z-[9999]">
       <span class="font-medium">{{ message.tags|title }}!</span> {{ message }}
     </div>
     <script>
@@ -60,42 +60,39 @@
         <div class="absolute bottom-32 right-32 w-[26rem] h-[26rem] bg-gradient-to-tr from-rose-500 via-rose-200 to-transparent opacity-80 rounded-full blur-3xl"></div>
         <!-- Center Faint Gradient -->
         <div class="absolute top-1/2 left-1/2 -translate-x-1/2 w-[60vw] h-[40vh] bg-gradient-to-r from-sky-400 via-sky-500 to-pink-100 opacity-40 rounded-full blur-2xl"></div>
+        
         <div class="bg-white/95 backdrop-blur-lg px-6 py-8 md:px-8 md:py-10 rounded-3xl w-full max-w-sm shadow-xl border border-white/30 relative overflow-hidden">
             <!-- Content with relative positioning to appear above gradient -->
             <div class="relative z-10">
                 <div class="text-center mb-8">
                     <img src="{% static 'assets/img/SENTINELSLOGO.svg' %}" alt="Sentinels Logo" class="mx-auto h-16 md:h-18 lg:h-20 drop-shadow-sm mb-3">
                     <h1 class="text-xl font-semibold text-gray-800 mb-1">Welcome Back</h1>
-                    <p class="text-xs text-gray-500">Sign in to your account</p>
+                    <p class="text-xs text-gray-500">Log in to your account</p>
                 </div>
                 
                 <!-- Login Form --> 
-                <form method="POST" action="{% url 'sentinels_login' %}" class="space-y-5">
+                <form id="loginForm" method="POST" action="{% url 'sentinels_login' %}" class="space-y-5">
                     {% csrf_token %}
                     
                     <!-- Username/Faculty ID Input -->
                     <div class="relative group">
+                        <label for="username_or_id" class="sr-only">Username or Faculty ID</label>
                         <!-- User Icon -->
                         <div class="absolute left-3 top-1/2 transform -translate-y-1/2 z-10">
                             <svg class="w-4 h-4 text-gray-400 group-focus-within:text-blue-500 transition-colors duration-200" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
                                 <path fill-rule="evenodd" d="M7.5 6a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0ZM3.751 20.105a8.25 8.25 0 0 1 16.498 0 .75.75 0 0 1-.437.695A18.683 18.683 0 0 1 12 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 0 1-.437-.695Z" clip-rule="evenodd" />
                             </svg>
                         </div>
-                        
                         <input type="text" 
                             name="username_or_id" 
                             id="username_or_id" 
-                            placeholder=" "
+                            placeholder="Username or Faculty ID"
                             required
-                            class="peer w-full pl-10 pr-3 py-3 text-gray-700 text-sm bg-gray-50/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 placeholder-transparent transition-all duration-300 hover:bg-gray-50">
+                            class="peer w-full pl-10 pr-3 py-3 text-gray-700 text-sm bg-white/60 backdrop-blur-sm border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 hover:border-gray-400 shadow-sm">
                         
-                        <label for="username_or_id" 
-                            class="absolute left-10 top-3 text-gray-500 text-sm pointer-events-none transition-all duration-300 origin-left
-                                   peer-placeholder-shown:top-3 peer-placeholder-shown:left-10 peer-placeholder-shown:text-sm peer-placeholder-shown:text-gray-500
-                                   peer-focus:top-0.5 peer-focus:left-2 peer-focus:text-xs peer-focus:text-blue-600 peer-focus:font-medium peer-focus:bg-white peer-focus:px-2 peer-focus:rounded
-                                   peer-valid:top-0.5 peer-valid:left-2 peer-valid:text-xs peer-valid:text-blue-600 peer-valid:font-medium peer-valid:bg-white peer-valid:px-2 peer-valid:rounded">
-                            Username or Faculty ID
-                        </label>
+                        {% if form.username_or_id.errors %}
+                            <p class="text-red-500 text-xs mt-1 ml-1">{{ form.username_or_id.errors.0 }}</p>
+                        {% endif %}
                     </div>
 
                     <!-- Password Input -->
@@ -110,17 +107,9 @@
                         <input type="password" 
                             id="password" 
                             name="password" 
-                            placeholder=" "
+                            placeholder="Enter Password"
                             required
-                            class="peer w-full pl-10 pr-10 py-3 text-gray-700 text-sm bg-gray-50/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 placeholder-transparent transition-all duration-300 hover:bg-gray-50">
-                        
-                        <label for="password" 
-                            class="absolute left-10 top-3 text-gray-500 text-sm pointer-events-none transition-all duration-300 origin-left
-                                   peer-placeholder-shown:top-3 peer-placeholder-shown:left-10 peer-placeholder-shown:text-sm peer-placeholder-shown:text-gray-500
-                                   peer-focus:top-0.5 peer-focus:left-2 peer-focus:text-xs peer-focus:text-blue-600 peer-focus:font-medium peer-focus:bg-white peer-focus:px-2 peer-focus:rounded
-                                   peer-valid:top-0.5 peer-valid:left-2 peer-valid:text-xs peer-valid:text-blue-600 peer-valid:font-medium peer-valid:bg-white peer-valid:px-2 peer-valid:rounded">
-                            Password
-                        </label>
+                            class="peer w-full pl-10 pr-10 py-3 text-gray-700 text-sm bg-white/60 backdrop-blur-sm border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 hover:border-gray-400 shadow-sm">
                         
                         <!-- Eye Icons for Password Toggle -->
                         <button type="button" id="togglePassword" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-blue-600 p-1 rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
@@ -146,10 +135,14 @@
                         {% endif %}
                     </div>
                 
-                    <button type="submit" class="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-sm font-semibold py-3 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl hover:shadow-blue-500/25 transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-blue-500/50 active:transform active:scale-[0.98]">
-                        Sign In
-                        <svg class="w-4 h-4 ml-2 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <button id="submitButton" type="submit" class="w-full flex items-center justify-center bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-700 hover:to-blue-800 text-white text-sm font-semibold py-4 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl hover:shadow-blue-500/25  focus:outline-none focus:ring-2 focus:ring-blue-500/50">
+                        <span class="button-text">Log In</span>
+                        <svg class="button-arrow w-4 h-4 ml-2 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                        </svg>
+                        <svg class="button-spinner animate-spin h-5 w-5 text-white hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                         </svg>
                     </button>
                 </form>
@@ -174,6 +167,22 @@
             eyeOpen.classList.remove('hidden');
             eyeClosed.classList.add('hidden');
         }
+    });
+</script>
+
+<!-- Form submission loading state -->
+<script>
+    document.getElementById('loginForm').addEventListener('submit', function() {
+        const button = document.getElementById('submitButton');
+        const buttonText = button.querySelector('.button-text');
+        const buttonArrow = button.querySelector('.button-arrow');
+        const buttonSpinner = button.querySelector('.button-spinner');
+
+        // Disable button and show spinner
+        button.disabled = true;
+        buttonText.textContent = 'Logging In...';
+        buttonArrow.classList.add('hidden');
+        buttonSpinner.classList.remove('hidden');
     });
 </script>
 

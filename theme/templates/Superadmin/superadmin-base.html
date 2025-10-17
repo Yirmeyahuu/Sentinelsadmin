@@ -57,7 +57,7 @@
 <!-- Global Notification-->
 {% if messages %}
   {% for message in messages %}
-    <div id="django-message-{{ forloop.counter }}" class="p-4 mb-4 text-sm text-green-800 rounded-lg bg-green-50 fixed top-5 right-5 shadow-lg z-50">
+    <div id="django-message-{{ forloop.counter }}" class="p-4 mb-4 text-sm font-medium text-sky-800 backdrop-blur-lg rounded-lg bg-sky-200/80 border-2 border-sky-300/60  fixed top-5 right-5 shadow-lg z-[9999]">
       <span class="font-medium">{{ message.tags|title }}!</span> {{ message }}
     </div>
     <script>

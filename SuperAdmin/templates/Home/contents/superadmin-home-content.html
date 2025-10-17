@@ -9,9 +9,9 @@
     <div class="px-6 mb-8">
         <div class="max-w-[calc(100%-80px)] mx-auto">
                 <!-- Dashboard Cards Row -->
-                <div class="flex space-x-6 w-full">
+                <div class="flex space-x-6 w-full mb-16">
                     <!-- Total Students Card -->
-                    <div class="flex-1 min-w-[260px] relative group bg-gradient-to-br from-blue-500 to-blue-700 shadow-xl rounded-2xl p-6 transition-all duration-300 hover:shadow-2xl hover:-translate-y-1">
+                    <div class="flex-1 min-w-[260px] relative group bg-gradient-to-br from-blue-500 to-blue-700 shadow-xl rounded-2xl p-8 transition-all duration-300 hover:shadow-2xl hover:-translate-y-1">
                         <!-- Decorative Blur Effect -->
                         <div class="absolute top-0 right-0 w-32 h-32 transform translate-x-16 -translate-y-16">
                             <div class="absolute inset-0 bg-blue-400 opacity-50 blur-3xl rounded-full"></div>
@@ -32,7 +32,7 @@
                     </div>
                 
                     <!-- Total Faculty Card -->
-                    <div class="flex-1 min-w-[260px] relative group bg-gradient-to-br from-indigo-500 to-indigo-700 shadow-xl rounded-2xl p-6 transition-all duration-300 hover:shadow-2xl hover:-translate-y-1">
+                    <div class="flex-1 min-w-[260px] relative group bg-gradient-to-br from-indigo-500 to-indigo-700 shadow-xl rounded-2xl p-8 transition-all duration-300 hover:shadow-2xl hover:-translate-y-1">
                         <div class="absolute top-0 right-0 w-32 h-32 transform translate-x-16 -translate-y-16">
                             <div class="absolute inset-0 bg-indigo-400 opacity-50 blur-3xl rounded-full"></div>
                         </div>
@@ -51,7 +51,7 @@
                     </div>
                 
                     <!-- CS Students Card -->
-                    <div class="flex-1 min-w-[260px] relative group bg-gradient-to-br from-amber-500 to-amber-700 shadow-xl rounded-2xl p-6 transition-all duration-300 hover:shadow-2xl hover:-translate-y-1">
+                    <div class="flex-1 min-w-[260px] relative group bg-gradient-to-br from-amber-500 to-amber-700 shadow-xl rounded-2xl p-8 transition-all duration-300 hover:shadow-2xl hover:-translate-y-1">
                         <div class="absolute top-0 right-0 w-32 h-32 transform translate-x-16 -translate-y-16">
                             <div class="absolute inset-0 bg-amber-400 opacity-50 blur-3xl rounded-full"></div>
                         </div>
@@ -69,7 +69,7 @@
                     </div>
                 
                     <!-- IT Students Card -->
-                    <div class="flex-1 min-w-[260px] relative group bg-gradient-to-br from-rose-500 to-rose-700 shadow-xl rounded-2xl p-6 transition-all duration-300 hover:shadow-2xl hover:-translate-y-1">
+                    <div class="flex-1 min-w-[260px] relative group bg-gradient-to-br from-rose-500 to-rose-700 shadow-xl rounded-2xl p-8 transition-all duration-300 hover:shadow-2xl hover:-translate-y-1">
                         <div class="absolute top-0 right-0 w-32 h-32 transform translate-x-16 -translate-y-16">
                             <div class="absolute inset-0 bg-rose-400 opacity-50 blur-3xl rounded-full"></div>
                         </div>
@@ -88,57 +88,58 @@
                 </div>
 
                 <!-- Students by Tier & Program Line Chart -->
-                <div class="bg-gradient-to-br from-blue-700/60 to-blue-600 rounded-2xl shadow-2xl p-8 w-full mt-6 border border-sky-700/30">
-                    <div class="flex justify-between items-center mb-6">
+                <div class="bg-white rounded-xl shadow-2xl p-8 w-full mt-6">
+                    <div class="flex justify-between items-center p-4 mb-4">
                         <!-- Chart Title -->
                         <div>
-                            <h3 class="text-xl font-bold text-white mb-1">Activity Progress</h3>
-                            <p class="text-blue-100/70 text-sm"><span id="programLabel">All Programs</span></p>
+                            <h3 class="text-2xl font-bold text-blue-500 mb-1">Activity Progress</h3>
+                            <p class="text-blue-400 text-sm"><span id="programLabel">All Programs</span></p>
                         </div>
                         
                         <!-- Program Selector Dropdown -->
                         <div class="relative">
                             <button id="programMenuBtn" 
-                                    class="bg-blue-800/50 text-sm px-4 py-2.5 text-white rounded-xl shadow-lg 
-                                           hover:bg-blue-700/50 focus:outline-none focus:ring-2 focus:ring-blue-400 
-                                           focus:ring-offset-2 focus:ring-offset-blue-800 flex items-center space-x-2 
-                                           transition-all duration-200 border border-blue-500/30">
+                                    class="bg-white/80 text-sm px-4 py-2 text-blue-500 rounded-xl shadow-lg 
+                                           hover:bg-blue-100/50 focus:outline-none focus:ring-1 focus:ring-blue-400 
+                                           focus:ring-offset-0.5 focus:ring-offset-blue-800 flex items-center space-x-2 
+                                           transition-all duration-200 border border-blue-500/30 cursor-pointer">
                                 <span id="programMenuBtnText">All Programs</span>
                                 <svg class="w-4 h-4 ml-1 text-blue-200" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
                                 </svg>
                             </button>
                             <div id="programMenu" 
-                                 class="absolute right-0 mt-2 w-48 bg-blue-800/95 rounded-xl shadow-xl border 
-                                        border-blue-500/30 hidden z-10 backdrop-blur-sm">
-                                <button class="block w-full text-left px-4 py-2.5 text-blue-100 hover:bg-blue-700/50 
-                                        hover:text-white transition-colors duration-200 first:rounded-t-xl" 
+                                 class="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border 
+                                        border-blue-500/30 hidden z-10 backdrop-blur-sm ">
+                                <button class="block w-full text-md text-left px-4 py-2.5 text-blue-500 hover:bg-blue-100/50 
+                                         transition-colors duration-200 first:rounded-t-xl cursor-pointer" 
                                         onclick="changeProgram('All')">All Programs</button>
-                                <button class="block w-full text-left px-4 py-2.5 text-blue-100 hover:bg-blue-700/50 
-                                        hover:text-white transition-colors duration-200" 
+                                <button class="block w-full text-md text-left px-4 py-2.5 text-blue-500 hover:bg-blue-100/50 
+                                         transition-colors duration-200 cursor-pointer" 
                                         onclick="changeProgram('Computer Science')">Computer Science</button>
-                                <button class="block w-full text-left px-4 py-2.5 text-blue-100 hover:bg-blue-700/50 
-                                        hover:text-white transition-colors duration-200 last:rounded-b-xl" 
+                                <button class="block w-full text-md text-left px-4 py-2.5 text-blue-500 hover:bg-blue-100/50 
+                                         transition-colors duration-200 last:rounded-b-xl cursor-pointer" 
                                         onclick="changeProgram('Information Technology')">Information Technology</button>
                             </div>
                         </div>
                     </div>
                                         
                     <script>
-                        // Pass Django data to JavaScript for chart rendering
                         window.csTierData = {{ cs_tier_data|safe }};
                         window.itTierData = {{ it_tier_data|safe }};
                         window.tierLabels = {{ tier_labels|safe }};
+                        window.totalStudentCount = {{ total_students|default:10 }};
                         
                         console.log('Data set from template:', {
                             csTierData: window.csTierData,
                             itTierData: window.itTierData,
-                            tierLabels: window.tierLabels
+                            tierLabels: window.tierLabels,
+                            totalStudentCount: window.totalStudentCount
                         });
                     </script>
                     
                     <!-- Chart Canvas Container -->
-                    <div class="mt-4 rounded-xl bg-blue-900/50 p-4 border border-sky-600/30">
+                    <div class="mt-8">
                         <canvas id="programLineChart" height="80"></canvas>
                     </div>
                 </div>

@@ -950,7 +950,12 @@ def update_game_trigger(request):
         db.collection("Game Triggers").document(doc_name).set(
             {key_name: isLock}, merge=True
         )
-        return JsonResponse({'success': True})
+        
+        status = "deactivated" if isLock else "activated"
+        message = f"Task '{task}' for tier '{tier}' has been {status}."
+        messages.success(request, message)
+        
+        return JsonResponse({'success': True, 'message': message})
     return JsonResponse({'success': False, 'error': 'Invalid request'})
 
 
@@ -976,7 +981,12 @@ def update_tier_lock(request):
         update_data = {f"{tier} isLock": isLock}
 
         db.collection("Game Triggers").document(doc_name).set(update_data, merge=True)
-        return JsonResponse({'success': True})
+        
+        status = "deactivated" if isLock else "activated"
+        message = f"The '{tier}' tier has been {status}."
+        messages.success(request, message)
+        
+        return JsonResponse({'success': True, 'message': message})
     return JsonResponse({'success': False, 'error': 'Invalid request'})
 
 
