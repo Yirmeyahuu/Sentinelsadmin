@@ -199,6 +199,29 @@
                                         </button>
                                     </td>
                                 </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="3" class="px-6 py-20 text-center">
+                                        <div class="flex flex-col items-center gap-4">
+                                            <!-- Illustrative icon -->
+                                            <svg class="w-16 h-16 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 11c1.657 0 3-1.343 3-3S13.657 5 12 5s-3 1.343-3 3 1.343 3 3 3zM5.5 20a6.5 6.5 0 0113 0" />
+                                            </svg>
+
+                                            <h3 class="text-slate-800 text-lg font-semibold">No students added yet</h3>
+                                            <p class="text-sm text-slate-500 max-w-[560px]">
+                                                Your student list is currently empty. Add new students or import a CSV to get started.
+                                            </p>
+
+                                            <div class="flex items-center gap-3 mt-3">
+                                                <a href="{% url 'faculty-student-list' %}" type="button"
+                                                        class="inline-flex items-center px-4 py-2 bg-sky-600 text-white rounded-xl text-sm hover:bg-sky-700 transition">
+                                                    Add Student
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
                                 {% endfor %}
                             </tbody>
                         </table>

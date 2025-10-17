@@ -1765,6 +1765,8 @@ def junior_tier(request):
         "task5": "Junior_Task_5(QNA)",
         "task6": "Junior_Task_6(Defeat Serpentix2)",
     }
+
+    selected_task = request.GET.get("task", "task1")
     
     # Get current time in Philippine timezone
     philippine_tz = pytz.timezone('Asia/Manila')
