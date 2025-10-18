@@ -24,6 +24,27 @@ window.closeFacultyActivityDeadlineModal = function() {
     document.getElementById('facultyDeadlineForm').reset();
 };
 
+function showLoadingOnCard(title) {
+    // Find the specific card using the data-title attribute
+    const card = document.querySelector(`[data-title="${title.replace(/"/g, '\\"')}"]`);
+    if (card) {
+        // Create the overlay div
+        const overlay = document.createElement('div');
+        overlay.className = 'absolute inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center z-10';
+        
+        // Create the SVG spinner using Tailwind classes
+        overlay.innerHTML = `
+            <svg class="animate-spin h-8 w-8 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+        `;
+        
+        // Append the overlay to the card
+        card.appendChild(overlay);
+    }
+}
+
 function convertTo12Hour(time24) {
     if (!time24) return "";
     const [hour, minute] = time24.split(':');
@@ -47,6 +68,9 @@ window.submitFacultyDeadline = function(event) {
     const date = document.getElementById('facultyDeadlineDate').value;
     const time24 = document.getElementById('facultyDeadlineTime').value;
     const time12 = convertTo12Hour(time24);
+
+    closeFacultyActivityDeadlineModal();
+    showLoadingOnCard(title);
 
     const payload = {
         title: title,
@@ -90,18 +114,11 @@ window.submitFacultyDeadline = function(event) {
         });
     })
     .then(data => {
-        console.log('Processing data:', data);
-        console.log('Data status:', data.status);
-        console.log('Data message:', data.message);
-        
         if (data.status === 'success') {
-            console.log('SUCCESS!');
-            alert(data.message || 'Deadline set successfully!');
             closeFacultyActivityDeadlineModal();
-            location.reload();
+            location.reload(); // Reload the page instead of showing an alert
         } else {
-            console.log('ERROR from server:', data.message);
-            alert(data.message || 'Failed to set deadline.');
+            alert('Error: ' + data.message); // Show alert only on error
         }
     })
     .catch(error => {
@@ -144,8 +161,14 @@ window.executeDeadlineRemoval = function() {
         return;
     }
     
+    const title = activityToRemove;
+
+    // Close modal and show loading spinner on the card
+    closeDeadlineModal();
+    showLoadingOnCard(title);
+
     console.log('=== REMOVE DEADLINE ===');
-    console.log('Removing deadline for:', activityToRemove);
+    console.log('Removing deadline for:', title);
     
     const csrfToken = getCookie('csrftoken');
     console.log('CSRF Token:', csrfToken ? 'Found' : 'NOT FOUND');
@@ -157,32 +180,21 @@ window.executeDeadlineRemoval = function() {
             'X-CSRFToken': csrfToken
         },
         body: JSON.stringify({
-            title: activityToRemove
+            title: title
         })
     })
-    .then(response => {
-        console.log('Remove response status:', response.status);
-        return response.clone().text().then(text => {
-            console.log('Raw remove response:', text);
-            return JSON.parse(text);
-        });
-    })
+    .then(response => response.json())
     .then(data => {
-        console.log('Remove response data:', data);
         if (data.status === 'success') {
-            alert(data.message || 'Deadline removed successfully!');
             closeDeadlineModal();
-            location.reload();
+            location.reload(); // Reload the page instead of showing an alert
         } else {
-            alert(data.message || 'Failed to remove deadline.');
+            alert('Error: ' + data.message); // Show alert only on error
         }
     })
     .catch(error => {
-        console.error('Remove error:', error);
+        console.error('Error removing deadline:', error);
         alert('An error occurred while removing the deadline.');
-    })
-    .finally(() => {
-        console.log('=== END REMOVE ===');
     });
 };
 
@@ -201,3 +213,4 @@ function getCookie(name) {
     }
     return cookieValue;
 }
+
