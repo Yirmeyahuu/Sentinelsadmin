@@ -301,11 +301,11 @@ function downloadCSV(data, filename) {
 
 // Initialize advanced features if needed
 document.addEventListener('DOMContentLoaded', function() {
+    initializeAdvancedFilters();
 
-     initializeAdvancedFilters();
-
-     const searchQuery = document.querySelector('input[name="search"]').value;
-     if (searchQuery) {
-         highlightSearchTerms(searchQuery);
-     }
+    const searchInput = document.querySelector('input[name="search"]');
+    const searchQuery = searchInput ? searchInput.value : '';
+    if (searchQuery) {
+        highlightSearchTerms(searchQuery);
+    }
 });

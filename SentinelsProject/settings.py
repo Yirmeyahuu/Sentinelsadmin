@@ -86,7 +86,13 @@ ROOT_URLCONF = 'SentinelsProject.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates'), os.path.join(BASE_DIR, 'theme/templates'), os.path.join(BASE_DIR, 'SuperAdmin/templates'), os.path.join(BASE_DIR, 'Faculty/templates'), os.path.join(BASE_DIR, 'Student/templates')],
+        'DIRS': [
+            os.path.join(BASE_DIR, 'templates'),
+            os.path.join(BASE_DIR, 'theme/templates'), 
+            os.path.join(BASE_DIR, 'SuperAdmin/templates'), 
+            os.path.join(BASE_DIR, 'Faculty/templates'), 
+            os.path.join(BASE_DIR, 'Student/templates'),
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

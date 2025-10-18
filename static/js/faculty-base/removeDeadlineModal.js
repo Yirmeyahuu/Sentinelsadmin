@@ -1,6 +1,3 @@
-// Global variable to store activity title for removal
-let activityToRemove = null;
-
 window.confirmDeadlineRemoval = function(event, title) {
     event.stopPropagation();
     activityToRemove = title;

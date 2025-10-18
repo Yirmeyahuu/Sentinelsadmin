@@ -1,13 +1,12 @@
-{% load static %}
-{% load tailwind_tags %}
+{% load static tailwind_tags %}
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>{% block title %}SENTINELS | Login{% endblock %}</title>
+    {% tailwind_css %}
     <link rel="icon" href="{% static 'assets/img/Sentinels-logo.svg' %}">
-    <script src="https://cdn.tailwindcss.com"></script>
 
     <!-- Basic Open Graph tags -->
     <meta property="og:title" content="Sentinels Web System" />
@@ -30,6 +29,7 @@
         }
     </style>
 </head>
+
 <body class="min-h-screen flex">
 
 <!-- Global Notification-->

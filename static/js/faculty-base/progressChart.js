@@ -17,8 +17,14 @@ window.initTierProgressChart = function() {
             const completion = ((count / totalStudents) * 100).toFixed(1);
             
             // Update completion rate display
-            card.querySelector('.completion-rate').textContent = `${completion}%`;
-            card.querySelector('.completion-bar').style.width = `${completion}%`;
+            const completionRateElem = card.querySelector('.completion-rate');
+            if (completionRateElem) {
+                completionRateElem.textContent = `${completion}%`;
+            }
+            const completionBarElem = card.querySelector('.completion-bar');
+            if (completionBarElem) {
+                completionBarElem.style.width = `${completion}%`;
+            }
 
             // Track highest completion for top tier
             if (parseFloat(completion) > maxCompletion) {
@@ -27,10 +33,16 @@ window.initTierProgressChart = function() {
             }
         });
 
-        // Update summary statistics
-        document.getElementById('avgCompletion').textContent = 
-            ((Object.values(tierData).reduce((a, b) => a + b, 0) / (totalStudents * 3) * 100)).toFixed(1) + '%';
-        document.getElementById('topTier').textContent = topTier;
+        // Update summary statistics safely
+        const avgCompletionElem = document.getElementById('avgCompletion');
+        if (avgCompletionElem) {
+            avgCompletionElem.textContent = 
+                ((Object.values(tierData).reduce((a, b) => a + b, 0) / (totalStudents * 3) * 100)).toFixed(1) + '%';
+        }
+        const topTierElem = document.getElementById('topTier');
+        if (topTierElem) {
+            topTierElem.textContent = topTier;
+        }
     }
 
     // Destroy existing chart if it exists

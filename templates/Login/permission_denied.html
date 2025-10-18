@@ -1,5 +1,4 @@
-{% load static %}
-{% load tailwind_tags %}
+{% load static tailwind_tags %}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -7,6 +6,7 @@
     <meta charset="UTF-8">
     <title>{% block title %}SENTINELS | Denied{% endblock %}</title>
     {% tailwind_css %}
+    <link rel="icon" href="{% static 'assets/img/Sentinels-logo.svg' %}">
 </head>
 <body class="bg-gradient-to-br from-blue-900 to-gray-900 flex items-center justify-center min-h-screen p-4">
     <div class="bg-blue-500 p-8 rounded-3xl shadow-2xl text-center max-w-md w-full relative overflow-hidden">

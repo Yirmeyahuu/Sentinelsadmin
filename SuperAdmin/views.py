@@ -601,7 +601,6 @@ def Superadmin_activity_page(request):
         "novice_is_locked": lock_states['Novice'],
         "junior_is_locked": lock_states['Junior'],
         "senior_is_locked": lock_states['Senior'],
-        "show_sticky_container": False,
     }
 
     if request.headers.get('HX-Request'):

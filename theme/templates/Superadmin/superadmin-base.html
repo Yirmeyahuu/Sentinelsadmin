@@ -1,5 +1,4 @@
-{% load static %}
-{% load tailwind_tags %}
+{% load static tailwind_tags %}
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -7,7 +6,6 @@
     <title>{% block title %}SENTINELS{% endblock title%}</title>
     {% tailwind_css %}
     <link rel="icon" href="{% static 'assets/img/Sentinels-logo.svg' %}">
-    <link rel="stylesheet" href="{% static 'css/dist/styles.css' %}">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     <script src="https://unpkg.com/htmx.org@1.9.6"></script>
@@ -33,6 +31,16 @@
     <script src="{% static 'assets/js/alpine.min.js' %}" defer></script>
     <script src="{% static 'assets/js/chart.min.js' %}"></script>
     <script src="{% static 'assets/js/neon-glow-plugin.js' %}"></script>
+
+    <!-- Reinitialize scripts after HTMX swap -->
+    <script>
+      document.body.addEventListener('htmx:afterSwap', () => {
+        if (window.Alpine) {
+          Alpine.discoverUninitializedComponents(el => Alpine.initializeComponent(el));
+        }
+      });
+    </script>
+
 
     <!-- Script of external Javascript-->
     <script src="{% static 'js/superadmin-base/open-modals.js' %}" defer></script>

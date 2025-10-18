@@ -73,7 +73,9 @@ htmlcov/
 .settings/
 
 # Tailwind and build cache
-.cache/
+theme/static_src/node_modules/
+theme/static_src/.cache/
+theme/static_src/dist/
 
 # Misc
 npm-debug.log*

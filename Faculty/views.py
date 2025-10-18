@@ -1200,7 +1200,6 @@ def Faculty_activity_page(request):
         "activities_novice": activities_novice,
         "activities_junior": activities_junior,
         "activities_senior": activities_senior,
-        "show_sticky_container": False,
     }
 
     if request.headers.get('HX-Request'):
