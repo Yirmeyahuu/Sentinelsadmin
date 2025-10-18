@@ -23,31 +23,14 @@
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-    <style>
-        * {
-            font-family: 'Poppins', sans-serif;
-        }
-    </style>
+    <link rel="stylesheet" href="{% static 'css/animations.css' %}">
+
+    <script src="{% static 'js/global-js/sentinels-login.js' %}" defer></script>
 </head>
 
 <body class="min-h-screen flex">
 
-<style>
-    @keyframes float1 {
-        0%, 100% { transform: translate(0, 0); }
-        50% { transform: translate(30px, -50px); }
-    }
-    @keyframes float2 {
-        0%, 100% { transform: translate(0, 0); }
-        50% { transform: translate(-40px, 40px); }
-    }
-    .animate-float1 {
-        animation: float1 14s ease-in-out infinite;
-    }
-    .animate-float2 {
-        animation: float2 18s ease-in-out infinite;
-    }
-</style>
+
 <!-- Preloader -->
 <div id="preloader" class="fixed inset-0 bg-white flex items-center justify-center z-[10000] hidden overflow-hidden">
     <!-- Floating Gradient Blobs -->
@@ -181,50 +164,5 @@
             </div>
         </div>
     </div>
-
-<!-- Eye toggle for password -->
-<script>
-    document.getElementById('togglePassword').addEventListener('click', function (e) {
-        e.preventDefault(); // Prevent form submission
-        const passwordInput = document.getElementById('password');
-        const eyeOpen = document.getElementById('eyeOpen');
-        const eyeClosed = document.getElementById('eyeClosed');
-        
-        if (passwordInput.type === 'password') {
-            passwordInput.type = 'text';
-            eyeOpen.classList.add('hidden');
-            eyeClosed.classList.remove('hidden');
-        } else {
-            passwordInput.type = 'password';
-            eyeOpen.classList.remove('hidden');
-            eyeClosed.classList.add('hidden');
-        }
-    });
-</script>
-
-
-<!-- Form submission loading state -->
-<script>
-    document.getElementById('loginForm').addEventListener('submit', function() {
-        // Button loading state
-        const button = document.getElementById('submitButton');
-        const buttonText = button.querySelector('.button-text');
-        const buttonArrow = button.querySelector('.button-arrow');
-        const buttonSpinner = button.querySelector('.button-spinner');
-
-        button.disabled = true;
-        buttonText.textContent = 'Logging In...';
-        buttonArrow.classList.add('hidden');
-        buttonSpinner.classList.remove('hidden');
-
-        // Preloader state
-        const preloader = document.getElementById('preloader');
-        const preloaderText = document.getElementById('preloader-text');
-        
-        preloaderText.textContent = 'Logging In...';
-        preloader.classList.remove('hidden');
-    });
-</script>
-
 </body>
 </html>
