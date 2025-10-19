@@ -728,7 +728,7 @@ def student_progress(request):
             student_data = student_doc.to_dict()
             student_name = f"{student_data.get('first_name', '')} {student_data.get('last_name', '')}"
             
-            # Check each tier's completion
+            # Check each tier's completions
             for tier in tier_priority:
                 tasks_in_tier = tasks_by_tier.get(tier, [])
                 if not tasks_in_tier:
@@ -3021,6 +3021,7 @@ def studentData(request):
 
 @faculty_required
 def studentDataModal(request, student_id):
+    print("DEBUG studentDataModal request type:", type(request))
     try:
         # Get student data from Firebase
         doc_ref = db.collection('Registered_Students').document(student_id).get()
@@ -3364,7 +3365,7 @@ def remove_deadline(request):
     return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
 
 
-@faculty_required
+
 def check_late_completions(task_data, deadline_date, deadline_time):
     """Check if task was completed after deadline"""
     if not task_data or not deadline_date or not deadline_time:
@@ -3389,7 +3390,7 @@ def check_late_completions(task_data, deadline_date, deadline_time):
         return False
 
 
-@faculty_required
+
 def get_late_completions(request, task_title):
     try:
         faculty_id = request.session.get('faculty_id')
