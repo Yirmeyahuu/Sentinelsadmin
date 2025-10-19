@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const data = {
             labels: ['Strongly Agree', 'Agree', 'Undecided', 'Disagree', 'Strongly Disagree'],
             datasets: [{
-                data: [46, 208, 287, 289, 41],
+                data: [46, 208, 286, 289, 41],
                 backgroundColor: gradients,
                 borderWidth: 2,
                 borderColor: '#ffffff',

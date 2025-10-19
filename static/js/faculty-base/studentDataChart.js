@@ -22,7 +22,8 @@ function viewDetails(studentId) {
         <div class="bg-white rounded-2xl shadow-xl p-6 sm:p-8 w-full max-w-4xl mx-auto transform transition-all">
             <div class="flex items-start justify-between mb-6">
                 <div>
-                    <h2 class="text-2xl font-bold text-gray-800">Student Progress</h2>
+                    <h2 class="text-xl font-bold text-gray-800 mb-2">Student Progress</h2>
+                    <p class="student-name text-2xl font-semibold mb-2 text-sky-700"></p>
                     <p class="text-sm text-gray-500">Task completion and points overview</p>
                 </div>
                 <button onclick="closeModal()" class="p-2 rounded-full text-gray-400 hover:bg-gray-100 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-400 transition-colors duration-200">
@@ -57,9 +58,17 @@ async function fetchStudentTaskData(studentId, tier) {
             throw new Error('Failed to fetch student data');
         }
         const data = await response.json();
-        
+
+        // Update the modal header with the student name
+        const modalContainer = document.querySelector('#studentTaskDataModal .relative');
+        if (modalContainer && data.student_name) {
+            const nameElem = modalContainer.querySelector('.student-name');
+            if (nameElem) {
+                nameElem.textContent = data.student_name;
+            }
+        }
+
         const tierData = (data.task_details && data.task_details[tier]) ? data.task_details[tier] : {};
-        
         renderTaskChart(tierData, tier);
     } catch (error) {
         console.error("Error fetching student data:", error);
@@ -158,7 +167,7 @@ function renderTaskChart(taskData, tier) {
 
         window.studentTaskChart = new Chart(ctx, {
             type: 'bar',
-            indexAxis: 'y', // Make the bar chart horizontal
+            indexAxis: 'y',
             data: {
                 labels: labels,
                 datasets: [{
@@ -168,7 +177,7 @@ function renderTaskChart(taskData, tier) {
                     borderColor: labels.map(label => (taskColors[getTaskType(label)] || 'rgb(107, 114, 128)').replace('0.8', '1')),
                     borderWidth: 1,
                     borderRadius: 6,
-                    barThickness: 60,
+                    barThickness: 80,
                 }]
             },
             options: {

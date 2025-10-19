@@ -63,54 +63,71 @@ window.initTierProgressChart = function() {
             totalStudents || 10
         );
 
-        chartInstance = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: ['Novice', 'Junior', 'Senior'],
-                datasets: [{
-                    label: 'Students per Tier',
-                    data: [tierData.novice, tierData.junior, tierData.senior],
-                    backgroundColor: [
-                        'rgba(14, 165, 233, 0.7)',  // sky-500
-                        'rgba(6, 182, 212, 0.7)',   // cyan-500
-                        'rgba(59, 130, 246, 0.7)'   // blue-500
-                    ],
-                    borderColor: [
-                        'rgb(14, 165, 233)',  // sky-500
-                        'rgb(6, 182, 212)',   // cyan-500
-                        'rgb(59, 130, 246)'   // blue-500
-                    ],
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: false
-                    }
+            chartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Novice', 'Junior', 'Senior'],
+                    datasets: [{
+                        label: 'Students per Tier',
+                        data: [tierData.novice, tierData.junior, tierData.senior],
+                        backgroundColor: [
+                            'rgba(14, 165, 233, 0.7)',  // sky-500
+                            'rgba(6, 182, 212, 0.7)',   // cyan-500
+                            'rgba(59, 130, 246, 0.7)'   // blue-500
+                        ],
+                        borderColor: [
+                            'rgb(14, 165, 233)',  // sky-500
+                            'rgb(6, 182, 212)',   // cyan-500
+                            'rgb(59, 130, 246)'   // blue-500
+                        ],
+                        borderWidth: 0,
+                        borderRadius: 16, // Rounded bars
+                        barThickness: 280, // Thicker bars for modern look
+                    }]
                 },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        max: Math.max(maxValue, 5), // Ensure minimum scale of 5
-                        grid: {
-                            color: 'rgba(203, 213, 225, 0.2)' // slate-200 with opacity
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: 'rgba(30, 41, 59, 0.95)', // slate-800
+                            titleFont: { size: 16, weight: 'bold', family: "'Poppins', sans-serif" },
+                            bodyFont: { size: 14, family: "'Poppins', sans-serif" },
+                            padding: 14,
+                            cornerRadius: 12,
+                            displayColors: false,
                         },
-                        ticks: {
-                            stepSize: 1,
-                            precision: 0
-                        }
                     },
-                    x: {
-                        grid: {
-                            display: false
+                    layout: {
+                        padding: { top: 24, right: 24, bottom: 24, left: 24 }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: Math.ceil(Math.max(maxValue, 5) / 5) * 5,
+                            grid: { color: 'rgba(203, 213, 225, 0.1)' },
+                            border: { display: false },
+                            ticks: {
+                                font: { size: 14, weight: 'bold', family: "'Poppins', sans-serif" },
+                                color: '#64748b', // slate-500
+                                stepSize: 1,
+                                precision: 0,
+                                padding: 8,
+                            }
+                        },
+                        x: {
+                            grid: { display: false },
+                            border: { display: false },
+                            ticks: {
+                                font: { size: 15, weight: 'bold', family: "'Poppins', sans-serif" },
+                                color: '#334155', // slate-800
+                                padding: 12,
+                            }
                         }
                     }
                 }
-            }
-        });
+            });
     }
 
     // View toggle handler

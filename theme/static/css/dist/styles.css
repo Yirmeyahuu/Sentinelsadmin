@@ -19,6 +19,7 @@
     --color-red-900: oklch(39.6% 0.141 25.723);
     --color-orange-50: oklch(98% 0.016 73.684);
     --color-orange-100: oklch(95.4% 0.038 75.164);
+    --color-orange-300: oklch(83.7% 0.128 66.29);
     --color-orange-400: oklch(75% 0.183 55.934);
     --color-orange-500: oklch(70.5% 0.213 47.604);
     --color-orange-600: oklch(64.6% 0.222 41.116);
@@ -1503,6 +1504,9 @@
   .border-sky-100 {
     border-color: var(--color-sky-100);
   }
+  .border-sky-300 {
+    border-color: var(--color-sky-300);
+  }
   .border-sky-300\/60 {
     border-color: color-mix(in srgb, oklch(82.8% 0.111 230.318) 60%, transparent);
   }
@@ -1613,6 +1617,12 @@
   }
   .bg-amber-500 {
     background-color: var(--color-amber-500);
+  }
+  .bg-amber-600 {
+    background-color: var(--color-amber-600);
+  }
+  .bg-amber-700 {
+    background-color: var(--color-amber-700);
   }
   .bg-blue-50 {
     background-color: var(--color-blue-50);
@@ -1887,8 +1897,17 @@
   .bg-orange-100 {
     background-color: var(--color-orange-100);
   }
+  .bg-orange-300 {
+    background-color: var(--color-orange-300);
+  }
   .bg-orange-500 {
     background-color: var(--color-orange-500);
+  }
+  .bg-orange-600 {
+    background-color: var(--color-orange-600);
+  }
+  .bg-orange-800 {
+    background-color: var(--color-orange-800);
   }
   .bg-purple-100 {
     background-color: var(--color-purple-100);
@@ -2111,6 +2130,14 @@
   }
   .bg-yellow-400 {
     background-color: var(--color-yellow-400);
+  }
+  .bg-yellow-400\/80 {
+    background-color: color-mix(in srgb, oklch(85.2% 0.199 91.936) 80%, transparent);
+  }
+  @supports (color: color-mix(in lab, red, red)) {
+    .bg-yellow-400\/80 {
+      background-color: color-mix(in oklab, var(--color-yellow-400) 80%, transparent);
+    }
   }
   .bg-yellow-500 {
     background-color: var(--color-yellow-500);
@@ -2971,6 +2998,12 @@
   }
   .text-indigo-700 {
     color: var(--color-indigo-700);
+  }
+  .text-orange-100 {
+    color: var(--color-orange-100);
+  }
+  .text-orange-300 {
+    color: var(--color-orange-300);
   }
   .text-orange-700 {
     color: var(--color-orange-700);
