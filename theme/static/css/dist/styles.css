@@ -772,6 +772,9 @@
   .h-\[400px\] {
     height: 400px;
   }
+  .h-\[450px\] {
+    height: 450px;
+  }
   .h-\[600px\] {
     height: 600px;
   }
@@ -2132,6 +2135,10 @@
     --tw-gradient-position: to right in oklab;
     background-image: linear-gradient(var(--tw-gradient-stops));
   }
+  .bg-gradient-to-t {
+    --tw-gradient-position: to top in oklab;
+    background-image: linear-gradient(var(--tw-gradient-stops));
+  }
   .bg-gradient-to-tr {
     --tw-gradient-position: to top right in oklab;
     background-image: linear-gradient(var(--tw-gradient-stops));
@@ -2358,6 +2365,10 @@
   }
   .from-teal-400 {
     --tw-gradient-from: var(--color-teal-400);
+    --tw-gradient-stops: var(--tw-gradient-via-stops, var(--tw-gradient-position), var(--tw-gradient-from) var(--tw-gradient-from-position), var(--tw-gradient-to) var(--tw-gradient-to-position));
+  }
+  .from-transparent {
+    --tw-gradient-from: transparent;
     --tw-gradient-stops: var(--tw-gradient-via-stops, var(--tw-gradient-position), var(--tw-gradient-from) var(--tw-gradient-from-position), var(--tw-gradient-to) var(--tw-gradient-to-position));
   }
   .from-white {
@@ -4072,6 +4083,9 @@
   .focus\:ring-gray-200:focus {
     --tw-ring-color: var(--color-gray-200);
   }
+  .focus\:ring-gray-400:focus {
+    --tw-ring-color: var(--color-gray-400);
+  }
   .focus\:ring-gray-500:focus {
     --tw-ring-color: var(--color-gray-500);
   }
@@ -4095,6 +4109,9 @@
   }
   .focus\:ring-sky-400:focus {
     --tw-ring-color: var(--color-sky-400);
+  }
+  .focus\:ring-sky-500:focus {
+    --tw-ring-color: var(--color-sky-500);
   }
   .focus\:ring-sky-500\/20:focus {
     --tw-ring-color: color-mix(in srgb, oklch(68.5% 0.169 237.323) 20%, transparent);
@@ -4211,6 +4228,11 @@
   @media (width >= 40rem) {
     .sm\:justify-start {
       justify-content: flex-start;
+    }
+  }
+  @media (width >= 40rem) {
+    .sm\:p-8 {
+      padding: calc(var(--spacing) * 8);
     }
   }
   @media (width >= 40rem) {

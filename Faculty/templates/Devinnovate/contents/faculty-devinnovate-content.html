@@ -35,7 +35,7 @@
                 </p>
             </div>
             <!-- Right: Sliding Photos -->
-            <div class="relative w-full h-96 md:h-[28rem] flex items-center justify-center overflow-hidden">
+            <div id="team-slider" class="relative w-full h-96 md:h-[28rem] flex items-center justify-center overflow-hidden">
                 <div id="team-slider" class="w-full h-full rounded-xl shadow-lg bg-gray-200 flex items-center justify-center">
                     <img id="slider-img" src="{% static 'assets/img/profiles/group/group1.webp' %}" alt="Team Photo" class="object-cover w-full h-full rounded-xl transition-all duration-700"'">
                 </div>
@@ -163,11 +163,22 @@
 <script>
     // Simple slider functionality
     document.addEventListener('DOMContentLoaded', function() {
+    function() {
+        const sliderContainer = document.getElementById('team-slider');
+        if (sliderContainer) {
+            const overlay = document.createElement('div');
+            overlay.className = 'absolute top-0 left-0 w-full h-full bg-gradient-to-t from-transparent to-blue-500 opacity-40 rounded-xl pointer-events-none';
+            sliderContainer.parentElement.insertBefore(overlay, document.getElementById('prev-btn'));
+        }
+
         const images = [
             "{% static 'assets/img/profiles/group/group1.webp' %}",
             "{% static 'assets/img/profiles/group/group2.webp' %}",
             "{% static 'assets/img/profiles/group/group3.webp' %}"
         ];
+
+
+
         let current = 0;
         const sliderImg = document.getElementById('slider-img');
         const prevBtn = document.getElementById('prev-btn');

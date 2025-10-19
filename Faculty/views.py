@@ -105,7 +105,7 @@ def Faculty_home(request):
 
     junior_tasks = [
         "Junior_Task_1(Collect Books)",
-        "Junior_Task_2(QNA)",
+        "Junior_Task_2(Casesar's QNA)",
         "Junior_Task_3(Collect USB)",
         "Junior_Task_4(Bellaso's QNA)",
         "Junior_Task_5(QNA)",
@@ -402,7 +402,7 @@ def student_list(request):
         "Novice_Task_4_(Defeat Rootkit)",
         # Junior Tasks
         "Junior_Task_1(Collect Books)",
-        "Junior_Task_2(QNA)",
+        "Junior_Task_2(Caesar's QNA)",
         "Junior_Task_3(Collect USB)", 
         "Junior_Task_4(Bellaso's QNA)",
         "Junior_Task_5(QNA)",
@@ -576,7 +576,7 @@ def student_progress(request):
         "Novice_Task_4_(Defeat Rootkit)",
         # Junior Tasks
         "Junior_Task_1(Collect Books)",
-        "Junior_Task_2(QNA)",
+        "Junior_Task_2(Caesar's QNA)",
         "Junior_Task_3(Collect USB)", 
         "Junior_Task_4(Bellaso's QNA)",
         "Junior_Task_5(QNA)",
@@ -1146,7 +1146,7 @@ def Faculty_activity_page(request):
         # Map Firebase tasks to display titles
         task_to_display = {
             "Junior_Task_1(Collect Books)": "Junior Task 1",
-            "Junior_Task_2(QNA)": "Junior Task 1",
+            "Junior_Task_2(Caesar's QNA)": "Junior Task 1",
             "Junior_Task_3(Collect USB)": "Junior Task 2",
             "Junior_Task_4(Bellaso's QNA)": "Junior Task 2",
             "Junior_Task_5(QNA)": "Junior Task 3",
@@ -1758,7 +1758,7 @@ def junior_tier(request):
     # Task map for filtering Junior tier tasks
     task_map = {
         "task1": "Junior_Task_1(Collect Books)",
-        "task2": "Junior_Task_2(QNA)",
+        "task2": "Junior_Task_2(Caesar's QNA)",
         "task3": "Junior_Task_3(Collect USB)",
         "task4": "Junior_Task_4(Bellaso's QNA)",
         "task5": "Junior_Task_5(QNA)",
@@ -2115,7 +2115,7 @@ def faculty_student_status(request):
         "Novice_Task_4_(Defeat Rootkit)",
         # Junior Tasks
         "Junior_Task_1(Collect Books)",
-        "Junior_Task_2(QNA)",
+        "Junior_Task_2(Caesar's QNA)",
         "Junior_Task_3(Collect USB)", 
         "Junior_Task_4(Bellaso's QNA)",
         "Junior_Task_5(QNA)",
@@ -2845,8 +2845,6 @@ def studentData(request):
             Q(last_name__icontains=search_query)
         )
 
-    
-
 
     # Firebase task completion check
     task_fields = [
@@ -2854,7 +2852,7 @@ def studentData(request):
         "Novice_Task_1(Collect Books)", "Novice_Task_2(Collect USB)",
         "Novice_Task_3(QNA)", "Novice_Task_4_(Defeat Rootkit)",
         # Junior Tasks
-        "Junior_Task_1(Collect Books)", "Junior_Task_2(QNA)",
+        "Junior_Task_1(Collect Books)", "Junior_Task_2(Caesar's QNA)",
         "Junior_Task_3(Collect USB)", "Junior_Task_4(Bellaso's QNA)",
         "Junior_Task_5(QNA)", "Junior_Task_6(Defeat Serpentix2)",
         # Senior Tasks
@@ -2897,19 +2895,19 @@ def studentData(request):
                         if task_field.startswith("Novice"):
                             task_details['novice'][task_field] = {
                                 'points': points,
-                                'completedAt': task_info.get('completedAt'),
+                                'completedAt': task_info.get('completed_at'),
                                 'time_taken': task_info.get('time_taken', '')
                             }
                         elif task_field.startswith("Junior"):
                             task_details['junior'][task_field] = {
                                 'points': points,
-                                'completedAt': task_info.get('completedAt'),
+                                'completedAt': task_info.get('completed_at'),
                                 'time_taken': task_info.get('time_taken', '')
                             }
                         elif task_field.startswith("Senior"):
                             task_details['senior'][task_field] = {
                                 'points': points,
-                                'completedAt': task_info.get('completedAt'),
+                                'completedAt': task_info.get('completed_at'),
                                 'time_taken': task_info.get('time_taken', '')
                             }
 
@@ -2994,7 +2992,7 @@ def studentDataModal(request, student_id):
             "Novice_Task_4_(Defeat Rootkit)",
             # Junior Tasks
             "Junior_Task_1(Collect Books)",
-            "Junior_Task_2(QNA)",
+            "Junior_Task_2(Caesar's QNA)",
             "Junior_Task_3(Collect USB)",
             "Junior_Task_4(Bellaso's QNA)",
             "Junior_Task_5(QNA)",
@@ -3015,7 +3013,7 @@ def studentDataModal(request, student_id):
                 tier = 'novice' if 'Novice' in task_field else 'junior' if 'Junior' in task_field else 'senior'
                 task_details[tier][task_field] = {
                     'points': task_info.get('points', 0),
-                    'completedAt': task_info.get('completedAt'),
+                    'completedAt': task_info.get('completed_at'),
                     'time_taken': task_info.get('time_taken', '')
                 }
 
@@ -3113,7 +3111,7 @@ def saveActivityDeadline(request):
                 # Junior tasks
                 'Junior Task 1': [
                     "Junior_Task_1(Collect Books)",
-                    "Junior_Task_2(QNA)"
+                    "Junior_Task_2(Caesar's QNA)"
                 ],
                 'Junior Task 2': [
                     "Junior_Task_3(Collect USB)",
@@ -3247,7 +3245,7 @@ def remove_deadline(request):
                     # Junior tasks
                     'Junior Task 1': [
                         "Junior_Task_1(Collect Books)",
-                        "Junior_Task_2(QNA)"
+                        "Junior_Task_2(Caesar's QNA)"
                     ],
                     'Junior Task 2': [
                         "Junior_Task_3(Collect USB)",

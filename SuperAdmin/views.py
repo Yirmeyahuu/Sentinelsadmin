@@ -62,7 +62,7 @@ def Superadmin_Home(request):
 
     junior_tasks = [
         "Junior_Task_1(Collect Books)",
-        "Junior_Task_2(QNA)",
+        "Junior_Task_2(Caesar's QNA)",
         "Junior_Task_3(Collect USB)",
         "Junior_Task_4(Bellaso's QNA)",
         "Junior_Task_5(QNA)",
