@@ -3370,63 +3370,92 @@ def check_late_completions(task_data, deadline_date, deadline_time):
     """Check if task was completed after deadline"""
     if not task_data or not deadline_date or not deadline_time:
         return False
-        
+
     try:
-        # Combine deadline date and time
+        # Assume deadlines are set in local timezone (UTC+8)
+        local_tz = timezone(timedelta(hours=8))
         deadline_str = f"{deadline_date} {deadline_time}"
-        deadline = datetime.strptime(deadline_str, '%Y-%m-%d %H:%M')
-        
-        # Get completion timestamp
+        deadline = datetime.strptime(deadline_str, '%Y-%m-%d %I:%M %p')
+        deadline = deadline.replace(tzinfo=local_tz)
+
         completed_at = task_data.get('completed_at')
         if not completed_at:
             return False
-            
-        # Convert completion timestamp to datetime
-        completion_time = datetime.fromtimestamp(completed_at.timestamp())
-        
+
+        # Convert completed_at to datetime with local timezone
+        if hasattr(completed_at, 'to_pydatetime'):
+            completion_time = completed_at.to_pydatetime()
+            if completion_time.tzinfo is None:
+                completion_time = completion_time.replace(tzinfo=local_tz)
+            else:
+                completion_time = completion_time.astimezone(local_tz)
+        elif isinstance(completed_at, datetime):
+            if completed_at.tzinfo is None:
+                completion_time = completed_at.replace(tzinfo=local_tz)
+            else:
+                completion_time = completed_at.astimezone(local_tz)
+        elif isinstance(completed_at, str):
+            # Try parsing with AM/PM
+            try:
+                completion_time = datetime.strptime(completed_at, '%B %d, %Y at %I:%M:%S %p UTC%z')
+            except Exception:
+                try:
+                    completion_time = datetime.strptime(completed_at, '%Y-%m-%d %I:%M %p')
+                    completion_time = completion_time.replace(tzinfo=local_tz)
+                except Exception:
+                    return False
+        else:
+            return False
+
         # Task is late if completed after deadline
         return completion_time > deadline
-    except:
+    except Exception as e:
+        print(f"Error in check_late_completions: {e}")
         return False
-
 
 
 def get_late_completions(request, task_title):
     try:
         faculty_id = request.session.get('faculty_id')
-        
-        # Get deadline info for this task
         deadline_doc = db.collection('Activity Deadlines').document(faculty_id).get()
         if not deadline_doc.exists:
             return JsonResponse({'late_completions': []})
-            
+
         deadline_data = deadline_doc.to_dict()
-        
-        # Get all students' data
         students_ref = db.collection('Registered_Students').where('faculty_id', '==', faculty_id).stream()
-        
+
         late_completions = []
         for student in students_ref:
             student_data = student.to_dict()
-            
-            # Check each task that matches the display title
             for task_key, deadline_info in deadline_data.items():
                 if deadline_info.get('display_title') == task_title:
                     task_data = student_data.get(task_key)
                     if task_data and isinstance(task_data, dict):
-                        # Check if completion was late
-                        if check_late_completions(task_data, 
-                                                deadline_info.get('deadline_date'),
-                                                deadline_info.get('deadline_time')):
+                        if check_late_completions(
+                            task_data,
+                            deadline_info.get('deadline_date'),
+                            deadline_info.get('deadline_time')
+                        ):
+                            # Format completed_at for display
+                            completed_at = task_data.get('completed_at')
+                            display_time = ""
+                            if hasattr(completed_at, 'to_pydatetime'):
+                                display_time = completed_at.to_pydatetime().astimezone(timezone(timedelta(hours=8))).strftime('%Y-%m-%d %I:%M %p')
+                            elif isinstance(completed_at, datetime):
+                                display_time = completed_at.astimezone(timezone(timedelta(hours=8))).strftime('%Y-%m-%d %I:%M %p')
+                            elif isinstance(completed_at, str):
+                                display_time = completed_at
+                            else:
+                                display_time = str(completed_at)
+
                             late_completions.append({
                                 'student_name': f"{student_data.get('first_name', '')} {student_data.get('last_name', '')}",
                                 'student_id': student_data.get('student_id', ''),
-                                'completed_at': task_data['completed_at'].strftime('%Y-%m-%d %H:%M'),
+                                'completed_at': display_time,
                                 'points': task_data.get('points', 0)
                             })
-        
+
         return JsonResponse({'late_completions': late_completions})
-        
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 

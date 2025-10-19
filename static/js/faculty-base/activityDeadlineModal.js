@@ -69,8 +69,9 @@ window.submitFacultyDeadline = function(event) {
     const time24 = document.getElementById('facultyDeadlineTime').value;
     const time12 = convertTo12Hour(time24);
 
-    closeFacultyActivityDeadlineModal();
+    // Show loading on card BEFORE closing modal
     showLoadingOnCard(title);
+    closeFacultyActivityDeadlineModal();
 
     const payload = {
         title: title,
@@ -115,8 +116,10 @@ window.submitFacultyDeadline = function(event) {
     })
     .then(data => {
         if (data.status === 'success') {
-            closeFacultyActivityDeadlineModal();
-            location.reload(); // Reload the page instead of showing an alert
+            // Wait a short moment to show the loading animation
+            setTimeout(() => {
+                location.reload();
+            }, 600); // 600ms delay for animation visibility
         } else {
             alert('Error: ' + data.message); // Show alert only on error
         }
@@ -213,4 +216,3 @@ function getCookie(name) {
     }
     return cookieValue;
 }
-
