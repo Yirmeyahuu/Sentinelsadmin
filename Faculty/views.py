@@ -483,6 +483,8 @@ def student_list(request):
         # Normal request: return the full page
         return render(request, 'Students/student-list.html', context)
     
+
+
 # This is the student progress of Faculty
 @faculty_required
 def student_progress(request):
@@ -549,9 +551,15 @@ def student_progress(request):
                 # Get the required Firestore keys for this tier
                 required_keys = [t.firestore_key for t in tasks_in_tier]
                 
-                # Check if ALL required keys are in the Firestore data
-                if all(key in progress_data for key in required_keys):
-                    
+                # Check if ALL required keys are present AND represent a completed task
+                tier_is_complete = all(
+                    key in progress_data and
+                    isinstance(progress_data.get(key), dict) and
+                    progress_data.get(key, {}).get("points", 0) > 0
+                    for key in required_keys
+                )
+
+                if tier_is_complete:
                     # Tier is complete in Firestore. Now, sync it to PostgreSQL.
                     with transaction.atomic(): # Ensure all tasks for the tier are saved together
                         for task_to_sync in tasks_in_tier:
@@ -625,23 +633,56 @@ def student_progress(request):
             print(f"Error checking Firebase for student {student_id}: {e}")
             inactive_students_count += 1
     
+    # --- Tier Completion Counts from Firebase ---
+    # --- Tier Completion Counts from Firebase ---
+    novice_completed_count = 0
+    junior_completed_count = 0
+    senior_completed_count = 0
 
-    # --- Final Counts from PostgreSQL ---
-    
-    novice_completed_count = Student.objects.filter(
-        faculty_assignment__in=faculty_assignments, 
-        progress_records__task__tier='Novice'
-    ).distinct().count()
+    for student in students_in_section:
+        try:
+            doc_ref = db.collection('Registered_Students').document(student.student_id).get()
+            if not doc_ref.exists:
+                continue
 
-    junior_completed_count = Student.objects.filter(
-        faculty_assignment__in=faculty_assignments, 
-        progress_records__task__tier='Junior'
-    ).distinct().count()
+            progress_data = doc_ref.to_dict()
 
-    senior_completed_count = Student.objects.filter(
-        faculty_assignment__in=faculty_assignments, 
-        progress_records__task__tier='Senior'
-    ).distinct().count()
+            # Novice tier: count if all novice task fields exist
+            novice_tasks = [
+                "Novice_Task_1(Collect Books)",
+                "Novice_Task_2(Collect USB)",
+                "Novice_Task_3(QNA)",
+                "Novice_Task_4_(Defeat Rootkit)"
+            ]
+            if all(key in progress_data for key in novice_tasks):
+                novice_completed_count += 1
+
+            # Junior tier: count if all junior task fields exist
+            junior_tasks = [
+                "Junior_Task_1(Collect Books)",
+                "Junior_Task_2(Caesar's QNA)",
+                "Junior_Task_3(Collect USB)", 
+                "Junior_Task_4(Bellaso's QNA)",
+                "Junior_Task_5(QNA)",
+                "Junior_Task_6(Defeat Serpentix2)"
+            ]
+            if all(key in progress_data for key in junior_tasks):
+                junior_completed_count += 1
+
+            # Senior tier: count if all senior task fields exist
+            senior_tasks = [
+                "Senior_Task_1(Collect Books)",
+                "Senior_Task_2(QNA)",
+                "Senior_Task_3(Collect USB)",
+                "Senior_Task_4(QNA)",
+                "Senior_Task_5(QNA)",
+                "Senior_Task_6(Defeat Rootkit2)"
+            ]
+            if all(key in progress_data for key in senior_tasks):
+                senior_completed_count += 1
+
+        except Exception as e:
+            print(f"Error counting tier completion for student {student.student_id}: {e}")
     
     # Calculate totals for dashboard cards
     program_total = Student.objects.filter(
@@ -655,9 +696,9 @@ def student_progress(request):
     total_completions = novice_completed_count + junior_completed_count + senior_completed_count
     
     # Calculate individual tier completion rates
-    novice_completion_rate = format((novice_completed_count / total_students * 100), '.1f')
-    junior_completion_rate = format((junior_completed_count / total_students * 100), '.1f')
-    senior_completion_rate = format((senior_completed_count / total_students * 100), '.1f')
+    novice_completion_rate = format((novice_completed_count / total_students * 100), '.1f') if total_students > 0 else '0.0'
+    junior_completion_rate = format((junior_completed_count / total_students * 100), '.1f') if total_students > 0 else '0.0'
+    senior_completion_rate = format((senior_completed_count / total_students * 100), '.1f') if total_students > 0 else '0.0'
     
     # Find top tier based on highest completion count (existing code)
     tier_counts = {
@@ -683,13 +724,25 @@ def student_progress(request):
         # Priority order of tiers (highest to lowest)
         tier_priority = ['Senior', 'Junior', 'Novice']
 
-        for student in students_ref:
-            student_data = student.to_dict()
+        for student_doc in students_ref:
+            student_data = student_doc.to_dict()
             student_name = f"{student_data.get('first_name', '')} {student_data.get('last_name', '')}"
             
             # Check each tier's completion
             for tier in tier_priority:
-                if student_data.get(f'{tier}_isComplete', False):
+                tasks_in_tier = tasks_by_tier.get(tier, [])
+                if not tasks_in_tier:
+                    continue
+
+                required_keys = [t.firestore_key for t in tasks_in_tier]
+                tier_is_complete = all(
+                    key in student_data and
+                    isinstance(student_data.get(key), dict) and
+                    student_data.get(key, {}).get("points", 0) > 0
+                    for key in required_keys
+                )
+
+                if tier_is_complete:
                     tier_counts[tier] += 1
                     # Update top student if this is a higher tier
                     if top_tier_student['tier'] == '-' or \
@@ -736,6 +789,8 @@ def student_progress(request):
         return render(request, 'Students/contents/students-progress-content.html', context)
     else:
         return render(request, 'Students/students-progress.html', context)
+
+
     
 
 # This is the add student process of Faculty
