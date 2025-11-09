@@ -131,35 +131,6 @@ else:
     }
 
 
-    
-    # Create the directory and copy migrations without the problematic one
-    # This can be done via build script
-#postgresql://sentinels_db_user:yAkAHRMXpXdOFOyqNSeTk0f2rAXj7gKd@dpg-d3d3tqjipnbc73failq0-a/sentinels_db
-#
-#POSTGRESQL DATABASE ON RENDER
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': os.getenv('DB_NAME', 'sentinels_db'),
-#         'USER': os.getenv('DB_USER', 'postgres'),
-#         'PASSWORD': os.getenv('DB_PASSWORD', ''),
-#         'HOST': os.getenv('DB_HOST', 'localhost'),
-#         'PORT': os.getenv('DB_PORT', '5432'),
-#     }
-# }
-#DATABASE LOCALLY
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': 'sentinels_db',
-#         'USER': 'postgres',
-#         'PASSWORD': '!Poypoy.mignon!01',
-#         'HOST': 'localhost',
-#         'PORT': '5432',
-#     }
-# }
-
-
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
 

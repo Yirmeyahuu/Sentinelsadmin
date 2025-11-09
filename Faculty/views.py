@@ -1293,12 +1293,12 @@ def accept_student(request, student_id):
             first_name=pending_student.first_name,
             last_name=pending_student.last_name,
             middle_initial=pending_student.middle_initial,
-            faculty_assignment=faculty_assignment,  # Use faculty_assignment instead of faculty
+            faculty_assignment=faculty_assignment,
             student_status='Registered',
-            password=pending_student.password
+            password=pending_student.password  # Transfer hashed password from pending
         )
 
-        # Prepare the data for Firestore from the pending student object
+        # Prepare the data for Firestore - INCLUDE PASSWORD
         firestore_data = {
             'student_id': pending_student.student_id,
             'first_name': pending_student.first_name,
@@ -1307,6 +1307,7 @@ def accept_student(request, student_id):
             'program': pending_student.program,
             'year_section': pending_student.year_section,
             'semester': pending_student.semester,
+            'password': pending_student.password,  # Add hashed password to Firebase
         }
 
         # Create the corresponding document in Firestore with student details

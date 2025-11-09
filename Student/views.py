@@ -40,10 +40,21 @@ def StudentRegister(request):
         program = request.POST.get("program", "").strip()
         year_section = request.POST.get("year_section", "").strip()
         semester = request.POST.get("semester", "").strip()
+        password = request.POST.get("password", "").strip()
+        confirm_password = request.POST.get("confirm_password", "").strip()
 
         # Server-side validation and formatting
         try:
-            # FIRST: Check faculty assignment before any other processing
+            # Validate password FIRST
+            if len(password) < 8:
+                messages.error(request, "Password must be at least 8 characters long.")
+                return redirect('student_register')
+            
+            if password != confirm_password:
+                messages.error(request, "Passwords do not match.")
+                return redirect('student_register')
+            
+            # SECOND: Check faculty assignment before any other processing
             faculty_assignment = FacultyAssignment.objects.filter(
                 program=program,
                 year_section=year_section,
@@ -105,7 +116,7 @@ def StudentRegister(request):
                 program=program,
                 year_section=year_section,
                 semester=semester,
-                password=make_password(student_id), # Using student_id as default password
+                password=make_password(password), # Hash the user's password
             )
 
             messages.success(request, "Registration submitted successfully! Please wait for faculty approval.")

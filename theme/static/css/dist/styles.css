@@ -507,6 +507,9 @@
   .z-50 {
     z-index: 50;
   }
+  .z-100 {
+    z-index: 100;
+  }
   .z-\[-9999\] {
     z-index: -9999;
   }
@@ -646,6 +649,15 @@
   .mb-46 {
     margin-bottom: calc(var(--spacing) * 46);
   }
+  .-ml-4 {
+    margin-left: calc(var(--spacing) * -4);
+  }
+  .-ml-8 {
+    margin-left: calc(var(--spacing) * -8);
+  }
+  .-ml-12 {
+    margin-left: calc(var(--spacing) * -12);
+  }
   .ml-1 {
     margin-left: calc(var(--spacing) * 1);
   }
@@ -733,17 +745,26 @@
   .h-20 {
     height: calc(var(--spacing) * 20);
   }
+  .h-22 {
+    height: calc(var(--spacing) * 22);
+  }
   .h-24 {
     height: calc(var(--spacing) * 24);
   }
   .h-26 {
     height: calc(var(--spacing) * 26);
   }
+  .h-28 {
+    height: calc(var(--spacing) * 28);
+  }
   .h-32 {
     height: calc(var(--spacing) * 32);
   }
   .h-36 {
     height: calc(var(--spacing) * 36);
+  }
+  .h-40 {
+    height: calc(var(--spacing) * 40);
   }
   .h-48 {
     height: calc(var(--spacing) * 48);
@@ -853,14 +874,23 @@
   .w-20 {
     width: calc(var(--spacing) * 20);
   }
+  .w-22 {
+    width: calc(var(--spacing) * 22);
+  }
   .w-24 {
     width: calc(var(--spacing) * 24);
+  }
+  .w-28 {
+    width: calc(var(--spacing) * 28);
   }
   .w-32 {
     width: calc(var(--spacing) * 32);
   }
   .w-36 {
     width: calc(var(--spacing) * 36);
+  }
+  .w-40 {
+    width: calc(var(--spacing) * 40);
   }
   .w-48 {
     width: calc(var(--spacing) * 48);
@@ -1273,6 +1303,9 @@
   .overflow-hidden {
     overflow: hidden;
   }
+  .overflow-visible {
+    overflow: visible;
+  }
   .overflow-x-auto {
     overflow-x: auto;
   }
@@ -1321,6 +1354,10 @@
   .border-2 {
     border-style: var(--tw-border-style);
     border-width: 2px;
+  }
+  .border-3 {
+    border-style: var(--tw-border-style);
+    border-width: 3px;
   }
   .border-4 {
     border-style: var(--tw-border-style);
@@ -1890,6 +1927,9 @@
   .bg-orange-600 {
     background-color: var(--color-orange-600);
   }
+  .bg-orange-800 {
+    background-color: var(--color-orange-800);
+  }
   .bg-purple-100 {
     background-color: var(--color-purple-100);
   }
@@ -1946,6 +1986,9 @@
   }
   .bg-rose-600 {
     background-color: var(--color-rose-600);
+  }
+  .bg-rose-800 {
+    background-color: var(--color-rose-800);
   }
   .bg-sky-50 {
     background-color: var(--color-sky-50);
@@ -2021,6 +2064,9 @@
       background-color: color-mix(in oklab, var(--color-sky-700) 30%, transparent);
     }
   }
+  .bg-sky-800 {
+    background-color: var(--color-sky-800);
+  }
   .bg-sky-800\/50 {
     background-color: color-mix(in srgb, oklch(44.3% 0.11 240.79) 50%, transparent);
   }
@@ -2037,6 +2083,9 @@
   }
   .bg-teal-100 {
     background-color: var(--color-teal-100);
+  }
+  .bg-teal-800 {
+    background-color: var(--color-teal-800);
   }
   .bg-transparent {
     background-color: transparent;
@@ -2119,6 +2168,9 @@
     .bg-yellow-500\/20 {
       background-color: color-mix(in oklab, var(--color-yellow-500) 20%, transparent);
     }
+  }
+  .bg-yellow-800 {
+    background-color: var(--color-yellow-800);
   }
   .bg-gradient-to-b {
     --tw-gradient-position: to bottom in oklab;
@@ -2627,8 +2679,14 @@
     --tw-gradient-to: var(--color-yellow-500);
     --tw-gradient-stops: var(--tw-gradient-via-stops, var(--tw-gradient-position), var(--tw-gradient-from) var(--tw-gradient-from-position), var(--tw-gradient-to) var(--tw-gradient-to-position));
   }
+  .object-contain {
+    object-fit: contain;
+  }
   .object-cover {
     object-fit: cover;
+  }
+  .object-fill {
+    object-fit: fill;
   }
   .p-0 {
     padding: calc(var(--spacing) * 0);
@@ -2731,6 +2789,9 @@
   }
   .pr-10 {
     padding-right: calc(var(--spacing) * 10);
+  }
+  .pr-12 {
+    padding-right: calc(var(--spacing) * 12);
   }
   .pr-16 {
     padding-right: calc(var(--spacing) * 16);
@@ -4272,6 +4333,11 @@
     }
   }
   @media (width >= 48rem) {
+    .md\:w-2\/3 {
+      width: calc(2/3 * 100%);
+    }
+  }
+  @media (width >= 48rem) {
     .md\:w-5\/12 {
       width: calc(5/12 * 100%);
     }
@@ -4383,6 +4449,11 @@
   @media (width >= 64rem) {
     .lg\:h-20 {
       height: calc(var(--spacing) * 20);
+    }
+  }
+  @media (width >= 64rem) {
+    .lg\:w-1\/2 {
+      width: calc(1/2 * 100%);
     }
   }
   @media (width >= 64rem) {
