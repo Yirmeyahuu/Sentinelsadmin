@@ -3,6 +3,101 @@
     document.title = "SENTINELS | Developers";
 </script>
 
+<style>
+    /* Floating Particles Animation */
+    .profile-circle {
+        position: absolute;
+        overflow: visible;
+        pointer-events: none;
+    }
+    
+    .profile-circle::before,
+    .profile-circle::after {
+        content: '';
+        position: absolute;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.3);
+        animation: float 3s ease-in-out infinite;
+        z-index: 1;
+    }
+    
+    .profile-circle::before {
+        width: 8px;
+        height: 8px;
+        top: 20%;
+        left: 10%;
+        animation-delay: 0s;
+    }
+    
+    .profile-circle::after {
+        width: 6px;
+        height: 6px;
+        bottom: 25%;
+        right: 15%;
+        animation-delay: 1.5s;
+    }
+    
+    .particle {
+        position: absolute;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.4);
+        pointer-events: none;
+        animation: float 3s ease-in-out infinite;
+        z-index: 1;
+    }
+    
+    .particle:nth-child(1) {
+        width: 4px;
+        height: 4px;
+        top: 30%;
+        right: 20%;
+        animation-delay: 0.5s;
+    }
+    
+    .particle:nth-child(2) {
+        width: 6px;
+        height: 6px;
+        bottom: 35%;
+        left: 25%;
+        animation-delay: 2s;
+    }
+    
+    .particle:nth-child(3) {
+        width: 5px;
+        height: 5px;
+        top: 60%;
+        right: 30%;
+        animation-delay: 1s;
+    }
+    
+    @keyframes float {
+        0%, 100% {
+            transform: translateY(0px) scale(1);
+            opacity: 0.3;
+        }
+        50% {
+            transform: translateY(-15px) scale(1.1);
+            opacity: 0.6;
+        }
+    }
+    
+    /* Adviser card particles (larger) */
+    .adviser-circle .particle:nth-child(1) {
+        width: 6px;
+        height: 6px;
+    }
+    
+    .adviser-circle .particle:nth-child(2) {
+        width: 8px;
+        height: 8px;
+    }
+    
+    .adviser-circle .particle:nth-child(3) {
+        width: 7px;
+        height: 7px;
+    }
+</style>
+
 <div class="min-h-screen py-8 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
     <!-- Decorative Gradient Backgrounds -->
     <div class="absolute inset-0 pointer-events-none z-0">
@@ -16,11 +111,11 @@
     <div class="max-w-7xl mx-auto relative z-10">
         <!-- Header Section -->
         <div class="text-center mb-26">
-            <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
                 Meet the Team
             </h1>
             <div class="w-24 h-1 bg-blue-600 mx-auto mb-6"></div>
-            <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+            <p class="text-lg text-gray-500 max-w-2xl mx-auto">
                 The brilliant minds behind SENTINELS, dedicated to innovation and excellence
             </p>
         </div>
@@ -29,13 +124,13 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center mb-46">
             <!-- Left: Team Description -->
             <div class="flex flex-col justify-center h-full px-2">
-                <h2 class="text-2xl md:text-3xl font-bold text-center text-gray-900 mb-4">About Our Team</h2>
-                <p class="text-gray-700 text-justify md:text-lg leading-relaxed">
+                <h2 class="text-2xl md:text-3xl font-bold text-center text-gray-800 mb-4">About Our Team</h2>
+                <p class="text-gray-500 text-justify md:text-lg leading-relaxed">
                 We are leveraging our group's expertise in design and development to create an engaging and highly effective platform. This application aims to transform often complex and dry cybersecurity concepts into interactive, game-like challenges that foster rapid skill development and superior practical knowledge retention. By integrating core principles of game design—such as progressive difficulty, immediate feedback, and competitive elements—we are building a system where learners aren't just passively consuming information, but are actively solving problems and making decisions in a risk-free, simulated environment. Ultimately, our goal is to close the skills gap in the industry by making cybersecurity education more accessible, motivating, and directly applicable to real-world scenarios, ensuring that learners are not only knowledgeable but also job-ready.
                 </p>
             </div>
             <!-- Right: Sliding Photos -->
-            <div class="relative w-full h-96 md:h-[28rem] flex items-center justify-center overflow-hidden">
+            <div id="team-slider" class="relative w-full h-96 md:h-[28rem] flex items-center justify-center overflow-hidden">
                 <div id="team-slider" class="w-full h-full rounded-xl shadow-lg bg-gray-200 flex items-center justify-center">
                     <img id="slider-img" src="{% static 'assets/img/profiles/group/group1.webp' %}" alt="Team Photo" class="object-cover w-full h-full rounded-xl transition-all duration-700"'">
                 </div>
@@ -56,8 +151,15 @@
         <!-- Developers Grid -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-24">
             <!-- Team Member Card 1 -->
-            <div class="bg-gradient-to-br from-sky-400 to-sky-600 rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden transform hover:-translate-y-1 flex items-center p-6 gap-4">
-                <img src="{% static 'assets/img/profiles/team/poy.webp' %}" alt="John Doe" class="w-20 h-20 rounded-full object-cover ring-2 ring-sky-100" onerror="this.src='{% static 'images/default-avatar.png' %}'">
+            <div class="bg-gradient-to-br from-sky-400 to-sky-600 rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-visible transform hover:-translate-y-1 flex items-center p-6 gap-4 relative">
+                <div class="relative">
+                    <img src="{% static 'assets/img/profiles/team/poypoy.png' %}" alt="Jeremiah" class="w-32 h-32 object-contain relative z-10" onerror="this.src='{% static 'images/default-avatar.png' %}'">
+                    <div class="absolute inset-0 w-24 h-24 rounded-full bg-sky-800 border-3 border-white top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-0 profile-circle">
+                        <span class="particle"></span>
+                        <span class="particle"></span>
+                        <span class="particle"></span>
+                    </div>
+                </div>
                 <div class="flex-grow">
                     <h2 class="text-xl font-bold text-white mb-1">Jeremiah P. Pantaras</h2>
                     <p class="text-base text-white italic mb-1">"Poypoy"</p>
@@ -69,9 +171,17 @@
                     </p>
                 </div>
             </div>
+            
             <!-- Team Member Card 2 -->
-            <div class="bg-gradient-to-br from-teal-400 to-teal-500 rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden transform hover:-translate-y-1 flex items-center p-6 gap-4">
-                <img src="{% static 'assets/img/profiles/team/bon.webp' %}" alt="Jane Smith" class="w-20 h-20 rounded-full object-cover ring-2 ring-teal-100" onerror="this.src='{% static 'images/default-avatar.png' %}'">
+            <div class="bg-gradient-to-br from-teal-400 to-teal-500 rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-visible transform hover:-translate-y-1 flex items-center p-6 gap-4 relative">
+                <div class="relative">
+                    <img src="{% static 'assets/img/profiles/team/bayer.png' %}" alt="John Eric" class="w-32 h-32 object-contain relative z-10" onerror="this.src='{% static 'images/default-avatar.png' %}'">
+                    <div class="absolute inset-0 w-24 h-24 rounded-full bg-teal-800 border-3 border-white top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-0 profile-circle">
+                        <span class="particle"></span>
+                        <span class="particle"></span>
+                        <span class="particle"></span>
+                    </div>
+                </div>
                 <div class="flex-grow">
                     <h2 class="text-xl font-bold text-white mb-1">John Eric G. Bayer</h2>
                     <p class="text-base text-white italic mb-1">"Bonbon"</p>
@@ -83,9 +193,17 @@
                     </p>
                 </div>
             </div>
+            
             <!-- Team Member Card 3 -->
-            <div class="bg-gradient-to-br from-rose-400 to-rose-500 rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden transform hover:-translate-y-1 flex items-center p-6 gap-4">
-                <img src="{% static 'assets/img/profiles/team/charles.webp' %}" alt="Mike Johnson" class="w-20 h-20 rounded-full object-cover ring-2 ring-rose-100" onerror="this.src='{% static 'images/default-avatar.png' %}'">
+            <div class="bg-gradient-to-br from-rose-400 to-rose-500 rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-visible transform hover:-translate-y-1 flex items-center p-6 gap-4 relative">
+                <div class="relative">
+                    <img src="{% static 'assets/img/profiles/team/roque.png' %}" alt="Joseph Charles" class="w-32 h-32 object-contain relative z-10" onerror="this.src='{% static 'images/default-avatar.png' %}'">
+                    <div class="absolute inset-0 w-24 h-24 rounded-full bg-rose-800 border-3 border-white top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-0 profile-circle">
+                        <span class="particle"></span>
+                        <span class="particle"></span>
+                        <span class="particle"></span>
+                    </div>
+                </div>
                 <div class="flex-grow">
                     <h2 class="text-xl font-bold text-white mb-1">Joseph Charles A. Roque</h2>
                     <p class="text-base text-white italic mb-1">"Charles"</p>
@@ -97,9 +215,17 @@
                     </p>
                 </div>
             </div>
+            
             <!-- Team Member Card 4 -->
-            <div class="bg-gradient-to-br from-orange-400 to-orange-500 rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden transform hover:-translate-y-1 flex items-center p-6 gap-4">
-                <img src="{% static 'assets/img/profiles/team/roy.webp' %}" alt="Anna Lee" class="w-20 h-20 rounded-full object-cover ring-2 ring-orange-100" onerror="this.src='{% static 'images/default-avatar.png' %}'">
+            <div class="bg-gradient-to-br from-orange-400 to-orange-500 rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-visible transform hover:-translate-y-1 flex items-center p-6 gap-4 relative">
+                <div class="relative">
+                    <img src="{% static 'assets/img/profiles/team/wenard.png' %}" alt="Wenard Roy" class="w-32 h-32 object-contain relative z-10" onerror="this.src='{% static 'images/default-avatar.png' %}'">
+                    <div class="absolute inset-0 w-24 h-24 rounded-full bg-orange-800 border-3 border-white top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-0 profile-circle">
+                        <span class="particle"></span>
+                        <span class="particle"></span>
+                        <span class="particle"></span>
+                    </div>
+                </div>
                 <div class="flex-grow">
                     <h2 class="text-xl font-bold text-white mb-1">Wenard Roy F. Barrera</h2>
                     <p class="text-base text-white italic mb-1">"Roy"</p>
@@ -112,11 +238,18 @@
                 </div>
             </div>
         </div>
-
-        <!-- Adviser Card (separated) -->
+        
+        <!-- Adviser Card (centered below the 2x2 grid) -->
         <div class="flex justify-center mb-16">
-            <div class="bg-gradient-to-br from-yellow-400 to-yellow-500 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden transform hover:-translate-y-1 flex items-center p-8 gap-6 max-w-lg w-full">
-                <img src="{% static 'assets/img/profiles/avatar-03.jpg' %}" alt="Prof. Samuel Cruz" class="w-24 h-24 rounded-full object-cover ring-4 ring-yellow-200" onerror="this.src='{% static 'images/default-avatar.png' %}'">
+            <div class="bg-gradient-to-br from-yellow-400 to-yellow-500 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-visible transform hover:-translate-y-1 flex items-center p-8 gap-6 w-full md:w-2/3 lg:w-1/2 relative">
+                <div class="relative">
+                    <img src="{% static 'assets/img/profiles/team/jhinwoo.png' %}" alt="Brian Steven" class="w-40 h-40 object-contain relative z-10" onerror="this.src='{% static 'images/default-avatar.png' %}'">
+                    <div class="absolute inset-0 w-32 h-32 rounded-full bg-yellow-800 border-4 border-white top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-0 profile-circle adviser-circle">
+                        <span class="particle"></span>
+                        <span class="particle"></span>
+                        <span class="particle"></span>
+                    </div>
+                </div>
                 <div class="flex-grow">
                     <h2 class="text-2xl font-bold text-white mb-1">Brian Steven G. Pajarillo</h2>
                     <p class="text-base text-white italic mb-1">"Jhinwoo"</p>
@@ -163,11 +296,22 @@
 <script>
     // Simple slider functionality
     document.addEventListener('DOMContentLoaded', function() {
+    function() {
+        const sliderContainer = document.getElementById('team-slider');
+        if (sliderContainer) {
+            const overlay = document.createElement('div');
+            overlay.className = 'absolute top-0 left-0 w-full h-full bg-gradient-to-t from-transparent to-blue-500 opacity-40 rounded-xl pointer-events-none';
+            sliderContainer.parentElement.insertBefore(overlay, document.getElementById('prev-btn'));
+        }
+
         const images = [
             "{% static 'assets/img/profiles/group/group1.webp' %}",
             "{% static 'assets/img/profiles/group/group2.webp' %}",
             "{% static 'assets/img/profiles/group/group3.webp' %}"
         ];
+
+
+
         let current = 0;
         const sliderImg = document.getElementById('slider-img');
         const prevBtn = document.getElementById('prev-btn');
@@ -193,46 +337,4 @@
             showImage(current);
         }, 5000);
     });
-</script>
-
-<script>
-function hideHelpIfDevelopers() {
-    const isDevPage = window.location.pathname.includes('/Superadmin/Developers/');
-    const helpTooltip = document.getElementById('helpTooltip');
-    if (helpTooltip) helpTooltip.style.display = isDevPage ? 'none' : '';
-
-    // Hide/show "Need help?" button by text
-    document.querySelectorAll('button, a').forEach(el => {
-        if (el.textContent && el.textContent.trim().toLowerCase().includes('need help')) {
-            el.style.display = isDevPage ? 'none' : '';
-        }
-    });
-
-    // About Us button logic
-    const aboutUsBtn = document.getElementById('superadminAboutUsFloatBtn');
-    if (aboutUsBtn) {
-        // Always show on non-Developers pages
-        if (!isDevPage) aboutUsBtn.style.display = '';             //
-        // Hide on Developers page
-        else aboutUsBtn.style.display = 'none';
-    }
-}
-
-// Hide About Us button when clicked (but only until next swap or navigation)
-document.addEventListener('DOMContentLoaded', function() {
-    const aboutUsBtn = document.getElementById('superadminAboutUsFloatBtn');
-    if (aboutUsBtn) {
-        aboutUsBtn.addEventListener('click', function() {
-            aboutUsBtn.style.display = 'none';
-        });
-    }
-    hideHelpIfDevelopers();
-});
-
-document.addEventListener('DOMContentLoaded', hideHelpIfDevelopers);
-document.addEventListener('htmx:afterSwap', hideHelpIfDevelopers);
-
-// Also observe DOM changes for dynamically added tooltips/buttons
-const observer = new MutationObserver(hideHelpIfDevelopers);
-observer.observe(document.body, { childList: true, subtree: true });
 </script>
