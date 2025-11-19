@@ -17,7 +17,8 @@ window.initSuperadminHomeChart = function() {
     // Calculate max value for better scaling
     const maxValue = Math.max(
         Math.max(...csData),
-        Math.max(...itData)
+        Math.max(...itData),
+        window.totalUsers || 10
     );
 
     const ctx = chartElem.getContext('2d');
@@ -76,7 +77,7 @@ window.initSuperadminHomeChart = function() {
                     beginAtZero: true,
                     title: { display: true, text: 'Students Completed', color: '#3b82f6', font: { size: 14, weight: 'bold' } },
                     min: 0,
-                    max: window.totalStudentCount || Math.max(maxValue + 5, 10),
+                    max: Math.max(maxValue + 5, 10),
                     ticks: {
                         color: '#3b82f6',
                         stepSize: 1,
