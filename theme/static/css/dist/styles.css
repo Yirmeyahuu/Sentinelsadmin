@@ -787,9 +787,6 @@
   .h-\[40vh\] {
     height: 40vh;
   }
-  .h-\[50vh\] {
-    height: 50vh;
-  }
   .h-\[400px\] {
     height: 400px;
   }
@@ -822,9 +819,6 @@
   }
   .max-h-\[400px\] {
     max-height: 400px;
-  }
-  .max-h-full {
-    max-height: 100%;
   }
   .min-h-\[400px\] {
     min-height: 400px;
@@ -966,9 +960,6 @@
   }
   .max-w-\[calc\(100vw-140px\)\] {
     max-width: calc(100vw - 140px);
-  }
-  .max-w-full {
-    max-width: 100%;
   }
   .max-w-lg {
     max-width: var(--container-lg);
