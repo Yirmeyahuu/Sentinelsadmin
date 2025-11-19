@@ -3,7 +3,7 @@ from django.contrib import messages
 from django.contrib.auth.hashers import make_password
 from .models import Student
 from Faculty.models import Faculty, FacultyAssignment
-from firebase_admin import firestore
+from firebase_admin import firestore, auth
 from .models import PendingStudent, Student
 from django.http import JsonResponse
 import json
@@ -91,10 +91,10 @@ def StudentRegister(request):
                 messages.error(request, "First name and last name are required.")
                 return redirect('student_register')
 
-            # Check if student is already pending or registered
+            # Check if student is already pending or registered in Django database
             if PendingStudent.objects.filter(student_id=student_id).exists() or Student.objects.filter(student_id=student_id).exists():
-                 messages.error(request, f"Student ID '{student_id}' is already registered or pending approval.")
-                 return redirect('student_register')
+                messages.error(request, f"Student ID '{student_id}' is already registered or pending approval.")
+                return redirect('student_register')
 
             # DOUBLE-CHECK: Verify faculty assignment still exists before creating student
             if not FacultyAssignment.objects.filter(
@@ -107,6 +107,7 @@ def StudentRegister(request):
                 messages.error(request, "Registration failed: Faculty assignment no longer available. Please contact your instructor.")
                 return redirect('student_register')
 
+            # Store plain text password temporarily in PendingStudent (will be used for Firebase Auth later)
             # Create a new PendingStudent instance with formatted data
             PendingStudent.objects.create(
                 student_id=student_id,
@@ -116,7 +117,7 @@ def StudentRegister(request):
                 program=program,
                 year_section=year_section,
                 semester=semester,
-                password=make_password(password), # Hash the user's password
+                password=password,  # Store plain password temporarily for Firebase Auth creation
             )
 
             messages.success(request, "Registration submitted successfully! Please wait for faculty approval.")

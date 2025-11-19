@@ -30,7 +30,6 @@ class Student(models.Model):
         choices=[('Registered', 'Registered'), ('Completed', 'Completed'), ('Drop-out', 'Drop-out')],
         default='Registered'
     )
-    password = models.CharField(max_length=128)
 
     @property
     def program(self):
@@ -61,7 +60,8 @@ class ArchivedStudent(models.Model):
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
     middle_initial = models.CharField(max_length=10, blank=True)
-    password = models.CharField(max_length=128, blank=True, default="")
+    password = models.CharField(max_length=128, blank=True, default="")  # Legacy field, not used for Firebase Auth students
+    firebase_uid = models.CharField(max_length=128, blank=True, default="")  # Store Firebase UID for restoration
     program = models.CharField(max_length=100, blank=True)
     year_section = models.CharField(max_length=20, blank=True)
     semester = models.CharField(max_length=20, blank=True)
@@ -82,7 +82,6 @@ class ArchivedStudent(models.Model):
         null=True,
         blank=True
     )
-    
     
     archived_at = models.DateTimeField(auto_now_add=True)
 
@@ -111,7 +110,7 @@ class PendingStudent(models.Model):
     class Meta:
         db_table = 'Pending_Students'
 
-# Keep your Task and StudentTaskProgress models as they were...
+
 
 class Task(models.Model):
     """Represents a single, definable task in the game."""

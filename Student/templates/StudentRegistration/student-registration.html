@@ -5,214 +5,242 @@
 
 {% block content %}
 <div class="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center p-4">
-    <div class="bg-white shadow-xl rounded-3xl overflow-hidden w-full max-w-7xl flex flex-col md:flex-row">
+    <div class="bg-white shadow-xl rounded-3xl overflow-hidden w-full max-w-6xl flex flex-col md:flex-row min-h-[400px]">
         <!-- Left Column: Image -->
-        <div class="hidden md:block md:w-5/12 bg-gradient-to-br from-blue-600 to-blue-800">
+        <div class="hidden md:block md:w-5/12 bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 relative overflow-hidden">
+            <div class="absolute inset-0 bg-black/10"></div>
             <img src="{% static 'assets/img/login-bg.png' %}" alt="Student Login" 
-                class="w-full h-full object-cover">
+                class="w-full h-full object-cover opacity-90">
+            <!-- Decorative elements -->
+            <div class="absolute top-0 left-0 w-full h-full">
+                <div class="absolute top-10 left-10 w-20 h-20 bg-white/10 rounded-full blur-xl"></div>
+                <div class="absolute bottom-10 right-10 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
+            </div>
         </div>
 
         <!-- Right Column: Registration Form -->
-        <div class="w-full md:w-7/12 p-8 md:p-12">
-            <h2 class="text-3xl font-bold text-gray-800 mb-8">Student Registration</h2>
-            <form action="{% url 'student_register' %}" method="POST" class="space-y-6" id="registrationForm">
+        <div class="w-full md:w-7/12 p-6 md:p-6 lg:p-8 overflow-y-auto max-h-[90vh] md:max-h-full">
+            <!-- Header -->
+            <div class="mb-6">
+                <h2 class="text-2xl md:text-3xl font-bold text-gray-800 mb-2">Create Account</h2>
+                <p class="text-sm text-gray-500">Fill in your details to get started</p>
+            </div>
+
+            <form action="{% url 'student_register' %}" method="POST" class="space-y-5" id="registrationForm">
                 {% csrf_token %}
                 
-                <!-- Student ID (Full Width Row) -->
+                <!-- Student ID -->
                 <div class="w-full">
+                    <label for="student_id" class="block text-sm font-semibold text-gray-700 mb-2">
+                        Student ID <span class="text-red-500">*</span>
+                    </label>
                     <div class="relative">
-                        <label for="student_id" class="block text-sm font-medium text-gray-700 mb-2">Student ID <span class="text-red-500">*</span></label>
-                        <div class="relative flex items-center">
-                            <span class="absolute left-3 text-blue-600 z-10">
-                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 9h3m-3 3h3m-3 3h3m-6 1c-.306-.613-.933-1-1.618-1H7.618c-.685 0-1.312.387-1.618 1M4 5h16a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Zm7 5a2 2 0 1 1-4 0 2 2 0 0 1 4 0Z"/>
-                                </svg>
-                            </span>
-                            <input type="text" id="student_id" name="student_id" required
-                                class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                placeholder="Enter your student ID"
-                                onblur="checkStudentIdAvailability(this.value)">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 9h3m-3 3h3m-3 3h3m-6 1c-.306-.613-.933-1-1.618-1H7.618c-.685 0-1.312.387-1.618 1M4 5h16a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Zm7 5a2 2 0 1 1-4 0 2 2 0 0 1 4 0Z"/>
+                            </svg>
                         </div>
-                        <!-- Message container for student ID validation -->
-                        <div id="student-id-message" class="text-sm mt-1 hidden"></div>
+                        <input type="text" id="student_id" name="student_id" required
+                            class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-sm"
+                            placeholder="Enter your student ID"
+                            onblur="checkStudentIdAvailability(this.value)">
+                    </div>
+                    <!-- Fixed height message container -->
+                    <div class="h-5 mt-1">
+                        <div id="student-id-message" class="text-xs transition-opacity duration-200 hidden"></div>
                     </div>
                 </div>
 
-                <!-- Name Fields Row (First Name, Middle Initial, Last Name) -->
+                <!-- Name Fields -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-4">
-                    <!-- First Name (takes more space) -->
+                    <!-- First Name -->
                     <div class="col-span-1 sm:col-span-1 lg:col-span-5">
-                        <label for="first_name" class="block text-sm font-medium text-gray-700 mb-2">First Name <span class="text-red-500">*</span></label>
-                        <div class="relative flex items-center">
-                            <span class="absolute left-3 text-blue-600 z-10">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <label for="first_name" class="block text-sm font-semibold text-gray-700 mb-2">
+                            First Name <span class="text-red-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
+                                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                 </svg>
-                            </span>
+                            </div>
                             <input type="text" id="first_name" name="first_name" required
-                                class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                placeholder="Enter your first name"
+                                class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-sm"
+                                placeholder="First name"
                                 oninput="formatName(this)">
                         </div>
                     </div>
 
-                    <!-- Middle Initial (smaller space) -->
+                    <!-- Middle Initial -->
                     <div class="col-span-1 sm:col-span-1 lg:col-span-2">
-                        <label for="middle_initial" class="block text-sm font-medium text-gray-700 mb-2">M.I. <span class="text-red-500">*</span></label>
-                        <div class="relative flex items-center">
-                            <span class="absolute left-3 text-blue-600 z-10">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                </svg>
-                            </span>
-                            <input type="text" id="middle_initial" name="middle_initial" required maxlength="2" 
-                                class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent uppercase text-center"
+                        <label for="middle_initial" class="block text-sm font-semibold text-gray-700 mb-2">
+                            M.I. <span class="text-gray-400 text-xs font-light">(Optional)</span>
+                        </label>
+                        <div class="relative">
+                            <input type="text" id="middle_initial" name="middle_initial" maxlength="2" 
+                                class="w-full px-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent uppercase text-center transition-all duration-200 text-sm font-semibold"
                                 placeholder="M."
                                 oninput="formatMiddleInitial(this)">
                         </div>
                     </div>
 
-                    <!-- Last Name (takes more space) -->
+                    <!-- Last Name -->
                     <div class="col-span-1 sm:col-span-2 lg:col-span-5">
-                        <label for="last_name" class="block text-sm font-medium text-gray-700 mb-2">Last Name <span class="text-red-500">*</span></label>
-                        <div class="relative flex items-center">
-                            <span class="absolute left-3 text-blue-600 z-10">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <label for="last_name" class="block text-sm font-semibold text-gray-700 mb-2">
+                            Last Name <span class="text-red-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
+                                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                 </svg>
-                            </span>
+                            </div>
                             <input type="text" id="last_name" name="last_name" required
-                                class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                placeholder="Enter your last name"
+                                class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-sm"
+                                placeholder="Last name"
                                 oninput="formatName(this)">
                         </div>
                     </div>
                 </div>
 
-                <!-- Program Details Row (Program, Year & Section, Semester) -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Program Details -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <!-- Program -->
                     <div class="relative flex flex-col">
-                        <label for="program" class="block text-sm font-medium text-gray-700 mb-2">Program <span class="text-red-500">*</span></label>
-                        <div class="relative flex items-center">
-                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-blue-600 z-10 pointer-events-none">
-                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <label for="program" class="block text-sm font-semibold text-gray-700 mb-2">
+                            Program <span class="text-red-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <svg class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                                 </svg>
-                            </span>
+                            </div>
                             <select id="program" name="program" required
-                                class="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none">
+                                class="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none transition-all duration-200 text-sm bg-white">
                                 <option value="" disabled selected>Select program</option>
                                 <option value="Computer Science">Computer Science</option>
                                 <option value="Information Technology">Information Technology</option>
                             </select>
-                            <span class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
-                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                                 </svg>
-                            </span>
+                            </div>
                         </div>
                     </div>
 
                     <!-- Year and Section -->
                     <div class="relative flex flex-col">
-                        <label for="year_section" class="block text-sm font-medium text-gray-700 mb-2">Year & Section <span class="text-red-500">*</span></label>
-                        <div class="relative flex items-center">
-                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-blue-600 z-10">
-                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <label for="year_section" class="block text-sm font-semibold text-gray-700 mb-2">
+                            Year & Section <span class="text-red-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <svg class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                                 </svg>
-                            </span>
+                            </div>
                             <input type="text" id="year_section" name="year_section" required maxlength="2"
-                                class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent uppercase text-center"
+                                class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent uppercase text-center transition-all duration-200 text-sm font-semibold"
                                 placeholder="3A"
                                 oninput="formatYearSection(this)">
                         </div>
-                        <!-- Message container for year section validation -->
-                        <div id="year-section-message" class="text-sm mt-1 hidden"></div>
+                        <div class="h-5 mt-1">
+                            <div id="year-section-message" class="text-xs transition-opacity duration-200 hidden"></div>
+                        </div>
                     </div>
                     
                     <!-- Semester -->
                     <div class="relative flex flex-col">
-                        <label for="semester" class="block text-sm font-medium text-gray-700 mb-2">Semester <span class="text-red-500">*</span></label>
-                        <div class="relative flex items-center">
-                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-blue-600 z-10">
-                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <label for="semester" class="block text-sm font-semibold text-gray-700 mb-2">
+                            Semester <span class="text-red-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <svg class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                 </svg>
-                            </span>
+                            </div>
                             <select id="semester" name="semester" required
-                                class="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none">
+                                class="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none transition-all duration-200 text-sm bg-white">
                                 <option value="" disabled selected>Select semester</option>
                                 <option value="1st Semester">1st Semester</option>
                                 <option value="2nd Semester">2nd Semester</option>
                             </select>
-                            <span class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
-                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                                 </svg>
-                            </span>
+                            </div>
                         </div>
-                        <!-- Message container for semester validation -->
-                        <div id="semester-message" class="text-sm mt-1 hidden"></div>
+                        <div class="h-5 mt-1">
+                            <div id="semester-message" class="text-xs transition-opacity duration-200 hidden"></div>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Add this after the Program Details Row and before the Submit Button -->
-                
-                <!-- Password Fields Row -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Password Fields -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <!-- Password -->
                     <div class="relative flex flex-col">
-                        <label for="password" class="block text-sm font-medium text-gray-700 mb-2">Password <span class="text-red-500">*</span></label>
-                        <div class="relative flex items-center">
-                            <span class="absolute left-3 text-blue-600 z-10">
-                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <label for="password" class="block text-sm font-semibold text-gray-700 mb-2">
+                            Password <span class="text-red-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <svg class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                                 </svg>
-                            </span>
+                            </div>
                             <input type="password" id="password" name="password" required minlength="8"
-                                class="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                placeholder="Enter password (min. 8 characters)"
+                                class="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-sm"
+                                placeholder="Min. 8 characters"
                                 oninput="checkPasswordMatch()">
-                            <button type="button" onclick="togglePassword('password')" class="absolute right-3 text-gray-400 hover:text-gray-600">
+                            <button type="button" onclick="togglePassword('password')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors">
                                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" id="password-eye">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                 </svg>
                             </button>
                         </div>
-                        <div id="password-message" class="text-sm mt-1 hidden"></div>
+                        <div class="h-5 mt-1">
+                            <div id="password-message" class="text-xs transition-opacity duration-200 hidden"></div>
+                        </div>
                     </div>
                 
                     <!-- Confirm Password -->
                     <div class="relative flex flex-col">
-                        <label for="confirm_password" class="block text-sm font-medium text-gray-700 mb-2">Confirm Password <span class="text-red-500">*</span></label>
-                        <div class="relative flex items-center">
-                            <span class="absolute left-3 text-blue-600 z-10">
-                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <label for="confirm_password" class="block text-sm font-semibold text-gray-700 mb-2">
+                            Confirm Password <span class="text-red-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <svg class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                                 </svg>
-                            </span>
+                            </div>
                             <input type="password" id="confirm_password" name="confirm_password" required minlength="8"
-                                class="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                placeholder="Confirm your password"
+                                class="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-sm"
+                                placeholder="Re-enter password"
                                 oninput="checkPasswordMatch()">
-                            <button type="button" onclick="togglePassword('confirm_password')" class="absolute right-3 text-gray-400 hover:text-gray-600">
+                            <button type="button" onclick="togglePassword('confirm_password')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors">
                                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" id="confirm-password-eye">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                 </svg>
                             </button>
                         </div>
-                        <div id="confirm-password-message" class="text-sm mt-1 hidden"></div>
+                        <div class="h-5 mt-1">
+                            <div id="confirm-password-message" class="text-xs transition-opacity duration-200 hidden"></div>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Submit Button -->
                 <button type="submit"
-                    class="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-4 px-6 rounded-xl hover:from-blue-700 hover:to-blue-800 transition duration-300 shadow-lg mt-8 font-medium text-lg">
-                    Register
+                    class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3.5 px-6 rounded-lg hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-300 shadow-lg hover:shadow-xl font-semibold text-sm mt-6 transform hover:-translate-y-0.5 cursor-pointer">
+                    Create Account
                 </button>
             </form>
         </div>
@@ -540,7 +568,6 @@ document.getElementById('registrationForm').addEventListener('submit', async fun
     
     const password = document.getElementById('password').value;
     const confirmPassword = document.getElementById('confirm_password').value;
-    // ...existing code...
     
     let errors = [];
     
@@ -552,8 +579,6 @@ document.getElementById('registrationForm').addEventListener('submit', async fun
     if (password !== confirmPassword) {
         errors.push('Passwords do not match.');
     }
-    
-    // ...existing validations...
     
     // Only submit if no errors
     if (errors.length > 0) {

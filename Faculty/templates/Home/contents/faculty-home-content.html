@@ -401,7 +401,7 @@
                     <div class="relative">
                         <div class="absolute inset-0 bg-gradient-to-br from-sky-400 to-blue-600 rounded-full blur-md"></div>
                         <div class="relative w-24 h-24 rounded-full overflow-hidden border-4 border-white/90 shadow-xl">
-                            <img src="{% static 'assets/img/Default Profile.jpg' %}" 
+                            <img src="{% if faculty_data.profile_image %}{{ faculty_data.profile_image.url }}{% else %}{% static 'assets/img/Default Profile.jpg' %}{% endif %}" 
                                  alt="User Profile"
                                  class="w-full h-full object-cover">
                         </div>

@@ -3,7 +3,7 @@
 import os
 import json
 import firebase_admin
-from firebase_admin import credentials, firestore
+from firebase_admin import credentials, firestore, auth
 
 # Avoid re-initialization
 if not firebase_admin._apps:

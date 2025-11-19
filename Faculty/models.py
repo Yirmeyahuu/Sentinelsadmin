@@ -7,6 +7,7 @@ class Faculty(models.Model):
     last_name = models.CharField(max_length=100)
     middle_initial = models.CharField(max_length=10, blank=True)
     password = models.CharField(max_length=128)
+    profile_image = models.ImageField(upload_to='faculty_profiles/', null=True, blank=True)
     faculty_status = models.CharField(
         max_length=20,
         choices=[('Continuing', 'Continuing'), ('Completed', 'Completed')],

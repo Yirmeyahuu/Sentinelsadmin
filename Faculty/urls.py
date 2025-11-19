@@ -52,5 +52,9 @@ urlpatterns = [
 
 
     # Developers Section
-    path('Developers/', views.facultyDevinnovateSection, name="devinnovate-section")
+    path('Developers/', views.facultyDevinnovateSection, name="devinnovate-section"),
+
+    # URL for uploading faculty profile image
+    path('upload-profile-image/', views.upload_faculty_profile_image, name='upload_faculty_profile_image'),
+    path('remove-profile-image/', views.remove_faculty_profile_image, name='remove_faculty_profile_image'),
 ]

@@ -83,7 +83,8 @@ class AddStudentForm(forms.Form):
             # Verify it belongs to the current faculty
             if self.faculty and faculty_assignment.faculty != self.faculty:
                 raise forms.ValidationError("Invalid faculty assignment selected.")
-            return faculty_assignment_id
+            # IMPORTANT: Return the OBJECT, not the ID
+            return faculty_assignment
         except FacultyAssignment.DoesNotExist:
             raise forms.ValidationError("Selected class assignment does not exist.")
 
@@ -97,20 +98,16 @@ class AddStudentForm(forms.Form):
         first_name = self.cleaned_data['first_name']
         last_name = self.cleaned_data['last_name']
         middle_initial = self.cleaned_data['middle_initial']
-        faculty_assignment_id = self.cleaned_data['faculty_assignment_id']
+        faculty_assignment = self.cleaned_data['faculty_assignment_id']  # This is now an object
 
-        # Get the selected faculty assignment
-        faculty_assignment = FacultyAssignment.objects.get(id=faculty_assignment_id)
-
-        # Create student with default password
+        # Create student - removed password field since Student model doesn't have it
         student = Student.objects.create(
             student_id=student_id,
             first_name=first_name,
             last_name=last_name,
             middle_initial=middle_initial,
             faculty_assignment=faculty_assignment,
-            student_status='Registered',
-            password=make_password('welcomestudent')  # Default password
+            student_status='Registered'
         )
 
         return student

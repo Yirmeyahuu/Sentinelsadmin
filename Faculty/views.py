@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.templatetags.static import static
 from django.views.decorators.http import require_POST
-from firebase_admin import firestore   
+from firebase_admin import firestore, auth
 from django.http import JsonResponse
 import json
 from Faculty.forms import AddStudentForm
@@ -18,6 +18,10 @@ from datetime import datetime, timedelta
 import calendar as cal
 from django.utils import timezone
 import pytz
+
+import base64
+import uuid
+from django.core.files.base import ContentFile
 
 import csv
 import io
@@ -816,48 +820,128 @@ def add_student(request):
 
         form = AddStudentForm(request.POST, faculty=faculty)
         
-        if form.is_valid():
-            print("Form is valid")
-            try:
-                # Use atomic transaction to ensure both PostgreSQL and Firestore succeed or fail together
-                with transaction.atomic():
-                    student = form.save()
-                    print(f"Student saved to PostgreSQL: {student.student_id}")
-                    
-                    # Create Firestore record
-                    firestore_data = {
-                        'student_id': student.student_id,
-                        'first_name': student.first_name,
-                        'last_name': student.last_name,
-                        'middle_initial': student.middle_initial,
-                        'program': student.faculty_assignment.program,
-                        'year_section': student.faculty_assignment.year_section,
-                        'semester': student.faculty_assignment.semester,
-                    }
-                    
-                    try:
-                        db.collection('Registered_Students').document(student.student_id).set(firestore_data)
-                        print(f"Firestore record created for {student.student_id}")
-                    except Exception as firestore_error:
-                        print(f"Firestore error: {firestore_error}")
-                        # Re-raise to trigger transaction rollback
-                        raise firestore_error
-                    
-                messages.success(request, f"Student {student.student_id} added successfully!")
-                print("Student addition completed successfully")
-                
-            except Exception as e:
-                messages.error(request, f"Error adding student: {str(e)}")
-                print(f"Error during save: {str(e)}")
-                
-            return redirect('faculty-student-list')
-        else:
-            print(f"Form errors: {form.errors}")
-            # Display form errors
+        print(f"Form is_valid: {form.is_valid()}")
+        if not form.is_valid():
+            print(f"FORM VALIDATION ERRORS: {form.errors}")
             for field, errors in form.errors.items():
                 for error in errors:
                     messages.error(request, f"{field}: {error}")
             return redirect('faculty-student-list')
+        
+        # Form is valid, proceed with student creation
+        print("Form is valid - proceeding with student creation")
+        
+        try:
+            # Default password for faculty-added students
+            DEFAULT_PASSWORD = "#AIMHIGH2025"
+            
+            # Get student data from form before saving
+            student_id = form.cleaned_data.get('student_id')
+            first_name = form.cleaned_data.get('first_name')
+            last_name = form.cleaned_data.get('last_name')
+            middle_initial = form.cleaned_data.get('middle_initial', '')
+            faculty_assignment = form.cleaned_data.get('faculty_assignment_id')  # This is now an object
+            
+            print(f"Student data: {student_id}, {first_name} {last_name}")
+            print(f"Faculty assignment: {faculty_assignment}")
+            print(f"Program: {faculty_assignment.program}, Year: {faculty_assignment.year_section}, Semester: {faculty_assignment.semester}")
+            
+            # Check if student already exists in PostgreSQL
+            if Student.objects.filter(student_id=student_id).exists():
+                messages.error(request, f"Student ID {student_id} already exists in the database.")
+                return redirect('faculty-student-list')
+            
+            # Create dummy email for Firebase Authentication
+            dummy_email = f"{student_id}@sentinels.app"
+            print(f"Creating Firebase user with email: {dummy_email}")
+            
+            # Step 1: Create user in Firebase Authentication with default password
+            firebase_uid = None
+            try:
+                firebase_user = auth.create_user(
+                    email=dummy_email,
+                    password=DEFAULT_PASSWORD,
+                    display_name=f"{first_name} {last_name}"
+                )
+                firebase_uid = firebase_user.uid
+                print(f"✓ Firebase Auth user created with UID: {firebase_uid}")
+            except auth.EmailAlreadyExistsError:
+                print(f"✗ Email already exists in Firebase Auth: {dummy_email}")
+                messages.error(request, f"Student ID {student_id} is already registered in Firebase Authentication.")
+                return redirect('faculty-student-list')
+            except Exception as firebase_auth_error:
+                print(f"✗ Firebase Authentication error: {firebase_auth_error}")
+                messages.error(request, f"Firebase Authentication error: {str(firebase_auth_error)}")
+                return redirect('faculty-student-list')
+            
+            # Step 2: Create Firestore record
+            firestore_data = {
+                'student_id': student_id,
+                'first_name': first_name,
+                'last_name': last_name,
+                'middle_initial': middle_initial,
+                'program': faculty_assignment.program,
+                'year_section': faculty_assignment.year_section,
+                'semester': faculty_assignment.semester,
+                'email': dummy_email,
+                'firebase_uid': firebase_uid,
+                'status': 'registered',
+                'added_by_faculty': True,
+                'created_at': firestore.SERVER_TIMESTAMP
+            }
+            
+            try:
+                db.collection('Registered_Students').document(student_id).set(firestore_data)
+                print(f"✓ Firestore record created for {student_id}")
+            except Exception as firestore_error:
+                print(f"✗ Firestore error: {firestore_error}")
+                import traceback
+                print(f"Firestore Traceback: {traceback.format_exc()}")
+                # Rollback: Delete Firebase Auth user
+                try:
+                    auth.delete_user(firebase_uid)
+                    print(f"✓ Rolled back Firebase Auth user: {firebase_uid}")
+                except Exception as delete_error:
+                    print(f"✗ Failed to delete Firebase Auth user: {delete_error}")
+                
+                messages.error(request, f"Firestore error: {str(firestore_error)}")
+                return redirect('faculty-student-list')
+            
+            # Step 3: Create PostgreSQL record (with transaction for safety)
+            try:
+                with transaction.atomic():
+                    student = form.save()
+                    print(f"✓ Student saved to PostgreSQL: {student.student_id}")
+            except Exception as postgres_error:
+                print(f"✗ PostgreSQL error: {postgres_error}")
+                import traceback
+                print(f"PostgreSQL Traceback: {traceback.format_exc()}")
+                # Rollback: Delete Firestore record
+                try:
+                    db.collection('Registered_Students').document(student_id).delete()
+                    print(f"✓ Rolled back Firestore record")
+                except:
+                    pass
+                # Rollback: Delete Firebase Auth user
+                try:
+                    auth.delete_user(firebase_uid)
+                    print(f"✓ Rolled back Firebase Auth user")
+                except:
+                    pass
+                
+                messages.error(request, f"Database error: {str(postgres_error)}")
+                return redirect('faculty-student-list')
+            
+            messages.success(request, f"Student {student_id} added successfully!")
+            print("=== STUDENT ADDITION COMPLETED SUCCESSFULLY ===")
+            
+        except Exception as e:
+            print(f"✗ Unexpected error during save: {str(e)}")
+            import traceback
+            print(f"Traceback: {traceback.format_exc()}")
+            messages.error(request, f"Error adding student: {str(e)}")
+            
+        return redirect('faculty-student-list')
     else:
         print("Not a POST request, redirecting")
         return redirect('faculty-student-list')
@@ -1287,39 +1371,77 @@ def accept_student(request, student_id):
             messages.error(request, "No matching active assignment found for this student's program and section.")
             return redirect('verify-students')
 
-        # Create the student in PostgreSQL with faculty_assignment
-        new_student = Student.objects.create(
-            student_id=pending_student.student_id,
-            first_name=pending_student.first_name,
-            last_name=pending_student.last_name,
-            middle_initial=pending_student.middle_initial,
-            faculty_assignment=faculty_assignment,
-            student_status='Registered',
-            password=pending_student.password  # Transfer hashed password from pending
-        )
+        # Create dummy email for Firebase Authentication
+        dummy_email = f"{pending_student.student_id}@sentinels.app"
 
-        # Prepare the data for Firestore - INCLUDE PASSWORD
-        firestore_data = {
-            'student_id': pending_student.student_id,
-            'first_name': pending_student.first_name,
-            'last_name': pending_student.last_name,
-            'middle_initial': pending_student.middle_initial,
-            'program': pending_student.program,
-            'year_section': pending_student.year_section,
-            'semester': pending_student.semester,
-            'password': pending_student.password,  # Add hashed password to Firebase
-        }
-
-        # Create the corresponding document in Firestore with student details
+        # Step 1: Create user in Firebase Authentication with the stored password
         try:
-            db.collection('Registered_Students').document(new_student.student_id).set(firestore_data)
+            firebase_user = auth.create_user(
+                email=dummy_email,
+                password=pending_student.password,  # Use the plain password from PendingStudent
+                display_name=f"{pending_student.first_name} {pending_student.last_name}"
+            )
+            firebase_uid = firebase_user.uid
+        except auth.EmailAlreadyExistsError:
+            messages.error(request, "This student ID is already registered in Firebase Authentication.")
+            return redirect('verify-students')
         except Exception as e:
-            messages.error(request, f"Student accepted, but failed to create Firestore record: {e}")
+            messages.error(request, f"Firebase Authentication error: {e}")
+            return redirect('verify-students')
 
-        # Delete the pending record from PostgreSQL
+        # Step 2: Create the student in PostgreSQL WITHOUT password
+        try:
+            new_student = Student.objects.create(
+                student_id=pending_student.student_id,
+                first_name=pending_student.first_name,
+                last_name=pending_student.last_name,
+                middle_initial=pending_student.middle_initial,
+                faculty_assignment=faculty_assignment,
+                student_status='Registered'
+            )
+        except Exception as e:
+            # If PostgreSQL creation fails, delete the Firebase Auth user
+            try:
+                auth.delete_user(firebase_uid)
+            except:
+                pass
+            messages.error(request, f"Error creating student record: {e}")
+            return redirect('verify-students')
+
+        # Step 3: Create document in Firestore Registered_Students collection
+        try:
+            registered_student_data = {
+                'student_id': pending_student.student_id,
+                'first_name': pending_student.first_name,
+                'last_name': pending_student.last_name,
+                'middle_initial': pending_student.middle_initial,
+                'program': pending_student.program,
+                'year_section': pending_student.year_section,
+                'semester': pending_student.semester,
+                'email': dummy_email,
+                'firebase_uid': firebase_uid,  # Store the Firebase UID for reference
+                'status': 'registered',
+                'approved_at': firestore.SERVER_TIMESTAMP
+            }
+            
+            # Use student_id as document name instead of Firebase UID
+            db.collection('Registered_Students').document(pending_student.student_id).set(registered_student_data)
+            
+        except Exception as e:
+            # If Firestore creation fails, rollback PostgreSQL and Firebase Auth
+            new_student.delete()
+            try:
+                auth.delete_user(firebase_uid)
+            except:
+                pass
+            messages.error(request, f"Failed to create Firestore record: {e}")
+            return redirect('verify-students')
+
+        # Step 4: Delete the pending record from PostgreSQL
         pending_student.delete()
         
-        messages.success(request, f"Student {new_student.first_name} {new_student.last_name} has been accepted.")
+        messages.success(request, f"Student {new_student.first_name} {new_student.last_name} has been accepted and registered.")
+        
     except Exception as e:
         messages.error(request, f"An error occurred while accepting the student: {e}")
 
@@ -1405,9 +1527,78 @@ def edit_faculty_account(request):
 
 
 # This is the upload faculty profile image process
-def handle_image_upload(image):
-    # Implement your image upload logic
-    pass
+@faculty_required
+def upload_faculty_profile_image(request):
+    if request.method == 'POST':
+        faculty_id = request.session.get('faculty_id')
+        if not faculty_id:
+            messages.error(request, "Session expired. Please login again.")
+            return redirect('sentinels_login')
+        
+        try:
+            faculty = Faculty.objects.get(faculty_id=faculty_id)
+            # Get the Base64 image data from the hidden input
+            cropped_image_data = request.POST.get('cropped_image_data')
+
+            if cropped_image_data:
+                # The data is in the format "data:image/jpeg;base64,..."
+                # We need to strip the header and decode the Base64 part
+                try:
+                    format, imgstr = cropped_image_data.split(';base64,') 
+                    ext = format.split('/')[-1] 
+                    # Create a unique filename
+                    filename = f'{faculty.faculty_id}_{uuid.uuid4()}.{ext}'
+                    data = ContentFile(base64.b64decode(imgstr), name=filename)
+
+                    # Optional: Delete the old image
+                    if faculty.profile_image:
+                        faculty.profile_image.delete(save=False)
+                    
+                    faculty.profile_image = data
+                    faculty.save()
+                    messages.success(request, "Profile picture updated successfully!")
+
+                except (ValueError, TypeError, base64.binascii.Error):
+                    messages.error(request, "Invalid image data. Please try again.")
+
+            else:
+                messages.error(request, "No image data was provided.")
+
+        except Faculty.DoesNotExist:
+            messages.error(request, "Faculty profile not found.")
+        except Exception as e:
+            messages.error(request, f"An error occurred: {str(e)}")
+            
+    return redirect('faculty-account')
+
+@faculty_required
+def remove_faculty_profile_image(request):
+    if request.method == 'POST':
+        faculty_id = request.session.get('faculty_id')
+        if not faculty_id:
+            messages.error(request, "Session expired. Please login again.")
+            return redirect('sentinels_login')
+        
+        try:
+            faculty = Faculty.objects.get(faculty_id=faculty_id)
+
+            if faculty.profile_image:
+                # This avoids deleting the default image if it's stored in the media folder
+                if 'faculty_profiles/' in faculty.profile_image.path:
+                    faculty.profile_image.delete(save=False)
+                
+                faculty.profile_image = None  # Or set to a default image if desired
+                faculty.save()
+                messages.success(request, "Profile picture removed successfully!")
+            else:
+                messages.info(request, "No profile picture to remove.")
+
+        except Faculty.DoesNotExist:
+            messages.error(request, "Faculty profile not found.")
+        except Exception as e:
+            messages.error(request, f"An error occurred: {str(e)}")
+            
+    return redirect('faculty-account')
 
 #This is the move student process of Faculty
 @faculty_required
@@ -1448,7 +1639,10 @@ def move_student(request):
                     "program": archived_student.program,
                     "year_section": archived_student.year_section,
                     "semester": archived_student.semester,
-                    # Removed: password and status - these belong only in PostgreSQL
+                    "email": f"{archived_student.student_id}@sentinels.app",
+                    "firebase_uid": archived_student.firebase_uid if hasattr(archived_student, 'firebase_uid') else "",
+                    "status": "registered",
+                    "added_by_faculty": True,
                 }
                 found_collection = "Archive"  # Indicate it came from archive
             except ArchivedStudent.DoesNotExist:
@@ -1502,9 +1696,8 @@ def move_student(request):
                     first_name=archived_student.first_name,
                     last_name=archived_student.last_name,
                     middle_initial=archived_student.middle_initial,
-                    password=archived_student.password,  # Password only in PostgreSQL
-                    faculty_assignment=faculty_assignment,  # Use faculty_assignment instead of faculty
-                    student_status='Registered'  # Status only in PostgreSQL
+                    faculty_assignment=faculty_assignment,
+                    student_status='Registered'
                 )
                 # Remove from archived table
                 archived_student.delete()
@@ -1551,13 +1744,18 @@ def move_student(request):
                 postgres_student = Student.objects.get(student_id=student_id)
                 # Get faculty_assignment details
                 faculty_assignment = postgres_student.faculty_assignment
+                
+                # Get Firebase UID from Firestore if exists
+                firebase_uid = ""
+                if student_data:
+                    firebase_uid = student_data.get('firebase_uid', '')
 
                 ArchivedStudent.objects.create(
                     student_id=postgres_student.student_id,
                     first_name=postgres_student.first_name,
                     last_name=postgres_student.last_name,
                     middle_initial=postgres_student.middle_initial,
-                    password=postgres_student.password,
+                    password='',  # Password is stored in Firebase Auth, not PostgreSQL
                     program=faculty_assignment.program if faculty_assignment else '',
                     year_section=faculty_assignment.year_section if faculty_assignment else '',
                     semester=faculty_assignment.semester if faculty_assignment else '',
@@ -1574,7 +1772,7 @@ def move_student(request):
                     first_name=student_data.get('first_name', ''),
                     last_name=student_data.get('last_name', ''),
                     middle_initial=student_data.get('middle_initial', ''),
-                    password='',  # Empty password - will need reset when restored
+                    password='',  # Empty password - stored in Firebase Auth
                     program=student_data.get('program', ''),
                     year_section=student_data.get('year_section', ''),
                     semester=student_data.get('semester', ''),
@@ -2441,6 +2639,9 @@ def import_student(request):
             errors = []
             rows = []
             
+            # Default password for imported students
+            DEFAULT_PASSWORD = "#AIMHIGH2025"
+            
             print(f"Processing file: {uploaded_file.name}")
             
             # Reset file pointer to beginning
@@ -2529,6 +2730,10 @@ def import_student(request):
 
                 # Process each row
                 for row_num, row in enumerate(rows, start=2):
+                    firebase_uid = None
+                    postgres_created = False
+                    firestore_created = False
+                    
                     try:
                         student_id = row.get('Student ID', '').strip()
                         first_name = row.get('First Name', '').strip()
@@ -2561,23 +2766,57 @@ def import_student(request):
                             error_count += 1
                             continue
                         
-                        # Check if student already exists
+                        # Check if student already exists in PostgreSQL
                         if Student.objects.filter(student_id=student_id).exists():
                             errors.append(f'Row {row_num}: Student ID "{student_id}" already exists')
                             error_count += 1
                             continue
                         
-                        # Create student with matched faculty assignment
-                        student = Student.objects.create(
-                            student_id=student_id,
-                            first_name=first_name,
-                            last_name=last_name,
-                            middle_initial=middle_initial,
-                            faculty_assignment=matching_assignment,
-                            student_status='Registered'
-                        )
+                        # Create dummy email for Firebase Authentication
+                        dummy_email = f"{student_id}@sentinels.app"
                         
-                        # Create Firestore record
+                        # Step 1: Create user in Firebase Authentication with default password
+                        try:
+                            firebase_user = auth.create_user(
+                                email=dummy_email,
+                                password=DEFAULT_PASSWORD,
+                                display_name=f"{first_name} {last_name}"
+                            )
+                            firebase_uid = firebase_user.uid
+                            print(f"✓ Row {row_num}: Firebase Auth user created with UID: {firebase_uid}")
+                        except auth.EmailAlreadyExistsError:
+                            errors.append(f'Row {row_num}: Student ID "{student_id}" already exists in Firebase Authentication')
+                            error_count += 1
+                            continue
+                        except Exception as firebase_error:
+                            errors.append(f'Row {row_num}: Firebase Authentication error - {str(firebase_error)}')
+                            error_count += 1
+                            continue
+                        
+                        # Step 2: Create student in PostgreSQL with matched faculty assignment
+                        try:
+                            student = Student.objects.create(
+                                student_id=student_id,
+                                first_name=first_name,
+                                last_name=last_name,
+                                middle_initial=middle_initial,
+                                faculty_assignment=matching_assignment,
+                                student_status='Registered'
+                            )
+                            postgres_created = True
+                            print(f"✓ Row {row_num}: PostgreSQL record created")
+                        except Exception as postgres_error:
+                            # Rollback Firebase Auth
+                            try:
+                                auth.delete_user(firebase_uid)
+                                print(f"✓ Row {row_num}: Rolled back Firebase Auth user")
+                            except:
+                                pass
+                            errors.append(f'Row {row_num}: Database error - {str(postgres_error)}')
+                            error_count += 1
+                            continue
+                        
+                        # Step 3: Create Firestore record
                         firestore_data = {
                             'student_id': student_id,
                             'first_name': first_name,
@@ -2586,28 +2825,58 @@ def import_student(request):
                             'program': matching_assignment.program,
                             'year_section': matching_assignment.year_section,
                             'semester': matching_assignment.semester,
+                            'email': dummy_email,
+                            'firebase_uid': firebase_uid,
+                            'status': 'registered',
+                            'added_by_faculty': True,
+                            'created_at': firestore.SERVER_TIMESTAMP
                         }
                         
                         try:
                             db.collection('Registered_Students').document(student_id).set(firestore_data)
+                            firestore_created = True
                             success_count += 1
-                            print(f"Successfully imported: {student_id}")
-                        except Exception as e:
-                            print(f"Failed to create Firestore record for {student_id}: {e}")
-                            student.delete()
-                            errors.append(f'Row {row_num}: Failed to create Firestore record')
+                            print(f"✓ Row {row_num}: Successfully imported {student_id}")
+                        except Exception as firestore_error:
+                            # Rollback PostgreSQL
+                            if postgres_created:
+                                student.delete()
+                                print(f"✓ Row {row_num}: Rolled back PostgreSQL record")
+                            # Rollback Firebase Auth
+                            try:
+                                auth.delete_user(firebase_uid)
+                                print(f"✓ Row {row_num}: Rolled back Firebase Auth user")
+                            except:
+                                pass
+                            errors.append(f'Row {row_num}: Firestore error - {str(firestore_error)}')
                             error_count += 1
                             continue
                             
                     except Exception as e:
-                        print(f"Error processing row {row_num}: {e}")
+                        print(f"✗ Row {row_num}: Unexpected error - {str(e)}")
+                        # Cleanup if any partial creation happened
+                        if firestore_created:
+                            try:
+                                db.collection('Registered_Students').document(student_id).delete()
+                            except:
+                                pass
+                        if postgres_created:
+                            try:
+                                Student.objects.filter(student_id=student_id).delete()
+                            except:
+                                pass
+                        if firebase_uid:
+                            try:
+                                auth.delete_user(firebase_uid)
+                            except:
+                                pass
                         errors.append(f'Row {row_num}: {str(e)}')
                         error_count += 1
                         continue
 
                 # Show results
                 if success_count > 0:
-                    messages.success(request, f'Successfully imported {success_count} students.')
+                    messages.success(request, f'Successfully imported {success_count} students with default password: {DEFAULT_PASSWORD}')
                 
                 if error_count > 0:
                     error_message = f'{error_count} rows had errors:\n' + '\n'.join(errors[:10])
