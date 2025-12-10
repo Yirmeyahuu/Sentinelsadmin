@@ -111,8 +111,8 @@ function updateExportLinks(studentId) {
         const pdfLink = document.getElementById('exportStudentPdf');
         
         if (excelLink && pdfLink) {
-            excelLink.href = `/faculty/export-student-excel`;
-            pdfLink.href = `/faculty/export-student-pdf`;
+            excelLink.href = `/Faculty/export-student-excel/${studentId}/`;
+            pdfLink.href = `/Faculty/export-student-pdf/${studentId}/`;
         }
     }, 100);
 }

@@ -45,7 +45,7 @@ urlpatterns = [
 
     # Student Import/Export URLs
     path('students/export/csv/', views.export_student_csv, name='export_student_csv'),
-    path('students/export/excel/', views.export_student_excel, name='export_student_excel'),
+    path('students/export/excel/', views.export_students_list_excel, name='export_students_list_excel'),
     path('students/import/', views.import_student, name='import_student'),
     path('students/template/csv/', views.download_student_csv_template, name='download_student_csv_template'),
     path('students/template/excel/', views.download_student_excel_template, name='download_student_excel_template'),
@@ -67,9 +67,9 @@ urlpatterns = [
     path('export-senior-pdf/', views.export_senior_pdf, name='export-senior-pdf'),
 
     # Individual Student Export URLs
-    path('export-student-excel/', views.export_student_excel, name='export-student-excel'),
-    path('export-student-pdf/', views.export_student_pdf, name='export-student-pdf'),
-    path('get-student-data/', views.get_student_data, name='get-student-data'),
+    path('export-student-excel/<str:student_id>/', views.export_individual_student_excel, name='export_individual_student_excel'),
+    path('export-student-pdf/<str:student_id>/', views.export_individual_student_pdf, name='export_individual_student_pdf'),
+    path('get-student-data/<str:student_id>/', views.get_student_data, name='get-student-data'),
 
     # Developers Section
     path('Developers/', views.facultyDevinnovateSection, name="devinnovate-section"),

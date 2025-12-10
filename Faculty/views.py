@@ -2513,7 +2513,7 @@ def export_student_csv(request):
 
 # Excel Export for Students
 @faculty_required
-def export_student_excel(request):
+def export_students_list_excel(request):
     """Export student data to Excel file"""
     try:
         faculty_id = request.session.get('faculty_id')
@@ -4740,7 +4740,7 @@ def export_senior_pdf(request):
     
 
 @faculty_required
-def export_student_excel(request, student_id):
+def export_individual_student_excel(request, student_id):
     """Export individual student's task data to Excel"""
     try:
         faculty_id = request.session.get('faculty_id')
@@ -4893,7 +4893,7 @@ def export_student_excel(request, student_id):
 
 
 @faculty_required
-def export_student_pdf(request, student_id):
+def export_individual_student_pdf(request, student_id):
     """Export individual student's task data to PDF"""
     try:
         faculty_id = request.session.get('faculty_id')
