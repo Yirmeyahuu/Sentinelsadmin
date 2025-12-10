@@ -1,3 +1,6 @@
+let currentStudentId = null;
+let currentStudentData = null;
+
 function viewDetails(studentId) {
     const modal = document.getElementById('studentTaskDataModal');
     const modalContainer = modal.querySelector('.relative');
@@ -6,6 +9,9 @@ function viewDetails(studentId) {
         console.error('Modal elements not found');
         return;
     }
+
+    // Store current student ID globally
+    currentStudentId = studentId;
 
     // Show modal with animation
     modal.classList.remove('hidden');
@@ -17,7 +23,7 @@ function viewDetails(studentId) {
         fetchStudentTaskData(studentId, 'novice');
     }, 50);
 
-    // Update modal content with a modern UI
+    // Update modal content with a modern UI including export dropdown
     modalContainer.innerHTML = `
         <div class="bg-white rounded-2xl shadow-xl p-6 sm:p-8 w-full max-w-4xl mx-auto transform transition-all">
             <div class="flex items-start justify-between mb-6">
@@ -26,11 +32,55 @@ function viewDetails(studentId) {
                     <p class="student-name text-2xl font-semibold mb-2 text-sky-700"></p>
                     <p class="text-sm text-gray-500">Task completion and points overview</p>
                 </div>
-                <button onclick="closeModal()" class="p-2 rounded-full text-gray-400 hover:bg-gray-100 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-400 transition-colors duration-200">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
+                <div class="flex items-center gap-3">
+                    <!-- Export Dropdown -->
+                    <div class="relative" x-data="{ open: false }">
+                        <button @click="open = !open" @click.away="open = false"
+                            class="inline-flex items-center px-3 py-1.5 bg-sky-600 text-white rounded-lg text-sm hover:bg-sky-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2">
+                            <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
+                            Export
+                            <svg class="w-4 h-4 ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                            </svg>
+                        </button>
+                        
+                        <!-- Dropdown Menu -->
+                        <div x-show="open" 
+                             x-transition:enter="transition ease-out duration-100"
+                             x-transition:enter-start="transform opacity-0 scale-95"
+                             x-transition:enter-end="transform opacity-100 scale-100"
+                             x-transition:leave="transition ease-in duration-75"
+                             x-transition:leave-start="transform opacity-100 scale-100"
+                             x-transition:leave-end="transform opacity-0 scale-95"
+                             class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-slate-200 z-50"
+                             style="display: none;">
+                            <div class="py-1">
+                                <a href="#" id="exportStudentExcel"
+                                   class="flex items-center px-4 py-2 text-sm text-slate-700 hover:bg-sky-50 transition-colors duration-200">
+                                    <svg class="w-4 h-4 mr-3 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                    </svg>
+                                    Export as Excel
+                                </a>
+                                <a href="#" id="exportStudentPdf"
+                                   class="flex items-center px-4 py-2 text-sm text-slate-700 hover:bg-sky-50 transition-colors duration-200">
+                                    <svg class="w-4 h-4 mr-3 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                                    </svg>
+                                    Export as PDF
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button onclick="closeModal()" class="p-2 rounded-full text-gray-400 hover:bg-gray-100 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-400 transition-colors duration-200">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
             </div>
 
             <!-- Tier Filter -->
@@ -49,6 +99,22 @@ function viewDetails(studentId) {
 
     // Store student ID for tier switching
     modalContainer.dataset.studentId = studentId;
+    
+    // Update export links after modal content is set
+    updateExportLinks(studentId);
+}
+
+function updateExportLinks(studentId) {
+    // Update export links with current student ID
+    setTimeout(() => {
+        const excelLink = document.getElementById('exportStudentExcel');
+        const pdfLink = document.getElementById('exportStudentPdf');
+        
+        if (excelLink && pdfLink) {
+            excelLink.href = `/faculty/export-student-excel`;
+            pdfLink.href = `/faculty/export-student-pdf`;
+        }
+    }, 100);
 }
 
 async function fetchStudentTaskData(studentId, tier) {
@@ -58,6 +124,9 @@ async function fetchStudentTaskData(studentId, tier) {
             throw new Error('Failed to fetch student data');
         }
         const data = await response.json();
+        
+        // Store student data globally
+        currentStudentData = data;
 
         // Update the modal header with the student name
         const modalContainer = document.querySelector('#studentTaskDataModal .relative');
@@ -278,28 +347,45 @@ function closeModal() {
         
         setTimeout(() => {
             modal.classList.add('hidden');
+            // Clear current student data
+            currentStudentId = null;
+            currentStudentData = null;
         }, 200);
     }
 }
 
+// Initialize modal event listeners
+document.addEventListener('DOMContentLoaded', function() {
+    initializeModalListeners();
+});
+
 document.addEventListener('htmx:afterSwap', function(event) {
+    initializeModalListeners();
+});
+
+function initializeModalListeners() {
+    // Update all view details buttons
     document.querySelectorAll('[onclick^="viewDetails"]').forEach(button => {
         const studentId = button.getAttribute('data-student-id');
-        button.onclick = () => viewDetails(studentId);
+        if (studentId) {
+            button.onclick = () => viewDetails(studentId);
+        }
     });
 
     const modal = document.getElementById('studentTaskDataModal');
     if (modal) {
+        // Close modal on backdrop click
         modal.addEventListener('click', function(e) {
             if (e.target === this) {
                 closeModal();
             }
         });
 
+        // Close modal on Escape key
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
                 closeModal();
             }
         });
     }
-});
+}

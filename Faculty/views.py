@@ -30,6 +30,15 @@ from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from django.http import HttpResponse
 from django.contrib.auth.hashers import make_password
 
+from reportlab.lib import colors
+from reportlab.lib.pagesizes import letter, landscape
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.units import inch
+from reportlab.lib.enums import TA_CENTER
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+
 from django.urls import reverse
 
 # Firestore database instance
@@ -3765,5 +3774,1295 @@ def facultyDevinnovateSection(request):
 
 
 
+@faculty_required
+def export_studentdata_excel(request):
+    """Export student data with task details to Excel"""
+    try:
+        faculty_id = request.session.get('faculty_id')
+        if not faculty_id:
+            messages.error(request, "Session expired. Please login again.")
+            return redirect('sentinels_login')
+            
+        faculty = Faculty.objects.prefetch_related('assignments').get(faculty_id=faculty_id)
+        faculty_assignments = faculty.assignments.filter(is_active=True)
+        
+        # Get students based on search query
+        search_query = request.GET.get('search', '').strip()
+        students = Student.objects.filter(
+            faculty_assignment__in=faculty_assignments,
+            student_status='Registered'
+        ).order_by('last_name')
+        
+        if search_query:
+            students = students.filter(
+                Q(student_id__icontains=search_query) |
+                Q(first_name__icontains=search_query) |
+                Q(last_name__icontains=search_query)
+            )
+        
+        # Create workbook
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "Student Data"
+        
+        # Headers
+        headers = [
+            'Student ID', 'Name', 'Program', 'Year Section', 
+            'Completed Tasks', 'Total Points', 'Completion %'
+        ]
+        
+        # Style for headers
+        header_font = Font(bold=True, color="FFFFFF")
+        header_fill = PatternFill(start_color="0EA5E9", end_color="0EA5E9", fill_type="solid")
+        header_alignment = Alignment(horizontal="center", vertical="center")
+        thin_border = Border(
+            left=Side(style='thin'),
+            right=Side(style='thin'),
+            top=Side(style='thin'),
+            bottom=Side(style='thin')
+        )
+        
+        # Add headers
+        for col, header in enumerate(headers, 1):
+            cell = ws.cell(row=1, column=col, value=header)
+            cell.font = header_font
+            cell.fill = header_fill
+            cell.alignment = header_alignment
+            cell.border = thin_border
+        
+        # Task fields for completion check
+        task_fields = [
+            "Novice_Task_1(Collect Books)", "Novice_Task_2(Collect USB)",
+            "Novice_Task_3(QNA)", "Novice_Task_4_(Defeat Rootkit)",
+            "Junior_Task_1(Collect Books)", "Junior_Task_2(Caesar's QNA)",
+            "Junior_Task_3(Collect USB)", "Junior_Task_4(Bellaso's QNA)",
+            "Junior_Task_5(QNA)", "Junior_Task_6(Defeat Serpentix2)",
+            "Senior_Task_1(Collect Books)", "Senior_Task_2(QNA)",
+            "Senior_Task_3(Collect USB)", "Senior_Task_4(QNA)",
+            "Senior_Task_5(QNA)", "Senior_Task_6(Defeat Rootkit2)"
+        ]
+        total_tasks = len(task_fields)
+        
+        # Add student data
+        for row_num, student in enumerate(students, 2):
+            try:
+                doc_ref = db.collection('Registered_Students').document(student.student_id).get()
+                completed_tasks = 0
+                total_points = 0
+                
+                if doc_ref.exists:
+                    student_data = doc_ref.to_dict()
+                    for task_field in task_fields:
+                        if task_field in student_data and isinstance(student_data[task_field], dict):
+                            points = student_data[task_field].get("points", 0)
+                            if points > 0:
+                                completed_tasks += 1
+                                total_points += int(points)
+                
+                completion_pct = (completed_tasks / total_tasks * 100) if total_tasks > 0 else 0
+                
+                data = [
+                    student.student_id,
+                    f"{student.first_name} {student.last_name}",
+                    student.faculty_assignment.program,
+                    student.faculty_assignment.year_section,
+                    completed_tasks,
+                    total_points,
+                    f"{completion_pct:.1f}%"
+                ]
+                
+                for col, value in enumerate(data, 1):
+                    cell = ws.cell(row=row_num, column=col, value=value)
+                    cell.border = thin_border
+                    cell.alignment = Alignment(horizontal="center", vertical="center")
+                    
+            except Exception as e:
+                print(f"Error processing student {student.student_id}: {e}")
+                continue
+        
+        # Auto-adjust column widths
+        for column in ws.columns:
+            max_length = 0
+            column_letter = column[0].column_letter
+            for cell in column:
+                try:
+                    if len(str(cell.value)) > max_length:
+                        max_length = len(str(cell.value))
+                except:
+                    pass
+            adjusted_width = min(max_length + 2, 50)
+            ws.column_dimensions[column_letter].width = adjusted_width
+        
+        # Create response
+        response = HttpResponse(
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+        response['Content-Disposition'] = 'attachment; filename="student_data_export.xlsx"'
+        
+        wb.save(response)
+        return response
+        
+    except Exception as e:
+        messages.error(request, f"Error exporting data: {str(e)}")
+        return redirect('studentData')
 
 
+@faculty_required
+def export_studentdata_pdf(request):
+    """Export student data with task details to PDF"""
+    try:
+        faculty_id = request.session.get('faculty_id')
+        if not faculty_id:
+            messages.error(request, "Session expired. Please login again.")
+            return redirect('sentinels_login')
+            
+        faculty = Faculty.objects.prefetch_related('assignments').get(faculty_id=faculty_id)
+        faculty_assignments = faculty.assignments.filter(is_active=True)
+        
+        # Get students based on search query
+        search_query = request.GET.get('search', '').strip()
+        students = Student.objects.filter(
+            faculty_assignment__in=faculty_assignments,
+            student_status='Registered'
+        ).order_by('last_name')
+        
+        if search_query:
+            students = students.filter(
+                Q(student_id__icontains=search_query) |
+                Q(first_name__icontains=search_query) |
+                Q(last_name__icontains=search_query)
+            )
+        
+        # Create PDF with letter size and 1 inch margins
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = 'attachment; filename="student_data_export.pdf"'
+        
+        doc = SimpleDocTemplate(
+            response,
+            pagesize=letter,
+            rightMargin=1*inch,
+            leftMargin=1*inch,
+            topMargin=1*inch,
+            bottomMargin=1*inch
+        )
+        elements = []
+        
+        # Styles with Calibri font
+        styles = getSampleStyleSheet()
+        title_style = ParagraphStyle(
+            'CustomTitle',
+            parent=styles['Heading1'],
+            fontName='Helvetica-Bold',  # Fallback to Helvetica if Calibri not available
+            fontSize=18,
+            textColor=colors.HexColor('#0EA5E9'),
+            spaceAfter=30,
+            alignment=TA_CENTER
+        )
+        
+        # Title
+        title = Paragraph("Student Data Report", title_style)
+        elements.append(title)
+        elements.append(Spacer(1, 0.2*inch))
+        
+        # Task fields for completion check
+        task_fields = [
+            "Novice_Task_1(Collect Books)", "Novice_Task_2(Collect USB)",
+            "Novice_Task_3(QNA)", "Novice_Task_4_(Defeat Rootkit)",
+            "Junior_Task_1(Collect Books)", "Junior_Task_2(Caesar's QNA)",
+            "Junior_Task_3(Collect USB)", "Junior_Task_4(Bellaso's QNA)",
+            "Junior_Task_5(QNA)", "Junior_Task_6(Defeat Serpentix2)",
+            "Senior_Task_1(Collect Books)", "Senior_Task_2(QNA)",
+            "Senior_Task_3(Collect USB)", "Senior_Task_4(QNA)",
+            "Senior_Task_5(QNA)", "Senior_Task_6(Defeat Rootkit2)"
+        ]
+        total_tasks = len(task_fields)
+        
+        # Table data
+        data = [['Student ID', 'Name', 'Program', 'Year', 'Tasks', 'Points', 'Completion']]
+        
+        for student in students:
+            try:
+                doc_ref = db.collection('Registered_Students').document(student.student_id).get()
+                completed_tasks = 0
+                total_points = 0
+                
+                if doc_ref.exists:
+                    student_data = doc_ref.to_dict()
+                    for task_field in task_fields:
+                        if task_field in student_data and isinstance(student_data[task_field], dict):
+                            points = student_data[task_field].get("points", 0)
+                            if points > 0:
+                                completed_tasks += 1
+                                total_points += int(points)
+                
+                completion_pct = (completed_tasks / total_tasks * 100) if total_tasks > 0 else 0
+                
+                data.append([
+                    student.student_id,
+                    f"{student.first_name} {student.last_name}",
+                    student.faculty_assignment.program[:15],
+                    student.faculty_assignment.year_section,
+                    str(completed_tasks),
+                    str(total_points),
+                    f"{completion_pct:.1f}%"
+                ])
+                
+            except Exception as e:
+                print(f"Error processing student {student.student_id}: {e}")
+                continue
+        
+        # Calculate column widths for letter size with 1 inch margins
+        # Available width = 8.5 - 2 (margins) = 6.5 inches
+        table = Table(data, colWidths=[0.9*inch, 1.3*inch, 1.2*inch, 0.7*inch, 0.6*inch, 0.6*inch, 0.8*inch])
+        
+        # Table style with Helvetica (closest to Calibri in reportlab)
+        table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor("#0455C7")),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 0), 10),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+            ('BACKGROUND', (0, 1), (-1, -1), colors.white),
+            ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
+            ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+            ('FONTSIZE', (0, 1), (-1, -1), 8),
+            ('GRID', (0, 0), (-1, -1), 1, colors.HexColor('#E2E8F0')),
+            ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#F0F9FF')])
+        ]))
+        
+        elements.append(table)
+        doc.build(elements)
+        
+        return response
+        
+    except Exception as e:
+        messages.error(request, f"Error exporting PDF: {str(e)}")
+        return redirect('studentData')
+
+
+
+@faculty_required
+def export_novice_excel(request):
+    """Export Novice tier student data to Excel"""
+    try:
+        faculty_id = request.session.get('faculty_id')
+        if not faculty_id:
+            messages.error(request, "Session expired. Please login again.")
+            return redirect('sentinels_login')
+            
+        faculty = Faculty.objects.prefetch_related('assignments').get(faculty_id=faculty_id)
+        faculty_assignments = faculty.assignments.filter(is_active=True)
+        
+        selected_task = request.GET.get('task', 'Novice_Task_1(Collect Books)')
+        task_map = {
+            "Novice_Task_1(Collect Books)": "Task 1: Collect Books",
+            "Novice_Task_2(Collect USB)": "Task 2: Collect USB",
+            "Novice_Task_3(QNA)": "Task 3: Q&A",
+            "Novice_Task_4_(Defeat Rootkit)": "Task 4: Defeat Rootkit"
+        }
+        
+        # Get students who completed novice tasks
+        students = Student.objects.filter(
+            faculty_assignment__in=faculty_assignments,
+            student_status='Registered'
+        ).order_by('last_name')
+        
+        # Create workbook
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "Novice Tier Progress"
+        
+        # Headers
+        headers = ['Student ID', 'Name', 'Task', 'Time Completed', 'Points Earned', 'Status']
+        
+        # Style for headers
+        header_font = Font(bold=True, color="FFFFFF")
+        header_fill = PatternFill(start_color="0EA5E9", end_color="0EA5E9", fill_type="solid")
+        header_alignment = Alignment(horizontal="center", vertical="center")
+        thin_border = Border(
+            left=Side(style='thin'),
+            right=Side(style='thin'),
+            top=Side(style='thin'),
+            bottom=Side(style='thin')
+        )
+        
+        # Add headers
+        for col, header in enumerate(headers, 1):
+            cell = ws.cell(row=1, column=col, value=header)
+            cell.font = header_font
+            cell.fill = header_fill
+            cell.alignment = header_alignment
+            cell.border = thin_border
+        
+        # Add student data
+        row_num = 2
+        for student in students:
+            try:
+                doc_ref = db.collection('Registered_Students').document(student.student_id).get()
+                
+                if doc_ref.exists:
+                    student_data = doc_ref.to_dict()
+                    
+                    if selected_task in student_data and isinstance(student_data[selected_task], dict):
+                        task_info = student_data[selected_task]
+                        points = task_info.get("points", 0)
+                        time_completed = task_info.get('time_taken', 'Not completed')
+                        status = "Completed" if points > 0 else "Not Started"
+                        
+                        data = [
+                            student.student_id,
+                            f"{student.first_name} {student.last_name}",
+                            task_map.get(selected_task, selected_task),
+                            time_completed,
+                            points,
+                            status
+                        ]
+                        
+                        for col, value in enumerate(data, 1):
+                            cell = ws.cell(row=row_num, column=col, value=value)
+                            cell.border = thin_border
+                            cell.alignment = Alignment(horizontal="center", vertical="center")
+                        
+                        row_num += 1
+                        
+            except Exception as e:
+                print(f"Error processing student {student.student_id}: {e}")
+                continue
+        
+        # Auto-adjust column widths
+        for column in ws.columns:
+            max_length = 0
+            column_letter = column[0].column_letter
+            for cell in column:
+                try:
+                    if len(str(cell.value)) > max_length:
+                        max_length = len(str(cell.value))
+                except:
+                    pass
+            adjusted_width = min(max_length + 2, 50)
+            ws.column_dimensions[column_letter].width = adjusted_width
+        
+        # Create response
+        response = HttpResponse(
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+        response['Content-Disposition'] = 'attachment; filename="novice_tier_export.xlsx"'
+        
+        wb.save(response)
+        return response
+        
+    except Exception as e:
+        messages.error(request, f"Error exporting data: {str(e)}")
+        return redirect('novice_tier')
+
+
+@faculty_required
+def export_novice_pdf(request):
+    """Export Novice tier student data to PDF"""
+    try:
+        faculty_id = request.session.get('faculty_id')
+        if not faculty_id:
+            messages.error(request, "Session expired. Please login again.")
+            return redirect('sentinels_login')
+            
+        faculty = Faculty.objects.prefetch_related('assignments').get(faculty_id=faculty_id)
+        faculty_assignments = faculty.assignments.filter(is_active=True)
+        
+        selected_task = request.GET.get('task', 'Novice_Task_1(Collect Books)')
+        task_map = {
+            "Novice_Task_1(Collect Books)": "Task 1: Collect Books",
+            "Novice_Task_2(Collect USB)": "Task 2: Collect USB",
+            "Novice_Task_3(QNA)": "Task 3: Q&A",
+            "Novice_Task_4_(Defeat Rootkit)": "Task 4: Defeat Rootkit"
+        }
+        
+        # Get students
+        students = Student.objects.filter(
+            faculty_assignment__in=faculty_assignments,
+            student_status='Registered'
+        ).order_by('last_name')
+        
+        # Create PDF
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = 'attachment; filename="novice_tier_export.pdf"'
+        
+        doc = SimpleDocTemplate(
+            response,
+            pagesize=letter,
+            rightMargin=1*inch,
+            leftMargin=1*inch,
+            topMargin=1*inch,
+            bottomMargin=1*inch
+        )
+        elements = []
+        
+        # Styles
+        styles = getSampleStyleSheet()
+        title_style = ParagraphStyle(
+            'CustomTitle',
+            parent=styles['Heading1'],
+            fontName='Helvetica-Bold',
+            fontSize=18,
+            textColor=colors.HexColor('#0EA5E9'),
+            spaceAfter=30,
+            alignment=TA_CENTER
+        )
+        
+        # Title
+        title = Paragraph(f"Novice Tier Progress Report<br/>{task_map.get(selected_task, selected_task)}", title_style)
+        elements.append(title)
+        elements.append(Spacer(1, 0.2*inch))
+        
+        # Table data
+        data = [['Student ID', 'Name', 'Time Completed', 'Points', 'Status']]
+        
+        for student in students:
+            try:
+                doc_ref = db.collection('Registered_Students').document(student.student_id).get()
+                
+                if doc_ref.exists:
+                    student_data = doc_ref.to_dict()
+                    
+                    if selected_task in student_data and isinstance(student_data[selected_task], dict):
+                        task_info = student_data[selected_task]
+                        points = task_info.get("points", 0)
+                        time_completed = task_info.get('time_taken', 'Not completed')
+                        status = "Completed" if points > 0 else "Not Started"
+                        
+                        data.append([
+                            student.student_id,
+                            f"{student.first_name} {student.last_name}",
+                            time_completed,
+                            str(points),
+                            status
+                        ])
+                        
+            except Exception as e:
+                print(f"Error processing student {student.student_id}: {e}")
+                continue
+        
+        # Create table
+        table = Table(data, colWidths=[1.2*inch, 1.8*inch, 1.3*inch, 0.8*inch, 1*inch])
+        
+        # Table style
+        table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#0EA5E9')),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 0), 10),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+            ('BACKGROUND', (0, 1), (-1, -1), colors.white),
+            ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
+            ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+            ('FONTSIZE', (0, 1), (-1, -1), 8),
+            ('GRID', (0, 0), (-1, -1), 1, colors.HexColor('#E2E8F0')),
+            ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#F0F9FF')])
+        ]))
+        
+        elements.append(table)
+        doc.build(elements)
+        
+        return response
+        
+    except Exception as e:
+        messages.error(request, f"Error exporting PDF: {str(e)}")
+        return redirect('novice_tier')
+
+
+
+
+@faculty_required
+def export_junior_excel(request):
+    """Export Junior tier student data to Excel"""
+    try:
+        faculty_id = request.session.get('faculty_id')
+        if not faculty_id:
+            messages.error(request, "Session expired. Please login again.")
+            return redirect('sentinels_login')
+            
+        faculty = Faculty.objects.prefetch_related('assignments').get(faculty_id=faculty_id)
+        faculty_assignments = faculty.assignments.filter(is_active=True)
+        
+        selected_task = request.GET.get('task', 'Junior_Task_1(Collect Books)')
+        task_map = {
+            "Junior_Task_1(Collect Books)": "Task 1: Collect Books",
+            "Junior_Task_2(Caesar's QNA)": "Task 2: Caesar's Q&A",
+            "Junior_Task_3(Collect USB)": "Task 3: Collect USB",
+            "Junior_Task_4(Bellaso's QNA)": "Task 4: Bellaso's Q&A",
+            "Junior_Task_5(QNA)": "Task 5: Q&A",
+            "Junior_Task_6(Defeat Serpentix2)": "Task 6: Defeat Serpentix2"
+        }
+        
+        # Get students
+        students = Student.objects.filter(
+            faculty_assignment__in=faculty_assignments,
+            student_status='Registered'
+        ).order_by('last_name')
+        
+        # Create workbook
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "Junior Tier Progress"
+        
+        # Headers
+        headers = ['Student ID', 'Name', 'Task', 'Time Completed', 'Points Earned', 'Status']
+        
+        # Style for headers
+        header_font = Font(bold=True, color="FFFFFF")
+        header_fill = PatternFill(start_color="0EA5E9", end_color="0EA5E9", fill_type="solid")
+        header_alignment = Alignment(horizontal="center", vertical="center")
+        thin_border = Border(
+            left=Side(style='thin'),
+            right=Side(style='thin'),
+            top=Side(style='thin'),
+            bottom=Side(style='thin')
+        )
+        
+        # Add headers
+        for col, header in enumerate(headers, 1):
+            cell = ws.cell(row=1, column=col, value=header)
+            cell.font = header_font
+            cell.fill = header_fill
+            cell.alignment = header_alignment
+            cell.border = thin_border
+        
+        # Add student data
+        row_num = 2
+        for student in students:
+            try:
+                doc_ref = db.collection('Registered_Students').document(student.student_id).get()
+                
+                if doc_ref.exists:
+                    student_data = doc_ref.to_dict()
+                    
+                    if selected_task in student_data and isinstance(student_data[selected_task], dict):
+                        task_info = student_data[selected_task]
+                        points = task_info.get("points", 0)
+                        time_completed = task_info.get('time_taken', 'Not completed')
+                        status = "Completed" if points > 0 else "Not Started"
+                        
+                        data = [
+                            student.student_id,
+                            f"{student.first_name} {student.last_name}",
+                            task_map.get(selected_task, selected_task),
+                            time_completed,
+                            points,
+                            status
+                        ]
+                        
+                        for col, value in enumerate(data, 1):
+                            cell = ws.cell(row=row_num, column=col, value=value)
+                            cell.border = thin_border
+                            cell.alignment = Alignment(horizontal="center", vertical="center")
+                        
+                        row_num += 1
+                        
+            except Exception as e:
+                print(f"Error processing student {student.student_id}: {e}")
+                continue
+        
+        # Auto-adjust column widths
+        for column in ws.columns:
+            max_length = 0
+            column_letter = column[0].column_letter
+            for cell in column:
+                try:
+                    if len(str(cell.value)) > max_length:
+                        max_length = len(str(cell.value))
+                except:
+                    pass
+            adjusted_width = min(max_length + 2, 50)
+            ws.column_dimensions[column_letter].width = adjusted_width
+        
+        # Create response
+        response = HttpResponse(
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+        response['Content-Disposition'] = 'attachment; filename="junior_tier_export.xlsx"'
+        
+        wb.save(response)
+        return response
+        
+    except Exception as e:
+        messages.error(request, f"Error exporting data: {str(e)}")
+        return redirect('junior_tier')
+
+
+@faculty_required
+def export_junior_pdf(request):
+    """Export Junior tier student data to PDF"""
+    try:
+        faculty_id = request.session.get('faculty_id')
+        if not faculty_id:
+            messages.error(request, "Session expired. Please login again.")
+            return redirect('sentinels_login')
+            
+        faculty = Faculty.objects.prefetch_related('assignments').get(faculty_id=faculty_id)
+        faculty_assignments = faculty.assignments.filter(is_active=True)
+        
+        selected_task = request.GET.get('task', 'Junior_Task_1(Collect Books)')
+        task_map = {
+            "Junior_Task_1(Collect Books)": "Task 1: Collect Books",
+            "Junior_Task_2(Caesar's QNA)": "Task 2: Caesar's Q&A",
+            "Junior_Task_3(Collect USB)": "Task 3: Collect USB",
+            "Junior_Task_4(Bellaso's QNA)": "Task 4: Bellaso's Q&A",
+            "Junior_Task_5(QNA)": "Task 5: Q&A",
+            "Junior_Task_6(Defeat Serpentix2)": "Task 6: Defeat Serpentix2"
+        }
+        
+        # Get students
+        students = Student.objects.filter(
+            faculty_assignment__in=faculty_assignments,
+            student_status='Registered'
+        ).order_by('last_name')
+        
+        # Create PDF
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = 'attachment; filename="junior_tier_export.pdf"'
+        
+        doc = SimpleDocTemplate(
+            response,
+            pagesize=letter,
+            rightMargin=1*inch,
+            leftMargin=1*inch,
+            topMargin=1*inch,
+            bottomMargin=1*inch
+        )
+        elements = []
+        
+        # Styles
+        styles = getSampleStyleSheet()
+        title_style = ParagraphStyle(
+            'CustomTitle',
+            parent=styles['Heading1'],
+            fontName='Helvetica-Bold',
+            fontSize=18,
+            textColor=colors.HexColor('#0EA5E9'),
+            spaceAfter=30,
+            alignment=TA_CENTER
+        )
+        
+        # Title
+        title = Paragraph(f"Junior Tier Progress Report<br/>{task_map.get(selected_task, selected_task)}", title_style)
+        elements.append(title)
+        elements.append(Spacer(1, 0.2*inch))
+        
+        # Table data
+        data = [['Student ID', 'Name', 'Time Completed', 'Points', 'Status']]
+        
+        for student in students:
+            try:
+                doc_ref = db.collection('Registered_Students').document(student.student_id).get()
+                
+                if doc_ref.exists:
+                    student_data = doc_ref.to_dict()
+                    
+                    if selected_task in student_data and isinstance(student_data[selected_task], dict):
+                        task_info = student_data[selected_task]
+                        points = task_info.get("points", 0)
+                        time_completed = task_info.get('time_taken', 'Not completed')
+                        status = "Completed" if points > 0 else "Not Started"
+                        
+                        data.append([
+                            student.student_id,
+                            f"{student.first_name} {student.last_name}",
+                            time_completed,
+                            str(points),
+                            status
+                        ])
+                        
+            except Exception as e:
+                print(f"Error processing student {student.student_id}: {e}")
+                continue
+        
+        # Create table
+        table = Table(data, colWidths=[1.2*inch, 1.8*inch, 1.3*inch, 0.8*inch, 1*inch])
+        
+        # Table style
+        table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#0EA5E9')),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 0), 10),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+            ('BACKGROUND', (0, 1), (-1, -1), colors.white),
+            ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
+            ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+            ('FONTSIZE', (0, 1), (-1, -1), 8),
+            ('GRID', (0, 0), (-1, -1), 1, colors.HexColor('#E2E8F0')),
+            ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#F0F9FF')])
+        ]))
+        
+        elements.append(table)
+        doc.build(elements)
+        
+        return response
+        
+    except Exception as e:
+        messages.error(request, f"Error exporting PDF: {str(e)}")
+        return redirect('junior_tier')
+
+
+@faculty_required
+def export_senior_excel(request):
+    """Export Senior tier student data to Excel"""
+    try:
+        faculty_id = request.session.get('faculty_id')
+        if not faculty_id:
+            messages.error(request, "Session expired. Please login again.")
+            return redirect('sentinels_login')
+            
+        faculty = Faculty.objects.prefetch_related('assignments').get(faculty_id=faculty_id)
+        faculty_assignments = faculty.assignments.filter(is_active=True)
+        
+        selected_task = request.GET.get('task', 'Senior_Task_1(Collect Books)')
+        task_map = {
+            "Senior_Task_1(Collect Books)": "Task 1: Collect Books",
+            "Senior_Task_2(QNA)": "Task 2: Q&A",
+            "Senior_Task_3(Collect USB)": "Task 3: Collect USB",
+            "Senior_Task_4(QNA)": "Task 4: Q&A",
+            "Senior_Task_5(QNA)": "Task 5: Q&A",
+            "Senior_Task_6(Defeat Rootkit2)": "Task 6: Defeat Rootkit2"
+        }
+        
+        # Get students
+        students = Student.objects.filter(
+            faculty_assignment__in=faculty_assignments,
+            student_status='Registered'
+        ).order_by('last_name')
+        
+        # Create workbook
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "Senior Tier Progress"
+        
+        # Headers
+        headers = ['Student ID', 'Name', 'Task', 'Time Completed', 'Points Earned', 'Status']
+        
+        # Style for headers
+        header_font = Font(bold=True, color="FFFFFF")
+        header_fill = PatternFill(start_color="0EA5E9", end_color="0EA5E9", fill_type="solid")
+        header_alignment = Alignment(horizontal="center", vertical="center")
+        thin_border = Border(
+            left=Side(style='thin'),
+            right=Side(style='thin'),
+            top=Side(style='thin'),
+            bottom=Side(style='thin')
+        )
+        
+        # Add headers
+        for col, header in enumerate(headers, 1):
+            cell = ws.cell(row=1, column=col, value=header)
+            cell.font = header_font
+            cell.fill = header_fill
+            cell.alignment = header_alignment
+            cell.border = thin_border
+        
+        # Add student data
+        row_num = 2
+        for student in students:
+            try:
+                doc_ref = db.collection('Registered_Students').document(student.student_id).get()
+                
+                if doc_ref.exists:
+                    student_data = doc_ref.to_dict()
+                    
+                    if selected_task in student_data and isinstance(student_data[selected_task], dict):
+                        task_info = student_data[selected_task]
+                        points = task_info.get("points", 0)
+                        time_completed = task_info.get('time_taken', 'Not completed')
+                        status = "Completed" if points > 0 else "Not Started"
+                        
+                        data = [
+                            student.student_id,
+                            f"{student.first_name} {student.last_name}",
+                            task_map.get(selected_task, selected_task),
+                            time_completed,
+                            points,
+                            status
+                        ]
+                        
+                        for col, value in enumerate(data, 1):
+                            cell = ws.cell(row=row_num, column=col, value=value)
+                            cell.border = thin_border
+                            cell.alignment = Alignment(horizontal="center", vertical="center")
+                        
+                        row_num += 1
+                        
+            except Exception as e:
+                print(f"Error processing student {student.student_id}: {e}")
+                continue
+        
+        # Auto-adjust column widths
+        for column in ws.columns:
+            max_length = 0
+            column_letter = column[0].column_letter
+            for cell in column:
+                try:
+                    if len(str(cell.value)) > max_length:
+                        max_length = len(str(cell.value))
+                except:
+                    pass
+            adjusted_width = min(max_length + 2, 50)
+            ws.column_dimensions[column_letter].width = adjusted_width
+        
+        # Create response
+        response = HttpResponse(
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+        response['Content-Disposition'] = 'attachment; filename="senior_tier_export.xlsx"'
+        
+        wb.save(response)
+        return response
+        
+    except Exception as e:
+        messages.error(request, f"Error exporting data: {str(e)}")
+        return redirect('senior_tier')
+
+
+@faculty_required
+def export_senior_pdf(request):
+    """Export Senior tier student data to PDF"""
+    try:
+        faculty_id = request.session.get('faculty_id')
+        if not faculty_id:
+            messages.error(request, "Session expired. Please login again.")
+            return redirect('sentinels_login')
+            
+        faculty = Faculty.objects.prefetch_related('assignments').get(faculty_id=faculty_id)
+        faculty_assignments = faculty.assignments.filter(is_active=True)
+        
+        selected_task = request.GET.get('task', 'Senior_Task_1(Collect Books)')
+        task_map = {
+            "Senior_Task_1(Collect Books)": "Task 1: Collect Books",
+            "Senior_Task_2(QNA)": "Task 2: Q&A",
+            "Senior_Task_3(Collect USB)": "Task 3: Collect USB",
+            "Senior_Task_4(QNA)": "Task 4: Q&A",
+            "Senior_Task_5(QNA)": "Task 5: Q&A",
+            "Senior_Task_6(Defeat Rootkit2)": "Task 6: Defeat Rootkit2"
+        }
+        
+        # Get students
+        students = Student.objects.filter(
+            faculty_assignment__in=faculty_assignments,
+            student_status='Registered'
+        ).order_by('last_name')
+        
+        # Create PDF
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = 'attachment; filename="senior_tier_export.pdf"'
+        
+        doc = SimpleDocTemplate(
+            response,
+            pagesize=letter,
+            rightMargin=1*inch,
+            leftMargin=1*inch,
+            topMargin=1*inch,
+            bottomMargin=1*inch
+        )
+        elements = []
+        
+        # Styles
+        styles = getSampleStyleSheet()
+        title_style = ParagraphStyle(
+            'CustomTitle',
+            parent=styles['Heading1'],
+            fontName='Helvetica-Bold',
+            fontSize=18,
+            textColor=colors.HexColor('#0EA5E9'),
+            spaceAfter=30,
+            alignment=TA_CENTER
+        )
+        
+        # Title
+        title = Paragraph(f"Senior Tier Progress Report<br/>{task_map.get(selected_task, selected_task)}", title_style)
+        elements.append(title)
+        elements.append(Spacer(1, 0.2*inch))
+        
+        # Table data
+        data = [['Student ID', 'Name', 'Time Completed', 'Points', 'Status']]
+        
+        for student in students:
+            try:
+                doc_ref = db.collection('Registered_Students').document(student.student_id).get()
+                
+                if doc_ref.exists:
+                    student_data = doc_ref.to_dict()
+                    
+                    if selected_task in student_data and isinstance(student_data[selected_task], dict):
+                        task_info = student_data[selected_task]
+                        points = task_info.get("points", 0)
+                        time_completed = task_info.get('time_taken', 'Not completed')
+                        status = "Completed" if points > 0 else "Not Started"
+                        
+                        data.append([
+                            student.student_id,
+                            f"{student.first_name} {student.last_name}",
+                            time_completed,
+                            str(points),
+                            status
+                        ])
+                        
+            except Exception as e:
+                print(f"Error processing student {student.student_id}: {e}")
+                continue
+        
+        # Create table
+        table = Table(data, colWidths=[1.2*inch, 1.8*inch, 1.3*inch, 0.8*inch, 1*inch])
+        
+        # Table style
+        table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#0EA5E9')),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 0), 10),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+            ('BACKGROUND', (0, 1), (-1, -1), colors.white),
+            ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
+            ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+            ('FONTSIZE', (0, 1), (-1, -1), 8),
+            ('GRID', (0, 0), (-1, -1), 1, colors.HexColor('#E2E8F0')),
+            ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#F0F9FF')])
+        ]))
+        
+        elements.append(table)
+        doc.build(elements)
+        
+        return response
+        
+    except Exception as e:
+        messages.error(request, f"Error exporting PDF: {str(e)}")
+        return redirect('senior_tier')
+    
+
+@faculty_required
+def export_student_excel(request, student_id):
+    """Export individual student's task data to Excel"""
+    try:
+        faculty_id = request.session.get('faculty_id')
+        if not faculty_id:
+            messages.error(request, "Session expired. Please login again.")
+            return redirect('sentinels_login')
+            
+        faculty = Faculty.objects.prefetch_related('assignments').get(faculty_id=faculty_id)
+        faculty_assignments = faculty.assignments.filter(is_active=True)
+        
+        # Get student
+        try:
+            student = Student.objects.get(
+                student_id=student_id,
+                faculty_assignment__in=faculty_assignments,
+                student_status='Registered'
+            )
+        except Student.DoesNotExist:
+            messages.error(request, "Student not found.")
+            return redirect('studentData')
+        
+        # Task fields
+        task_fields = {
+            'Novice': [
+                "Novice_Task_1(Collect Books)", "Novice_Task_2(Collect USB)",
+                "Novice_Task_3(QNA)", "Novice_Task_4_(Defeat Rootkit)"
+            ],
+            'Junior': [
+                "Junior_Task_1(Collect Books)", "Junior_Task_2(Caesar's QNA)",
+                "Junior_Task_3(Collect USB)", "Junior_Task_4(Bellaso's QNA)",
+                "Junior_Task_5(QNA)", "Junior_Task_6(Defeat Serpentix2)"
+            ],
+            'Senior': [
+                "Senior_Task_1(Collect Books)", "Senior_Task_2(QNA)",
+                "Senior_Task_3(Collect USB)", "Senior_Task_4(QNA)",
+                "Senior_Task_5(QNA)", "Senior_Task_6(Defeat Rootkit2)"
+            ]
+        }
+        
+        # Create workbook
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "Student Task Report"
+        
+        # Student Info Section
+        ws.merge_cells('A1:F1')
+        title_cell = ws['A1']
+        title_cell.value = f"Task Report: {student.first_name} {student.last_name}"
+        title_cell.font = Font(bold=True, size=16, color="0EA5E9")
+        title_cell.alignment = Alignment(horizontal="center", vertical="center")
+        
+        ws.merge_cells('A2:F2')
+        info_cell = ws['A2']
+        info_cell.value = f"Student ID: {student.student_id} | Program: {student.faculty_assignment.program} | Section: {student.faculty_assignment.year_section}"
+        info_cell.font = Font(size=11)
+        info_cell.alignment = Alignment(horizontal="center")
+        
+        # Add spacing
+        ws.append([])
+        
+        # Headers
+        headers = ['Tier', 'Task', 'Status', 'Points', 'Time Taken', 'Completed At']
+        header_font = Font(bold=True, color="FFFFFF")
+        header_fill = PatternFill(start_color="0EA5E9", end_color="0EA5E9", fill_type="solid")
+        header_alignment = Alignment(horizontal="center", vertical="center")
+        thin_border = Border(
+            left=Side(style='thin'),
+            right=Side(style='thin'),
+            top=Side(style='thin'),
+            bottom=Side(style='thin')
+        )
+        
+        header_row = ws.max_row + 1
+        for col, header in enumerate(headers, 1):
+            cell = ws.cell(row=header_row, column=col, value=header)
+            cell.font = header_font
+            cell.fill = header_fill
+            cell.alignment = header_alignment
+            cell.border = thin_border
+        
+        # Get student data from Firebase
+        try:
+            doc_ref = db.collection('Registered_Students').document(student.student_id).get()
+            
+            if doc_ref.exists:
+                student_data = doc_ref.to_dict()
+                
+                # Add task data
+                for tier, tasks in task_fields.items():
+                    for task_field in tasks:
+                        task_name = task_field.split('(')[0].replace('_', ' ')
+                        
+                        if task_field in student_data and isinstance(student_data[task_field], dict):
+                            task_info = student_data[task_field]
+                            points = task_info.get("points", 0)
+                            time_taken = task_info.get('time_taken', 'N/A')
+                            completed_at = task_info.get('completed_at', 'N/A')
+                            status = "Completed" if points > 0 else "Not Started"
+                        else:
+                            points = 0
+                            time_taken = 'N/A'
+                            completed_at = 'N/A'
+                            status = "Not Started"
+                        
+                        row_data = [tier, task_name, status, points, time_taken, completed_at]
+                        row_num = ws.max_row + 1
+                        
+                        for col, value in enumerate(row_data, 1):
+                            cell = ws.cell(row=row_num, column=col, value=value)
+                            cell.border = thin_border
+                            cell.alignment = Alignment(horizontal="center", vertical="center")
+                            
+                            # Color code status
+                            if col == 3:  # Status column
+                                if status == "Completed":
+                                    cell.fill = PatternFill(start_color="D1FAE5", end_color="D1FAE5", fill_type="solid")
+                                    cell.font = Font(color="065F46")
+                                else:
+                                    cell.fill = PatternFill(start_color="FEE2E2", end_color="FEE2E2", fill_type="solid")
+                                    cell.font = Font(color="991B1B")
+        
+        except Exception as e:
+            print(f"Error fetching Firebase data: {e}")
+        
+        # Auto-adjust column widths
+        for column in ws.columns:
+            max_length = 0
+            column_letter = column[0].column_letter
+            for cell in column:
+                try:
+                    if len(str(cell.value)) > max_length:
+                        max_length = len(str(cell.value))
+                except:
+                    pass
+            adjusted_width = min(max_length + 2, 50)
+            ws.column_dimensions[column_letter].width = adjusted_width
+        
+        # Create response
+        response = HttpResponse(
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+        response['Content-Disposition'] = f'attachment; filename="{student.student_id}_task_report.xlsx"'
+        
+        wb.save(response)
+        return response
+        
+    except Exception as e:
+        messages.error(request, f"Error exporting data: {str(e)}")
+        return redirect('studentData')
+
+
+@faculty_required
+def export_student_pdf(request, student_id):
+    """Export individual student's task data to PDF"""
+    try:
+        faculty_id = request.session.get('faculty_id')
+        if not faculty_id:
+            messages.error(request, "Session expired. Please login again.")
+            return redirect('sentinels_login')
+            
+        faculty = Faculty.objects.prefetch_related('assignments').get(faculty_id=faculty_id)
+        faculty_assignments = faculty.assignments.filter(is_active=True)
+        
+        # Get student
+        try:
+            student = Student.objects.get(
+                student_id=student_id,
+                faculty_assignment__in=faculty_assignments,
+                student_status='Registered'
+            )
+        except Student.DoesNotExist:
+            messages.error(request, "Student not found.")
+            return redirect('studentData')
+        
+        # Task fields
+        task_fields = {
+            'Novice': [
+                "Novice_Task_1(Collect Books)", "Novice_Task_2(Collect USB)",
+                "Novice_Task_3(QNA)", "Novice_Task_4_(Defeat Rootkit)"
+            ],
+            'Junior': [
+                "Junior_Task_1(Collect Books)", "Junior_Task_2(Caesar's QNA)",
+                "Junior_Task_3(Collect USB)", "Junior_Task_4(Bellaso's QNA)",
+                "Junior_Task_5(QNA)", "Junior_Task_6(Defeat Serpentix2)"
+            ],
+            'Senior': [
+                "Senior_Task_1(Collect Books)", "Senior_Task_2(QNA)",
+                "Senior_Task_3(Collect USB)", "Senior_Task_4(QNA)",
+                "Senior_Task_5(QNA)", "Senior_Task_6(Defeat Rootkit2)"
+            ]
+        }
+        
+        # Create PDF
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="{student.student_id}_task_report.pdf"'
+        
+        doc = SimpleDocTemplate(
+            response,
+            pagesize=letter,
+            rightMargin=1*inch,
+            leftMargin=1*inch,
+            topMargin=1*inch,
+            bottomMargin=1*inch
+        )
+        elements = []
+        
+        # Styles
+        styles = getSampleStyleSheet()
+        title_style = ParagraphStyle(
+            'CustomTitle',
+            parent=styles['Heading1'],
+            fontName='Helvetica-Bold',
+            fontSize=18,
+            textColor=colors.HexColor('#0EA5E9'),
+            spaceAfter=15,
+            alignment=TA_CENTER
+        )
+        subtitle_style = ParagraphStyle(
+            'Subtitle',
+            parent=styles['Normal'],
+            fontName='Helvetica',
+            fontSize=11,
+            textColor=colors.HexColor('#64748B'),
+            spaceAfter=20,
+            alignment=TA_CENTER
+        )
+        
+        # Title and student info
+        title = Paragraph(f"Student Task Report<br/>{student.first_name} {student.last_name}", title_style)
+        elements.append(title)
+        
+        subtitle = Paragraph(
+            f"Student ID: {student.student_id} | Program: {student.faculty_assignment.program} | Section: {student.faculty_assignment.year_section}",
+            subtitle_style
+        )
+        elements.append(subtitle)
+        elements.append(Spacer(1, 0.2*inch))
+        
+        # Table data
+        data = [['Tier', 'Task', 'Status', 'Points', 'Time']]
+        
+        # Get student data from Firebase
+        try:
+            doc_ref = db.collection('Registered_Students').document(student.student_id).get()
+            
+            if doc_ref.exists:
+                student_data = doc_ref.to_dict()
+                
+                for tier, tasks in task_fields.items():
+                    for task_field in tasks:
+                        task_name = task_field.split('(')[0].replace('_', ' ')
+                        
+                        if task_field in student_data and isinstance(student_data[task_field], dict):
+                            task_info = student_data[task_field]
+                            points = task_info.get("points", 0)
+                            time_taken = task_info.get('time_taken', 'N/A')
+                            status = "✓" if points > 0 else "✗"
+                        else:
+                            points = 0
+                            time_taken = 'N/A'
+                            status = "✗"
+                        
+                        data.append([
+                            tier,
+                            Paragraph(task_name, styles['Normal']),
+                            status,
+                            str(points),
+                            time_taken
+                        ])
+        
+        except Exception as e:
+            print(f"Error fetching Firebase data: {e}")
+        
+        # Create table
+        table = Table(data, colWidths=[0.8*inch, 2*inch, 0.6*inch, 0.6*inch, 1.1*inch])
+        
+        # Table style
+        table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#0EA5E9')),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 0), 10),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+            ('BACKGROUND', (0, 1), (-1, -1), colors.white),
+            ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
+            ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+            ('FONTSIZE', (0, 1), (-1, -1), 8),
+            ('GRID', (0, 0), (-1, -1), 1, colors.HexColor('#E2E8F0')),
+            ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#F0F9FF')]),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ]))
+        
+        elements.append(table)
+        doc.build(elements)
+        
+        return response
+        
+    except Exception as e:
+        messages.error(request, f"Error exporting PDF: {str(e)}")
+        return redirect('studentData')
+    
+@faculty_required
+def get_student_data(request, student_id):
+    """Get basic student data for modal display"""
+    try:
+        faculty_id = request.session.get('faculty_id')
+        faculty = Faculty.objects.prefetch_related('assignments').get(faculty_id=faculty_id)
+        faculty_assignments = faculty.assignments.filter(is_active=True)
+        
+        student = Student.objects.get(
+            student_id=student_id,
+            faculty_assignment__in=faculty_assignments,
+            student_status='Registered'
+        )
+        
+        return JsonResponse({
+            'student_id': student.student_id,
+            'first_name': student.first_name,
+            'last_name': student.last_name,
+            'program': student.faculty_assignment.program,
+            'year_section': student.faculty_assignment.year_section
+        })
+    except:
+        return JsonResponse({'error': 'Student not found'}, status=404)

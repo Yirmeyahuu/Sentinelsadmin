@@ -131,6 +131,7 @@
     --color-slate-400: oklch(70.4% 0.04 256.788);
     --color-slate-500: oklch(55.4% 0.046 257.417);
     --color-slate-600: oklch(44.6% 0.043 257.281);
+    --color-slate-700: oklch(37.2% 0.044 257.287);
     --color-slate-800: oklch(27.9% 0.041 260.031);
     --color-gray-50: oklch(98.5% 0.002 247.839);
     --color-gray-100: oklch(96.7% 0.003 264.542);
@@ -619,6 +620,9 @@
   .mr-1 {
     margin-right: calc(var(--spacing) * 1);
   }
+  .mr-1\.5 {
+    margin-right: calc(var(--spacing) * 1.5);
+  }
   .mr-2 {
     margin-right: calc(var(--spacing) * 2);
   }
@@ -666,6 +670,9 @@
   }
   .ml-1 {
     margin-left: calc(var(--spacing) * 1);
+  }
+  .ml-1\.5 {
+    margin-left: calc(var(--spacing) * 1.5);
   }
   .ml-2 {
     margin-left: calc(var(--spacing) * 2);
@@ -3145,6 +3152,9 @@
   .text-slate-600 {
     color: var(--color-slate-600);
   }
+  .text-slate-700 {
+    color: var(--color-slate-700);
+  }
   .text-slate-800 {
     color: var(--color-slate-800);
   }
@@ -3408,6 +3418,14 @@
   .duration-10 {
     --tw-duration: 10ms;
     transition-duration: 10ms;
+  }
+  .duration-75 {
+    --tw-duration: 75ms;
+    transition-duration: 75ms;
+  }
+  .duration-100 {
+    --tw-duration: 100ms;
+    transition-duration: 100ms;
   }
   .duration-150 {
     --tw-duration: 150ms;
@@ -4113,9 +4131,6 @@
   .focus\:border-blue-500:focus {
     border-color: var(--color-blue-500);
   }
-  .focus\:border-sky-500:focus {
-    border-color: var(--color-sky-500);
-  }
   .focus\:border-transparent:focus {
     border-color: transparent;
   }
@@ -4187,14 +4202,6 @@
   }
   .focus\:ring-sky-500:focus {
     --tw-ring-color: var(--color-sky-500);
-  }
-  .focus\:ring-sky-500\/20:focus {
-    --tw-ring-color: color-mix(in srgb, oklch(68.5% 0.169 237.323) 20%, transparent);
-  }
-  @supports (color: color-mix(in lab, red, red)) {
-    .focus\:ring-sky-500\/20:focus {
-      --tw-ring-color: color-mix(in oklab, var(--color-sky-500) 20%, transparent);
-    }
   }
   .focus\:ring-offset-1:focus {
     --tw-ring-offset-width: 1px;
