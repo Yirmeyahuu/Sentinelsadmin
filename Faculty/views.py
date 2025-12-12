@@ -3129,6 +3129,7 @@ def faculty_delete_archived_student(request, student_id):
     
     return redirect('archived_students_list')
 
+#Export Student Data in Student Progress Export View
 @faculty_required
 def studentData(request):
     # Get faculty using session
@@ -3298,6 +3299,7 @@ def studentData(request):
         return render(request, 'Students/studentData.html', context)
     
 
+#Student Data Modal Export
 @faculty_required
 def studentDataModal(request, student_id):
     print("DEBUG studentDataModal request type:", type(request))
@@ -4054,15 +4056,30 @@ def export_novice_excel(request):
         faculty = Faculty.objects.prefetch_related('assignments').get(faculty_id=faculty_id)
         faculty_assignments = faculty.assignments.filter(is_active=True)
         
-        selected_task = request.GET.get('task', 'Novice_Task_1(Collect Books)')
-        task_map = {
-            "Novice_Task_1(Collect Books)": "Task 1: Collect Books",
-            "Novice_Task_2(Collect USB)": "Task 2: Collect USB",
-            "Novice_Task_3(QNA)": "Task 3: Q&A",
-            "Novice_Task_4_(Defeat Rootkit)": "Task 4: Defeat Rootkit"
+        # Get the query parameter (e.g., "task1")
+        selected_task_param = request.GET.get('task', 'task1')
+        
+        # Map query parameters to Firebase field names
+        task_firebase_map = {
+            "task1": "Novice_Task_1(Collect Books)",
+            "task2": "Novice_Task_2(Collect USB)",
+            "task3": "Novice_Task_3(QNA)",
+            "task4": "Novice_Task_4_(Defeat Rootkit)"
         }
         
-        # Get students who completed novice tasks
+        # Map query parameters to display names
+        task_display_map = {
+            "task1": "Task 1: Collect Books",
+            "task2": "Task 2: Collect USB",
+            "task3": "Task 3: Q&A",
+            "task4": "Task 4: Defeat Rootkit"
+        }
+        
+        # Get the actual Firebase field name
+        selected_task_field = task_firebase_map.get(selected_task_param, "Novice_Task_1(Collect Books)")
+        selected_task_display = task_display_map.get(selected_task_param, "Task 1: Collect Books")
+        
+        # Get ALL students
         students = Student.objects.filter(
             faculty_assignment__in=faculty_assignments,
             student_status='Registered'
@@ -4072,6 +4089,14 @@ def export_novice_excel(request):
         wb = Workbook()
         ws = wb.active
         ws.title = "Novice Tier Progress"
+        
+        # Title
+        ws.merge_cells('A1:F1')
+        title_cell = ws['A1']
+        title_cell.value = f"Novice Tier Progress Report - {selected_task_display}"
+        title_cell.font = Font(bold=True, size=14, color="0EA5E9")
+        title_cell.alignment = Alignment(horizontal="center", vertical="center")
+        ws.append([])  # Empty row
         
         # Headers
         headers = ['Student ID', 'Name', 'Task', 'Time Completed', 'Points Earned', 'Status']
@@ -4087,59 +4112,84 @@ def export_novice_excel(request):
             bottom=Side(style='thin')
         )
         
-        # Add headers
+        # Add headers at row 3
+        header_row = 3
         for col, header in enumerate(headers, 1):
-            cell = ws.cell(row=1, column=col, value=header)
+            cell = ws.cell(row=header_row, column=col, value=header)
             cell.font = header_font
             cell.fill = header_fill
             cell.alignment = header_alignment
             cell.border = thin_border
         
-        # Add student data
-        row_num = 2
+        # Add ALL student data
+        row_num = 4
         for student in students:
+            # Default values for students who haven't completed the task
+            points = 0
+            time_completed = 'Not completed'
+            status = "Not Started"
+            
             try:
                 doc_ref = db.collection('Registered_Students').document(student.student_id).get()
                 
                 if doc_ref.exists:
                     student_data = doc_ref.to_dict()
                     
-                    if selected_task in student_data and isinstance(student_data[selected_task], dict):
-                        task_info = student_data[selected_task]
+                    # Check if task exists and has data - USE THE FIREBASE FIELD NAME
+                    if selected_task_field in student_data and isinstance(student_data[selected_task_field], dict):
+                        task_info = student_data[selected_task_field]
                         points = task_info.get("points", 0)
                         time_completed = task_info.get('time_taken', 'Not completed')
                         status = "Completed" if points > 0 else "Not Started"
                         
-                        data = [
-                            student.student_id,
-                            f"{student.first_name} {student.last_name}",
-                            task_map.get(selected_task, selected_task),
-                            time_completed,
-                            points,
-                            status
-                        ]
-                        
-                        for col, value in enumerate(data, 1):
-                            cell = ws.cell(row=row_num, column=col, value=value)
-                            cell.border = thin_border
-                            cell.alignment = Alignment(horizontal="center", vertical="center")
-                        
-                        row_num += 1
-                        
             except Exception as e:
                 print(f"Error processing student {student.student_id}: {e}")
-                continue
+            
+            # Add row for this student regardless of completion status
+            data = [
+                student.student_id,
+                f"{student.first_name} {student.last_name}",
+                selected_task_display,
+                time_completed,
+                points,
+                status
+            ]
+            
+            for col, value in enumerate(data, 1):
+                cell = ws.cell(row=row_num, column=col, value=value)
+                cell.border = thin_border
+                cell.alignment = Alignment(horizontal="center", vertical="center")
+                
+                # Color code status
+                if col == 6:  # Status column
+                    if status == "Completed":
+                        cell.fill = PatternFill(start_color="D1FAE5", end_color="D1FAE5", fill_type="solid")
+                        cell.font = Font(color="065F46")
+                    else:
+                        cell.fill = PatternFill(start_color="FEE2E2", end_color="FEE2E2", fill_type="solid")
+                        cell.font = Font(color="991B1B")
+            
+            row_num += 1
         
-        # Auto-adjust column widths
-        for column in ws.columns:
+        # FIXED: Auto-adjust column widths - skip merged cells
+        from openpyxl.cell.cell import MergedCell
+        
+        for col_idx in range(1, len(headers) + 1):
             max_length = 0
-            column_letter = column[0].column_letter
-            for cell in column:
-                try:
-                    if len(str(cell.value)) > max_length:
-                        max_length = len(str(cell.value))
-                except:
-                    pass
+            column_letter = ws.cell(row=header_row, column=col_idx).column_letter
+            
+            # Iterate through all rows in this column
+            for row in ws.iter_rows(min_row=header_row, max_row=ws.max_row, min_col=col_idx, max_col=col_idx):
+                for cell in row:
+                    # Skip merged cells
+                    if isinstance(cell, MergedCell):
+                        continue
+                    try:
+                        if cell.value and len(str(cell.value)) > max_length:
+                            max_length = len(str(cell.value))
+                    except:
+                        pass
+            
             adjusted_width = min(max_length + 2, 50)
             ws.column_dimensions[column_letter].width = adjusted_width
         
@@ -4147,14 +4197,14 @@ def export_novice_excel(request):
         response = HttpResponse(
             content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         )
-        response['Content-Disposition'] = 'attachment; filename="novice_tier_export.xlsx"'
+        response['Content-Disposition'] = f'attachment; filename="novice_tier_{selected_task_display.replace(" ", "_").replace(":", "")}.xlsx"'
         
         wb.save(response)
         return response
         
     except Exception as e:
         messages.error(request, f"Error exporting data: {str(e)}")
-        return redirect('novice_tier')
+        return redirect('novice-tier')
 
 
 @faculty_required
@@ -4169,15 +4219,30 @@ def export_novice_pdf(request):
         faculty = Faculty.objects.prefetch_related('assignments').get(faculty_id=faculty_id)
         faculty_assignments = faculty.assignments.filter(is_active=True)
         
-        selected_task = request.GET.get('task', 'Novice_Task_1(Collect Books)')
-        task_map = {
-            "Novice_Task_1(Collect Books)": "Task 1: Collect Books",
-            "Novice_Task_2(Collect USB)": "Task 2: Collect USB",
-            "Novice_Task_3(QNA)": "Task 3: Q&A",
-            "Novice_Task_4_(Defeat Rootkit)": "Task 4: Defeat Rootkit"
+        # Get the query parameter (e.g., "task1")
+        selected_task_param = request.GET.get('task', 'task1')
+        
+        # Map query parameters to Firebase field names
+        task_firebase_map = {
+            "task1": "Novice_Task_1(Collect Books)",
+            "task2": "Novice_Task_2(Collect USB)",
+            "task3": "Novice_Task_3(QNA)",
+            "task4": "Novice_Task_4_(Defeat Rootkit)"
         }
         
-        # Get students
+        # Map query parameters to display names
+        task_display_map = {
+            "task1": "Task 1: Collect Books",
+            "task2": "Task 2: Collect USB",
+            "task3": "Task 3: Q&A",
+            "task4": "Task 4: Defeat Rootkit"
+        }
+        
+        # Get the actual Firebase field name
+        selected_task_field = task_firebase_map.get(selected_task_param, "Novice_Task_1(Collect Books)")
+        selected_task_display = task_display_map.get(selected_task_param, "Task 1: Collect Books")
+        
+        # Get ALL students
         students = Student.objects.filter(
             faculty_assignment__in=faculty_assignments,
             student_status='Registered'
@@ -4185,7 +4250,7 @@ def export_novice_pdf(request):
         
         # Create PDF
         response = HttpResponse(content_type='application/pdf')
-        response['Content-Disposition'] = 'attachment; filename="novice_tier_export.pdf"'
+        response['Content-Disposition'] = f'attachment; filename="novice_tier_{selected_task_display.replace(" ", "_").replace(":", "")}.pdf"'
         
         doc = SimpleDocTemplate(
             response,
@@ -4210,37 +4275,44 @@ def export_novice_pdf(request):
         )
         
         # Title
-        title = Paragraph(f"Novice Tier Progress Report<br/>{task_map.get(selected_task, selected_task)}", title_style)
+        title = Paragraph(f"Novice Tier Progress Report<br/>{selected_task_display}", title_style)
         elements.append(title)
         elements.append(Spacer(1, 0.2*inch))
         
         # Table data
         data = [['Student ID', 'Name', 'Time Completed', 'Points', 'Status']]
         
+        # Add ALL students
         for student in students:
+            # Default values for students who haven't completed the task
+            points = 0
+            time_completed = 'Not completed'
+            status = "✗"
+            
             try:
                 doc_ref = db.collection('Registered_Students').document(student.student_id).get()
                 
                 if doc_ref.exists:
                     student_data = doc_ref.to_dict()
                     
-                    if selected_task in student_data and isinstance(student_data[selected_task], dict):
-                        task_info = student_data[selected_task]
+                    # Check if task exists and has data - USE THE FIREBASE FIELD NAME
+                    if selected_task_field in student_data and isinstance(student_data[selected_task_field], dict):
+                        task_info = student_data[selected_task_field]
                         points = task_info.get("points", 0)
                         time_completed = task_info.get('time_taken', 'Not completed')
-                        status = "Completed" if points > 0 else "Not Started"
-                        
-                        data.append([
-                            student.student_id,
-                            f"{student.first_name} {student.last_name}",
-                            time_completed,
-                            str(points),
-                            status
-                        ])
+                        status = "✓" if points > 0 else "✗"
                         
             except Exception as e:
                 print(f"Error processing student {student.student_id}: {e}")
-                continue
+            
+            # Add row for this student regardless of completion status
+            data.append([
+                student.student_id,
+                Paragraph(f"{student.first_name} {student.last_name}", styles['Normal']),
+                time_completed,
+                str(points),
+                status
+            ])
         
         # Create table
         table = Table(data, colWidths=[1.2*inch, 1.8*inch, 1.3*inch, 0.8*inch, 1*inch])
@@ -4258,7 +4330,8 @@ def export_novice_pdf(request):
             ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
             ('FONTSIZE', (0, 1), (-1, -1), 8),
             ('GRID', (0, 0), (-1, -1), 1, colors.HexColor('#E2E8F0')),
-            ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#F0F9FF')])
+            ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#F0F9FF')]),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
         ]))
         
         elements.append(table)
@@ -4268,7 +4341,7 @@ def export_novice_pdf(request):
         
     except Exception as e:
         messages.error(request, f"Error exporting PDF: {str(e)}")
-        return redirect('novice_tier')
+        return redirect('novice-tier')
 
 
 
@@ -4285,17 +4358,34 @@ def export_junior_excel(request):
         faculty = Faculty.objects.prefetch_related('assignments').get(faculty_id=faculty_id)
         faculty_assignments = faculty.assignments.filter(is_active=True)
         
-        selected_task = request.GET.get('task', 'Junior_Task_1(Collect Books)')
-        task_map = {
-            "Junior_Task_1(Collect Books)": "Task 1: Collect Books",
-            "Junior_Task_2(Caesar's QNA)": "Task 2: Caesar's Q&A",
-            "Junior_Task_3(Collect USB)": "Task 3: Collect USB",
-            "Junior_Task_4(Bellaso's QNA)": "Task 4: Bellaso's Q&A",
-            "Junior_Task_5(QNA)": "Task 5: Q&A",
-            "Junior_Task_6(Defeat Serpentix2)": "Task 6: Defeat Serpentix2"
+        # Get the query parameter (e.g., "task1")
+        selected_task_param = request.GET.get('task', 'task1')
+        
+        # Map query parameters to Firebase field names
+        task_firebase_map = {
+            "task1": "Junior_Task_1(Collect Books)",
+            "task2": "Junior_Task_2(Caesar's QNA)",
+            "task3": "Junior_Task_3(Collect USB)",
+            "task4": "Junior_Task_4(Bellaso's QNA)",
+            "task5": "Junior_Task_5(QNA)",
+            "task6": "Junior_Task_6(Defeat Serpentix2)"
         }
         
-        # Get students
+        # Map query parameters to display names
+        task_display_map = {
+            "task1": "Task 1: Collect Books",
+            "task2": "Task 2: Caesar's Q&A",
+            "task3": "Task 3: Collect USB",
+            "task4": "Task 4: Bellaso's Q&A",
+            "task5": "Task 5: Q&A",
+            "task6": "Task 6: Defeat Serpentix2"
+        }
+        
+        # Get the actual Firebase field name
+        selected_task_field = task_firebase_map.get(selected_task_param, "Junior_Task_1(Collect Books)")
+        selected_task_display = task_display_map.get(selected_task_param, "Task 1: Collect Books")
+        
+        # Get ALL students
         students = Student.objects.filter(
             faculty_assignment__in=faculty_assignments,
             student_status='Registered'
@@ -4305,6 +4395,14 @@ def export_junior_excel(request):
         wb = Workbook()
         ws = wb.active
         ws.title = "Junior Tier Progress"
+        
+        # Title
+        ws.merge_cells('A1:F1')
+        title_cell = ws['A1']
+        title_cell.value = f"Junior Tier Progress Report - {selected_task_display}"
+        title_cell.font = Font(bold=True, size=14, color="0EA5E9")
+        title_cell.alignment = Alignment(horizontal="center", vertical="center")
+        ws.append([])  # Empty row
         
         # Headers
         headers = ['Student ID', 'Name', 'Task', 'Time Completed', 'Points Earned', 'Status']
@@ -4320,59 +4418,84 @@ def export_junior_excel(request):
             bottom=Side(style='thin')
         )
         
-        # Add headers
+        # Add headers at row 3
+        header_row = 3
         for col, header in enumerate(headers, 1):
-            cell = ws.cell(row=1, column=col, value=header)
+            cell = ws.cell(row=header_row, column=col, value=header)
             cell.font = header_font
             cell.fill = header_fill
             cell.alignment = header_alignment
             cell.border = thin_border
         
-        # Add student data
-        row_num = 2
+        # Add ALL student data
+        row_num = 4
         for student in students:
+            # Default values for students who haven't completed the task
+            points = 0
+            time_completed = 'Not completed'
+            status = "Not Started"
+            
             try:
                 doc_ref = db.collection('Registered_Students').document(student.student_id).get()
                 
                 if doc_ref.exists:
                     student_data = doc_ref.to_dict()
                     
-                    if selected_task in student_data and isinstance(student_data[selected_task], dict):
-                        task_info = student_data[selected_task]
+                    # Check if task exists and has data - USE THE FIREBASE FIELD NAME
+                    if selected_task_field in student_data and isinstance(student_data[selected_task_field], dict):
+                        task_info = student_data[selected_task_field]
                         points = task_info.get("points", 0)
                         time_completed = task_info.get('time_taken', 'Not completed')
                         status = "Completed" if points > 0 else "Not Started"
                         
-                        data = [
-                            student.student_id,
-                            f"{student.first_name} {student.last_name}",
-                            task_map.get(selected_task, selected_task),
-                            time_completed,
-                            points,
-                            status
-                        ]
-                        
-                        for col, value in enumerate(data, 1):
-                            cell = ws.cell(row=row_num, column=col, value=value)
-                            cell.border = thin_border
-                            cell.alignment = Alignment(horizontal="center", vertical="center")
-                        
-                        row_num += 1
-                        
             except Exception as e:
                 print(f"Error processing student {student.student_id}: {e}")
-                continue
+            
+            # Add row for this student regardless of completion status
+            data = [
+                student.student_id,
+                f"{student.first_name} {student.last_name}",
+                selected_task_display,
+                time_completed,
+                points,
+                status
+            ]
+            
+            for col, value in enumerate(data, 1):
+                cell = ws.cell(row=row_num, column=col, value=value)
+                cell.border = thin_border
+                cell.alignment = Alignment(horizontal="center", vertical="center")
+                
+                # Color code status
+                if col == 6:  # Status column
+                    if status == "Completed":
+                        cell.fill = PatternFill(start_color="D1FAE5", end_color="D1FAE5", fill_type="solid")
+                        cell.font = Font(color="065F46")
+                    else:
+                        cell.fill = PatternFill(start_color="FEE2E2", end_color="FEE2E2", fill_type="solid")
+                        cell.font = Font(color="991B1B")
+            
+            row_num += 1
         
-        # Auto-adjust column widths
-        for column in ws.columns:
+        # FIXED: Auto-adjust column widths - skip merged cells
+        from openpyxl.cell.cell import MergedCell
+        
+        for col_idx in range(1, len(headers) + 1):
             max_length = 0
-            column_letter = column[0].column_letter
-            for cell in column:
-                try:
-                    if len(str(cell.value)) > max_length:
-                        max_length = len(str(cell.value))
-                except:
-                    pass
+            column_letter = ws.cell(row=header_row, column=col_idx).column_letter
+            
+            # Iterate through all rows in this column
+            for row in ws.iter_rows(min_row=header_row, max_row=ws.max_row, min_col=col_idx, max_col=col_idx):
+                for cell in row:
+                    # Skip merged cells
+                    if isinstance(cell, MergedCell):
+                        continue
+                    try:
+                        if cell.value and len(str(cell.value)) > max_length:
+                            max_length = len(str(cell.value))
+                    except:
+                        pass
+            
             adjusted_width = min(max_length + 2, 50)
             ws.column_dimensions[column_letter].width = adjusted_width
         
@@ -4380,14 +4503,14 @@ def export_junior_excel(request):
         response = HttpResponse(
             content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         )
-        response['Content-Disposition'] = 'attachment; filename="junior_tier_export.xlsx"'
+        response['Content-Disposition'] = f'attachment; filename="junior_tier_{selected_task_display.replace(" ", "_").replace(":", "")}.xlsx"'
         
         wb.save(response)
         return response
         
     except Exception as e:
         messages.error(request, f"Error exporting data: {str(e)}")
-        return redirect('junior_tier')
+        return redirect('junior-tier')
 
 
 @faculty_required
@@ -4402,17 +4525,34 @@ def export_junior_pdf(request):
         faculty = Faculty.objects.prefetch_related('assignments').get(faculty_id=faculty_id)
         faculty_assignments = faculty.assignments.filter(is_active=True)
         
-        selected_task = request.GET.get('task', 'Junior_Task_1(Collect Books)')
-        task_map = {
-            "Junior_Task_1(Collect Books)": "Task 1: Collect Books",
-            "Junior_Task_2(Caesar's QNA)": "Task 2: Caesar's Q&A",
-            "Junior_Task_3(Collect USB)": "Task 3: Collect USB",
-            "Junior_Task_4(Bellaso's QNA)": "Task 4: Bellaso's Q&A",
-            "Junior_Task_5(QNA)": "Task 5: Q&A",
-            "Junior_Task_6(Defeat Serpentix2)": "Task 6: Defeat Serpentix2"
+        # Get the query parameter (e.g., "task1")
+        selected_task_param = request.GET.get('task', 'task1')
+        
+        # Map query parameters to Firebase field names
+        task_firebase_map = {
+            "task1": "Junior_Task_1(Collect Books)",
+            "task2": "Junior_Task_2(Caesar's QNA)",
+            "task3": "Junior_Task_3(Collect USB)",
+            "task4": "Junior_Task_4(Bellaso's QNA)",
+            "task5": "Junior_Task_5(QNA)",
+            "task6": "Junior_Task_6(Defeat Serpentix2)"
         }
         
-        # Get students
+        # Map query parameters to display names
+        task_display_map = {
+            "task1": "Task 1: Collect Books",
+            "task2": "Task 2: Caesar's Q&A",
+            "task3": "Task 3: Collect USB",
+            "task4": "Task 4: Bellaso's Q&A",
+            "task5": "Task 5: Q&A",
+            "task6": "Task 6: Defeat Serpentix2"
+        }
+        
+        # Get the actual Firebase field name
+        selected_task_field = task_firebase_map.get(selected_task_param, "Junior_Task_1(Collect Books)")
+        selected_task_display = task_display_map.get(selected_task_param, "Task 1: Collect Books")
+        
+        # Get ALL students
         students = Student.objects.filter(
             faculty_assignment__in=faculty_assignments,
             student_status='Registered'
@@ -4420,7 +4560,7 @@ def export_junior_pdf(request):
         
         # Create PDF
         response = HttpResponse(content_type='application/pdf')
-        response['Content-Disposition'] = 'attachment; filename="junior_tier_export.pdf"'
+        response['Content-Disposition'] = f'attachment; filename="junior_tier_{selected_task_display.replace(" ", "_").replace(":", "")}.pdf"'
         
         doc = SimpleDocTemplate(
             response,
@@ -4445,37 +4585,44 @@ def export_junior_pdf(request):
         )
         
         # Title
-        title = Paragraph(f"Junior Tier Progress Report<br/>{task_map.get(selected_task, selected_task)}", title_style)
+        title = Paragraph(f"Junior Tier Progress Report<br/>{selected_task_display}", title_style)
         elements.append(title)
         elements.append(Spacer(1, 0.2*inch))
         
         # Table data
         data = [['Student ID', 'Name', 'Time Completed', 'Points', 'Status']]
         
+        # Add ALL students
         for student in students:
+            # Default values for students who haven't completed the task
+            points = 0
+            time_completed = 'Not completed'
+            status = "✗"
+            
             try:
                 doc_ref = db.collection('Registered_Students').document(student.student_id).get()
                 
                 if doc_ref.exists:
                     student_data = doc_ref.to_dict()
                     
-                    if selected_task in student_data and isinstance(student_data[selected_task], dict):
-                        task_info = student_data[selected_task]
+                    # Check if task exists and has data - USE THE FIREBASE FIELD NAME
+                    if selected_task_field in student_data and isinstance(student_data[selected_task_field], dict):
+                        task_info = student_data[selected_task_field]
                         points = task_info.get("points", 0)
                         time_completed = task_info.get('time_taken', 'Not completed')
-                        status = "Completed" if points > 0 else "Not Started"
-                        
-                        data.append([
-                            student.student_id,
-                            f"{student.first_name} {student.last_name}",
-                            time_completed,
-                            str(points),
-                            status
-                        ])
+                        status = "✓" if points > 0 else "✗"
                         
             except Exception as e:
                 print(f"Error processing student {student.student_id}: {e}")
-                continue
+            
+            # Add row for this student regardless of completion status
+            data.append([
+                student.student_id,
+                Paragraph(f"{student.first_name} {student.last_name}", styles['Normal']),
+                time_completed,
+                str(points),
+                status
+            ])
         
         # Create table
         table = Table(data, colWidths=[1.2*inch, 1.8*inch, 1.3*inch, 0.8*inch, 1*inch])
@@ -4493,7 +4640,8 @@ def export_junior_pdf(request):
             ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
             ('FONTSIZE', (0, 1), (-1, -1), 8),
             ('GRID', (0, 0), (-1, -1), 1, colors.HexColor('#E2E8F0')),
-            ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#F0F9FF')])
+            ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#F0F9FF')]),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
         ]))
         
         elements.append(table)
@@ -4503,7 +4651,7 @@ def export_junior_pdf(request):
         
     except Exception as e:
         messages.error(request, f"Error exporting PDF: {str(e)}")
-        return redirect('junior_tier')
+        return redirect('junior-tier')
 
 
 @faculty_required
@@ -4518,17 +4666,34 @@ def export_senior_excel(request):
         faculty = Faculty.objects.prefetch_related('assignments').get(faculty_id=faculty_id)
         faculty_assignments = faculty.assignments.filter(is_active=True)
         
-        selected_task = request.GET.get('task', 'Senior_Task_1(Collect Books)')
-        task_map = {
-            "Senior_Task_1(Collect Books)": "Task 1: Collect Books",
-            "Senior_Task_2(QNA)": "Task 2: Q&A",
-            "Senior_Task_3(Collect USB)": "Task 3: Collect USB",
-            "Senior_Task_4(QNA)": "Task 4: Q&A",
-            "Senior_Task_5(QNA)": "Task 5: Q&A",
-            "Senior_Task_6(Defeat Rootkit2)": "Task 6: Defeat Rootkit2"
+        # Get the query parameter (e.g., "task1")
+        selected_task_param = request.GET.get('task', 'task1')
+        
+        # Map query parameters to Firebase field names
+        task_firebase_map = {
+            "task1": "Senior_Task_1(Collect Books)",
+            "task2": "Senior_Task_2(QNA)",
+            "task3": "Senior_Task_3(Collect USB)",
+            "task4": "Senior_Task_4(QNA)",
+            "task5": "Senior_Task_5(QNA)",
+            "task6": "Senior_Task_6(Defeat Rootkit2)"
         }
         
-        # Get students
+        # Map query parameters to display names
+        task_display_map = {
+            "task1": "Task 1: Collect Books",
+            "task2": "Task 2: Q&A",
+            "task3": "Task 3: Collect USB",
+            "task4": "Task 4: Q&A",
+            "task5": "Task 5: Q&A",
+            "task6": "Task 6: Defeat Rootkit2"
+        }
+        
+        # Get the actual Firebase field name
+        selected_task_field = task_firebase_map.get(selected_task_param, "Senior_Task_1(Collect Books)")
+        selected_task_display = task_display_map.get(selected_task_param, "Task 1: Collect Books")
+        
+        # Get ALL students
         students = Student.objects.filter(
             faculty_assignment__in=faculty_assignments,
             student_status='Registered'
@@ -4538,6 +4703,14 @@ def export_senior_excel(request):
         wb = Workbook()
         ws = wb.active
         ws.title = "Senior Tier Progress"
+        
+        # Title
+        ws.merge_cells('A1:F1')
+        title_cell = ws['A1']
+        title_cell.value = f"Senior Tier Progress Report - {selected_task_display}"
+        title_cell.font = Font(bold=True, size=14, color="0EA5E9")
+        title_cell.alignment = Alignment(horizontal="center", vertical="center")
+        ws.append([])  # Empty row
         
         # Headers
         headers = ['Student ID', 'Name', 'Task', 'Time Completed', 'Points Earned', 'Status']
@@ -4553,59 +4726,84 @@ def export_senior_excel(request):
             bottom=Side(style='thin')
         )
         
-        # Add headers
+        # Add headers at row 3
+        header_row = 3
         for col, header in enumerate(headers, 1):
-            cell = ws.cell(row=1, column=col, value=header)
+            cell = ws.cell(row=header_row, column=col, value=header)
             cell.font = header_font
             cell.fill = header_fill
             cell.alignment = header_alignment
             cell.border = thin_border
         
-        # Add student data
-        row_num = 2
+        # Add ALL student data
+        row_num = 4
         for student in students:
+            # Default values for students who haven't completed the task
+            points = 0
+            time_completed = 'Not completed'
+            status = "Not Started"
+            
             try:
                 doc_ref = db.collection('Registered_Students').document(student.student_id).get()
                 
                 if doc_ref.exists:
                     student_data = doc_ref.to_dict()
                     
-                    if selected_task in student_data and isinstance(student_data[selected_task], dict):
-                        task_info = student_data[selected_task]
+                    # Check if task exists and has data - USE THE FIREBASE FIELD NAME
+                    if selected_task_field in student_data and isinstance(student_data[selected_task_field], dict):
+                        task_info = student_data[selected_task_field]
                         points = task_info.get("points", 0)
                         time_completed = task_info.get('time_taken', 'Not completed')
                         status = "Completed" if points > 0 else "Not Started"
                         
-                        data = [
-                            student.student_id,
-                            f"{student.first_name} {student.last_name}",
-                            task_map.get(selected_task, selected_task),
-                            time_completed,
-                            points,
-                            status
-                        ]
-                        
-                        for col, value in enumerate(data, 1):
-                            cell = ws.cell(row=row_num, column=col, value=value)
-                            cell.border = thin_border
-                            cell.alignment = Alignment(horizontal="center", vertical="center")
-                        
-                        row_num += 1
-                        
             except Exception as e:
                 print(f"Error processing student {student.student_id}: {e}")
-                continue
+            
+            # Add row for this student regardless of completion status
+            data = [
+                student.student_id,
+                f"{student.first_name} {student.last_name}",
+                selected_task_display,
+                time_completed,
+                points,
+                status
+            ]
+            
+            for col, value in enumerate(data, 1):
+                cell = ws.cell(row=row_num, column=col, value=value)
+                cell.border = thin_border
+                cell.alignment = Alignment(horizontal="center", vertical="center")
+                
+                # Color code status
+                if col == 6:  # Status column
+                    if status == "Completed":
+                        cell.fill = PatternFill(start_color="D1FAE5", end_color="D1FAE5", fill_type="solid")
+                        cell.font = Font(color="065F46")
+                    else:
+                        cell.fill = PatternFill(start_color="FEE2E2", end_color="FEE2E2", fill_type="solid")
+                        cell.font = Font(color="991B1B")
+            
+            row_num += 1
         
-        # Auto-adjust column widths
-        for column in ws.columns:
+        # FIXED: Auto-adjust column widths - skip merged cells
+        from openpyxl.cell.cell import MergedCell
+        
+        for col_idx in range(1, len(headers) + 1):
             max_length = 0
-            column_letter = column[0].column_letter
-            for cell in column:
-                try:
-                    if len(str(cell.value)) > max_length:
-                        max_length = len(str(cell.value))
-                except:
-                    pass
+            column_letter = ws.cell(row=header_row, column=col_idx).column_letter
+            
+            # Iterate through all rows in this column
+            for row in ws.iter_rows(min_row=header_row, max_row=ws.max_row, min_col=col_idx, max_col=col_idx):
+                for cell in row:
+                    # Skip merged cells
+                    if isinstance(cell, MergedCell):
+                        continue
+                    try:
+                        if cell.value and len(str(cell.value)) > max_length:
+                            max_length = len(str(cell.value))
+                    except:
+                        pass
+            
             adjusted_width = min(max_length + 2, 50)
             ws.column_dimensions[column_letter].width = adjusted_width
         
@@ -4613,14 +4811,14 @@ def export_senior_excel(request):
         response = HttpResponse(
             content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         )
-        response['Content-Disposition'] = 'attachment; filename="senior_tier_export.xlsx"'
+        response['Content-Disposition'] = f'attachment; filename="senior_tier_{selected_task_display.replace(" ", "_").replace(":", "")}.xlsx"'
         
         wb.save(response)
         return response
         
     except Exception as e:
         messages.error(request, f"Error exporting data: {str(e)}")
-        return redirect('senior_tier')
+        return redirect('senior-tier')
 
 
 @faculty_required
@@ -4635,17 +4833,34 @@ def export_senior_pdf(request):
         faculty = Faculty.objects.prefetch_related('assignments').get(faculty_id=faculty_id)
         faculty_assignments = faculty.assignments.filter(is_active=True)
         
-        selected_task = request.GET.get('task', 'Senior_Task_1(Collect Books)')
-        task_map = {
-            "Senior_Task_1(Collect Books)": "Task 1: Collect Books",
-            "Senior_Task_2(QNA)": "Task 2: Q&A",
-            "Senior_Task_3(Collect USB)": "Task 3: Collect USB",
-            "Senior_Task_4(QNA)": "Task 4: Q&A",
-            "Senior_Task_5(QNA)": "Task 5: Q&A",
-            "Senior_Task_6(Defeat Rootkit2)": "Task 6: Defeat Rootkit2"
+        # Get the query parameter (e.g., "task1")
+        selected_task_param = request.GET.get('task', 'task1')
+        
+        # Map query parameters to Firebase field names
+        task_firebase_map = {
+            "task1": "Senior_Task_1(Collect Books)",
+            "task2": "Senior_Task_2(QNA)",
+            "task3": "Senior_Task_3(Collect USB)",
+            "task4": "Senior_Task_4(QNA)",
+            "task5": "Senior_Task_5(QNA)",
+            "task6": "Senior_Task_6(Defeat Rootkit2)"
         }
         
-        # Get students
+        # Map query parameters to display names
+        task_display_map = {
+            "task1": "Task 1: Collect Books",
+            "task2": "Task 2: Q&A",
+            "task3": "Task 3: Collect USB",
+            "task4": "Task 4: Q&A",
+            "task5": "Task 5: Q&A",
+            "task6": "Task 6: Defeat Rootkit2"
+        }
+        
+        # Get the actual Firebase field name
+        selected_task_field = task_firebase_map.get(selected_task_param, "Senior_Task_1(Collect Books)")
+        selected_task_display = task_display_map.get(selected_task_param, "Task 1: Collect Books")
+        
+        # Get ALL students
         students = Student.objects.filter(
             faculty_assignment__in=faculty_assignments,
             student_status='Registered'
@@ -4653,7 +4868,7 @@ def export_senior_pdf(request):
         
         # Create PDF
         response = HttpResponse(content_type='application/pdf')
-        response['Content-Disposition'] = 'attachment; filename="senior_tier_export.pdf"'
+        response['Content-Disposition'] = f'attachment; filename="senior_tier_{selected_task_display.replace(" ", "_").replace(":", "")}.pdf"'
         
         doc = SimpleDocTemplate(
             response,
@@ -4678,37 +4893,44 @@ def export_senior_pdf(request):
         )
         
         # Title
-        title = Paragraph(f"Senior Tier Progress Report<br/>{task_map.get(selected_task, selected_task)}", title_style)
+        title = Paragraph(f"Senior Tier Progress Report<br/>{selected_task_display}", title_style)
         elements.append(title)
         elements.append(Spacer(1, 0.2*inch))
         
         # Table data
         data = [['Student ID', 'Name', 'Time Completed', 'Points', 'Status']]
         
+        # Add ALL students
         for student in students:
+            # Default values for students who haven't completed the task
+            points = 0
+            time_completed = 'Not completed'
+            status = "✗"
+            
             try:
                 doc_ref = db.collection('Registered_Students').document(student.student_id).get()
                 
                 if doc_ref.exists:
                     student_data = doc_ref.to_dict()
                     
-                    if selected_task in student_data and isinstance(student_data[selected_task], dict):
-                        task_info = student_data[selected_task]
+                    # Check if task exists and has data - USE THE FIREBASE FIELD NAME
+                    if selected_task_field in student_data and isinstance(student_data[selected_task_field], dict):
+                        task_info = student_data[selected_task_field]
                         points = task_info.get("points", 0)
                         time_completed = task_info.get('time_taken', 'Not completed')
-                        status = "Completed" if points > 0 else "Not Started"
-                        
-                        data.append([
-                            student.student_id,
-                            f"{student.first_name} {student.last_name}",
-                            time_completed,
-                            str(points),
-                            status
-                        ])
+                        status = "✓" if points > 0 else "✗"
                         
             except Exception as e:
                 print(f"Error processing student {student.student_id}: {e}")
-                continue
+            
+            # Add row for this student regardless of completion status
+            data.append([
+                student.student_id,
+                Paragraph(f"{student.first_name} {student.last_name}", styles['Normal']),
+                time_completed,
+                str(points),
+                status
+            ])
         
         # Create table
         table = Table(data, colWidths=[1.2*inch, 1.8*inch, 1.3*inch, 0.8*inch, 1*inch])
@@ -4726,7 +4948,8 @@ def export_senior_pdf(request):
             ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
             ('FONTSIZE', (0, 1), (-1, -1), 8),
             ('GRID', (0, 0), (-1, -1), 1, colors.HexColor('#E2E8F0')),
-            ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#F0F9FF')])
+            ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#F0F9FF')]),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
         ]))
         
         elements.append(table)
@@ -4736,7 +4959,7 @@ def export_senior_pdf(request):
         
     except Exception as e:
         messages.error(request, f"Error exporting PDF: {str(e)}")
-        return redirect('senior_tier')
+        return redirect('senior-tier')
     
 
 @faculty_required
