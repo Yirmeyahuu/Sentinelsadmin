@@ -3935,29 +3935,29 @@ def export_studentdata_pdf(request):
                 Q(last_name__icontains=search_query)
             )
         
-        # Create PDF with letter size and 1 inch margins
+        # Create PDF with 0.5 inch margins
         response = HttpResponse(content_type='application/pdf')
         response['Content-Disposition'] = 'attachment; filename="student_data_export.pdf"'
         
         doc = SimpleDocTemplate(
             response,
             pagesize=letter,
-            rightMargin=1*inch,
-            leftMargin=1*inch,
-            topMargin=1*inch,
-            bottomMargin=1*inch
+            rightMargin=0.5*inch,
+            leftMargin=0.5*inch,
+            topMargin=0.5*inch,
+            bottomMargin=0.5*inch
         )
         elements = []
         
-        # Styles with Calibri font
+        # Styles - BLACK colors
         styles = getSampleStyleSheet()
         title_style = ParagraphStyle(
             'CustomTitle',
             parent=styles['Heading1'],
-            fontName='Helvetica-Bold',  # Fallback to Helvetica if Calibri not available
+            fontName='Helvetica-Bold',
             fontSize=18,
-            textColor=colors.HexColor('#0EA5E9'),
-            spaceAfter=30,
+            textColor=colors.black,
+            spaceAfter=15,
             alignment=TA_CENTER
         )
         
@@ -4013,18 +4013,21 @@ def export_studentdata_pdf(request):
                 print(f"Error processing student {student.student_id}: {e}")
                 continue
         
-        # Calculate column widths for letter size with 1 inch margins
-        # Available width = 8.5 - 2 (margins) = 6.5 inches
-        table = Table(data, colWidths=[0.9*inch, 1.3*inch, 1.2*inch, 0.7*inch, 0.6*inch, 0.6*inch, 0.8*inch])
+        # Create table with expanded width (7.5" available)
+        table = Table(data, colWidths=[1*inch, 1.8*inch, 1.5*inch, 0.8*inch, 0.7*inch, 0.7*inch, 1*inch])
         
-        # Table style with Helvetica (closest to Calibri in reportlab)
+        # Table style with centered alignment and 0.069 inch padding
         table.setStyle(TableStyle([
             ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor("#0455C7")),
             ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
             ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
             ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
             ('FONTSIZE', (0, 0), (-1, 0), 10),
-            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+            ('TOPPADDING', (0, 0), (-1, -1), 0.069*inch),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 0.069*inch),
+            ('LEFTPADDING', (0, 0), (-1, -1), 0.069*inch),
+            ('RIGHTPADDING', (0, 0), (-1, -1), 0.069*inch),
             ('BACKGROUND', (0, 1), (-1, -1), colors.white),
             ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
             ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
@@ -4248,29 +4251,29 @@ def export_novice_pdf(request):
             student_status='Registered'
         ).order_by('last_name')
         
-        # Create PDF
+        # Create PDF with 0.5 inch margins
         response = HttpResponse(content_type='application/pdf')
         response['Content-Disposition'] = f'attachment; filename="novice_tier_{selected_task_display.replace(" ", "_").replace(":", "")}.pdf"'
         
         doc = SimpleDocTemplate(
             response,
             pagesize=letter,
-            rightMargin=1*inch,
-            leftMargin=1*inch,
-            topMargin=1*inch,
-            bottomMargin=1*inch
+            rightMargin=0.5*inch,
+            leftMargin=0.5*inch,
+            topMargin=0.5*inch,
+            bottomMargin=0.5*inch
         )
         elements = []
         
-        # Styles
+        # Styles - BLACK colors
         styles = getSampleStyleSheet()
         title_style = ParagraphStyle(
             'CustomTitle',
             parent=styles['Heading1'],
             fontName='Helvetica-Bold',
             fontSize=18,
-            textColor=colors.HexColor('#0EA5E9'),
-            spaceAfter=30,
+            textColor=colors.black,
+            spaceAfter=15,
             alignment=TA_CENTER
         )
         
@@ -4314,24 +4317,27 @@ def export_novice_pdf(request):
                 status
             ])
         
-        # Create table
-        table = Table(data, colWidths=[1.2*inch, 1.8*inch, 1.3*inch, 0.8*inch, 1*inch])
+        # Create table with expanded width (7.5" available)
+        table = Table(data, colWidths=[1.2*inch, 2.3*inch, 1.5*inch, 1*inch, 1.5*inch])
         
-        # Table style
+        # Table style with centered alignment and 0.069 inch padding
         table.setStyle(TableStyle([
             ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#0EA5E9')),
             ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
             ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
             ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
             ('FONTSIZE', (0, 0), (-1, 0), 10),
-            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+            ('TOPPADDING', (0, 0), (-1, -1), 0.069*inch),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 0.069*inch),
+            ('LEFTPADDING', (0, 0), (-1, -1), 0.069*inch),
+            ('RIGHTPADDING', (0, 0), (-1, -1), 0.069*inch),
             ('BACKGROUND', (0, 1), (-1, -1), colors.white),
             ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
             ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
             ('FONTSIZE', (0, 1), (-1, -1), 8),
             ('GRID', (0, 0), (-1, -1), 1, colors.HexColor('#E2E8F0')),
             ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#F0F9FF')]),
-            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
         ]))
         
         elements.append(table)
@@ -4558,29 +4564,29 @@ def export_junior_pdf(request):
             student_status='Registered'
         ).order_by('last_name')
         
-        # Create PDF
+        # Create PDF with 0.5 inch margins
         response = HttpResponse(content_type='application/pdf')
         response['Content-Disposition'] = f'attachment; filename="junior_tier_{selected_task_display.replace(" ", "_").replace(":", "")}.pdf"'
         
         doc = SimpleDocTemplate(
             response,
             pagesize=letter,
-            rightMargin=1*inch,
-            leftMargin=1*inch,
-            topMargin=1*inch,
-            bottomMargin=1*inch
+            rightMargin=0.5*inch,
+            leftMargin=0.5*inch,
+            topMargin=0.5*inch,
+            bottomMargin=0.5*inch
         )
         elements = []
         
-        # Styles
+        # Styles - BLACK colors
         styles = getSampleStyleSheet()
         title_style = ParagraphStyle(
             'CustomTitle',
             parent=styles['Heading1'],
             fontName='Helvetica-Bold',
             fontSize=18,
-            textColor=colors.HexColor('#0EA5E9'),
-            spaceAfter=30,
+            textColor=colors.black,
+            spaceAfter=15,
             alignment=TA_CENTER
         )
         
@@ -4624,24 +4630,27 @@ def export_junior_pdf(request):
                 status
             ])
         
-        # Create table
-        table = Table(data, colWidths=[1.2*inch, 1.8*inch, 1.3*inch, 0.8*inch, 1*inch])
+        # Create table with expanded width (7.5" available)
+        table = Table(data, colWidths=[1.2*inch, 2.3*inch, 1.5*inch, 1*inch, 1.5*inch])
         
-        # Table style
+        # Table style with centered alignment and 0.069 inch padding
         table.setStyle(TableStyle([
             ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#0EA5E9')),
             ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
             ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
             ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
             ('FONTSIZE', (0, 0), (-1, 0), 10),
-            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+            ('TOPPADDING', (0, 0), (-1, -1), 0.069*inch),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 0.069*inch),
+            ('LEFTPADDING', (0, 0), (-1, -1), 0.069*inch),
+            ('RIGHTPADDING', (0, 0), (-1, -1), 0.069*inch),
             ('BACKGROUND', (0, 1), (-1, -1), colors.white),
             ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
             ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
             ('FONTSIZE', (0, 1), (-1, -1), 8),
             ('GRID', (0, 0), (-1, -1), 1, colors.HexColor('#E2E8F0')),
             ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#F0F9FF')]),
-            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
         ]))
         
         elements.append(table)
@@ -4866,29 +4875,29 @@ def export_senior_pdf(request):
             student_status='Registered'
         ).order_by('last_name')
         
-        # Create PDF
+        # Create PDF with 0.5 inch margins
         response = HttpResponse(content_type='application/pdf')
         response['Content-Disposition'] = f'attachment; filename="senior_tier_{selected_task_display.replace(" ", "_").replace(":", "")}.pdf"'
         
         doc = SimpleDocTemplate(
             response,
             pagesize=letter,
-            rightMargin=1*inch,
-            leftMargin=1*inch,
-            topMargin=1*inch,
-            bottomMargin=1*inch
+            rightMargin=0.5*inch,
+            leftMargin=0.5*inch,
+            topMargin=0.5*inch,
+            bottomMargin=0.5*inch
         )
         elements = []
         
-        # Styles
+        # Styles - BLACK colors
         styles = getSampleStyleSheet()
         title_style = ParagraphStyle(
             'CustomTitle',
             parent=styles['Heading1'],
             fontName='Helvetica-Bold',
             fontSize=18,
-            textColor=colors.HexColor('#0EA5E9'),
-            spaceAfter=30,
+            textColor=colors.black,
+            spaceAfter=15,
             alignment=TA_CENTER
         )
         
@@ -4932,24 +4941,27 @@ def export_senior_pdf(request):
                 status
             ])
         
-        # Create table
-        table = Table(data, colWidths=[1.2*inch, 1.8*inch, 1.3*inch, 0.8*inch, 1*inch])
+        # Create table with expanded width (7.5" available)
+        table = Table(data, colWidths=[1.2*inch, 2.3*inch, 1.5*inch, 1*inch, 1.5*inch])
         
-        # Table style
+        # Table style with centered alignment and 0.069 inch padding
         table.setStyle(TableStyle([
             ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#0EA5E9')),
             ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
             ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
             ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
             ('FONTSIZE', (0, 0), (-1, 0), 10),
-            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+            ('TOPPADDING', (0, 0), (-1, -1), 0.069*inch),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 0.069*inch),
+            ('LEFTPADDING', (0, 0), (-1, -1), 0.069*inch),
+            ('RIGHTPADDING', (0, 0), (-1, -1), 0.069*inch),
             ('BACKGROUND', (0, 1), (-1, -1), colors.white),
             ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
             ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
             ('FONTSIZE', (0, 1), (-1, -1), 8),
             ('GRID', (0, 0), (-1, -1), 1, colors.HexColor('#E2E8F0')),
             ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#F0F9FF')]),
-            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
         ]))
         
         elements.append(table)
@@ -5156,28 +5168,28 @@ def export_individual_student_pdf(request, student_id):
             ]
         }
         
-        # Create PDF
+        # Create PDF with 0.5 inch margins
         response = HttpResponse(content_type='application/pdf')
         response['Content-Disposition'] = f'attachment; filename="{student.student_id}_task_report.pdf"'
         
         doc = SimpleDocTemplate(
             response,
             pagesize=letter,
-            rightMargin=1*inch,
-            leftMargin=1*inch,
-            topMargin=1*inch,
-            bottomMargin=1*inch
+            rightMargin=0.5*inch,
+            leftMargin=0.5*inch,
+            topMargin=0.5*inch,
+            bottomMargin=0.5*inch
         )
         elements = []
         
-        # Styles
+        # Styles - BLACK colors for header and student name
         styles = getSampleStyleSheet()
         title_style = ParagraphStyle(
             'CustomTitle',
             parent=styles['Heading1'],
             fontName='Helvetica-Bold',
             fontSize=18,
-            textColor=colors.HexColor('#0EA5E9'),
+            textColor=colors.black,  # Changed to black
             spaceAfter=15,
             alignment=TA_CENTER
         )
@@ -5186,7 +5198,7 @@ def export_individual_student_pdf(request, student_id):
             parent=styles['Normal'],
             fontName='Helvetica',
             fontSize=11,
-            textColor=colors.HexColor('#64748B'),
+            textColor=colors.black,  # Changed to black
             spaceAfter=20,
             alignment=TA_CENTER
         )
@@ -5220,11 +5232,11 @@ def export_individual_student_pdf(request, student_id):
                             task_info = student_data[task_field]
                             points = task_info.get("points", 0)
                             time_taken = task_info.get('time_taken', 'N/A')
-                            status = "✓" if points > 0 else "✗"
+                            status = "Completed" if points > 0 else "✗"
                         else:
                             points = 0
                             time_taken = 'N/A'
-                            status = "✗"
+                            status = "Not Started"
                         
                         data.append([
                             tier,
@@ -5237,24 +5249,29 @@ def export_individual_student_pdf(request, student_id):
         except Exception as e:
             print(f"Error fetching Firebase data: {e}")
         
-        # Create table
-        table = Table(data, colWidths=[0.8*inch, 2*inch, 0.6*inch, 0.6*inch, 1.1*inch])
+        # Create table with expanded width (letter size 8.5" - 1" margins = 7.5" available)
+        # Available width = 8.5 - 1 (0.5 * 2 margins) = 7.5 inches
+        table = Table(data, colWidths=[1*inch, 2.8*inch, 0.8*inch, 0.9*inch, 1.5*inch])
         
-        # Table style
+        # Table style with centered alignment and 0.069 inch padding
         table.setStyle(TableStyle([
             ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#0EA5E9')),
             ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
             ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
             ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
             ('FONTSIZE', (0, 0), (-1, 0), 10),
-            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+            # Set padding to 0.069 inches (about 5 points)
+            ('TOPPADDING', (0, 0), (-1, -1), 0.069*inch),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 0.069*inch),
+            ('LEFTPADDING', (0, 0), (-1, -1), 0.069*inch),
+            ('RIGHTPADDING', (0, 0), (-1, -1), 0.069*inch),
             ('BACKGROUND', (0, 1), (-1, -1), colors.white),
             ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
             ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
             ('FONTSIZE', (0, 1), (-1, -1), 8),
             ('GRID', (0, 0), (-1, -1), 1, colors.HexColor('#E2E8F0')),
             ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#F0F9FF')]),
-            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
         ]))
         
         elements.append(table)
