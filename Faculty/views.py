@@ -4069,7 +4069,7 @@ def export_novice_excel(request):
             "task3": "Novice_Task_3(QNA)",
             "task4": "Novice_Task_4_(Defeat Rootkit)"
         }
-        
+    
         # Map query parameters to display names
         task_display_map = {
             "task1": "Task 1: Collect Books",
@@ -4082,11 +4082,11 @@ def export_novice_excel(request):
         selected_task_field = task_firebase_map.get(selected_task_param, "Novice_Task_1(Collect Books)")
         selected_task_display = task_display_map.get(selected_task_param, "Task 1: Collect Books")
         
-        # Get ALL students
+        # Get ALL students - Already ordered by last_name
         students = Student.objects.filter(
             faculty_assignment__in=faculty_assignments,
             student_status='Registered'
-        ).order_by('last_name')
+        ).order_by('last_name', 'first_name')  # Added first_name as secondary sort
         
         # Create workbook
         wb = Workbook()
@@ -4148,10 +4148,14 @@ def export_novice_excel(request):
             except Exception as e:
                 print(f"Error processing student {student.student_id}: {e}")
             
+            # Format name as: Last name, First name Middle initial.
+            middle_initial = f" {student.middle_initial}." if student.middle_initial else ""
+            formatted_name = f"{student.last_name}, {student.first_name}{middle_initial}"
+            
             # Add row for this student regardless of completion status
             data = [
                 student.student_id,
-                f"{student.first_name} {student.last_name}",
+                formatted_name,
                 selected_task_display,
                 time_completed,
                 points,
@@ -4245,11 +4249,11 @@ def export_novice_pdf(request):
         selected_task_field = task_firebase_map.get(selected_task_param, "Novice_Task_1(Collect Books)")
         selected_task_display = task_display_map.get(selected_task_param, "Task 1: Collect Books")
         
-        # Get ALL students
+        # Get ALL students - Already ordered by last_name
         students = Student.objects.filter(
             faculty_assignment__in=faculty_assignments,
             student_status='Registered'
-        ).order_by('last_name')
+        ).order_by('last_name', 'first_name')  # Added first_name as secondary sort
         
         # Create PDF with 0.5 inch margins
         response = HttpResponse(content_type='application/pdf')
@@ -4308,10 +4312,14 @@ def export_novice_pdf(request):
             except Exception as e:
                 print(f"Error processing student {student.student_id}: {e}")
             
+            # Format name as: Last name, First name Middle initial.
+            middle_initial = f" {student.middle_initial}." if student.middle_initial else ""
+            formatted_name = f"{student.last_name}, {student.first_name}{middle_initial}"
+            
             # Add row for this student regardless of completion status
             data.append([
                 student.student_id,
-                Paragraph(f"{student.first_name} {student.last_name}", styles['Normal']),
+                Paragraph(formatted_name, styles['Normal']),
                 time_completed,
                 str(points),
                 status
@@ -4391,11 +4399,11 @@ def export_junior_excel(request):
         selected_task_field = task_firebase_map.get(selected_task_param, "Junior_Task_1(Collect Books)")
         selected_task_display = task_display_map.get(selected_task_param, "Task 1: Collect Books")
         
-        # Get ALL students
+        # Get ALL students - Ordered by last_name, then first_name
         students = Student.objects.filter(
             faculty_assignment__in=faculty_assignments,
             student_status='Registered'
-        ).order_by('last_name')
+        ).order_by('last_name', 'first_name')  # Added first_name as secondary sort
         
         # Create workbook
         wb = Workbook()
@@ -4457,10 +4465,14 @@ def export_junior_excel(request):
             except Exception as e:
                 print(f"Error processing student {student.student_id}: {e}")
             
+            # Format name as: Last name, First name Middle initial.
+            middle_initial = f" {student.middle_initial}." if student.middle_initial else ""
+            formatted_name = f"{student.last_name}, {student.first_name}{middle_initial}"
+            
             # Add row for this student regardless of completion status
             data = [
                 student.student_id,
-                f"{student.first_name} {student.last_name}",
+                formatted_name,
                 selected_task_display,
                 time_completed,
                 points,
@@ -4558,11 +4570,11 @@ def export_junior_pdf(request):
         selected_task_field = task_firebase_map.get(selected_task_param, "Junior_Task_1(Collect Books)")
         selected_task_display = task_display_map.get(selected_task_param, "Task 1: Collect Books")
         
-        # Get ALL students
+        # Get ALL students - Ordered by last_name, then first_name
         students = Student.objects.filter(
             faculty_assignment__in=faculty_assignments,
             student_status='Registered'
-        ).order_by('last_name')
+        ).order_by('last_name', 'first_name')  # Added first_name as secondary sort
         
         # Create PDF with 0.5 inch margins
         response = HttpResponse(content_type='application/pdf')
@@ -4621,10 +4633,14 @@ def export_junior_pdf(request):
             except Exception as e:
                 print(f"Error processing student {student.student_id}: {e}")
             
+            # Format name as: Last name, First name Middle initial.
+            middle_initial = f" {student.middle_initial}." if student.middle_initial else ""
+            formatted_name = f"{student.last_name}, {student.first_name}{middle_initial}"
+            
             # Add row for this student regardless of completion status
             data.append([
                 student.student_id,
-                Paragraph(f"{student.first_name} {student.last_name}", styles['Normal']),
+                Paragraph(formatted_name, styles['Normal']),
                 time_completed,
                 str(points),
                 status
@@ -4702,11 +4718,11 @@ def export_senior_excel(request):
         selected_task_field = task_firebase_map.get(selected_task_param, "Senior_Task_1(Collect Books)")
         selected_task_display = task_display_map.get(selected_task_param, "Task 1: Collect Books")
         
-        # Get ALL students
+        # Get ALL students - Ordered by last_name, then first_name
         students = Student.objects.filter(
             faculty_assignment__in=faculty_assignments,
             student_status='Registered'
-        ).order_by('last_name')
+        ).order_by('last_name', 'first_name')  # Added first_name as secondary sort
         
         # Create workbook
         wb = Workbook()
@@ -4768,10 +4784,14 @@ def export_senior_excel(request):
             except Exception as e:
                 print(f"Error processing student {student.student_id}: {e}")
             
+            # Format name as: Last name, First name Middle initial.
+            middle_initial = f" {student.middle_initial}." if student.middle_initial else ""
+            formatted_name = f"{student.last_name}, {student.first_name}{middle_initial}"
+            
             # Add row for this student regardless of completion status
             data = [
                 student.student_id,
-                f"{student.first_name} {student.last_name}",
+                formatted_name,
                 selected_task_display,
                 time_completed,
                 points,
@@ -4869,11 +4889,11 @@ def export_senior_pdf(request):
         selected_task_field = task_firebase_map.get(selected_task_param, "Senior_Task_1(Collect Books)")
         selected_task_display = task_display_map.get(selected_task_param, "Task 1: Collect Books")
         
-        # Get ALL students
+        # Get ALL students - Ordered by last_name, then first_name
         students = Student.objects.filter(
             faculty_assignment__in=faculty_assignments,
             student_status='Registered'
-        ).order_by('last_name')
+        ).order_by('last_name', 'first_name')  # Added first_name as secondary sort
         
         # Create PDF with 0.5 inch margins
         response = HttpResponse(content_type='application/pdf')
@@ -4932,10 +4952,14 @@ def export_senior_pdf(request):
             except Exception as e:
                 print(f"Error processing student {student.student_id}: {e}")
             
+            # Format name as: Last name, First name Middle initial.
+            middle_initial = f" {student.middle_initial}." if student.middle_initial else ""
+            formatted_name = f"{student.last_name}, {student.first_name}{middle_initial}"
+            
             # Add row for this student regardless of completion status
             data.append([
                 student.student_id,
-                Paragraph(f"{student.first_name} {student.last_name}", styles['Normal']),
+                Paragraph(formatted_name, styles['Normal']),
                 time_completed,
                 str(points),
                 status
@@ -5135,7 +5159,7 @@ def export_individual_student_pdf(request, student_id):
         if not faculty_id:
             messages.error(request, "Session expired. Please login again.")
             return redirect('sentinels_login')
-            
+        
         faculty = Faculty.objects.prefetch_related('assignments').get(faculty_id=faculty_id)
         faculty_assignments = faculty.assignments.filter(is_active=True)
         
@@ -5282,7 +5306,7 @@ def export_individual_student_pdf(request, student_id):
     except Exception as e:
         messages.error(request, f"Error exporting PDF: {str(e)}")
         return redirect('studentData')
-    
+
 @faculty_required
 def get_student_data(request, student_id):
     """Get basic student data for modal display"""
@@ -5290,13 +5314,13 @@ def get_student_data(request, student_id):
         faculty_id = request.session.get('faculty_id')
         faculty = Faculty.objects.prefetch_related('assignments').get(faculty_id=faculty_id)
         faculty_assignments = faculty.assignments.filter(is_active=True)
-        
+    
         student = Student.objects.get(
             student_id=student_id,
             faculty_assignment__in=faculty_assignments,
             student_status='Registered'
         )
-        
+    
         return JsonResponse({
             'student_id': student.student_id,
             'first_name': student.first_name,

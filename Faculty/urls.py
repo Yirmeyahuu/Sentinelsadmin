@@ -25,14 +25,13 @@ urlpatterns = [
     # Add this to your urlpatterns
     path('account/', views.faculty_account, name='faculty-account'),
     path('faculty/edit/', views.edit_faculty_account, name='edit_faculty_account'),
-    
+
     #URLS FOR ACTIVITY PAGE
     path("Activity-list/", views.Faculty_activity_page, name='faculty-activity-page'),
     path('save-activity-deadline/', views.saveActivityDeadline, name='save-activity-deadline'),
     path('remove-deadline/', views.remove_deadline, name='remove-deadline'), 
     path('get-late-completions/<str:task_title>/', views.get_late_completions, name='get-late-completions'),
 
-    
     #URLS FOR STUDENT DASHBOARD
     path('Student-progress/', views.student_progress, name='student-progress'),
 
@@ -41,7 +40,6 @@ urlpatterns = [
     path('Tier/Novice/', views.novice_tier, name='novice-tier'),
     path('Tier/Junior/', views.junior_tier, name='junior-tier'),
     path('Tier/Senior/', views.senior_tier, name='senior-tier'),
-
 
     # Student Import/Export URLs
     path('students/export/csv/', views.export_student_csv, name='export_student_csv'),
@@ -61,7 +59,7 @@ urlpatterns = [
     # Junior Tier Export URLs
     path('export-junior-excel/', views.export_junior_excel, name='export-junior-excel'),
     path('export-junior-pdf/', views.export_junior_pdf, name='export-junior-pdf'),
-    
+
     # Senior Tier Export URLs
     path('export-senior-excel/', views.export_senior_excel, name='export-senior-excel'),
     path('export-senior-pdf/', views.export_senior_pdf, name='export-senior-pdf'),
