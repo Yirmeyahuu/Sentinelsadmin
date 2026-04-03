@@ -2,24 +2,18 @@
     document.title = "SENTINELS | Student Progress";
 </script>
 
-<!-- Table -->
-<div class="flex flex-col min-h-screen ml-20">
-    <!-- Dashboard cards container -->
-    <div class="px-6 mb-8">
+<!-- Main Container -->
+<div class="flex flex-col min-h-screen ml-20 pb-8">
+    <!-- Dashboard Cards -->
+    <div class="px-6 pt-6 mb-6">
         <div class="max-w-[calc(100%-80px)] mx-auto">
-            <!-- Dashboard Cards Row-->
-            <div class="flex space-x-6 w-full">
-                <!-- 1. All Students in Program -->
-                <div class="flex-1 min-w-[280px] relative group bg-gradient-to-br from-blue-500 to-blue-700 shadow-xl rounded-2xl p-6 transition-all duration-300 hover:shadow-2xl hover:-translate-y-1">
-                    <!-- Decorative Blur Effect -->
-                    <div class="absolute top-0 right-0 w-32 h-32 transform translate-x-16 -translate-y-16">
-                        <div class="absolute inset-0 bg-blue-400 opacity-50 blur-3xl rounded-full"></div>
-                    </div>
-                    <!-- Card Content -->
-                    <div class="flex items-center justify-between relative z-10">
+            <div class="grid grid-cols-4 gap-6">
+                <!-- Total Students Card -->
+                <div class="bg-gradient-to-br from-blue-500 to-blue-700 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-shadow duration-300">
+                    <div class="flex items-center justify-between">
                         <div>
                             {% if faculty_assignments %}
-                                <p class="text-blue-100 text-lg font-medium mb-1">
+                                <p class="text-blue-100 text-sm font-medium mb-1">
                                     {% for assignment in faculty_assignments %}
                                         {{ assignment.program }}{% if not forloop.last %}, {% endif %}
                                     {% endfor %}
@@ -38,12 +32,9 @@
                     </div>
                 </div>
 
-                <!-- 2. Students in Program, Year, Section, Semester -->
-                <div class="flex-1 min-w-[280px] relative group bg-gradient-to-br from-sky-500 to-sky-700 shadow-xl rounded-2xl p-6 transition-all duration-300 hover:shadow-2xl hover:-translate-y-1">
-                    <div class="absolute top-0 right-0 w-32 h-32 transform translate-x-16 -translate-y-16">
-                        <div class="absolute inset-0 bg-sky-400 opacity-50 blur-3xl rounded-full"></div>
-                    </div>
-                    <div class="flex items-center justify-between relative z-10">
+                <!-- Section Students Card -->
+                <div class="bg-gradient-to-br from-sky-500 to-sky-700 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-shadow duration-300">
+                    <div class="flex items-center justify-between">
                         <div>
                             {% if faculty_assignments %}
                                 <p class="text-sky-100 text-sm font-medium mb-1">
@@ -62,23 +53,20 @@
                                     {% endfor %}
                                 {% else %}
                                     No Semester
-                                {% endif %} Students
+                                {% endif %}
                             </p>
                         </div>
                         <div class="bg-sky-400/30 p-3 rounded-xl">
-                            <svg class="w-8 h-8 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.35709 16V5.78571c0-.43393.34822-.78571.77777-.78571H18.5793c.4296 0 .7778.35178.7778.78571V16M5.35709 16h-1c-.55229 0-1 .4477-1 1v1c0 .5523.44771 1 1 1H20.3571c.5523 0 1-.4477 1-1v-1c0-.5523-.4477-1-1-1h-1M5.35709 16H19.3571M9.35709 8l2.62501 2.5L9.35709 13m4.00001 0h2"/>
+                            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.35709 16V5.78571c0-.43393.34822-.78571.77777-.78571H18.5793c.4296 0 .7778.35178.7778.78571V16M5.35709 16h-1c-.55229 0-1 .4477-1 1v1c0 .5523.44771 1 1 1H20.3571c.5523 0 1-.4477 1-1v-1c0-.5523-.4477-1-1-1h-1M5.35709 16H19.3571M9.35709 8l2.62501 2.5L9.35709 13m4.00001 0h2"/>
                             </svg>
                         </div>
                     </div>
                 </div>
 
-                <!-- 3. Active Students -->
-                <div class="flex-1 min-w-[280px] relative group bg-gradient-to-br from-emerald-500 to-emerald-700 shadow-xl rounded-2xl p-6 transition-all duration-300 hover:shadow-2xl hover:-translate-y-1">
-                    <div class="absolute top-0 right-0 w-32 h-32 transform translate-x-16 -translate-y-16">
-                        <div class="absolute inset-0 bg-emerald-400 opacity-50 blur-3xl rounded-full"></div>
-                    </div>
-                    <div class="flex items-center justify-between relative z-10">
+                <!-- Active Students Card -->
+                <div class="bg-gradient-to-br from-emerald-500 to-emerald-700 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-shadow duration-300">
+                    <div class="flex items-center justify-between">
                         <div>
                             <p class="text-emerald-100 text-sm font-medium mb-1">Active Students</p>
                             <h3 class="text-4xl font-bold text-white">{{ active_students_count }}</h3>
@@ -92,12 +80,9 @@
                     </div>
                 </div>
 
-                <!-- 4. Inactive Students -->
-                <div class="flex-1 min-w-[280px] relative group bg-gradient-to-br from-rose-500 to-rose-700 shadow-xl rounded-2xl p-6 transition-all duration-300 hover:shadow-2xl hover:-translate-y-1">
-                    <div class="absolute top-0 right-0 w-32 h-32 transform translate-x-16 -translate-y-16">
-                        <div class="absolute inset-0 bg-rose-400 opacity-50 blur-3xl rounded-full"></div>
-                    </div>
-                    <div class="flex items-center justify-between relative z-10">
+                <!-- Inactive Students Card -->
+                <div class="bg-gradient-to-br from-rose-500 to-rose-700 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-shadow duration-300">
+                    <div class="flex items-center justify-between">
                         <div>
                             <p class="text-rose-100 text-sm font-medium mb-1">Inactive Students</p>
                             <h3 class="text-4xl font-bold text-white">{{ inactive_students_count }}</h3>
@@ -114,13 +99,12 @@
         </div>
     </div>
 
-
-    <!-- Main Content (Tier Progress Section) -->
+    <!-- Tier Progress Section -->
     <div class="px-6">
         <div class="max-w-[calc(100%-80px)] mx-auto">
-            <div class="bg-white rounded-3xl shadow-lg border border-slate-100 p-8">
-                <!-- Section Header with Dropdown -->
-                <div class="flex items-center justify-between mb-10 pb-6 border-b border-slate-100">
+            <!-- Section Header -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 mb-6">
+                <div class="flex items-center justify-between">
                     <div class="flex items-center gap-4">
                         <div class="bg-blue-50 p-3 rounded-xl">
                             <svg class="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -128,8 +112,8 @@
                             </svg>
                         </div>
                         <div>
-                            <h2 class="text-2xl font-bold text-slate-800">Tier Progress Overview</h2>
-                            <p class="text-slate-500 text-sm mt-1">Track student progression across competency tiers</p>
+                            <h2 class="text-xl font-bold text-slate-800">Tier Progress Overview</h2>
+                            <p class="text-slate-500 text-sm mt-0.5">Track student progression across competency tiers</p>
                         </div>
                     </div>
                     <select id="viewType" class="bg-slate-50 text-slate-600 text-sm rounded-lg px-4 py-2 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
@@ -137,201 +121,167 @@
                         <option value="chart">Chart View</option>
                     </select>
                 </div>
+            </div>
 
-                <!-- Cards View -->
-                <div id="cardsView" class="space-y-6">
-                    <!-- Progress Summary -->
-                    <div class="flex gap-4 mb-8">
-                        <div class="text-center flex-1 p-4 bg-gradient-to-br bg-slate-50 to-slate-150/70 rounded-xl shadow-md rounded-xl">
-                            <p class="text-sm text-slate-500 mb-1">Total Students</p>
-                            <p class="text-2xl font-bold text-slate-800">{{ program_total }}</p>
-                        </div>
-                        <div class="text-center flex-1 p-4 bg-gradient-to-br bg-slate-50 to-slate-150/70 rounded-xl shadow-md">
-                            <p class="text-sm text-slate-500 mb-1">Average Completion</p>
-                            <p class="text-2xl font-bold text-slate-800">{{ average_completion }}%</p>
-                        </div>
-                        
-                        <div class="text-center flex-1 p-4 bg-gradient-to-br bg-slate-50 to-slate-150/70 shadow-md rounded-xl">
-                            <p class="text-sm text-slate-500 mb-1">Top Student</p>
-                            <p class="text-2xl font-bold text-slate-800">{{ top_tier_student.name }}</p>
-                            <p class="text-xs text-slate-500 mt-1">{{ top_tier_student.tier }} Tier</p>
-                        </div>
+            <!-- Cards View -->
+            <div id="cardsView">
+                <!-- Progress Summary -->
+                <div class="grid grid-cols-3 gap-4 mb-6">
+                    <div class="bg-slate-50 rounded-xl p-4 text-center border border-slate-100">
+                        <p class="text-sm text-slate-500 mb-1">Total Students</p>
+                        <p class="text-2xl font-bold text-slate-800">{{ program_total }}</p>
                     </div>
-
-                    <!-- Tier Cards -->
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 ">
-                        <!-- Novice Card -->
-                        <div class="tier-card group " data-tier="novice" data-count="{{ novice_count }}">
-                            <a href="{% url 'novice-tier' %}" class="block p-6 bg-gradient-to-br bg-sky-500 to-sky-600 rounded-2xl border border-sky-400 hover:bg-sky-600 transition-all duration-300 hover:shadow-lg shadow-md ">
-                                <div class="flex items-center justify-between mb-4 ">
-                                    <div class="flex items-center gap-3">
-                                        <div class="p-2 bg-sky-400/30 rounded-lg">
-                                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                                            </svg>
-                                        </div>
-                                        <h3 class="text-lg font-semibold text-white">Novice Tier</h3>
-                                    </div>
-                                    <span class="text-xs font-medium text-white bg-sky-400/30 px-2 py-1 rounded-full">T1</span>
-                                </div>
-
-                                <div class="space-y-4">
-                                    <div>
-                                        <div class="flex items-baseline gap-2">
-                                            <span class="text-3xl font-bold text-white">{{ novice_count }}</span>
-                                            <span class="text-sky-100">students</span>
-                                        </div>
-                                        <p class="text-sm text-sky-100 mt-1">Completed Requirements</p>
-                                    </div>
-
-                                    <div class="space-y-2">
-                                        <div class="space-y-2">
-                                            <div class="flex justify-between text-sm">
-                                                <span class="text-sky-100">Completion Rate</span>
-                                                <span class="text-white font-medium">{{ novice_completion_rate }}%</span>
-                                            </div>
-                                            <div class="h-2 bg-sky-400/20 rounded-full overflow-hidden">
-                                                <div class="h-full bg-white/70 transition-all duration-500" style="width: {{ novice_completion_rate }}%"></div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="mt-6 flex items-center justify-between pt-4 border-t border-sky-400/30">
-                                    <div class="flex items-center gap-2 text-sm text-sky-100">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
-                                        <span class="last-updated" data-timestamp="{{ last_update }}">Updated 2m ago</span>
-                                    </div>
-                                    <button class="text-white hover:text-sky-100 text-sm font-medium group-hover:translate-x-1 transition-transform">
-                                        View Details →
-                                    </button>
-                                </div>
-                            </a>
-                        </div>
-                    
-                        <!-- Junior Card -->
-                        <div class="tier-card group" data-tier="junior" data-count="{{ junior_count }}">
-                            <a href="{% url 'junior-tier' %}" class="block p-6 shadow-md bg-gradient-to-br bg-cyan-500 to-cyan-600 rounded-2xl border border-cyan-400 hover:bg-cyan-600 transition-all duration-300 hover:shadow-lg">
-                                <div class="flex items-center justify-between mb-4">
-                                    <div class="flex items-center gap-3">
-                                        <div class="p-2 bg-cyan-400/30 rounded-lg">
-                                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
-                                            </svg>
-                                        </div>
-                                        <h3 class="text-lg font-semibold text-white">Junior Tier</h3>
-                                    </div>
-                                    <span class="text-xs font-medium text-white bg-cyan-400/30 px-2 py-1 rounded-full">T2</span>
-                                </div>
-                    
-                                <div class="space-y-4">
-                                    <div>
-                                        <div class="flex items-baseline gap-2">
-                                            <span class="text-3xl font-bold text-white">{{ junior_count }}</span>
-                                            <span class="text-white">students</span>
-                                        </div>
-                                        <p class="text-sm text-white mt-1">Completed Requirements</p>
-                                    </div>
-                    
-                                    <div class="space-y-2">
-                                        <div class="space-y-2">
-                                            <div class="flex justify-between text-sm">
-                                                <span class="text-white">Completion Rate</span>
-                                                <span class="text-white font-medium">{{ junior_completion_rate }}%</span>
-                                            </div>
-                                            <div class="h-2 bg-cyan-400/20 rounded-full overflow-hidden">
-                                                <div class="h-full bg-white/70 transition-all duration-500" style="width: {{ junior_completion_rate }}%"></div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                    
-                                <div class="mt-6 flex items-center justify-between pt-4 border-t border-slate-100">
-                                    <div class="flex items-center gap-2 text-sm text-white">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
-                                        <span class="last-updated" data-timestamp="{{ last_update }}">Updated 2m ago</span>
-                                    </div>
-                                    <button class="text-white text-sm font-medium">View Details →</button>
-                                </div>
-                            </a>
-                        </div>
-                    
-                        <!-- Senior Card -->
-                        <div class="tier-card group" data-tier="senior" data-count="{{ senior_count }}">
-                            <a href="{% url 'senior-tier' %}" class="block p-6 shadow-md bg-gradient-to-br bg-blue-500 to-blue-600 rounded-2xl border border-blue-400 hover:bg-blue-600 transition-all duration-300 hover:shadow-lg">
-                                <div class="flex items-center justify-between mb-4">
-                                    <div class="flex items-center gap-3">
-                                        <div class="p-2 bg-blue-400/30 rounded-lg">
-                                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-                                            </svg>
-                                        </div>
-                                        <h3 class="text-lg font-semibold text-white">Senior Tier</h3>
-                                    </div>
-                                    <span class="text-xs font-medium text-white bg-blue-400/30 px-2 py-1 rounded-full">T3</span>
-                                </div>
-                    
-                                <div class="space-y-4">
-                                    <div>
-                                        <div class="flex items-baseline gap-2">
-                                            <span class="text-3xl font-bold text-white">{{ senior_count }}</span>
-                                            <span class="text-white">students</span>
-                                        </div>
-                                        <p class="text-sm text-white mt-1">Completed Requirements</p>
-                                    </div>
-                    
-                                    <div class="space-y-2">
-                                        <div class="flex justify-between text-sm">
-                                            <span class="text-white">Completion Rate</span>
-                                            <span class="text-white font-medium">{{ senior_completion_rate }}%</span>
-                                        </div>
-                                        <div class="h-2 bg-blue-400/20 rounded-full overflow-hidden">
-                                            <div class="h-full bg-white/70 transition-all duration-500" style="width: {{ senior_completion_rate }}%"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                    
-                                <div class="mt-6 flex items-center justify-between pt-4 border-t border-slate-100">
-                                        <div class="flex items-center gap-2 text-sm text-white">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                            </svg>
-                                            <span class="last-updated" data-timestamp="{{ last_update }}">Updated 2m ago</span>
-                                        </div>
-                                    <button class="text-white hover:text-purple-600 text-sm font-medium">View Details →</button>
-                                </div>
-                            </a>
-                        </div>
+                    <div class="bg-slate-50 rounded-xl p-4 text-center border border-slate-100">
+                        <p class="text-sm text-slate-500 mb-1">Average Completion</p>
+                        <p class="text-2xl font-bold text-slate-800">{{ average_completion }}%</p>
                     </div>
-                    <!-- View All Student Data Link Section -->
-                    <div class="flex justify-center mt-8 mb-12">
-                        <a href="{% url 'student-data' %}" 
-                           class="group relative inline-flex items-center justify-center px-8 py-4 rounded-xl bg-gradient-to-br from-blue-500 to-blue-700 text-white font-semibold text-md shadow-lg hover:shadow-xl transition-all duration-200 hover:-translate-y-1">
-                            <span class="absolute inset-0 bg-white/20 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity"></span>
-                            <div class="flex items-center space-x-3">
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                </svg>
-                                <span>View All Student Data</span>
-                            </div>
-                        </a>
+                    <div class="bg-slate-50 rounded-xl p-4 text-center border border-slate-100">
+                        <p class="text-sm text-slate-500 mb-1">Top Student</p>
+                        <p class="text-lg font-bold text-slate-800 truncate">{{ top_tier_student.name }}</p>
+                        <p class="text-xs text-slate-500">{{ top_tier_student.tier }} Tier</p>
                     </div>
                 </div>
+
+                <!-- Tier Cards -->
+                <div class="grid grid-cols-3 gap-6 mb-6">
+                    <!-- Novice Tier -->
+                    <a href="{% url 'novice-tier' %}" class="group bg-gradient-to-br from-sky-500 to-sky-600 rounded-2xl p-6 shadow-md hover:shadow-lg transition-all duration-300">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center gap-3">
+                                <div class="p-2 bg-white/20 rounded-lg">
+                                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                    </svg>
+                                </div>
+                                <h3 class="text-lg font-semibold text-white">Novice Tier</h3>
+                            </div>
+                            <span class="text-xs font-medium text-white bg-white/20 px-2 py-1 rounded-full">T1</span>
+                        </div>
+
+                        <div class="mb-4">
+                            <div class="flex items-baseline gap-2">
+                                <span class="text-3xl font-bold text-white">{{ novice_count }}</span>
+                                <span class="text-sky-100">students</span>
+                            </div>
+                            <p class="text-sm text-sky-100 mt-1">Completed Requirements</p>
+                        </div>
+
+                        <div class="mb-4">
+                            <div class="flex justify-between text-sm mb-1">
+                                <span class="text-sky-100">Completion Rate</span>
+                                <span class="text-white font-medium">{{ novice_completion_rate }}%</span>
+                            </div>
+                            <div class="h-2 bg-white/20 rounded-full overflow-hidden">
+                                <div class="h-full bg-white rounded-full transition-all duration-500" style="width: {{ novice_completion_rate }}%"></div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between pt-4 border-t border-white/20">
+                            <span class="text-xs text-sky-100">Updated: {{ last_update|date:"M d, H:i" }}</span>
+                            <span class="text-sm text-white font-medium group-hover:translate-x-1 transition-transform">View →</span>
+                        </div>
+                    </a>
+
+                    <!-- Junior Tier -->
+                    <a href="{% url 'junior-tier' %}" class="group bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-2xl p-6 shadow-md hover:shadow-lg transition-all duration-300">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center gap-3">
+                                <div class="p-2 bg-white/20 rounded-lg">
+                                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                                    </svg>
+                                </div>
+                                <h3 class="text-lg font-semibold text-white">Junior Tier</h3>
+                            </div>
+                            <span class="text-xs font-medium text-white bg-white/20 px-2 py-1 rounded-full">T2</span>
+                        </div>
+
+                        <div class="mb-4">
+                            <div class="flex items-baseline gap-2">
+                                <span class="text-3xl font-bold text-white">{{ junior_count }}</span>
+                                <span class="text-cyan-100">students</span>
+                            </div>
+                            <p class="text-sm text-cyan-100 mt-1">Completed Requirements</p>
+                        </div>
+
+                        <div class="mb-4">
+                            <div class="flex justify-between text-sm mb-1">
+                                <span class="text-cyan-100">Completion Rate</span>
+                                <span class="text-white font-medium">{{ junior_completion_rate }}%</span>
+                            </div>
+                            <div class="h-2 bg-white/20 rounded-full overflow-hidden">
+                                <div class="h-full bg-white rounded-full transition-all duration-500" style="width: {{ junior_completion_rate }}%"></div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between pt-4 border-t border-white/20">
+                            <span class="text-xs text-cyan-100">Updated: {{ last_update|date:"M d, H:i" }}</span>
+                            <span class="text-sm text-white font-medium group-hover:translate-x-1 transition-transform">View →</span>
+                        </div>
+                    </a>
+
+                    <!-- Senior Tier -->
+                    <a href="{% url 'senior-tier' %}" class="group bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-6 shadow-md hover:shadow-lg transition-all duration-300">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center gap-3">
+                                <div class="p-2 bg-white/20 rounded-lg">
+                                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                                    </svg>
+                                </div>
+                                <h3 class="text-lg font-semibold text-white">Senior Tier</h3>
+                            </div>
+                            <span class="text-xs font-medium text-white bg-white/20 px-2 py-1 rounded-full">T3</span>
+                        </div>
+
+                        <div class="mb-4">
+                            <div class="flex items-baseline gap-2">
+                                <span class="text-3xl font-bold text-white">{{ senior_count }}</span>
+                                <span class="text-blue-100">students</span>
+                            </div>
+                            <p class="text-sm text-blue-100 mt-1">Completed Requirements</p>
+                        </div>
+
+                        <div class="mb-4">
+                            <div class="flex justify-between text-sm mb-1">
+                                <span class="text-blue-100">Completion Rate</span>
+                                <span class="text-white font-medium">{{ senior_completion_rate }}%</span>
+                            </div>
+                            <div class="h-2 bg-white/20 rounded-full overflow-hidden">
+                                <div class="h-full bg-white rounded-full transition-all duration-500" style="width: {{ senior_completion_rate }}%"></div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between pt-4 border-t border-white/20">
+                            <span class="text-xs text-blue-100">Updated: {{ last_update|date:"M d, H:i" }}</span>
+                            <span class="text-sm text-white font-medium group-hover:translate-x-1 transition-transform">View →</span>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- View All Student Data Button -->
+                <div class="flex justify-center">
+                    <a href="{% url 'student-data' %}" 
+                       class="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-blue-500 to-blue-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 hover:-translate-y-0.5">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <span>View All Student Data</span>
+                    </a>
+                </div>
+            </div>
+
             <!-- Chart View (Hidden by default) -->
             <div id="chartView" class="hidden">
-                <canvas id="tierProgressChart" class="w-full h-[400px]"></canvas>
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
+                    <canvas id="tierProgressChart" class="w-full h-[400px]"></canvas>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
-
 <script>
-    // Pass Django template variables to JavaScript
     window.tierProgressData = {
         totalStudents: {{ program_total }},
         tierData: {

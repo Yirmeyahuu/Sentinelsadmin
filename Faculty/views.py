@@ -3282,6 +3282,11 @@ def studentData(request):
     # Calculate average completion
     average_completion = (total_completed_tasks / (total_students * total_tasks) * 100) if total_students > 0 else 0
 
+    # Pagination - 10 students per page
+    paginator = Paginator(enhanced_students, 10)
+    page_number = request.GET.get('page', 1)
+    page_obj = paginator.get_page(page_number)
+
     context = {
         "search_query": search_query,
         "faculty_data": faculty,
@@ -3289,8 +3294,10 @@ def studentData(request):
         "average_completion": f"{average_completion:.1f}",
         "active_students": active_students,
         "inactive_students": inactive_students,
-        "students": enhanced_students,
+        "students": page_obj,
         "task_fields": task_fields,
+        "paginator": paginator,
+        "page_obj": page_obj,
     }
 
     if request.headers.get('HX-Request'):

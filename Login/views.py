@@ -8,8 +8,6 @@ from Faculty.models import Faculty
 # Firestore database instance
 from SentinelsProject.firebase_config import db
 
-
-
 def Sentinels_login_view(request):
     # Redirect authenticated users to their respective homepages
     if request.user.is_authenticated:

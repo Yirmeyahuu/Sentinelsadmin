@@ -4,20 +4,17 @@
     document.title = "SENTINELS | Student Data";
 </script>
 
-
 <!-- Main Container with Left Margin -->
-<div class="flex flex-col min-h-screen ml-20">
+<div class="flex flex-col min-h-screen ml-20 pb-8">
     <!-- Dashboard Cards Container -->
-    <div class="px-6 mb-8">
+    <div class="px-6 pt-6 mb-6">
         <div class="max-w-[calc(100%-80px)] mx-auto">
             <!-- Dashboard Cards Row -->
-            <div class="flex space-x-6 w-full">
+            <div class="grid grid-cols-4 gap-6">
                 <!-- Total Students Card -->
-                <div class="flex-1 min-w-[280px] relative group bg-gradient-to-br from-blue-500 to-blue-700 shadow-xl rounded-2xl p-6 transition-all duration-300 hover:shadow-2xl hover:-translate-y-1">
-                    <div class="absolute top-0 right-0 w-32 h-32 transform translate-x-16 -translate-y-16">
-                        <div class="absolute inset-0 bg-blue-400 opacity-50 blur-3xl rounded-full"></div>
-                    </div>
-                    <div class="flex items-center justify-between relative z-10">
+                <div class="relative bg-gradient-to-br from-blue-500 to-blue-700 rounded-2xl p-6 shadow-lg hover:shadow-2xl hover:-translate-y-0.5 transition-all duration-300 overflow-hidden">
+                    <div class="absolute top-0 right-0 w-24 h-24 bg-blue-400/30 rounded-full blur-2xl transform translate-x-8 -translate-y-8"></div>
+                    <div class="relative flex items-center justify-between">
                         <div>
                             <p class="text-blue-100 text-sm font-medium mb-1">Total Students</p>
                             <h3 class="text-4xl font-bold text-white">{{ total_students }}</h3>
@@ -32,11 +29,9 @@
                 </div>
 
                 <!-- Average Completion Card -->
-                <div class="flex-1 min-w-[280px] relative group bg-gradient-to-br from-emerald-500 to-emerald-700 shadow-xl rounded-2xl p-6 transition-all duration-300 hover:shadow-2xl hover:-translate-y-1">
-                    <div class="absolute top-0 right-0 w-32 h-32 transform translate-x-16 -translate-y-16">
-                        <div class="absolute inset-0 bg-emerald-400 opacity-50 blur-3xl rounded-full"></div>
-                    </div>
-                    <div class="flex items-center justify-between relative z-10">
+                <div class="relative bg-gradient-to-br from-emerald-500 to-emerald-700 rounded-2xl p-6 shadow-lg hover:shadow-2xl hover:-translate-y-0.5 transition-all duration-300 overflow-hidden">
+                    <div class="absolute top-0 right-0 w-24 h-24 bg-emerald-400/30 rounded-full blur-2xl transform translate-x-8 -translate-y-8"></div>
+                    <div class="relative flex items-center justify-between">
                         <div>
                             <p class="text-emerald-100 text-sm font-medium mb-1">Average Completion</p>
                             <h3 class="text-4xl font-bold text-white">{{ average_completion }}%</h3>
@@ -51,11 +46,9 @@
                 </div>
 
                 <!-- Active Students Card -->
-                <div class="flex-1 min-w-[280px] relative group bg-gradient-to-br from-cyan-500 to-cyan-700 shadow-xl rounded-2xl p-6 transition-all duration-300 hover:shadow-2xl hover:-translate-y-1">
-                    <div class="absolute top-0 right-0 w-32 h-32 transform translate-x-16 -translate-y-16">
-                        <div class="absolute inset-0 bg-cyan-400 opacity-50 blur-3xl rounded-full"></div>
-                    </div>
-                    <div class="flex items-center justify-between relative z-10">
+                <div class="relative bg-gradient-to-br from-cyan-500 to-cyan-700 rounded-2xl p-6 shadow-lg hover:shadow-2xl hover:-translate-y-0.5 transition-all duration-300 overflow-hidden">
+                    <div class="absolute top-0 right-0 w-24 h-24 bg-cyan-400/30 rounded-full blur-2xl transform translate-x-8 -translate-y-8"></div>
+                    <div class="relative flex items-center justify-between">
                         <div>
                             <p class="text-cyan-100 text-sm font-medium mb-1">Active Students</p>
                             <h3 class="text-4xl font-bold text-white">{{ active_students }}</h3>
@@ -70,11 +63,9 @@
                 </div>
 
                 <!-- Inactive Students Card -->
-                <div class="flex-1 min-w-[280px] relative group bg-gradient-to-br from-rose-500 to-rose-700 shadow-xl rounded-2xl p-6 transition-all duration-300 hover:shadow-2xl hover:-translate-y-1">
-                    <div class="absolute top-0 right-0 w-32 h-32 transform translate-x-16 -translate-y-16">
-                        <div class="absolute inset-0 bg-rose-400 opacity-50 blur-3xl rounded-full"></div>
-                    </div>
-                    <div class="flex items-center justify-between relative z-10">
+                <div class="relative bg-gradient-to-br from-rose-500 to-rose-700 rounded-2xl p-6 shadow-lg hover:shadow-2xl hover:-translate-y-0.5 transition-all duration-300 overflow-hidden">
+                    <div class="absolute top-0 right-0 w-24 h-24 bg-rose-400/30 rounded-full blur-2xl transform translate-x-8 -translate-y-8"></div>
+                    <div class="relative flex items-center justify-between">
                         <div>
                             <p class="text-rose-100 text-sm font-medium mb-1">Inactive Students</p>
                             <h3 class="text-4xl font-bold text-white">{{ inactive_students }}</h3>
@@ -91,11 +82,12 @@
         </div>
     </div>
 
+    <!-- Back Link -->
     <div class="px-6 mb-4">
         <div class="max-w-[calc(100%-80px)] mx-auto">
             <a href="{% url 'student-progress' %}" 
-               class="inline-flex items-center text-blue-600 hover:text-blue-600/60 transition-colors duration-200">
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+               class="inline-flex items-center text-slate-500 hover:text-sky-600 transition-colors duration-200 group">
+                <svg class="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                 </svg>
                 <span class="text-sm font-medium">Back to Progress</span>
@@ -106,135 +98,184 @@
     <!-- Main Content Section -->
     <div class="px-6">
         <div class="max-w-[calc(100%-80px)] mx-auto">
-            <div class="flex flex-col gap-6">
-                <!-- Student List Container -->
-                <div class="bg-white rounded-2xl shadow-lg border border-slate-100 overflow-hidden flex flex-col h-[600px]">
-                    <!-- Header Section (Fixed) -->
-                    <div class="p-6 border-b border-slate-100 flex-shrink-0">
-                        <div class="flex items-center justify-between mb-4">
-                            <div>
-                                <h2 class="text-xl font-bold text-slate-800">Student List</h2>
-                                <p class="text-slate-500 text-sm">Registered students overview</p>
-                            </div>
-                            <div class="flex items-center gap-3">
-                                <span class="px-3 py-1 text-sm text-slate-600 bg-slate-100 rounded-full">
-                                    {{ students|length }} Students
-                                </span>
+            <!-- Student List Container -->
+            <div class="bg-white rounded-2xl shadow-lg border border-slate-100 overflow-hidden">
+                <!-- Header Section -->
+                <div class="px-6 py-5 border-b border-slate-100">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h2 class="text-xl font-bold text-slate-800">Student List</h2>
+                            <p class="text-slate-500 text-sm mt-0.5">Registered students overview</p>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <span class="px-4 py-1.5 text-sm font-medium text-slate-600 bg-slate-100 rounded-full">
+                                {{ total_students }} Students
+                            </span>
+                            
+                            <!-- Export Dropdown -->
+                            <div class="relative" x-data="{ open: false }">
+                                <button @click="open = !open" @click.away="open = false"
+                                    class="inline-flex items-center px-4 py-2 bg-sky-600 text-white rounded-xl text-sm font-medium hover:bg-sky-700 transition-colors duration-200">
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                    </svg>
+                                    Export
+                                    <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                    </svg>
+                                </button>
                                 
-                                <!-- Export Dropdown -->
-                                <div class="relative" x-data="{ open: false }">
-                                    <button @click="open = !open" @click.away="open = false"
-                                        class="inline-flex items-center px-4 py-2 bg-sky-600 text-white rounded-xl text-sm hover:bg-sky-700 transition">
-                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                                        </svg>
-                                        Export
-                                        <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                                        </svg>
-                                    </button>
-                                    
-                                    <!-- Dropdown Menu -->
-                                    <div x-show="open" 
-                                        x-transition:enter="transition ease-out duration-100"
-                                        x-transition:enter-start="transform opacity-0 scale-95"
-                                        x-transition:enter-end="transform opacity-100 scale-100"
-                                        x-transition:leave="transition ease-in duration-75"
-                                        x-transition:leave-start="transform opacity-100 scale-100"
-                                        x-transition:leave-end="transform opacity-0 scale-95"
-                                        class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-slate-200 z-50">
-                                        <div class="py-1">
-                                            <a href="{% url 'export-studentdata-excel' %}?search={{ search_query }}" 
-                                            class="flex items-center px-4 py-2 text-sm text-slate-700 hover:bg-sky-50 transition">
-                                                <svg class="w-4 h-4 mr-3 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                                                </svg>
-                                                Export as Excel
-                                            </a>
-                                            <a href="{% url 'export-studentdata-pdf' %}?search={{ search_query }}"
-                                            class="flex items-center px-4 py-2 text-sm text-slate-700 hover:bg-sky-50 transition">
-                                                <svg class="w-4 h-4 mr-3 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
-                                                </svg>
-                                                Export as PDF
-                                            </a>
-                                        </div>
+                                <!-- Dropdown Menu -->
+                                <div x-show="open" 
+                                    x-transition:enter="transition ease-out duration-100"
+                                    x-transition:enter-start="transform opacity-0 scale-95"
+                                    x-transition:enter-end="transform opacity-100 scale-100"
+                                    x-transition:leave="transition ease-in duration-75"
+                                    x-transition:leave-start="transform opacity-100 scale-100"
+                                    x-transition:leave-end="transform opacity-0 scale-95"
+                                    class="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-slate-200 z-50">
+                                    <div class="py-1">
+                                        <a href="{% url 'export-studentdata-excel' %}?search={{ search_query }}" 
+                                        class="flex items-center px-4 py-2.5 text-sm text-slate-700 hover:bg-sky-50 transition-colors">
+                                            <svg class="w-4 h-4 mr-3 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                            </svg>
+                                            Export as Excel
+                                        </a>
+                                        <a href="{% url 'export-studentdata-pdf' %}?search={{ search_query }}"
+                                        class="flex items-center px-4 py-2.5 text-sm text-slate-700 hover:bg-sky-50 transition-colors">
+                                            <svg class="w-4 h-4 mr-3 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                                            </svg>
+                                            Export as PDF
+                                        </a>
                                     </div>
                                 </div>
                             </div>
                         </div>
+                    </div>
+                </div>
 
-                    <!-- Table Section (Scrollable) -->
-                    <div class="flex-1 overflow-y-auto">
-                        <table class="min-w-full divide-y divide-sky-200">
-                            <thead class="bg-gradient-to-r from-sky-50 to-sky-100 sticky top-0">
-                                <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-sky-700 uppercase tracking-wider">Student</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-sky-700 uppercase tracking-wider">Student ID</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-sky-700 uppercase tracking-wider">Action</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-sky-100">
-                                {% for student in students %}
-                                <tr class="hover:bg-sky-50 transition-colors duration-150">
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="flex items-center">
-                                            <div class="w-10 h-10 bg-gradient-to-br from-sky-400 to-blue-500 rounded-full flex items-center justify-center">
-                                                <span class="text-sm font-medium text-white">
-                                                    {{ student.student.first_name|first }}{{ student.student.last_name|first }}
-                                                </span>
-                                            </div>
-                                            <div class="ml-4">
-                                                <div class="text-sm font-medium text-sky-900">
-                                                    {{ student.student.first_name }} {{ student.student.last_name }}
-                                                </div>
+                <!-- Table Section -->
+                <div class="overflow-x-auto">
+                    <table class="min-w-full">
+                        <thead class="bg-gradient-to-r from-slate-50 to-slate-100">
+                            <tr>
+                                <th class="px-6 py-3.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Student</th>
+                                <th class="px-6 py-3.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Student ID</th>
+                                <th class="px-6 py-3.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            {% for student in students %}
+                            <tr class="hover:bg-slate-50 transition-colors duration-150">
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <div class="w-10 h-10 bg-gradient-to-br from-sky-400 to-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
+                                            <span class="text-sm font-semibold text-white">
+                                                {{ student.student.first_name|slice:1|first|upper }}{{ student.student.last_name|slice:1|first|upper }}
+                                            </span>
+                                        </div>
+                                        <div class="ml-4">
+                                            <div class="text-sm font-medium text-slate-900">
+                                                {{ student.student.first_name }} {{ student.student.last_name }}
                                             </div>
                                         </div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm font-mono text-sky-800">{{ student.student.student_id }}</div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <button 
-                                            onclick="viewDetails('{{ student.student.student_id }}')"
-                                            data-student-id="{{ student.student.student_id }}"
-                                            class="inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-full text-white bg-sky-600 hover:bg-sky-700 transition-colors duration-200">
-                                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                                            </svg>
-                                            View Details
-                                        </button>
-                                    </td>
-                                </tr>
-                                {% empty %}
-                                <tr>
-                                    <td colspan="3" class="px-6 py-20 text-center">
-                                        <div class="flex flex-col items-center gap-4">
-                                            <!-- Illustrative icon -->
-                                            <svg class="w-16 h-16 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="text-sm font-mono text-slate-600 bg-slate-100 px-2 py-1 rounded">{{ student.student.student_id }}</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <button 
+                                        onclick="viewDetails('{{ student.student.student_id }}')"
+                                        data-student-id="{{ student.student.student_id }}"
+                                        class="inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-lg text-white bg-sky-600 hover:bg-sky-700 transition-colors duration-200">
+                                        <svg class="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                        </svg>
+                                        View Details
+                                    </button>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="3" class="px-6 py-16 text-center">
+                                    <div class="flex flex-col items-center gap-3">
+                                        <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center">
+                                            <svg class="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 11c1.657 0 3-1.343 3-3S13.657 5 12 5s-3 1.343-3 3 1.343 3 3 3zM5.5 20a6.5 6.5 0 0113 0" />
                                             </svg>
-
-                                            <h3 class="text-slate-800 text-lg font-semibold">No students added yet</h3>
-                                            <p class="text-sm text-slate-500 max-w-[560px]">
-                                                Your student list is currently empty. Add new students or import a CSV to get started.
-                                            </p>
-
-                                            <div class="flex items-center gap-3 mt-3">
-                                                <a href="{% url 'faculty-student-list' %}" type="button"
-                                                        class="inline-flex items-center px-4 py-2 bg-sky-600 text-white rounded-xl text-sm hover:bg-sky-700 transition">
-                                                    Add Student
-                                                </a>
-                                            </div>
                                         </div>
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
+                                        <h3 class="text-slate-700 text-base font-semibold">No students added yet</h3>
+                                        <p class="text-sm text-slate-500 max-w-xs">
+                                            Your student list is currently empty. Add new students or import a CSV to get started.
+                                        </p>
+                                        <a href="{% url 'faculty-student-list' %}" 
+                                           class="mt-2 inline-flex items-center px-4 py-2 bg-sky-600 text-white text-sm font-medium rounded-xl hover:bg-sky-700 transition-colors">
+                                            Add Student
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                {% if students.has_other_pages %}
+                <div class="px-6 py-4 border-t border-slate-100 bg-slate-50/50">
+                    <div class="flex items-center justify-between">
+                        <div class="text-sm text-slate-500">
+                            Page <span class="font-medium text-slate-700">{{ students.number }}</span> of <span class="font-medium text-slate-700">{{ students.paginator.num_pages }}</span>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            {% if students.has_previous %}
+                            <a href="?page={{ students.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}" 
+                               class="px-3 py-1.5 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 hover:border-slate-300 transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                                </svg>
+                            </a>
+                            {% else %}
+                            <span class="px-3 py-1.5 text-sm font-medium text-slate-400 bg-slate-100 border border-slate-200 rounded-lg cursor-not-allowed">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                                </svg>
+                            </span>
+                            {% endif %}
+
+                            {% for num in students.paginator.page_range %}
+                                {% if students.number == num %}
+                                <span class="px-3 py-1.5 text-sm font-medium text-white bg-sky-600 rounded-lg">{{ num }}</span>
+                                {% elif num > students.number|add:'-3' and num < students.number|add:'3' %}
+                                <a href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}" 
+                                   class="px-3 py-1.5 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 hover:border-slate-300 transition-colors">
+                                    {{ num }}
+                                </a>
+                                {% endif %}
+                            {% endfor %}
+
+                            {% if students.has_next %}
+                            <a href="?page={{ students.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}" 
+                               class="px-3 py-1.5 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 hover:border-slate-300 transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                </svg>
+                            </a>
+                            {% else %}
+                            <span class="px-3 py-1.5 text-sm font-medium text-slate-400 bg-slate-100 border border-slate-200 rounded-lg cursor-not-allowed">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                </svg>
+                            </span>
+                            {% endif %}
+                        </div>
                     </div>
-                </div> 
+                </div>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -243,11 +284,11 @@
 
 <!-- Student Task Data Modal Container -->
 <div id="studentTaskDataModalContainer" hx-swap-oob="true">
-    <div id="studentTaskDataModal" hx-swap-oob="true" class="fixed inset-0 flex items-center justify-center bg-gray-900/80 backdrop-blur-xs z-[9999] hidden transition-opacity duration-300">
-        <div class="relative bg-white rounded-2xl shadow-xl max-w-4xl w-full mx-4 min-h-[500px]">
-            <div class="p-6">
+    <div id="studentTaskDataModal" hx-swap-oob="true" class="fixed inset-0 flex items-center justify-center bg-gray-900/80 backdrop-blur-sm z-[9999] hidden transition-opacity duration-300">
+        <div class="relative bg-white rounded-2xl shadow-2xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden">
+            <div class="p-6 border-b border-slate-100">
                 <!-- Modal Header -->
-                <div class="flex items-center justify-between mb-6">
+                <div class="flex items-center justify-between">
                     <div>
                         <h2 class="text-xl font-bold text-slate-800">Student Task Details</h2>
                         <p class="text-sm text-slate-500 mt-1" id="studentNameDisplay"></p>
@@ -256,12 +297,12 @@
                         <!-- Export Dropdown -->
                         <div class="relative" x-data="{ open: false }">
                             <button @click="open = !open" @click.away="open = false"
-                                class="inline-flex items-center px-3 py-1.5 bg-sky-600 text-white rounded-lg text-sm hover:bg-sky-700 transition">
-                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                class="inline-flex items-center px-4 py-2 bg-sky-600 text-white rounded-xl text-sm font-medium hover:bg-sky-700 transition-colors">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                                 </svg>
                                 Export
-                                <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                                 </svg>
                             </button>
@@ -274,17 +315,17 @@
                                  x-transition:leave="transition ease-in duration-75"
                                  x-transition:leave-start="transform opacity-100 scale-100"
                                  x-transition:leave-end="transform opacity-0 scale-95"
-                                 class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-slate-200 z-50">
+                                 class="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-slate-200 z-50">
                                 <div class="py-1">
                                     <a href="#" id="exportStudentExcel"
-                                       class="flex items-center px-4 py-2 text-sm text-slate-700 hover:bg-sky-50 transition">
+                                       class="flex items-center px-4 py-2.5 text-sm text-slate-700 hover:bg-sky-50 transition-colors">
                                         <svg class="w-4 h-4 mr-3 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                                         </svg>
                                         Export as Excel
                                     </a>
                                     <a href="#" id="exportStudentPdf"
-                                       class="flex items-center px-4 py-2 text-sm text-slate-700 hover:bg-sky-50 transition">
+                                       class="flex items-center px-4 py-2.5 text-sm text-slate-700 hover:bg-sky-50 transition-colors">
                                         <svg class="w-4 h-4 mr-3 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
                                         </svg>
@@ -294,23 +335,25 @@
                             </div>
                         </div>
                         
-                        <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 transition-colors duration-200">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <button onclick="closeModal()" class="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                             </svg>
                         </button>
                     </div>
                 </div>
+            </div>
 
+            <div class="p-6">
                 <!-- Tier Filter -->
-                <div class="flex space-x-2 mb-6">
-                    <button onclick="switchTier('novice')" class="px-4 py-2 rounded-lg text-sm font-medium bg-sky-100 text-sky-700 hover:bg-sky-200 active-tier">Novice</button>
-                    <button onclick="switchTier('junior')" class="px-4 py-2 rounded-lg text-sm font-medium bg-slate-100 text-slate-600 hover:bg-slate-200">Junior</button>
-                    <button onclick="switchTier('senior')" class="px-4 py-2 rounded-lg text-sm font-medium bg-slate-100 text-slate-600 hover:bg-slate-200">Senior</button>
+                <div class="flex gap-2 mb-6">
+                    <button onclick="switchTier('novice')" class="px-5 py-2.5 rounded-xl text-sm font-medium bg-sky-100 text-sky-700 hover:bg-sky-200 transition-colors tier-btn active-tier">Novice</button>
+                    <button onclick="switchTier('junior')" class="px-5 py-2.5 rounded-xl text-sm font-medium bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors tier-btn">Junior</button>
+                    <button onclick="switchTier('senior')" class="px-5 py-2.5 rounded-xl text-sm font-medium bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors tier-btn">Senior</button>
                 </div>
 
                 <!-- Chart Container -->
-                <div class="h-[400px] w-full">
+                <div class="h-[400px] w-full bg-slate-50 rounded-xl p-4">
                     <canvas id="studentTaskChart"></canvas>
                 </div>
             </div>
