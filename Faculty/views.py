@@ -1968,17 +1968,33 @@ def novice_tier(request):
     average_score = total_points / active_students if active_students > 0 else 0
     completed_tasks_count = total_completed_tasks
 
-    # Sort leaderboard
+    # Sort leaderboard (highest points first)
     novice_leaderboard = sorted(
         leaderboard_students,
         key=lambda x: (-x["points"], -x["tasks_completed"])
     )
 
+    # Sort students alphabetically by name
+    novice_students = sorted(
+        novice_students,
+        key=lambda x: (x["last_name"].lower(), x["first_name"].lower())
+    )
+
+    # Add pagination - 10 students per page
+    paginator = Paginator(novice_students, 10)
+    page_number = request.GET.get('page', 1)
+    students_page = paginator.get_page(page_number)
+
+    # Top 5 leaderboard
+    top_leaderboard = novice_leaderboard[:5]
+
     context = {
+        "students_page": students_page,
         "novice_students": novice_students,
         "novice_leaderboard": novice_leaderboard,
+        "top_leaderboard": top_leaderboard,
         "faculty_data": faculty,
-        "faculty_assignments": faculty_assignments,  # Add assignments to context
+        "faculty_assignments": faculty_assignments,
         "selected_task": selected_task,
         "total_students": total_students,
         "completed_tasks_count": completed_tasks_count,
@@ -2116,9 +2132,25 @@ def junior_tier(request):
         key=lambda x: (-x["points"], -x["tasks_completed"])
     )
 
+    # Sort students alphabetically by name
+    junior_students = sorted(
+        junior_students,
+        key=lambda x: (x["last_name"].lower(), x["first_name"].lower())
+    )
+
+    # Add pagination - 10 students per page
+    paginator = Paginator(junior_students, 10)
+    page_number = request.GET.get('page', 1)
+    students_page = paginator.get_page(page_number)
+
+    # Top 5 leaderboard
+    top_leaderboard = junior_leaderboard[:5]
+
     context = {
+        "students_page": students_page,
         "junior_students": junior_students,
         "junior_leaderboard": junior_leaderboard,
+        "top_leaderboard": top_leaderboard,
         "faculty_data": faculty,
         "faculty_assignments": faculty_assignments,
         "selected_task": selected_task,
@@ -2256,9 +2288,25 @@ def senior_tier(request):
         key=lambda x: (-x["points"], -x["tasks_completed"])
     )
 
+    # Sort students alphabetically by name
+    senior_students = sorted(
+        senior_students,
+        key=lambda x: (x["last_name"].lower(), x["first_name"].lower())
+    )
+
+    # Add pagination - 10 students per page
+    paginator = Paginator(senior_students, 10)
+    page_number = request.GET.get('page', 1)
+    students_page = paginator.get_page(page_number)
+
+    # Top 5 leaderboard
+    top_leaderboard = senior_leaderboard[:5]
+
     context = {
+        "students_page": students_page,
         "senior_students": senior_students,
         "senior_leaderboard": senior_leaderboard,
+        "top_leaderboard": top_leaderboard,
         "faculty_data": faculty,
         "faculty_assignments": faculty_assignments,
         "selected_task": selected_task,

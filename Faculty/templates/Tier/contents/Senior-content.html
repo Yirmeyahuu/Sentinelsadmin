@@ -3,32 +3,26 @@
     document.title = "SENTINELS | Senior Tier";
 </script>
 
-<!-- Professional Header Section -->
 <div class="pl-0 md:pl-28 px-6 mb-8">
     <div class="max-w-[calc(100vw-140px)] mx-auto">
-        <div class="bg-gradient-to-br from-sky-500/90 to-sky-800 border border-sky-500 shadow-lg rounded-2xl p-6">
+        <div class="bg-gradient-to-br from-blue-500 to-blue-700 rounded-2xl p-6">
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                <div class="flex items-center space-x-4 mb-4 sm:mb-0">
-                    <a href="{% url 'student-progress' %}" 
-                       class="inline-flex items-center px-4 py-2 text-sm font-medium text-blue-100 hover:text-white bg-blue-700/30 hover:bg-blue-500/80 border border-blue-400/30 rounded-2xl transition-all duration-200">
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                <a href="{% url 'student-progress' %}" 
+                   class="inline-flex items-center px-4 py-2 text-sm font-medium text-blue-100 bg-blue-600/30 hover:bg-blue-500/50 rounded-xl transition mb-4 sm:mb-0">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                    </svg>
+                    Back
+                </a>
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-blue-500/30 rounded-xl flex items-center justify-center">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
                         </svg>
-                        Back to Overview
-                    </a>
-                </div>
-                
-                <div class="text-center sm:text-left">
-                    <div class="flex items-center justify-center sm:justify-start space-x-3">
-                        <div class="w-10 h-10 bg-blue-500/30 rounded-2xl flex items-center justify-center backdrop-blur-sm">
-                            <svg class="w-6 h-6 text-blue-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
-                            </svg>
-                        </div>
-                        <div>
-                            <h1 class="text-2xl font-bold text-white">Senior Tier</h1>
-                            <p class="text-sm text-blue-100 mt-1">Student Progress & Performance</p>
-                        </div>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold text-white">Senior Tier</h1>
+                        <p class="text-sm text-blue-200">Student Progress</p>
                     </div>
                 </div>
             </div>
@@ -36,326 +30,157 @@
     </div>
 </div>
 
-<!-- Stats Cards Section -->
 <div class="pl-0 md:pl-28 px-6 mb-8">
     <div class="max-w-[calc(100vw-140px)] mx-auto">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <!-- Total Students Card -->
-            <div class="relative group bg-gradient-to-br from-blue-500 to-blue-700 shadow-xl rounded-2xl p-6 transition-all duration-300 hover:shadow-2xl hover:-translate-y-1">
-                <div class="absolute top-0 right-0 w-32 h-32 transform translate-x-16 -translate-y-16">
-                    <div class="absolute inset-0 bg-blue-400 opacity-50 blur-3xl rounded-full"></div>
-                </div>
-                <div class="relative z-10">
-                    <h3 class="text-lg font-semibold text-blue-100">Total Students</h3>
-                    <p class="text-3xl font-bold text-white mt-2">{{ total_students }}</p>
-                    <p class="text-sm text-blue-200 mt-1">In Senior Tier</p>
-                </div>
+            <div class="bg-gradient-to-br from-blue-500 to-blue-700 rounded-2xl p-5">
+                <p class="text-sm text-blue-200">Total Students</p>
+                <p class="text-2xl font-bold text-white mt-1">{{ total_students }}</p>
             </div>
-
-            <!-- Task Completion Card -->
-            <div class="relative group bg-gradient-to-br from-sky-500 to-sky-700 shadow-xl rounded-2xl p-6 transition-all duration-300 hover:shadow-2xl hover:-translate-y-1">
-                <div class="absolute top-0 right-0 w-32 h-32 transform translate-x-16 -translate-y-16">
-                    <div class="absolute inset-0 bg-blue-400 opacity-50 blur-3xl rounded-full"></div>
-                </div>
-                <div class="relative z-10">
-                    <h3 class="text-lg font-semibold text-blue-100">Tasks Completed</h3>
-                    <p class="text-3xl font-bold text-white mt-2">{{ completed_tasks_count }}</p>
-                    <p class="text-sm text-blue-200 mt-1">Out of {{ task_map|length }} Tasks</p>
-                </div>
+            <div class="bg-gradient-to-br from-sky-500 to-sky-700 rounded-2xl p-5">
+                <p class="text-sm text-sky-200">Tasks Completed</p>
+                <p class="text-2xl font-bold text-white mt-1">{{ completed_tasks_count }}</p>
             </div>
-
-            <!-- Average Score Card -->
-            <div class="relative group bg-gradient-to-br from-emerald-500 to-emerald-700 shadow-xl rounded-2xl p-6 transition-all duration-300 hover:shadow-2xl hover:-translate-y-1">
-                <div class="absolute top-0 right-0 w-32 h-32 transform translate-x-16 -translate-y-16">
-                    <div class="absolute inset-0 bg-emerald-400 opacity-50 blur-3xl rounded-full"></div>
-                </div>
-                <div class="relative z-10">
-                    <h3 class="text-lg font-semibold text-emerald-100">Average Score</h3>
-                    <p class="text-3xl font-bold text-white mt-2">{{ average_score|floatformat:1 }}</p>
-                    <p class="text-sm text-emerald-200 mt-1">Points per Student</p>
-                </div>
+            <div class="bg-gradient-to-br from-emerald-500 to-emerald-700 rounded-2xl p-5">
+                <p class="text-sm text-emerald-200">Average Score</p>
+                <p class="text-2xl font-bold text-white mt-1">{{ average_score|floatformat:1 }}</p>
             </div>
-
-            <!-- Last Updated Card -->
-            <div class="relative group bg-gradient-to-br from-purple-500 to-purple-700 shadow-xl rounded-2xl p-6 transition-all duration-300 hover:shadow-2xl hover:-translate-y-1">
-                <div class="relative z-10">
-                    <h3 class="text-lg font-semibold text-purple-100">Last Updated</h3>
-                    <p class="text-xl font-bold text-white mt-2" data-timestamp="{{ last_update }}">Just now</p>
-                    <p class="text-sm text-purple-200 mt-1">Auto-updates</p>
-                </div>
+            <div class="bg-gradient-to-br from-purple-500 to-purple-700 rounded-2xl p-5">
+                <p class="text-sm text-purple-200">Last Updated</p>
+                <p class="text-lg font-bold text-white mt-1">Just now</p>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Main Content Section -->
 <div class="pl-0 md:pl-28 px-6">
     <div class="max-w-[calc(100vw-140px)] mx-auto">
         <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
-            <!-- Progress Table with Integrated Filter -->
             <div class="xl:col-span-2">
-                <div class="rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
-                    <!-- Enhanced Table Header with Filter -->
-                    <div class="bg-white p-6 border-b border-gray-200">
-                        <div class="flex flex-col space-y-4">
-                            <!-- Header Title -->
-                            <div class="flex items-center justify-between">
-                                <div>
-                                    <h2 class="text-lg font-semibold text-gray-900">Student Progress</h2>
-                                    <p class="text-sm text-gray-600 mt-1">Task Performance Overview</p>
-                                </div>
-                                <div class="flex items-center gap-3">
-                                    <span class="px-3 py-1 text-sm text-gray-600 bg-gray-100 rounded-2xl">
-                                        {{ senior_students|length }} Students
-                                    </span>
-                                    
-                                    <!-- Export Dropdown -->
-                                    <div class="relative" x-data="{ open: false }">
-                                        <button @click="open = !open" @click.away="open = false"
-                                            class="inline-flex items-center px-4 py-2 bg-sky-600 text-white rounded-xl text-sm hover:bg-sky-700 transition">
-                                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                                            </svg>
-                                            Export
-                                            <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                                            </svg>
-                                        </button>
-                                        
-                                        <!-- Dropdown Menu -->
-                                        <div x-show="open" 
-                                             x-transition:enter="transition ease-out duration-100"
-                                             x-transition:enter-start="transform opacity-0 scale-95"
-                                             x-transition:enter-end="transform opacity-100 scale-100"
-                                             x-transition:leave="transition ease-in duration-75"
-                                             x-transition:leave-start="transform opacity-100 scale-100"
-                                             x-transition:leave-end="transform opacity-0 scale-95"
-                                             class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-slate-200 z-50">
-                                            <div class="py-1">
-                                                <a href="{% url 'export-senior-excel' %}?task={{ selected_task }}" 
-                                                   class="flex items-center px-4 py-2 text-sm text-slate-700 hover:bg-sky-50 transition">
-                                                    <svg class="w-4 h-4 mr-3 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                                                    </svg>
-                                                    Export as Excel
-                                                </a>
-                                                <a href="{% url 'export-senior-pdf' %}?task={{ selected_task }}"
-                                                   class="flex items-center px-4 py-2 text-sm text-slate-700 hover:bg-sky-50 transition">
-                                                    <svg class="w-4 h-4 mr-3 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
-                                                    </svg>
-                                                    Export as PDF
-                                                </a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="p-5 border-b border-gray-200">
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                            <div>
+                                <h2 class="text-lg font-semibold text-gray-900">Student Progress</h2>
+                                <p class="text-sm text-gray-500 mt-1">{{ students_page.paginator.count }} Students</p>
                             </div>
-
-                            <!-- Integrated Task Filter -->
-                            <div class="flex items-center space-x-4 bg-blue-100 rounded-2xl p-3">
-                                <div class="flex items-center space-x-3 flex-1">
-                                    <div class="w-8 h-8 p-1 bg-gray-100 rounded-2xl flex items-center justify-center">
-                                        <svg class="w-10 h-10" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15 15">
-                                            <path fill="currentColor" d="M9.6 10.01a.5.5 0 0 1 0 .98l-.1.01h-4a.5.5 0 0 1 0-1h4zm2-3a.5.5 0 0 1 0 .98l-.1.01h-8a.5.5 0 0 1 0-1h8zM13.5 4a.5.5 0 0 1 0 1h-12a.5.5 0 0 1 0-1z"/>
-                                        </svg>
-                                    </div>
-                                    <form method="get" class="flex-1">
-                                        <select 
-                                            name="task" 
-                                            class="w-full px-4 py-2 text-sm bg-white border border-gray-200 rounded-2xl text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-200 focus:border-transparent appearance-none cursor-pointer hover:bg-gray-50 transition-colors duration-200"
-                                            onchange="this.form.submit()"
-                                        >
-                                            {% for task_id, task_name in task_map.items %}
-                                                <option 
-                                                    value="{{ task_id }}" 
-                                                    {% if selected_task == task_id %}selected{% endif %}
-                                                    class="text-gray-700"
-                                                >
-                                                    {{ task_name }}
-                                                </option>
-                                            {% endfor %}
-                                        </select>
-                                    </form>
-                                </div>
-                                
-                                <!-- Task Stats -->
-                                <div class="flex items-center space-x-2">
-                                    <div class="flex items-center space-x-1 text-sm text-gray-600 bg-gray-100 px-3 py-1 rounded-2xl">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
-                                        <span>{{ completion_percentage|default:"0" }}% Complete</span>
+                            <div class="flex items-center gap-3">
+                                <form method="get" class="flex items-center gap-2">
+                                    <select name="task" 
+                                        class="px-3 py-2 text-sm border border-gray-200 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-sky-200"
+                                        onchange="this.form.submit()">
+                                        {% for task_id, task_name in task_map.items %}
+                                            <option value="{{ task_id }}" {% if selected_task == task_id %}selected{% endif %}>
+                                                {{ task_name }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </form>
+                                <div class="relative" x-data="{ open: false }">
+                                    <button @click="open = !open" @click.away="open = false"
+                                        class="px-3 py-2 bg-sky-600 text-white text-sm rounded-lg hover:bg-sky-700 transition">
+                                        Export
+                                    </button>
+                                    <div x-show="open" class="absolute right-0 mt-2 w-40 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                                        <a href="{% url 'export-senior-excel' %}?task={{ selected_task }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Export Excel</a>
+                                        <a href="{% url 'export-senior-pdf' %}?task={{ selected_task }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Export PDF</a>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    
-                    <!-- Table Content -->
                     <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-blue-200">
-                            <thead class="bg-gradient-to-r from-blue-50 to-blue-100">
+                        <table class="min-w-full">
+                            <thead class="bg-gray-50">
                                 <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">
-                                        Student
-                                    </th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">
-                                        Student ID
-                                    </th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">
-                                        Time Completed
-                                    </th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">
-                                        Points Earned
-                                    </th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">
-                                        Status
-                                    </th>
+                                    <th class="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase">Student</th>
+                                    <th class="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase">Student ID</th>
+                                    <th class="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase">Time</th>
+                                    <th class="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase">Points</th>
+                                    <th class="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
                                 </tr>
                             </thead>
-                            <tbody class="bg-white divide-y divide-blue-100">
-                                {% for student in senior_students %}
-                                <tr class="hover:bg-blue-50 transition-colors duration-150">
-                                    <td class="px-6 py-4 whitespace-nowrap">
+                            <tbody class="divide-y divide-gray-100">
+                                {% for student in students_page %}
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-5 py-4">
                                         <div class="flex items-center">
-                                            <div class="w-10 h-10 bg-gradient-to-br from-blue-400 to-blue-500 rounded-full flex items-center justify-center">
-                                                <span class="text-sm font-medium text-white">
-                                                    {{ student.first_name|first }}{{ student.last_name|first }}
-                                                </span>
+                                            <div class="w-9 h-9 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center">
+                                                <span class="text-sm font-medium text-white">{{ student.first_name|slice:1 }}{{ student.last_name|slice:1 }}</span>
                                             </div>
-                                            <div class="ml-4">
-                                                <div class="text-sm font-medium text-blue-900">
-                                                    {{ student.first_name }} {{ student.last_name }}
-                                                </div>
-                                                <div class="text-sm text-blue-600">Senior Tier</div>
+                                            <div class="ml-3">
+                                                <p class="text-sm font-medium text-gray-900">{{ student.first_name }} {{ student.last_name }}</p>
+                                                <p class="text-xs text-gray-500">Senior Tier</p>
                                             </div>
                                         </div>
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm font-mono text-blue-800">{{ student.student_id }}</div>
+                                    <td class="px-5 py-4 text-sm font-mono text-gray-600">{{ student.student_id }}</td>
+                                    <td class="px-5 py-4 text-sm text-gray-600">{{ student.total_time_completed|default:"-" }}</td>
+                                    <td class="px-5 py-4">
+                                        <span class="text-sm font-medium text-gray-900">{{ student.points|default:"0" }}</span>
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm text-blue-700">
-                                            {{ student.total_time_completed|default:"Not completed" }}
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="flex items-center">
-                                            <svg class="w-4 h-4 text-blue-400 mr-1" fill="currentColor" viewBox="0 0 24 24">
-                                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                                            </svg>
-                                            <span class="text-sm font-medium text-blue-800">{{ student.points|default:"0" }}</span>
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
+                                    <td class="px-5 py-4">
                                         {% if student.points > 0 %}
-                                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800">
-                                                Completed
-                                            </span>
+                                            <span class="px-2 py-1 text-xs font-medium rounded-full bg-emerald-100 text-emerald-700">Completed</span>
                                         {% else %}
-                                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-50 text-blue-600">
-                                                Not Started
-                                            </span>
+                                            <span class="px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-600">Not Started</span>
                                         {% endif %}
                                     </td>
                                 </tr>
                                 {% empty %}
                                 <tr>
-                                    <td colspan="5" class="px-6 py-12">
-                                        <div class="text-center">
-                                            <div class="w-12 h-12 p-2 bg-sky-100 text-sky-400 rounded-full flex items-center justify-center mx-auto mb-4">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M12 6a3.5 3.5 0 1 0 0 7a3.5 3.5 0 0 0 0-7m-1.5 8a4 4 0 0 0-4 4c0 1.1.9 2 2 2h7a2 2 0 0 0 2-2a4 4 0 0 0-4-4zm6.8-3.1a5.5 5.5 0 0 0-2.8-6.3c.6-.4 1.3-.6 2-.6a3.5 3.5 0 0 1 .8 6.9m2.2 7.1h.5a2 2 0 0 0 2-2a4 4 0 0 0-4-4h-1.1l-.5.8c1.9 1 3.1 3 3.1 5.2M4 7.5a3.5 3.5 0 0 1 5.5-2.9A5.5 5.5 0 0 0 6.7 11A3.5 3.5 0 0 1 4 7.5M7.1 12H6a4 4 0 0 0-4 4c0 1.1.9 2 2 2h.5a6 6 0 0 1 3-5.2z" clip-rule="evenodd"/>
-                                                </svg>
-                                            </div>
-                                            <h3 class="text-lg font-medium text-sky-900 mb-1">No Students Found</h3>
-                                            <p class="text-sm text-sky-600">No students have started this task yet.</p>
-                                        </div>
+                                    <td colspan="5" class="px-5 py-12 text-center">
+                                        <p class="text-gray-500">No students found</p>
                                     </td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
                         </table>
                     </div>
-                </div>
-            </div>
-
-            <!-- Leaderboard - Takes 1/3 of the space -->
-            <div class="xl:col-span-1">
-                <div class="bg-white rounded-2xl shadow-lg border border-blue-200 overflow-hidden">
-                    <!-- Leaderboard Header -->
-                    <div class="bg-white px-6 py-4">
-                        <div class="flex items-center space-x-3">
-                            <div>
-                                <h2 class="text-lg font-semibold text-sky-600">Leaderboard</h2>
-                                <p class="text-sm text-sky-500">Top performers</p>
+                    {% if students_page.paginator.num_pages > 1 %}
+                    <div class="p-4 border-t border-gray-200">
+                        <div class="flex items-center justify-between">
+                            <p class="text-sm text-gray-500">
+                                Page {{ students_page.number }} of {{ students_page.paginator.num_pages }}
+                            </p>
+                            <div class="flex gap-2">
+                                {% if students_page.has_previous %}
+                                <a href="?page={{ students_page.previous_page_number }}&task={{ selected_task }}" 
+                                   class="px-3 py-1 text-sm text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">Previous</a>
+                                {% endif %}
+                                {% if students_page.has_next %}
+                                <a href="?page={{ students_page.next_page_number }}&task={{ selected_task }}" 
+                                   class="px-3 py-1 text-sm text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">Next</a>
+                                {% endif %}
                             </div>
                         </div>
                     </div>
-                    
-                    <!-- Leaderboard Content -->
-                    <div class="p-6 bg-gradient-to-b from-blue-50 to-white">
-                        <div class="space-y-4">
-                            {% for student in senior_leaderboard %}
-                            <div class="flex items-center p-4 bg-white rounded-2xl border border-blue-100 hover:border-blue-200 hover:shadow-md transition-all duration-150">
-                                <!-- Rank -->
-                                <div class="flex-shrink-0 mr-4">
-                                    {% if forloop.counter == 1 %}
-                                        <div class="w-8 h-8 bg-gradient-to-br from-blue-400 to-blue-500 rounded-full flex items-center justify-center shadow-lg">
-                                            <span class="text-sm font-bold text-white">1</span>
-                                        </div>
-                                    {% elif forloop.counter == 2 %}
-                                        <div class="w-8 h-8 bg-gradient-to-br from-blue-300 to-blue-400 rounded-full flex items-center justify-center shadow-lg">
-                                            <span class="text-sm font-bold text-white">2</span>
-                                        </div>
-                                    {% elif forloop.counter == 3 %}
-                                        <div class="w-8 h-8 bg-gradient-to-br from-blue-200 to-blue-300 rounded-full flex items-center justify-center shadow-lg">
-                                            <span class="text-sm font-bold text-white">3</span>
-                                        </div>
-                                    {% else %}
-                                        <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                                            <span class="text-sm font-medium text-blue-600">{{ forloop.counter }}</span>
-                                        </div>
-                                    {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+            <div class="xl:col-span-1">
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="p-4 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900">Leaderboard</h2>
+                        <p class="text-sm text-gray-500">Top 5 performers</p>
+                    </div>
+                    <div class="p-4">
+                        <div class="space-y-3">
+                            {% for student in top_leaderboard %}
+                            <div class="flex items-center p-3 bg-gray-50 rounded-xl">
+                                <div class="w-7 h-7 rounded-full flex items-center justify-center {% if forloop.counter == 1 %}bg-yellow-400{% elif forloop.counter == 2 %}bg-gray-300{% elif forloop.counter == 3 %}bg-amber-600{% else %}bg-gray-200{% endif %}">
+                                    <span class="text-sm font-bold {% if forloop.counter <= 3 %}text-white{% else %}text-gray-600{% endif %}">{{ forloop.counter }}</span>
                                 </div>
-                                
-                                <!-- Student Info -->
-                                <div class="flex-1 min-w-0">
-                                    <p class="text-sm font-medium text-blue-900 truncate">
-                                        {{ student.first_name }} {{ student.last_name }}
-                                    </p>
-                                    <p class="text-xs text-blue-600">{{ student.student_id }}</p>
+                                <div class="ml-3 flex-1">
+                                    <p class="text-sm font-medium text-gray-900">{{ student.first_name }} {{ student.last_name }}</p>
+                                    <p class="text-xs text-gray-500">{{ student.student_id }}</p>
                                 </div>
-                                
-                                <!-- Points -->
-                                <div class="flex items-center text-sm text-blue-700">
-                                    <svg class="w-4 h-4 text-blue-400 mr-1" fill="currentColor" viewBox="0 0 24 24">
-                                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                                    </svg>
-                                    <span class="font-medium">{{ student.points }}</span>
-                                </div>
+                                <span class="text-sm font-medium text-gray-700">{{ student.points }} pts</span>
                             </div>
                             {% empty %}
-                            <div class="text-center py-8">
-                                <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                                    <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                                    </svg>
-                                </div>
-                                <h3 class="text-sm font-medium text-blue-900 mb-1">No Rankings Yet</h3>
-                                <p class="text-xs text-blue-600">Complete tasks to see rankings</p>
-                            </div>
+                            <p class="text-center text-gray-500 py-4">No rankings yet</p>
                             {% endfor %}
                         </div>
-                        
-                        <!-- Show More Button (if there are more than 5 students) -->
-                        {% if senior_leaderboard|length > 5 %}
-                        <div class="mt-6 text-center">
-                            <button class="text-sm text-blue-600 hover:text-blue-700 font-medium px-4 py-2 rounded-2xl bg-blue-50 hover:bg-blue-100 transition-all duration-200">
-                                View All Rankings
-                            </button>
-                        </div>
-                        {% endif %}
                     </div>
                 </div>
             </div>
